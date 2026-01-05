@@ -5,6 +5,7 @@
 
 ### 🔍 Technical details
 - Built in Swift 6, for iOS 26.2 minimum deployment target with Xcode 26.2.
-- Swift concurrency default settings.
+- Swift concurrency uses the default settings.
+- The testing framework for unit tests is Swift Testing.
 
 ### 🚧 More coming soon as I build out the project.
