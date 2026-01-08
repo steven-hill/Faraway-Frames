@@ -10,7 +10,7 @@ import Testing
 internal import UIKit
 
 @MainActor
-struct TabBarControllerTests {
+struct TabBarControllerUnitTests {
 
     @Test func tab_Bar_Has_NavigationController() {
         let sut = makeSUT()
