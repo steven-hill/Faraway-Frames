@@ -25,7 +25,7 @@
 		5B565F862F0C4C8600A49426 /* Exceptions for "Faraway Frames" folder in "Faraway Frames" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Info.plist,
+				App/Info.plist,
 			);
 			target = 5B565F732F0C4C8500A49426 /* Faraway Frames */;
 		};
