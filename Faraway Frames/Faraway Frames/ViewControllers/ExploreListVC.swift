@@ -1,17 +1,17 @@
 //
-//  ExploreVC.swift
+//  ExploreListViewController.swift
 //  Faraway Frames
 //
-//  Created by Steven Hill on 06/01/2026.
+//  Created by Steven Hill on 09/01/2026.
 //
 
 import UIKit
 
-final class ExploreVC: UIViewController {
+class ExploreListVC: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
         navigationController?.navigationBar.prefersLargeTitles = true
+        title = "Explore"
     }
 }
