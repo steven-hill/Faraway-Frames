@@ -11,14 +11,27 @@ final class TabBarController: UITabBarController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        viewControllers = [createExploreVC()]
+        viewControllers = [createExploreTab()]
     }
     
-    func createExploreVC() -> UINavigationController {
-        let exploreVC = ExploreVC()
-        exploreVC.title = "Explore"
-        exploreVC.tabBarItem.image = UIImage(systemName: "film")
-        exploreVC.tabBarItem.tag = 0
-        return UINavigationController(rootViewController: exploreVC)
+    private func createExploreTab() -> UISplitViewController {
+        let exploreSplitVC = ExploreSplitVC(style: .doubleColumn)
+        exploreSplitVC.preferredDisplayMode = .oneBesideSecondary
+        
+        let exploreListVC = ExploreListVC()
+        let exploreListNav = UINavigationController(rootViewController: exploreListVC)
+        exploreSplitVC.setViewController(exploreListNav, for: .primary)
+
+        let exploreDetailVC = ExploreDetailVC()        
+        let exploreDetailNav = UINavigationController(rootViewController: exploreDetailVC)
+        exploreSplitVC.setViewController(exploreDetailNav, for: .secondary)
+        
+        exploreSplitVC.tabBarItem = UITabBarItem(
+            title: "Explore",
+            image: UIImage(systemName: "film"),
+            tag: 0
+        )
+
+        return exploreSplitVC
     }
 }
