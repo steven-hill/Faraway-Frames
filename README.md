@@ -9,4 +9,8 @@
 - Swift concurrency uses the default settings.
 - The testing framework for unit tests is Swift Testing.
 
+### 🔌 API
+- [Studio Ghibli API](https://ghibliapi.vercel.app).
+- No auth needed. 
+
 ### 🚧 More coming soon as I build out the project.
