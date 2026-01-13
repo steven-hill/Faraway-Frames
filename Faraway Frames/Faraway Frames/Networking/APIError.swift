@@ -9,4 +9,6 @@ import Foundation
 
 enum APIError: Error {
     case invalidURL
+    case invalidStatusCode
+    case decodingError
 }
