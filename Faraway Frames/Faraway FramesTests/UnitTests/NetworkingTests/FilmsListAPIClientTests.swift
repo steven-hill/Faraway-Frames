@@ -13,12 +13,12 @@ import Foundation
 struct FilmsListAPIClientTests {
     
     @Test func fetchAllFilms_decodesDataOn200ResponseWithCorrectURL() async throws {
-        let url = makeFilmsURLString()
+        let urlString = makeFilmsURLString()
         let filmsListAPIClient = await makeFilmsListAPIClient()
         let mockFilmsData = makeValidMockFilmsData()
         
         MockURLProtocol.requestHandler = { request in
-            #expect(request.url?.absoluteString == url)
+            #expect(request.url?.absoluteString == urlString)
             let response = HTTPURLResponse(
                 url: request.url!,
                 statusCode: 200,
@@ -29,17 +29,17 @@ struct FilmsListAPIClientTests {
         }
         let result = try await filmsListAPIClient.fetchAllFilms()
         
-        #expect(!result.isEmpty)
-        #expect(result.count == 1)
+        #expect(!result.isEmpty, "The films array should not be empty.")
+        #expect(result.count == 1, "Should be one film in the array.")
     }
     
     @Test func fetchAllFilms_throwsOnNon200Response() async throws {
-        let url = makeFilmsURLString()
+        let urlString = makeFilmsURLString()
         let filmsListAPIClient = await makeFilmsListAPIClient()
         let mockFilmsData = Data()
         
         MockURLProtocol.requestHandler = { request in
-            #expect(request.url?.absoluteString == url)
+            #expect(request.url?.absoluteString == urlString)
             let response = HTTPURLResponse(
                 url: request.url!,
                 statusCode: 400,
@@ -49,18 +49,18 @@ struct FilmsListAPIClientTests {
             return (response!, mockFilmsData)
         }
         
-        await #expect(throws: APIError.invalidStatusCode) {
+        await #expect(throws: APIError.invalidStatusCode, "The error code should be .invalidStatusCode.") {
             try await filmsListAPIClient.fetchAllFilms()
         }
     }
     
     @Test func fetchAllFilms_throwsOnDataDecodingError() async throws {
-        let url = makeFilmsURLString()
+        let urlString = makeFilmsURLString()
         let filmsListAPIClient = await makeFilmsListAPIClient()
         let mockInvalidData = "invalid data".data(using: .utf8)!
         
         MockURLProtocol.requestHandler = { request in
-            #expect(request.url?.absoluteString == url)
+            #expect(request.url?.absoluteString == urlString)
             let response = HTTPURLResponse(
                 url: request.url!,
                 statusCode: 200,
@@ -70,7 +70,7 @@ struct FilmsListAPIClientTests {
             return (response!, mockInvalidData)
         }
         
-        await #expect(throws: APIError.decodingError) {
+        await #expect(throws: APIError.decodingError, "The error code should be .decodingError.") {
             try await filmsListAPIClient.fetchAllFilms()
         }
     }
