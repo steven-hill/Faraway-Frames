@@ -33,23 +33,44 @@ struct FilmsListAPIClientTests {
         #expect(result.count == 1, "Should be one film in the array.")
     }
     
-    @Test func fetchAllFilms_throwsOnNon200Response() async throws {
+    @Test func fetchAllFilms_throwsOnInvalidResponse() async throws {
+        let urlString = makeFilmsURLString()
+        let filmsListAPIClient = await makeFilmsListAPIClient()
+
+        MockURLProtocol.requestHandler = { request in
+            #expect(request.url?.absoluteString == urlString)
+            let response = URLResponse(
+                url: request.url!,
+                mimeType: nil,
+                expectedContentLength: 0,
+                textEncodingName: nil
+            )
+            return (response, Data())
+        }
+        
+        await #expect(throws: APIError.invalidResponse, "The error should be .invalidResponse.") {
+            try await filmsListAPIClient.fetchAllFilms()
+        }
+    }
+    
+    @Test func fetchAllFilms_throwsOnNon200To299Response() async throws {
         let urlString = makeFilmsURLString()
         let filmsListAPIClient = await makeFilmsListAPIClient()
         let mockFilmsData = Data()
+        let statusCode = 500
         
         MockURLProtocol.requestHandler = { request in
             #expect(request.url?.absoluteString == urlString)
             let response = HTTPURLResponse(
                 url: request.url!,
-                statusCode: 400,
+                statusCode: statusCode,
                 httpVersion: nil,
                 headerFields: nil
             )
             return (response!, mockFilmsData)
         }
         
-        await #expect(throws: APIError.invalidStatusCode, "The error code should be .invalidStatusCode.") {
+        await #expect(throws: APIError.serverError(statusCode: statusCode), "The error should be .serverError(statusCode: \(statusCode).") {
             try await filmsListAPIClient.fetchAllFilms()
         }
     }
@@ -70,7 +91,7 @@ struct FilmsListAPIClientTests {
             return (response!, mockInvalidData)
         }
         
-        await #expect(throws: APIError.decodingError, "The error code should be .decodingError.") {
+        await #expect(throws: APIError.decodingError, "The error should be .decodingError.") {
             try await filmsListAPIClient.fetchAllFilms()
         }
     }

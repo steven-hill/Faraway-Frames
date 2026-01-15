@@ -24,13 +24,16 @@ final class FilmsListAPIClient: FilmsListService {
         
         let (data, response) = try await session.data(from: url)
         
-        guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
-            throw APIError.invalidStatusCode
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw(APIError.serverError(statusCode: httpResponse.statusCode))
         }
         
-        let jsonDecoder = JSONDecoder()
         do {
-            let decodedData = try jsonDecoder.decode([Film].self, from: data)
+            let decodedData = try decoder.decode([Film].self, from: data)
             return decodedData
         } catch {
             throw APIError.decodingError
