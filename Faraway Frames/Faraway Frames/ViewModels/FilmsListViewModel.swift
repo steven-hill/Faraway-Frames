@@ -1,0 +1,38 @@
+//
+//  FilmsListViewModel.swift
+//  Faraway Frames
+//
+//  Created by Steven Hill on 16/01/2026.
+//
+
+import Foundation
+
+final class FilmsListViewModel {
+    
+    enum State {
+        case idle
+        case success([Film])
+        case failure(error: APIError)
+    }
+    
+    private let filmsListService: FilmsListService
+    private(set) var films: [Film] = []
+    var viewModelError: APIError?
+    private(set) var state: State = .idle
+    
+    init(filmsListService: FilmsListService) {
+        self.filmsListService = filmsListService
+    }
+    
+    func getAllFilms() async {
+        do {
+            films = try await filmsListService.fetchAllFilms()
+            state = .success(films)
+        } catch let error as APIError {
+            viewModelError = error
+            state = .failure(error: viewModelError ?? APIError.unknown)
+        } catch {
+            state = .failure(error: APIError.unknown)
+        }
+    }
+}
