@@ -12,4 +12,5 @@ enum APIError: Error, Equatable {
     case invalidResponse
     case serverError(statusCode: Int)
     case decodingError
+    case unknown
 }
