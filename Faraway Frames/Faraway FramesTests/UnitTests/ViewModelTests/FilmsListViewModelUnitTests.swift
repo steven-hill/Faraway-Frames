@@ -13,11 +13,10 @@ import Testing
 struct FilmsListViewModelUnitTests {
     
     @Test func filmsListViewModel_gets22FilmsInSuccessCase() async throws {
-        var mockService = MockFilmsListService()
-        let films = try loadAndDecodeFilmsFromJSON()
-        mockService.result = .success(films)
+        let mockService = setupMockServiceForSuccessCase()
+        let mockImageLoader = MockImageLoader()
+        let viewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
         
-        let viewModel = FilmsListViewModel(filmsListService: mockService)
         await viewModel.getAllFilms()
         
         #expect(viewModel.films.count == 22, "There should be 22 films.")
@@ -34,7 +33,8 @@ struct FilmsListViewModelUnitTests {
     func filmsListViewModel_handlesErrors(expectedError: APIError) async {
         var mockService = MockFilmsListService()
         mockService.result = .failure(expectedError)
-        let viewModel = FilmsListViewModel(filmsListService: mockService)
+        let mockImageLoader = MockImageLoader()
+        let viewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
         
         await viewModel.getAllFilms()
         
@@ -42,7 +42,37 @@ struct FilmsListViewModelUnitTests {
         #expect(viewModel.viewModelError == expectedError, "Error property should match the API error.")
     }
     
+    @Test func filmsListViewModel_downloadsImageForFilm() async throws {
+        let mockService = setupMockServiceForSuccessCase()
+        let mockImageLoader = MockImageLoader()
+        let viewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
+        
+        await viewModel.getAllFilms()
+        let filmImage = await viewModel.getImage(for: viewModel.films[0])
+        
+        #expect(filmImage != nil, "Film image should not be nil.")
+    }
+    
+    @Test func filmsListViewModel_returnNilWhenFailedToDownLoadFilmImage() async throws {
+        let mockService = setupMockServiceForSuccessCase()
+        var mockImageLoader = MockImageLoader()
+        mockImageLoader.shouldSucceed = false
+        let viewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
+        
+        await viewModel.getAllFilms()
+        let filmImage = await viewModel.getImage(for: viewModel.films[0])
+        
+        #expect(filmImage == nil, "Film image should be nil.")
+    }
+    
     // MARK: - Helper method
+    private func setupMockServiceForSuccessCase() -> MockFilmsListService {
+        var mockService = MockFilmsListService()
+        let films = try! loadAndDecodeFilmsFromJSON()
+        mockService.result = .success(films)
+        return mockService
+    }
+    
     private func loadAndDecodeFilmsFromJSON() throws -> [Film] {
         guard let bundle = Bundle(identifier: "com.StevenHill.Faraway-FramesTests"),
               let url = bundle.url(forResource: "ghibliFilms", withExtension: "json") else {
