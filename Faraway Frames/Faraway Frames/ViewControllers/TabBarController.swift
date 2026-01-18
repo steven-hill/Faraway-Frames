@@ -19,7 +19,10 @@ final class TabBarController: UITabBarController {
         exploreSplitVC.preferredDisplayMode = .oneBesideSecondary
         exploreSplitVC.delegate = self
         
-        let exploreListVC = ExploreListVC()
+        let filmsListAPIClient = FilmsListAPIClient()
+        let apiClientImageLoader = APIClientImageLoader()
+        let filmsListViewModel = FilmsListViewModel(filmsListService: filmsListAPIClient, imageLoader: apiClientImageLoader)
+        let exploreListVC = ExploreListVC(viewModel: filmsListViewModel)
         let exploreListNav = UINavigationController(rootViewController: exploreListVC)
         exploreSplitVC.setViewController(exploreListNav, for: .primary)
         

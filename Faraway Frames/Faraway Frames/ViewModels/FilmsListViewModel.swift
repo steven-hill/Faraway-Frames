@@ -27,7 +27,7 @@ final class FilmsListViewModel {
         self.imageLoader = imageLoader
     }
     
-    func getAllFilms() async {
+    func getAllFilms() async throws {
         do {
             films = try await filmsListService.fetchAllFilms()
             state = .success(films)

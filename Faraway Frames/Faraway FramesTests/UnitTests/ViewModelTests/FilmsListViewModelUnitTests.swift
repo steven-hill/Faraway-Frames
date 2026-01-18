@@ -17,7 +17,7 @@ struct FilmsListViewModelUnitTests {
         let mockImageLoader = MockImageLoader()
         let viewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
         
-        await viewModel.getAllFilms()
+        try! await viewModel.getAllFilms()
         
         #expect(viewModel.films.count == 22, "There should be 22 films.")
         #expect(viewModel.viewModelError == nil, "Error should be nil.")
@@ -36,7 +36,7 @@ struct FilmsListViewModelUnitTests {
         let mockImageLoader = MockImageLoader()
         let viewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
         
-        await viewModel.getAllFilms()
+        try! await viewModel.getAllFilms()
         
         #expect(viewModel.films.isEmpty, "Films array should be empty on failure.")
         #expect(viewModel.viewModelError == expectedError, "Error property should match the API error.")
@@ -47,7 +47,7 @@ struct FilmsListViewModelUnitTests {
         let mockImageLoader = MockImageLoader()
         let viewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
         
-        await viewModel.getAllFilms()
+        try! await viewModel.getAllFilms()
         let filmImage = await viewModel.getImage(for: viewModel.films[0])
         
         #expect(filmImage != nil, "Film image should not be nil.")
@@ -59,7 +59,7 @@ struct FilmsListViewModelUnitTests {
         mockImageLoader.shouldSucceed = false
         let viewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
         
-        await viewModel.getAllFilms()
+        try! await viewModel.getAllFilms()
         let filmImage = await viewModel.getImage(for: viewModel.films[0])
         
         #expect(filmImage == nil, "Film image should be nil.")
