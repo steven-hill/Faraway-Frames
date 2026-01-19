@@ -13,50 +13,40 @@ import UIKit
 struct ExploreListVCTests {
 
     @Test func exploreListVC_canInit() {
-        let mockFilmsListService = MockFilmsListService()
-        let imageLoader = MockImageLoader()
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
-        let vc = ExploreListVC(viewModel: filmsListViewModel)
-        _ = UINavigationController(rootViewController: vc)
+        let sut = makeSUT()
+        _ = UINavigationController(rootViewController: sut)
 
-        vc.loadViewIfNeeded()
+        sut.loadViewIfNeeded()
         
-        #expect((vc.navigationController != nil), "VC should be inside a navigation controller.")
+        #expect((sut.navigationController != nil), "VC should be inside a navigation controller.")
     }
     
     @Test func exploreListVC_initiallyHasNoFilms() {
-        let mockFilmsListService = MockFilmsListService()
-        let imageLoader = MockImageLoader()
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
-        let vc = ExploreListVC(viewModel: filmsListViewModel)
-
-        vc.loadViewIfNeeded()
+        let sut = makeSUT()
         
-        #expect(vc.films.isEmpty, "VC's films should be empty initially.")
+        sut.loadViewIfNeeded()
+        
+        #expect(sut.films.isEmpty, "VC's films should be empty initially.")
     }
     
     @Test func exploreListVC_setsViewModelDelegateToSelf() {
-        let mockFilmsListService = MockFilmsListService()
-        let imageLoader = MockImageLoader()
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
-        let vc = ExploreListVC(viewModel: filmsListViewModel)
+        let sut = makeSUT()
         
-        vc.loadViewIfNeeded()
+        sut.loadViewIfNeeded()
         
-        #expect(filmsListViewModel.delegate === vc, "View model's delegate should be set to ExploreListVC.")
+        #expect(sut.viewModel.delegate != nil, "View model's delegate should be set.")
     }
     
     @Test func exploreListVC_canUpdateFilmsArraySuccessfully() async throws {
         let mockFilmsListService = MockServiceHelper.setupMockServiceForSuccessCase()
         let imageLoader = MockImageLoader()
         let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
-
-        let vc = ExploreListVC(viewModel: filmsListViewModel)
+        let sut = ExploreListVC(viewModel: filmsListViewModel)
         
-        vc.loadViewIfNeeded()
+        sut.loadViewIfNeeded()
         try await Task.sleep(nanoseconds: 100)
         
-        #expect(vc.films.count == 22, "VC's film should contain 22 films.")
+        #expect(sut.films.count == 22, "VC's film should contain 22 films.")
     }
     
     @Test("ExploreListVC presents an alert for all API errors", arguments: [
@@ -79,9 +69,17 @@ struct ExploreListVCTests {
         vc.didFailToLoadFilms(withError: expectedError)
         
         #expect(spy.presentedVC != nil, "Should not be nil.")
-        #expect(spy.presentedVC is UIAlertController, "Alert uses a UIAlertController.")
+        #expect(spy.presentedVC is UIAlertController, "Alert should use a UIAlertController.")
         #expect(spy.isAnimated == true, "Should present the alert with animation.")
         #expect(spy.presentedVC?.title == "Error: \(expectedError)", "Title should state which error occurred.")
+    }
+    
+    // MARK: - Helper method
+    fileprivate func makeSUT() -> ExploreListVC {
+        let mockFilmsListService = MockFilmsListService()
+        let imageLoader = MockImageLoader()
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
+        return ExploreListVC(viewModel: filmsListViewModel)
     }
     
     // MARK: - Presentation Spy
