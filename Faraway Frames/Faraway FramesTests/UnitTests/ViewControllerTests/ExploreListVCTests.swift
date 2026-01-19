@@ -47,7 +47,7 @@ struct ExploreListVCTests {
     }
     
     @Test func exploreListVC_canUpdateFilmsArraySuccessfully() async throws {
-        let mockFilmsListService = setupMockServiceForSuccessCase()
+        let mockFilmsListService = MockServiceHelper.setupMockServiceForSuccessCase()
         let imageLoader = MockImageLoader()
         let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
 
@@ -82,29 +82,6 @@ struct ExploreListVCTests {
         #expect(spy.presentedVC is UIAlertController, "Alert uses a UIAlertController.")
         #expect(spy.isAnimated == true, "Should present the alert with animation.")
         #expect(spy.presentedVC?.title == "Error: \(expectedError)", "Title should state which error occurred.")
-    }
-    
-    // MARK: - Helper method
-    private func setupMockServiceForSuccessCase() -> MockFilmsListService {
-        var mockService = MockFilmsListService()
-        let films = try! loadAndDecodeFilmsFromJSON()
-        mockService.result = .success(films)
-        return mockService
-    }
-    
-    private func loadAndDecodeFilmsFromJSON() throws -> [Film] {
-        guard let bundle = Bundle(identifier: "com.StevenHill.Faraway-FramesTests"),
-              let url = bundle.url(forResource: "ghibliFilms", withExtension: "json") else {
-            Issue.record("ghibliFilms JSON file not found")
-            return []
-        }
-        do {
-            let data = try Data(contentsOf: url)
-            return try JSONDecoder().decode([Film].self, from: data)
-        } catch {
-            Issue.record("ghibliFilms JSON file decoding failed with error: \(error)")
-            return []
-        }
     }
     
     // MARK: - Presentation Spy

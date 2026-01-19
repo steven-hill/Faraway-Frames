@@ -13,7 +13,7 @@ import Testing
 struct FilmsListViewModelUnitTests {
     
     @Test func filmsListViewModel_gets22FilmsInSuccessCase() async throws {
-        let mockService = setupMockServiceForSuccessCase()
+        let mockService = MockServiceHelper.setupMockServiceForSuccessCase()
         let mockImageLoader = MockImageLoader()
         let viewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
         
@@ -43,7 +43,7 @@ struct FilmsListViewModelUnitTests {
     }
     
     @Test func filmsListViewModel_downloadsImageForFilm() async throws {
-        let mockService = setupMockServiceForSuccessCase()
+        let mockService = MockServiceHelper.setupMockServiceForSuccessCase()
         let mockImageLoader = MockImageLoader()
         let viewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
         
@@ -54,7 +54,7 @@ struct FilmsListViewModelUnitTests {
     }
     
     @Test func filmsListViewModel_returnNilWhenFailedToDownloadFilmImage() async throws {
-        let mockService = setupMockServiceForSuccessCase()
+        let mockService = MockServiceHelper.setupMockServiceForSuccessCase()
         var mockImageLoader = MockImageLoader()
         mockImageLoader.shouldSucceed = false
         let viewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
@@ -63,28 +63,5 @@ struct FilmsListViewModelUnitTests {
         let filmImage = await viewModel.getImage(for: viewModel.films[0])
         
         #expect(filmImage == nil, "Film image should be nil.")
-    }
-    
-    // MARK: - Helper method
-    private func setupMockServiceForSuccessCase() -> MockFilmsListService {
-        var mockService = MockFilmsListService()
-        let films = try! loadAndDecodeFilmsFromJSON()
-        mockService.result = .success(films)
-        return mockService
-    }
-    
-    private func loadAndDecodeFilmsFromJSON() throws -> [Film] {
-        guard let bundle = Bundle(identifier: "com.StevenHill.Faraway-FramesTests"),
-              let url = bundle.url(forResource: "ghibliFilms", withExtension: "json") else {
-            Issue.record("ghibliFilms JSON file not found")
-            return []
-        }
-        do {
-            let data = try Data(contentsOf: url)
-            return try JSONDecoder().decode([Film].self, from: data)
-        } catch {
-            Issue.record("ghibliFilms JSON file decoding failed with error: \(error)")
-            return []
-        }
     }
 }
