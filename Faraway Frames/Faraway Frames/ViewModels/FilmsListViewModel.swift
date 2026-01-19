@@ -9,33 +9,27 @@ import UIKit
 
 final class FilmsListViewModel {
     
-    enum State {
-        case idle
-        case success([Film])
-        case failure(error: APIError)
-    }
-    
     private let filmsListService: FilmsListService
     private let imageLoader: ImageLoader
+    weak var delegate: FilmsListViewModelDelegate?
     
     private(set) var films: [Film] = []
     var viewModelError: APIError?
-    private(set) var state: State = .idle
     
     init(filmsListService: FilmsListService, imageLoader: ImageLoader) {
         self.filmsListService = filmsListService
         self.imageLoader = imageLoader
     }
     
-    func getAllFilms() async throws {
+    func getAllFilms() async {
         do {
             films = try await filmsListService.fetchAllFilms()
-            state = .success(films)
+            delegate?.didUpdateFilms(films)
         } catch let error as APIError {
             viewModelError = error
-            state = .failure(error: viewModelError ?? APIError.unknown)
+            delegate?.didFailToLoadFilms(withError: viewModelError ?? APIError.unknown)
         } catch {
-            state = .failure(error: APIError.unknown)
+            delegate?.didFailToLoadFilms(withError: APIError.unknown)
         }
     }
     
