@@ -7,7 +7,8 @@
 - Built in Swift 6, for iOS 26.2 minimum deployment target with Xcode 26.2.
 - UI framework is UIKit.
 - Swift concurrency uses the default settings.
-- The testing framework for unit tests is Swift Testing.
+- The testing framework for unit tests is Swift Testing, and the project is built with TDD.
+- MVVM. Protocol/delegate pattern used to allow communication between the view model and view controller.
 
 ### 🔌 API
 - [Studio Ghibli API](https://ghibliapi.vercel.app).
