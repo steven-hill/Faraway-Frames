@@ -8,8 +8,9 @@
 import UIKit
 
 final class ExploreListVC: UIViewController {
-    var films: [Film] = []
+    private(set) var films: [Film] = []
     let viewModel: FilmsListViewModel
+    weak var alertPresenter: AlertPresenter?
     
     init(viewModel: FilmsListViewModel) {
         self.viewModel = viewModel
@@ -24,18 +25,28 @@ final class ExploreListVC: UIViewController {
         super.viewDidLoad()
         navigationController?.navigationBar.prefersLargeTitles = true
         title = "Explore"
+        if alertPresenter == nil { alertPresenter = self }
+        viewModel.delegate = self
         getAllFilms()
     }
     
     private func getAllFilms() {
         Task {
-            do {
-                try await viewModel.getAllFilms()
-                films = viewModel.films
-                print(films)
-            } catch {
-                // Present alert
-            }
+           await viewModel.getAllFilms()
         }
+    }
+}
+
+extension ExploreListVC: FilmsListViewModelDelegate {
+    func didUpdateFilms(_ films: [Film]) {
+        self.films = films
+    }
+    
+    func didFailToLoadFilms(withError error: APIError) {
+        let alertVC = UIAlertController(title: "Error: \(error)", message: "Failed to load films", preferredStyle: .alert)
+        alertVC.addAction(UIAlertAction(title: "OK", style: .default))
+        alertVC.modalPresentationStyle = .automatic
+        alertVC.modalTransitionStyle = .crossDissolve
+        alertPresenter?.present(alertVC, animated: true, completion: nil)
     }
 }
