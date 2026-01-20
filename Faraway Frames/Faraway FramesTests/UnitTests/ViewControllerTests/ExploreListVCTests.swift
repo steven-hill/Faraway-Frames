@@ -37,6 +37,22 @@ struct ExploreListVCTests {
         #expect(sut.viewModel.delegate != nil, "View model's delegate should be set.")
     }
     
+    @Test func exploreListVC_setsCollectionViewDelegate() {
+        let sut = makeSUT()
+        
+        sut.loadViewIfNeeded()
+        
+        #expect(sut.collectionView.delegate != nil, "Collection view delegate should be set.")
+    }
+    
+    @Test func exploreListVC_setsCollectionViewDataSource() {
+        let sut = makeSUT()
+        
+        sut.loadViewIfNeeded()
+        
+        #expect(sut.collectionView.dataSource != nil, "Collection view data source should be set.")
+    }
+    
     @Test func exploreListVC_canUpdateFilmsArraySuccessfully() async throws {
         let mockFilmsListService = MockServiceHelper.setupMockServiceForSuccessCase()
         let imageLoader = MockImageLoader()
@@ -72,6 +88,29 @@ struct ExploreListVCTests {
         #expect(spy.presentedVC is UIAlertController, "Alert should use a UIAlertController.")
         #expect(spy.isAnimated == true, "Should present the alert with animation.")
         #expect(spy.presentedVC?.title == "Error: \(expectedError)", "Title should state which error occurred.")
+    }
+    
+    @Test func exploreListVC_didUpdateFilms_updatesCollectionViewItemCount() {
+        let sut = makeSUT()
+        sut.loadViewIfNeeded()
+        let films: [Film] = [.sample]
+        
+        sut.didUpdateFilms(films)
+        
+        let itemCount = sut.collectionView.numberOfItems(inSection: 0)
+        #expect(itemCount == 1, "Should be 1 item in the collection view.")
+    }
+    
+    @Test func exploreListVC_dataSource_returnsACell() {
+        let sut = makeSUT()
+        sut.loadViewIfNeeded()
+        let films: [Film] = [.sample]
+        
+        sut.didUpdateFilms(films)
+        
+        let indexPath = IndexPath(item: 0, section: 0)
+        let cell = sut.collectionView.dataSource?.collectionView(sut.collectionView, cellForItemAt: indexPath)
+        #expect(cell != nil, "Should not be nil.")
     }
     
     // MARK: - Helper method
