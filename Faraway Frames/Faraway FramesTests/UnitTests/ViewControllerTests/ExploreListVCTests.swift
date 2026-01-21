@@ -53,6 +53,15 @@ struct ExploreListVCTests {
         #expect(sut.collectionView.dataSource != nil, "Collection view data source should be set.")
     }
     
+    @Test func exploreListVC_columnCount_returnsCorrectNumberOfColumns() {
+        let sut = makeSUT()
+        
+        sut.loadViewIfNeeded()
+                
+        #expect(sut.columnCount(for: 801) == 3, "Should be 3.")
+        #expect(sut.columnCount(for: 800) == 1, "Should be 1.")
+    }
+    
     @Test func exploreListVC_canUpdateFilmsArraySuccessfully() async throws {
         let mockFilmsListService = MockServiceHelper.setupMockServiceForSuccessCase()
         let imageLoader = MockImageLoader()
