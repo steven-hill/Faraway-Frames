@@ -14,11 +14,7 @@ final class ExploreListVC: UIViewController {
     private(set) var films: [Film] = []
     let viewModel: FilmsListViewModel
     weak var alertPresenter: AlertPresenter?
-    lazy var collectionView: UICollectionView = {
-        let layout = UICollectionViewFlowLayout()
-        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        return collectionView
-    }()
+    lazy var collectionView = UICollectionView()
     var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
 
     init(viewModel: FilmsListViewModel) {
@@ -36,27 +32,80 @@ final class ExploreListVC: UIViewController {
         title = "Explore"
         if alertPresenter == nil { alertPresenter = self }
         viewModel.delegate = self
-        configureDataSource()
         configureCollectionView()
+        configureDataSource()
         getAllFilms()
     }
     
+    private func configureCollectionView() {
+        collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
+        collectionView.delegate = self
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(collectionView)
+        
+        NSLayoutConstraint.activate([
+            collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+    }
+    
+    private func createLayout() -> UICollectionViewLayout {
+        return UICollectionViewCompositionalLayout { (sectionIndex, layoutEnvironment) -> NSCollectionLayoutSection? in
+            
+            let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                                  heightDimension: .fractionalHeight(1.0))
+            let item = NSCollectionLayoutItem(layoutSize: itemSize)
+            
+            let width = layoutEnvironment.container.effectiveContentSize.width
+            let columnCount = self.columnCount(for: width)
+            
+            let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                                   heightDimension: .estimated(150))
+            let group = NSCollectionLayoutGroup.horizontal(
+                layoutSize: groupSize,
+                repeatingSubitem: item,
+                count: columnCount)
+            group.interItemSpacing = .fixed(10)
+            
+            let section = NSCollectionLayoutSection(group: group)
+            section.interGroupSpacing = 10
+            section.contentInsets = NSDirectionalEdgeInsets(
+                top: 10, leading: 10, bottom: 10, trailing: 10)
+            
+            return section
+        }
+    }
+    
+    func columnCount(for width: CGFloat) -> Int {
+        width > 800 ? 3 : 1
+    }
+    
     private func configureDataSource() {
-        dataSource = UICollectionViewDiffableDataSource<Section, Film.ID>(collectionView: collectionView, cellProvider: { (collectionView, indexPath, film) -> UICollectionViewCell? in
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath)
+        let filmCellRegistration = UICollectionView.CellRegistration<ExploreListCell, Film> { (cell, indexPath, film) in
+            var config = UIListContentConfiguration.cell()
+            config.text = film.title
+            config.image = UIImage(systemName: "photo")
+            cell.contentConfiguration = config
+            cell.accessories = [.disclosureIndicator()]
+            
+            var background = UIBackgroundConfiguration.listCell()
+            background.backgroundColor = .secondarySystemBackground
+            background.cornerRadius = 8
+            cell.backgroundConfiguration = background
+        }
+        
+        dataSource = UICollectionViewDiffableDataSource<Section, Film.ID>(collectionView: collectionView, cellProvider: { (collectionView, indexPath, film) -> ExploreListCell in
+            let film = self.films.first(where: { $0.id == film })
+            let cell = collectionView.dequeueConfiguredReusableCell(using: filmCellRegistration, for: indexPath, item: film)
             return cell
         })
     }
     
-    private func configureCollectionView() {
-        view.addSubview(collectionView)
-        collectionView.delegate = self
-        collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "Cell")
-    }
-    
     private func getAllFilms() {
         Task {
-           await viewModel.getAllFilms()
+            await viewModel.getAllFilms()
         }
     }
 }
@@ -72,7 +121,7 @@ extension ExploreListVC: FilmsListViewModelDelegate {
         var snapshot = NSDiffableDataSourceSnapshot<Section, Film.ID>()
         snapshot.appendSections([.main])
         snapshot.appendItems(filmIds, toSection: .main)
-        dataSource.applySnapshotUsingReloadData(snapshot)
+        dataSource.apply(snapshot, animatingDifferences: true)
     }
     
     func didFailToLoadFilms(withError error: APIError) {
