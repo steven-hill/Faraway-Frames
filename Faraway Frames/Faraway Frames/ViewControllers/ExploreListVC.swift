@@ -9,7 +9,7 @@ import UIKit
 
 final class ExploreListVC: UIViewController {
     
-    nonisolated enum Section { case main }
+    enum Section: Int { case main }
     
     private(set) var films: [Film] = []
     let viewModel: FilmsListViewModel
@@ -19,7 +19,7 @@ final class ExploreListVC: UIViewController {
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         return collectionView
     }()
-    var dataSource: UICollectionViewDiffableDataSource<Section, Film>!
+    var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
 
     init(viewModel: FilmsListViewModel) {
         self.viewModel = viewModel
@@ -42,7 +42,7 @@ final class ExploreListVC: UIViewController {
     }
     
     private func configureDataSource() {
-        dataSource = UICollectionViewDiffableDataSource<Section, Film>(collectionView: collectionView, cellProvider: { (collectionView, indexPath, film) -> UICollectionViewCell? in
+        dataSource = UICollectionViewDiffableDataSource<Section, Film.ID>(collectionView: collectionView, cellProvider: { (collectionView, indexPath, film) -> UICollectionViewCell? in
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath)
             return cell
         })
@@ -67,11 +67,12 @@ extension ExploreListVC: UICollectionViewDelegate {
 extension ExploreListVC: FilmsListViewModelDelegate {
     func didUpdateFilms(_ films: [Film]) {
         self.films = films
+        let filmIds = films.map({ $0.id })
         
-        var snapshot = NSDiffableDataSourceSnapshot<Section, Film>()
+        var snapshot = NSDiffableDataSourceSnapshot<Section, Film.ID>()
         snapshot.appendSections([.main])
-        snapshot.appendItems(films)
-        dataSource.apply(snapshot, animatingDifferences: true)
+        snapshot.appendItems(filmIds, toSection: .main)
+        dataSource.applySnapshotUsingReloadData(snapshot)
     }
     
     func didFailToLoadFilms(withError error: APIError) {
