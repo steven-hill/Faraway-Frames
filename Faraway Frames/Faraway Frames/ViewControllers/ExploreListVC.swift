@@ -12,6 +12,7 @@ final class ExploreListVC: UIViewController {
     enum Section: Int { case main }
     
     private(set) var films: [Film] = []
+    private(set) var filmLookup: [String: Film] = [:]
     let viewModel: FilmsListViewModel
     weak var alertPresenter: AlertPresenter?
     lazy var collectionView = UICollectionView()
@@ -96,10 +97,11 @@ final class ExploreListVC: UIViewController {
             cell.backgroundConfiguration = background
         }
         
-        dataSource = UICollectionViewDiffableDataSource<Section, Film.ID>(collectionView: collectionView, cellProvider: { (collectionView, indexPath, film) -> ExploreListCell in
-            let film = self.films.first(where: { $0.id == film })
-            let cell = collectionView.dequeueConfiguredReusableCell(using: filmCellRegistration, for: indexPath, item: film)
-            return cell
+        dataSource = UICollectionViewDiffableDataSource<Section, Film.ID>(collectionView: collectionView, cellProvider: { (collectionView, indexPath, filmID) -> ExploreListCell in
+            guard let film = self.filmLookup[filmID] else {
+                return collectionView.dequeueConfiguredReusableCell(using: filmCellRegistration, for: indexPath, item: Film.sample)
+            }
+            return collectionView.dequeueConfiguredReusableCell(using: filmCellRegistration, for: indexPath, item: film)
         })
     }
     
@@ -117,6 +119,7 @@ extension ExploreListVC: FilmsListViewModelDelegate {
     func didUpdateFilms(_ films: [Film]) {
         self.films = films
         let filmIds = films.map({ $0.id })
+        filmLookup = Dictionary(uniqueKeysWithValues: films.map { ($0.id, $0) })
         
         var snapshot = NSDiffableDataSourceSnapshot<Section, Film.ID>()
         snapshot.appendSections([.main])

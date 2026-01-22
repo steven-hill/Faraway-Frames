@@ -100,34 +100,60 @@ struct ExploreListVCTests {
     }
     
     @Test func exploreListVC_didUpdateFilms_updatesCollectionViewItemCount() {
-        let sut = makeSUT()
-        sut.loadViewIfNeeded()
-        let films: [Film] = [.sample]
-        
-        sut.didUpdateFilms(films)
+        let sut = createSUTForDataSource()
         
         let itemCount = sut.collectionView.numberOfItems(inSection: 0)
+        
         #expect(itemCount == 1, "Should be 1 item in the collection view.")
     }
     
     @Test func exploreListVC_dataSource_returnsACell() {
+        let sut = createSUTForDataSource()
+        
+        let indexPath = IndexPath(item: 0, section: 0)
+        let cell = sut.collectionView.dataSource?.collectionView(sut.collectionView, cellForItemAt: indexPath)
+        
+        #expect(cell != nil, "Should not be nil.")
+    }
+    
+    @Test func exploreListVC_filmsLookup_populatesCorrectly() {
+        let sut = createSUTForDataSource()
+        
+        #expect(sut.filmLookup.count == 1, "Dictionary should have 1 film.")
+    }
+    
+    @Test func exploreListVC_filmsLookup_returnsCorrectFilm() {
         let sut = makeSUT()
         sut.loadViewIfNeeded()
         let films: [Film] = [.sample]
         
         sut.didUpdateFilms(films)
         
-        let indexPath = IndexPath(item: 0, section: 0)
-        let cell = sut.collectionView.dataSource?.collectionView(sut.collectionView, cellForItemAt: indexPath)
-        #expect(cell != nil, "Should not be nil.")
+        #expect(sut.filmLookup["2baf70d1-42bb-4437-b551-e5fed5a87abe"] != nil, "Should not be nil.")
+        #expect(sut.filmLookup["2baf70d1-42bb-4437-b551-e5fed5a87abe"] == films.first, "ID should be for 'Castle in the Sky'.")
+        #expect(sut.filmLookup.first?.value.title == "Castle in the Sky", "Title should be 'Castle in the Sky'.")
     }
     
-    // MARK: - Helper method
+    @Test func exploreListVC_filmsLookup_returnsNilForUnknownID() {
+        let sut = createSUTForDataSource()
+        
+        #expect(sut.filmLookup["non existent ID"] == nil, "Should return nil if no film with that ID exists.")
+    }
+    
+    // MARK: - Helper methods
     fileprivate func makeSUT() -> ExploreListVC {
         let mockFilmsListService = MockFilmsListService()
         let imageLoader = MockImageLoader()
         let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
         return ExploreListVC(viewModel: filmsListViewModel)
+    }
+    
+    fileprivate func createSUTForDataSource() -> ExploreListVC {
+        let sut = makeSUT()
+        sut.loadViewIfNeeded()
+        let films: [Film] = [.sample]
+        sut.didUpdateFilms(films)
+        return sut
     }
     
     // MARK: - Presentation Spy
