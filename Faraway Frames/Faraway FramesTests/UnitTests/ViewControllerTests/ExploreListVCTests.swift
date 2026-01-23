@@ -11,11 +11,11 @@ import UIKit
 
 @MainActor
 struct ExploreListVCTests {
-
+    
     @Test func exploreListVC_canInit() {
         let sut = makeSUT()
         _ = UINavigationController(rootViewController: sut)
-
+        
         sut.loadViewIfNeeded()
         
         #expect((sut.navigationController != nil), "VC should be inside a navigation controller.")
@@ -57,7 +57,7 @@ struct ExploreListVCTests {
         let sut = makeSUT()
         
         sut.loadViewIfNeeded()
-                
+        
         #expect(sut.columnCount(for: 801) == 3, "Should be 3.")
         #expect(sut.columnCount(for: 800) == 1, "Should be 1.")
     }
@@ -140,6 +140,36 @@ struct ExploreListVCTests {
         #expect(sut.filmLookup["non existent ID"] == nil, "Should return nil if no film with that ID exists.")
     }
     
+    @Test func exploreListVC_createSpinnerView_callsDidMove() {
+        let sut = makeSUT()
+        let spy = SpinnerSpy()
+        sut.child = spy
+        
+        sut.createSpinnerView()
+        
+        #expect(spy.didMoveToParentWasCalled == true, "didMove(toParent:) should be called by the container.")
+        #expect(spy.capturedParentVC == sut, "The parent view controller should be the one that was passed in.")
+    }
+    
+    @Test func exploreListVC_removeSpinnerView_removesSpinner() {
+        let sut = makeSUT()
+        
+        sut.removeSpinnerView()
+        
+        #expect(!sut.children.contains(sut.child), "Spinner is no longer a child of ExploreListVC.")
+    }
+    
+    @Test func exploreListVC_removeSpinnerView_callsWillMove() {
+        let sut = makeSUT()
+        let spy = SpinnerSpy()
+        sut.child = spy
+        
+        sut.removeSpinnerView()
+        
+        #expect(spy.willMoveToParentWasCalled == true, "didMove(toParent:) should be called by the container.")
+        #expect(spy.capturedParentVC == nil, "Nil was passed in.")
+    }
+    
     // MARK: - Helper methods
     fileprivate func makeSUT() -> ExploreListVC {
         let mockFilmsListService = MockFilmsListService()
@@ -156,15 +186,33 @@ struct ExploreListVCTests {
         return sut
     }
     
-    // MARK: - Presentation Spy
+    // MARK: - Presentation Spies
     fileprivate class PresentationSpy: AlertPresenter {
         var presentedVC: UIViewController?
         var isAnimated: Bool?
-
+        
         func present(_ viewControllerToPresent: UIViewController, animated flag: Bool, completion: (() -> Void)?) {
             self.presentedVC = viewControllerToPresent
             self.isAnimated = flag
             completion?()
+        }
+    }
+    
+    fileprivate class SpinnerSpy: SpinnerVC {
+        var didMoveToParentWasCalled = false
+        var willMoveToParentWasCalled = false
+        var capturedParentVC: UIViewController?
+        
+        override func didMove(toParent parent: UIViewController?) {
+            super.didMove(toParent: parent)
+            didMoveToParentWasCalled = true
+            capturedParentVC = parent
+        }
+        
+        override func willMove(toParent parent: UIViewController?) {
+            super.willMove(toParent: parent)
+            willMoveToParentWasCalled = true
+            capturedParentVC = parent
         }
     }
 }
