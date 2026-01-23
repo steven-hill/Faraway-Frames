@@ -17,7 +17,8 @@ final class ExploreListVC: UIViewController {
     weak var alertPresenter: AlertPresenter?
     lazy var collectionView = UICollectionView()
     var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
-
+    var child = SpinnerVC()
+    
     init(viewModel: FilmsListViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
@@ -33,6 +34,8 @@ final class ExploreListVC: UIViewController {
         title = "Explore"
         if alertPresenter == nil { alertPresenter = self }
         viewModel.delegate = self
+        configureSpinnerView()
+        createSpinnerView()
         configureCollectionView()
         configureDataSource()
         getAllFilms()
@@ -103,12 +106,31 @@ final class ExploreListVC: UIViewController {
             }
             return collectionView.dequeueConfiguredReusableCell(using: filmCellRegistration, for: indexPath, item: film)
         })
+        removeSpinnerView()
     }
     
     private func getAllFilms() {
         Task {
             await viewModel.getAllFilms()
         }
+    }
+    
+    //MARK: - SpinnerView Methods
+    func configureSpinnerView() {
+        child.loadView()
+    }
+    
+    func createSpinnerView() {
+        addChild(child)
+        child.view.frame = view.frame
+        view.addSubview(child.view)
+        child.didMove(toParent: self)
+    }
+    
+    func removeSpinnerView() {
+        child.willMove(toParent: nil)
+        child.view.removeFromSuperview()
+        child.removeFromParent()
     }
 }
 
