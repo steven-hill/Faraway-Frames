@@ -170,6 +170,37 @@ struct ExploreListVCTests {
         #expect(spy.capturedParentVC == nil, "Nil was passed in.")
     }
     
+    @Test func exploreListVC_updateCellImage_setsImageWhenCellHasNotBeenReused() async {
+        let (sut, cell, indexPath) = makeSUTForUpdateCellImageTests()
+        
+        await sut.updateCellImage(cell, film: .sample, indexPath: indexPath)
+        
+        let updatedConfig = cell.contentConfiguration as? UIListContentConfiguration
+        #expect(sut.filmImage == UIImage(systemName: "popcorn"), "Popcorn image means image loading succeeded.")
+        #expect(updatedConfig?.image == sut.filmImage, "The cell's image should match the loaded image.")
+    }
+    
+    @Test func exploreListVC_updateCellImage_doesNotSetImageToFilmImage_ifCellWasReused() async {
+        let (sut, cell, _) = makeSUTForUpdateCellImageTests(indexPath: IndexPath(item: 1, section: 0))
+        let originalIndexPath = IndexPath(item: 0, section: 0)
+        
+        await sut.updateCellImage(cell, film: .sample, indexPath: originalIndexPath)
+        
+        let updatedConfig = cell.contentConfiguration as? UIListContentConfiguration
+        #expect(updatedConfig?.image == nil, "The updated configuration should be nil as the cell was reused.")
+        #expect(cell.imageView.image == UIImage(systemName: "photo"), "The default image should be set as a placeholder.")
+    }
+    
+    @Test func exploreListVC_updateCellImage_usesPlaceholder_whenImageLoadFails() async {
+        let (sut, cell, indexPath) = makeSUTForUpdateCellImageTests(shouldSucceed: false)
+        
+        await sut.updateCellImage(cell, film: .sample, indexPath: indexPath)
+        
+        let updatedConfig = cell.contentConfiguration as? UIListContentConfiguration
+        #expect(updatedConfig?.image != nil, "Should not be nil.")
+        #expect(updatedConfig?.image == UIImage(systemName: "photo"), "Placeholder image should be used if image loading fails.")
+    }
+    
     // MARK: - Helper methods
     fileprivate func makeSUT() -> ExploreListVC {
         let mockFilmsListService = MockFilmsListService()
@@ -184,6 +215,31 @@ struct ExploreListVCTests {
         let films: [Film] = [.sample]
         sut.didUpdateFilms(films)
         return sut
+    }
+    
+    fileprivate func makeSUTForUpdateCellImageTests(
+        shouldSucceed: Bool = true,
+        indexPath: IndexPath = IndexPath(item: 0, section: 0)
+    ) -> (sut: ExploreListVC, cell: ExploreListCell, indexPath: IndexPath) {
+        let mockFilmsListService = MockFilmsListService()
+        var imageLoader = MockImageLoader()
+        imageLoader.shouldSucceed = shouldSucceed
+        
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
+        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        let cell = ExploreListCell()
+        cell.contentConfiguration = UIListContentConfiguration.cell()
+        
+        class MockCollectionView: UICollectionView {
+            var overrideIndexPath: IndexPath?
+            override func indexPath(for cell: UICollectionViewCell) -> IndexPath? { overrideIndexPath }
+        }
+        
+        let mockCV = MockCollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+        mockCV.overrideIndexPath = indexPath
+        sut.collectionView = mockCV
+        
+        return (sut, cell, indexPath)
     }
     
     // MARK: - Presentation Spies
