@@ -12,6 +12,7 @@ final class ExploreListVC: UIViewController {
     enum Section: Int { case main }
     
     private(set) var films: [Film] = []
+    var filmImage: UIImage?
     private(set) var filmLookup: [String: Film] = [:]
     let viewModel: FilmsListViewModel
     weak var alertPresenter: AlertPresenter?
@@ -86,8 +87,20 @@ final class ExploreListVC: UIViewController {
         width > 800 ? 3 : 1
     }
     
+    func updateCellImage(_ cell: UICollectionViewCell, film: Film, indexPath: IndexPath) async {
+        filmImage = await viewModel.getImage(for: film)
+        
+        guard let currentIndexPath = collectionView.indexPath(for: cell),
+                currentIndexPath == indexPath else { return }
+        
+        var updatedConfig = cell.contentConfiguration as? UIListContentConfiguration
+        updatedConfig?.image = filmImage ?? UIImage(systemName: "photo")
+        cell.contentConfiguration = updatedConfig
+    }
+    
     private func configureDataSource() {
-        let filmCellRegistration = UICollectionView.CellRegistration<ExploreListCell, Film> { (cell, indexPath, film) in
+        let filmCellRegistration = UICollectionView.CellRegistration<ExploreListCell, Film> { [weak self] (cell, indexPath, film) in
+            guard let self else { return }
             var config = UIListContentConfiguration.cell()
             config.text = film.title
             config.image = UIImage(systemName: "photo")
@@ -98,6 +111,10 @@ final class ExploreListVC: UIViewController {
             background.backgroundColor = .secondarySystemBackground
             background.cornerRadius = 8
             cell.backgroundConfiguration = background
+            
+            Task {
+                await updateCellImage(cell, film: film, indexPath: indexPath)
+            }
         }
         
         dataSource = UICollectionViewDiffableDataSource<Section, Film.ID>(collectionView: collectionView, cellProvider: { (collectionView, indexPath, filmID) -> ExploreListCell in
