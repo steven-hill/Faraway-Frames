@@ -20,7 +20,8 @@ final class TabBarController: UITabBarController {
         exploreSplitVC.delegate = self
         
         let filmsListAPIClient = FilmsListAPIClient()
-        let apiClientImageLoader = APIClientImageLoader()
+        let cacheManager = CacheManager()
+        let apiClientImageLoader = APIClientImageLoader(cacheManager: cacheManager)
         let filmsListViewModel = FilmsListViewModel(filmsListService: filmsListAPIClient, imageLoader: apiClientImageLoader)
         let exploreListVC = ExploreListVC(viewModel: filmsListViewModel)
         let exploreListNav = UINavigationController(rootViewController: exploreListVC)
