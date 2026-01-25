@@ -35,3 +35,10 @@ struct JSONHelper {
    }
 }
 
+struct MockSession {
+    static func createMockSession() -> URLSession {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [MockURLProtocol.self]
+        return URLSession(configuration: configuration)
+    }
+}

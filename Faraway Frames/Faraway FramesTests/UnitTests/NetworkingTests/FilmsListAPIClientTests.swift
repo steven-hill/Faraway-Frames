@@ -97,18 +97,12 @@ struct FilmsListAPIClientTests {
     }
     
     // MARK: - Helper methods
-    private func createMockSession() -> URLSession {
-        let configuration = URLSessionConfiguration.ephemeral
-        configuration.protocolClasses = [MockURLProtocol.self]
-        return URLSession(configuration: configuration)
-    }
-    
     private func makeFilmsURLString() -> String {
         "https://ghibliapi.vercel.app/films"
     }
     
     private func makeFilmsListAPIClient() async -> FilmsListAPIClient {
-        let mockSession = createMockSession()
+        let mockSession = MockSession.createMockSession()
         return await FilmsListAPIClient(session: mockSession)
     }
     
