@@ -11,6 +11,7 @@ final class ExploreListVC: UIViewController {
     
     enum Section: Int { case main }
     
+    // MARK: - Properties
     private(set) var films: [Film] = []
     var filmImage: UIImage?
     private(set) var filmLookup: [String: Film] = [:]
@@ -29,6 +30,7 @@ final class ExploreListVC: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: - View Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.navigationBar.prefersLargeTitles = true
@@ -151,9 +153,11 @@ final class ExploreListVC: UIViewController {
     }
 }
 
+// MARK: - Collection View Delegate
 extension ExploreListVC: UICollectionViewDelegate {
 }
 
+// MARK: - Films List View Model Delegate
 extension ExploreListVC: FilmsListViewModelDelegate {
     func didUpdateFilms(_ films: [Film]) {
         self.films = films
