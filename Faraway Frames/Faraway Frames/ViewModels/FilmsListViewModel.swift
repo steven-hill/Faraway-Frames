@@ -14,6 +14,7 @@ final class FilmsListViewModel {
     weak var delegate: FilmsListViewModelDelegate?
     
     private(set) var films: [Film] = []
+    var filteredFilms: [Film] = []
     var viewModelError: APIError?
     
     init(filmsListService: FilmsListService, imageLoader: ImageLoader) {
@@ -37,5 +38,22 @@ final class FilmsListViewModel {
         guard let url = URL(string: film.image) else { return nil }
         let image = await imageLoader.loadImage(from: url)
         return image
+    }
+    
+    func filterFilms(by searchText: String) {
+        guard !films.isEmpty && !searchText.isEmpty else { return }
+        let query = cleanSearchText(searchText: searchText)
+        guard !query.isEmpty else { return }
+        
+        filteredFilms = films.filter { $0.title.lowercased().contains(query) }
+    }
+    
+    private func cleanSearchText(searchText: String) -> String {
+        searchText
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+            .components(separatedBy: .punctuationCharacters)
+            .joined()
+            .lowercased()
     }
 }
