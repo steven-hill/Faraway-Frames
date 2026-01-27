@@ -174,8 +174,8 @@ struct ExploreListVCTests {
         let (sut, cell, indexPath) = makeSUTForUpdateCellImageTests()
         
         await sut.updateCellImage(cell, film: .sample, indexPath: indexPath)
-        
         let updatedConfig = cell.contentConfiguration as? UIListContentConfiguration
+        
         #expect(sut.filmImage == UIImage(systemName: "popcorn"), "Popcorn image means image loading succeeded.")
         #expect(updatedConfig?.image == sut.filmImage, "The cell's image should match the loaded image.")
     }
@@ -185,8 +185,8 @@ struct ExploreListVCTests {
         let originalIndexPath = IndexPath(item: 0, section: 0)
         
         await sut.updateCellImage(cell, film: .sample, indexPath: originalIndexPath)
-        
         let updatedConfig = cell.contentConfiguration as? UIListContentConfiguration
+        
         #expect(updatedConfig?.image == nil, "The updated configuration should be nil as the cell was reused.")
         #expect(cell.imageView.image == UIImage(systemName: "photo"), "The default image should be set as a placeholder.")
     }
@@ -195,12 +195,123 @@ struct ExploreListVCTests {
         let (sut, cell, indexPath) = makeSUTForUpdateCellImageTests(shouldSucceed: false)
         
         await sut.updateCellImage(cell, film: .sample, indexPath: indexPath)
-        
         let updatedConfig = cell.contentConfiguration as? UIListContentConfiguration
+        
         #expect(updatedConfig?.image != nil, "Should not be nil.")
         #expect(updatedConfig?.image == UIImage(systemName: "photo"), "Placeholder image should be used if image loading fails.")
     }
     
+    @Test func exploreListVC_setssearchControllerSearchResultsUpdater() {
+        let sut = makeSUT()
+        
+        sut.loadViewIfNeeded()
+
+        #expect(sut.searchController.searchResultsUpdater != nil, "Search Results Updater should be set.")
+    }
+    
+    @Test func exploreListVC_searchTextIsEmptyOnInit() {
+        let sut = makeSUT()
+        
+        sut.loadViewIfNeeded()
+        sut.updateSearchResults(for: sut.searchController)
+        
+        #expect(((sut.searchController.searchBar.text?.isEmpty) != nil), "Search bar text should be nil on init.")
+    }
+    
+    @Test func exploreListVC_searchIsNotAttempted_whenSearchTextIsEmpty() async throws {
+        let mockFilmsListService = MockServiceHelper.setupMockServiceForSuccessCase()
+        let imageLoader = MockImageLoader()
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
+        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        
+        sut.loadViewIfNeeded()
+        try await Task.sleep(nanoseconds: 100)
+        sut.searchController.searchBar.text = ""
+        sut.updateSearchResults(for: sut.searchController)
+        
+        #expect(sut.films.count == 22, "When no search is attempted, the VC's films array should still contain all films.")
+    }
+    
+    @Test func exploreListVC_searchIsNotAttempted_whenFilmsArrayIsEmpty() {
+        let sut = makeSUT()
+
+        sut.updateSearchResults(for: sut.searchController)
+        
+        #expect(sut.films.isEmpty, "When no search is attempted, the VC's films array should be empty.")
+        #expect(sut.viewModel.films.isEmpty, "View model's films should be empty.")
+        #expect(sut.viewModel.filteredFilms.isEmpty, "View model's filtered films should be empty.")
+    }
+    
+    @Test func exploreListVC_showsFilteredResults_whenSearchWasSuccessful() async throws {
+        let mockFilmsListService = MockServiceHelper.setupMockServiceForSuccessCase()
+        let imageLoader = MockImageLoader()
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
+        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        
+        sut.loadViewIfNeeded()
+        try await Task.sleep(nanoseconds: 100)
+        sut.searchController.searchBar.text = "Cas"
+        sut.updateSearchResults(for: sut.searchController)
+        
+        #expect(sut.films.count == 2, "When search successfully finds results, the VC's films array should be updated with those results.")
+    }
+    
+    @Test func exploreListVC_searchBarCancelButtonTapped_resetsFilmsArrayToAllFilms() async throws {
+        let mockFilmsListService = MockServiceHelper.setupMockServiceForSuccessCase()
+        let imageLoader = MockImageLoader()
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
+        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        
+        sut.loadViewIfNeeded()
+        try await Task.sleep(nanoseconds: 100)
+        sut.searchBarCancelButtonClicked(sut.searchController.searchBar)
+        
+        #expect(sut.films.count == 22, "Should have an array of all films.")
+    }
+    
+    @Test func exploreListVC_showsContentUnavailableConfigurationViewAndHidesCollectionView_whenSearchFoundNoResults() {
+        let sut = makeSUT()
+        
+        sut.isSearching = true
+        sut.hasFilms = false
+        sut.updateContentUnavailableConfiguration(using: sut.contentUnavailableConfigurationState)
+        
+        #expect(sut.contentUnavailableConfiguration != nil, "Should show a view to say there are no results.")
+        #expect(sut.collectionView.isHidden, "Collection view should be hidden.")
+    }
+    
+    @Test func exploreListVC_hidesContentUnavailableConfigurationViewAndUnhidesCollectionView_whenThereAreSearchResults() {
+        let sut = makeSUT()
+        
+        sut.loadViewIfNeeded()
+        sut.isSearching = true
+        sut.hasFilms = true
+        sut.updateContentUnavailableConfiguration(using: sut.contentUnavailableConfigurationState)
+        
+        #expect(sut.contentUnavailableConfiguration == nil, "Should be nil as there are search results.")
+        #expect(sut.collectionView.isHidden == false, "Collection view should not be hidden.")
+    }
+    
+    @Test func exploreListVC_textDidChange_unHidesCollectionViewAndSetsContentUnavailableConfigurationToNilIfNeeded() {
+        let sut = makeSUT()
+        
+        sut.loadViewIfNeeded()
+        sut.searchBar(sut.searchController.searchBar, textDidChange: "Cas")
+        
+        #expect(sut.isSearching, "Should be true.")
+    }
+    
+    @Test func exploreListVC_showNoSearchResultsFoundView_setsStateCorrectlyAndCallsUpdateContentUnavailableConfiguration() {
+        let sut = makeSUT()
+        
+        sut.loadViewIfNeeded()
+        sut.didFailToMatchResults()
+        
+        #expect(sut.isSearching, "Should be true.")
+        #expect(sut.hasFilms == false, "Should be false.")
+        #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
+    }
+        
     // MARK: - Helper methods
     fileprivate func makeSUT() -> ExploreListVC {
         let mockFilmsListService = MockFilmsListService()
@@ -242,7 +353,7 @@ struct ExploreListVCTests {
         return (sut, cell, indexPath)
     }
     
-    // MARK: - Presentation Spies
+    // MARK: - Presentation Spy
     fileprivate class PresentationSpy: AlertPresenter {
         var presentedVC: UIViewController?
         var isAnimated: Bool?
@@ -254,6 +365,7 @@ struct ExploreListVCTests {
         }
     }
     
+    // MARK: - Spinner Spy
     fileprivate class SpinnerSpy: SpinnerVC {
         var didMoveToParentWasCalled = false
         var willMoveToParentWasCalled = false

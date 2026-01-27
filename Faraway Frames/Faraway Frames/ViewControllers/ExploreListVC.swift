@@ -20,6 +20,9 @@ final class ExploreListVC: UIViewController {
     lazy var collectionView = UICollectionView()
     var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
     var child = SpinnerVC()
+    let searchController = UISearchController(searchResultsController: nil)
+    var hasFilms: Bool?
+    var isSearching = false
     
     init(viewModel: FilmsListViewModel) {
         self.viewModel = viewModel
@@ -41,6 +44,7 @@ final class ExploreListVC: UIViewController {
         createSpinnerView()
         configureCollectionView()
         configureDataSource()
+        configureSearchController()
         getAllFilms()
     }
     
@@ -134,6 +138,19 @@ final class ExploreListVC: UIViewController {
         }
     }
     
+    override func updateContentUnavailableConfiguration(using state: UIContentUnavailableConfigurationState) {
+        if hasFilms == false && isSearching == true {
+            var config = UIContentUnavailableConfiguration.search()
+            config.text = "No Results"
+            config.secondaryText = "Try a different search term."
+            self.contentUnavailableConfiguration = config
+            self.collectionView.isHidden = true
+        } else {
+            self.contentUnavailableConfiguration = nil
+            self.collectionView.isHidden = false
+        }
+    }
+    
     //MARK: - SpinnerView Methods
     func configureSpinnerView() {
         child.loadView()
@@ -151,6 +168,19 @@ final class ExploreListVC: UIViewController {
         child.view.removeFromSuperview()
         child.removeFromParent()
     }
+    
+    //MARK: - Search Controller
+    func configureSearchController() {
+        searchController.searchBar.delegate = self
+        searchController.searchResultsUpdater = self
+        searchController.searchBar.placeholder = "Search films"
+        navigationItem.searchController = searchController
+        navigationItem.hidesSearchBarWhenScrolling = false
+    }
+    
+    func resetFilmsToAllFilms() {
+        viewModel.resetAllFilms()
+    }
 }
 
 // MARK: - Collection View Delegate
@@ -163,6 +193,7 @@ extension ExploreListVC: FilmsListViewModelDelegate {
         self.films = films
         let filmIds = films.map({ $0.id })
         filmLookup = Dictionary(uniqueKeysWithValues: films.map { ($0.id, $0) })
+        hasFilms = true
         
         var snapshot = NSDiffableDataSourceSnapshot<Section, Film.ID>()
         snapshot.appendSections([.main])
@@ -177,4 +208,37 @@ extension ExploreListVC: FilmsListViewModelDelegate {
         alertVC.modalTransitionStyle = .crossDissolve
         alertPresenter?.present(alertVC, animated: true, completion: nil)
     }
+    
+    func didFailToMatchResults() {
+        hasFilms = false
+        isSearching = true
+        self.setNeedsUpdateContentUnavailableConfiguration()
+    }
 }
+
+// MARK: - Search Bar Delegate
+extension ExploreListVC: UISearchBarDelegate {
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.text = ""
+        searchBar.resignFirstResponder()
+        isSearching = false
+        resetFilmsToAllFilms()
+        self.setNeedsUpdateContentUnavailableConfiguration()
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        isSearching = true
+    }
+}
+
+// MARK: - Search Results Updating
+extension ExploreListVC: UISearchResultsUpdating {
+    func updateSearchResults(for searchController: UISearchController) {
+        guard let searchText = searchController.searchBar.text, !searchText.isEmpty else { return }
+        guard !films.isEmpty else { return }
+        isSearching = true
+        viewModel.filterFilms(by: searchText)
+        self.setNeedsUpdateContentUnavailableConfiguration()
+    }
+}
+
