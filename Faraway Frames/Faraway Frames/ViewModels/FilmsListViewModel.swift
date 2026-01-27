@@ -42,10 +42,15 @@ final class FilmsListViewModel {
     
     func filterFilms(by searchText: String) {
         guard !films.isEmpty && !searchText.isEmpty else { return }
+        filteredFilms.removeAll()
         let query = cleanSearchText(searchText: searchText)
         guard !query.isEmpty else { return }
-        
         filteredFilms = films.filter { $0.title.lowercased().contains(query) }
+        if filteredFilms.isEmpty {
+            delegate?.didFailToMatchResults()
+        } else {
+            delegate?.didUpdateFilms(filteredFilms)
+        }
     }
     
     private func cleanSearchText(searchText: String) -> String {
@@ -55,5 +60,9 @@ final class FilmsListViewModel {
             .components(separatedBy: .punctuationCharacters)
             .joined()
             .lowercased()
+    }
+    
+    func resetAllFilms() {
+        delegate?.didUpdateFilms(films)
     }
 }

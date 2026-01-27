@@ -10,6 +10,7 @@ import Testing
 import UIKit
 
 @MainActor
+@Suite(.serialized)
 struct APIClientImageLoaderTests {
     
     @Test func apiClientImageLoader_whenSuccessful_shouldSaveImageToCache() async {
