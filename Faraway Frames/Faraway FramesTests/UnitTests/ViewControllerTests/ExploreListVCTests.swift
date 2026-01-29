@@ -82,7 +82,7 @@ struct ExploreListVCTests {
         APIError.unknown
     ])
     func exploreListVC_presentsAlertForAllErrors(expectedError: APIError) async throws {
-        var mockService = MockFilmsListService()
+        let mockService = MockFilmsListService()
         mockService.result = .failure(expectedError)
         let imageLoader = MockImageLoader()
         let filmsListViewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: imageLoader)

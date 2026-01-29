@@ -13,7 +13,15 @@ final class FilmsListViewModel {
     private let imageLoader: ImageLoader
     weak var delegate: FilmsListViewModelDelegate?
     
+    enum FilmsListState: Equatable {
+        case loadingAllFilms
+        case content
+        case emptySearchResults
+        case error(APIError)
+    }
+    
     private(set) var films: [Film] = []
+    private(set) var currentState: FilmsListState = .loadingAllFilms
     var filteredFilms: [Film] = []
     var viewModelError: APIError?
     
@@ -26,11 +34,14 @@ final class FilmsListViewModel {
         do {
             films = try await filmsListService.fetchAllFilms()
             delegate?.didUpdateFilms(films)
+            currentState = .content
         } catch let error as APIError {
             viewModelError = error
             delegate?.didFailToLoadFilms(withError: viewModelError ?? APIError.unknown)
+            currentState = .error(viewModelError ?? APIError.unknown)
         } catch {
             delegate?.didFailToLoadFilms(withError: APIError.unknown)
+            currentState = .error(APIError.unknown)
         }
     }
     
@@ -64,5 +75,11 @@ final class FilmsListViewModel {
     
     func resetAllFilms() {
         delegate?.didUpdateFilms(films)
+        currentState = .content
+    }
+    
+    func retryLoadingAllFilms() async {
+        currentState = .loadingAllFilms
+        await getAllFilms()
     }
 }
