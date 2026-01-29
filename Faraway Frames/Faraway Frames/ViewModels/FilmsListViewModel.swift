@@ -59,8 +59,10 @@ final class FilmsListViewModel {
         filteredFilms = films.filter { $0.title.lowercased().contains(query) }
         if filteredFilms.isEmpty {
             delegate?.didFailToMatchResults()
+            currentState = .emptySearchResults
         } else {
             delegate?.didUpdateFilms(filteredFilms)
+            currentState = .content
         }
     }
     

@@ -16,13 +16,9 @@ final class ExploreListVC: UIViewController {
     var filmImage: UIImage?
     private(set) var filmLookup: [String: Film] = [:]
     let viewModel: FilmsListViewModel
-    weak var alertPresenter: AlertPresenter?
     lazy var collectionView = UICollectionView()
     var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
-    var child = SpinnerVC()
     let searchController = UISearchController(searchResultsController: nil)
-    var hasFilms: Bool?
-    var isSearching = false
     
     init(viewModel: FilmsListViewModel) {
         self.viewModel = viewModel
@@ -38,10 +34,7 @@ final class ExploreListVC: UIViewController {
         super.viewDidLoad()
         navigationController?.navigationBar.prefersLargeTitles = true
         title = "Explore"
-        if alertPresenter == nil { alertPresenter = self }
         viewModel.delegate = self
-        configureSpinnerView()
-        createSpinnerView()
         configureCollectionView()
         configureDataSource()
         configureSearchController()
@@ -129,7 +122,6 @@ final class ExploreListVC: UIViewController {
             }
             return collectionView.dequeueConfiguredReusableCell(using: filmCellRegistration, for: indexPath, item: film)
         })
-        removeSpinnerView()
     }
     
     private func getAllFilms() {
@@ -139,34 +131,51 @@ final class ExploreListVC: UIViewController {
     }
     
     override func updateContentUnavailableConfiguration(using state: UIContentUnavailableConfigurationState) {
-        if hasFilms == false && isSearching == true {
-            var config = UIContentUnavailableConfiguration.search()
-            config.text = "No Results"
-            config.secondaryText = "Try a different search term."
-            self.contentUnavailableConfiguration = config
-            self.collectionView.isHidden = true
-        } else {
-            self.contentUnavailableConfiguration = nil
-            self.collectionView.isHidden = false
+        var config: UIContentUnavailableConfiguration? = nil
+        var hideCollectionView = false
+        switch viewModel.currentState {
+        case .loadingAllFilms:
+            config = createLoadingConfig()
+            hideCollectionView = true
+        case .content:
+            config = nil
+            hideCollectionView = false
+        case .emptySearchResults:
+            config = createEmptySearchResultsConfig()
+            hideCollectionView = true
+        case .error(let error):
+            config = createErrorConfig(error: error)
+            hideCollectionView = true
         }
+        self.contentUnavailableConfiguration = config
+        self.collectionView.isHidden = hideCollectionView
     }
     
-    //MARK: - SpinnerView Methods
-    func configureSpinnerView() {
-        child.loadView()
+    private func createLoadingConfig() -> UIContentUnavailableConfiguration {
+        var config = UIContentUnavailableConfiguration.loading()
+        config.text = "Fetching films..."
+        config.textProperties.color = .systemGray
+        return config
     }
     
-    func createSpinnerView() {
-        addChild(child)
-        child.view.frame = view.frame
-        view.addSubview(child.view)
-        child.didMove(toParent: self)
+    private func createEmptySearchResultsConfig() -> UIContentUnavailableConfiguration {
+        var searchConfig = UIContentUnavailableConfiguration.search()
+        searchConfig.text = "No Results"
+        searchConfig.secondaryText = "Try a different search term."
+        return searchConfig
     }
     
-    func removeSpinnerView() {
-        child.willMove(toParent: nil)
-        child.view.removeFromSuperview()
-        child.removeFromParent()
+    private func createErrorConfig(error: APIError) -> UIContentUnavailableConfiguration {
+        var config = UIContentUnavailableConfiguration.empty()
+        config.text = "Error loading films: \(error.description)"
+        config.image = UIImage(systemName: "exclamationmark.triangle")
+        config.imageProperties.tintColor = .systemRed
+        config.button = .prominentGlass()
+        config.button.title = "Retry"
+        config.buttonProperties.primaryAction = UIAction { [weak self] _ in
+            Task { await self?.viewModel.retryLoadingAllFilms() }
+        }
+        return config
     }
     
     //MARK: - Search Controller
@@ -193,7 +202,8 @@ extension ExploreListVC: FilmsListViewModelDelegate {
         self.films = films
         let filmIds = films.map({ $0.id })
         filmLookup = Dictionary(uniqueKeysWithValues: films.map { ($0.id, $0) })
-        hasFilms = true
+
+        setNeedsUpdateContentUnavailableConfiguration()
         
         var snapshot = NSDiffableDataSourceSnapshot<Section, Film.ID>()
         snapshot.appendSections([.main])
@@ -202,17 +212,11 @@ extension ExploreListVC: FilmsListViewModelDelegate {
     }
     
     func didFailToLoadFilms(withError error: APIError) {
-        let alertVC = UIAlertController(title: "Error: \(error)", message: "Failed to load films", preferredStyle: .alert)
-        alertVC.addAction(UIAlertAction(title: "OK", style: .default))
-        alertVC.modalPresentationStyle = .automatic
-        alertVC.modalTransitionStyle = .crossDissolve
-        alertPresenter?.present(alertVC, animated: true, completion: nil)
+        setNeedsUpdateContentUnavailableConfiguration()
     }
     
     func didFailToMatchResults() {
-        hasFilms = false
-        isSearching = true
-        self.setNeedsUpdateContentUnavailableConfiguration()
+        setNeedsUpdateContentUnavailableConfiguration()
     }
 }
 
@@ -221,13 +225,7 @@ extension ExploreListVC: UISearchBarDelegate {
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         searchBar.text = ""
         searchBar.resignFirstResponder()
-        isSearching = false
         resetFilmsToAllFilms()
-        self.setNeedsUpdateContentUnavailableConfiguration()
-    }
-    
-    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        isSearching = true
     }
 }
 
@@ -236,9 +234,7 @@ extension ExploreListVC: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         guard let searchText = searchController.searchBar.text, !searchText.isEmpty else { return }
         guard !films.isEmpty else { return }
-        isSearching = true
         viewModel.filterFilms(by: searchText)
-        self.setNeedsUpdateContentUnavailableConfiguration()
     }
 }
 

@@ -74,29 +74,28 @@ struct ExploreListVCTests {
         #expect(sut.films.count == 22, "VC's film should contain 22 films.")
     }
     
-    @Test("ExploreListVC presents an alert for all API errors", arguments: [
+    @Test("ExploreListVC shows error view for all API errors", arguments: [
         APIError.invalidURL,
         APIError.invalidResponse,
         APIError.serverError(statusCode: 500),
         APIError.decodingError,
         APIError.unknown
     ])
-    func exploreListVC_presentsAlertForAllErrors(expectedError: APIError) async throws {
+    func exploreListVC_showsErrorViewForAllErrors(expectedError: APIError) async throws {
         let mockService = MockFilmsListService()
         mockService.result = .failure(expectedError)
         let imageLoader = MockImageLoader()
         let filmsListViewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: imageLoader)
-        let vc = ExploreListVC(viewModel: filmsListViewModel)
-        let spy = PresentationSpy()
-        vc.alertPresenter = spy
+        let sut = ExploreListVC(viewModel: filmsListViewModel)
         
-        vc.loadViewIfNeeded()
-        vc.didFailToLoadFilms(withError: expectedError)
+        sut.loadViewIfNeeded()
+        await sut.viewModel.getAllFilms()
         
-        #expect(spy.presentedVC != nil, "Should not be nil.")
-        #expect(spy.presentedVC is UIAlertController, "Alert should use a UIAlertController.")
-        #expect(spy.isAnimated == true, "Should present the alert with animation.")
-        #expect(spy.presentedVC?.title == "Error: \(expectedError)", "Title should state which error occurred.")
+        sut.setNeedsUpdateContentUnavailableConfiguration()
+        sut.view.layoutIfNeeded()
+        
+        #expect(sut.viewModel.currentState == .error(expectedError), "Should set the state to .error.")
+        #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil.")
     }
     
     @Test func exploreListVC_didUpdateFilms_updatesCollectionViewItemCount() {
@@ -138,36 +137,6 @@ struct ExploreListVCTests {
         let sut = createSUTForDataSource()
         
         #expect(sut.filmLookup["non existent ID"] == nil, "Should return nil if no film with that ID exists.")
-    }
-    
-    @Test func exploreListVC_createSpinnerView_callsDidMove() {
-        let sut = makeSUT()
-        let spy = SpinnerSpy()
-        sut.child = spy
-        
-        sut.createSpinnerView()
-        
-        #expect(spy.didMoveToParentWasCalled == true, "didMove(toParent:) should be called by the container.")
-        #expect(spy.capturedParentVC == sut, "The parent view controller should be the one that was passed in.")
-    }
-    
-    @Test func exploreListVC_removeSpinnerView_removesSpinner() {
-        let sut = makeSUT()
-        
-        sut.removeSpinnerView()
-        
-        #expect(!sut.children.contains(sut.child), "Spinner is no longer a child of ExploreListVC.")
-    }
-    
-    @Test func exploreListVC_removeSpinnerView_callsWillMove() {
-        let sut = makeSUT()
-        let spy = SpinnerSpy()
-        sut.child = spy
-        
-        sut.removeSpinnerView()
-        
-        #expect(spy.willMoveToParentWasCalled == true, "didMove(toParent:) should be called by the container.")
-        #expect(spy.capturedParentVC == nil, "Nil was passed in.")
     }
     
     @Test func exploreListVC_updateCellImage_setsImageWhenCellHasNotBeenReused() async {
@@ -256,6 +225,38 @@ struct ExploreListVCTests {
         #expect(sut.films.count == 2, "When search successfully finds results, the VC's films array should be updated with those results.")
     }
     
+    @Test func exploreListVC_didFailToMatchResults_updatesContentUnavailableConfiguration() {
+        let mockFilmsListService = MockServiceHelper.setupMockServiceForSuccessCase()
+        let imageLoader = MockImageLoader()
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
+        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        sut.loadViewIfNeeded()
+        
+        sut.didFailToMatchResults()
+        sut.setNeedsUpdateContentUnavailableConfiguration()
+        sut.view.layoutIfNeeded()
+        
+        #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil.")
+    }
+    
+    @Test func exploreListVC_showsEmptySearchResultsConfig_whenThereAreNoSearchResults() async throws {
+        let mockFilmsListService = MockServiceHelper.setupMockServiceForSuccessCase()
+        let imageLoader = MockImageLoader()
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
+        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        
+        sut.loadViewIfNeeded()
+        try await Task.sleep(nanoseconds: 100)
+        sut.searchController.searchBar.text = "No results found"
+        sut.updateSearchResults(for: sut.searchController)
+        
+        sut.setNeedsUpdateContentUnavailableConfiguration()
+        sut.view.layoutIfNeeded()
+        
+        #expect(sut.viewModel.currentState == .emptySearchResults, "Should set the state to .emptySearchResults.")
+        #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil.")
+    }
+    
     @Test func exploreListVC_searchBarCancelButtonTapped_resetsFilmsArrayToAllFilms() async throws {
         let mockFilmsListService = MockServiceHelper.setupMockServiceForSuccessCase()
         let imageLoader = MockImageLoader()
@@ -267,49 +268,6 @@ struct ExploreListVCTests {
         sut.searchBarCancelButtonClicked(sut.searchController.searchBar)
         
         #expect(sut.films.count == 22, "Should have an array of all films.")
-    }
-    
-    @Test func exploreListVC_showsContentUnavailableConfigurationViewAndHidesCollectionView_whenSearchFoundNoResults() {
-        let sut = makeSUT()
-        
-        sut.isSearching = true
-        sut.hasFilms = false
-        sut.updateContentUnavailableConfiguration(using: sut.contentUnavailableConfigurationState)
-        
-        #expect(sut.contentUnavailableConfiguration != nil, "Should show a view to say there are no results.")
-        #expect(sut.collectionView.isHidden, "Collection view should be hidden.")
-    }
-    
-    @Test func exploreListVC_hidesContentUnavailableConfigurationViewAndUnhidesCollectionView_whenThereAreSearchResults() {
-        let sut = makeSUT()
-        
-        sut.loadViewIfNeeded()
-        sut.isSearching = true
-        sut.hasFilms = true
-        sut.updateContentUnavailableConfiguration(using: sut.contentUnavailableConfigurationState)
-        
-        #expect(sut.contentUnavailableConfiguration == nil, "Should be nil as there are search results.")
-        #expect(sut.collectionView.isHidden == false, "Collection view should not be hidden.")
-    }
-    
-    @Test func exploreListVC_textDidChange_unHidesCollectionViewAndSetsContentUnavailableConfigurationToNilIfNeeded() {
-        let sut = makeSUT()
-        
-        sut.loadViewIfNeeded()
-        sut.searchBar(sut.searchController.searchBar, textDidChange: "Cas")
-        
-        #expect(sut.isSearching, "Should be true.")
-    }
-    
-    @Test func exploreListVC_showNoSearchResultsFoundView_setsStateCorrectlyAndCallsUpdateContentUnavailableConfiguration() {
-        let sut = makeSUT()
-        
-        sut.loadViewIfNeeded()
-        sut.didFailToMatchResults()
-        
-        #expect(sut.isSearching, "Should be true.")
-        #expect(sut.hasFilms == false, "Should be false.")
-        #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
     }
         
     // MARK: - Helper methods
@@ -351,36 +309,5 @@ struct ExploreListVCTests {
         sut.collectionView = mockCV
         
         return (sut, cell, indexPath)
-    }
-    
-    // MARK: - Presentation Spy
-    fileprivate class PresentationSpy: AlertPresenter {
-        var presentedVC: UIViewController?
-        var isAnimated: Bool?
-        
-        func present(_ viewControllerToPresent: UIViewController, animated flag: Bool, completion: (() -> Void)?) {
-            self.presentedVC = viewControllerToPresent
-            self.isAnimated = flag
-            completion?()
-        }
-    }
-    
-    // MARK: - Spinner Spy
-    fileprivate class SpinnerSpy: SpinnerVC {
-        var didMoveToParentWasCalled = false
-        var willMoveToParentWasCalled = false
-        var capturedParentVC: UIViewController?
-        
-        override func didMove(toParent parent: UIViewController?) {
-            super.didMove(toParent: parent)
-            didMoveToParentWasCalled = true
-            capturedParentVC = parent
-        }
-        
-        override func willMove(toParent parent: UIViewController?) {
-            super.willMove(toParent: parent)
-            willMoveToParentWasCalled = true
-            capturedParentVC = parent
-        }
     }
 }
