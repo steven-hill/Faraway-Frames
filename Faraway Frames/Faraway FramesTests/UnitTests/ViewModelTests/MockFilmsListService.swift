@@ -9,7 +9,7 @@ import Testing
 @testable import Faraway_Frames
 
 final class MockFilmsListService: FilmsListService {
-    var result: Result<[Film], APIError>?
+    var result: Result<[Film], Error>?
     var fetchWasCalled = false
     
     func fetchAllFilms() async throws -> [Film] {
