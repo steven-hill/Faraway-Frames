@@ -45,6 +45,7 @@ final class ExploreListVC: UIViewController {
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
         collectionView.delegate = self
         collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.backgroundColor = .secondarySystemBackground
         view.addSubview(collectionView)
         
         NSLayoutConstraint.activate([
@@ -107,7 +108,7 @@ final class ExploreListVC: UIViewController {
             cell.accessories = [.disclosureIndicator()]
             
             var background = UIBackgroundConfiguration.listCell()
-            background.backgroundColor = .secondarySystemBackground
+            background.backgroundColor = .tertiarySystemBackground
             background.cornerRadius = 8
             cell.backgroundConfiguration = background
             
