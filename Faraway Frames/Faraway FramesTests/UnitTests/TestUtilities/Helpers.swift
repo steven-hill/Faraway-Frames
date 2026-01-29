@@ -11,7 +11,7 @@ import Testing
 
 struct MockServiceHelper {
     static func setupMockServiceForSuccessCase() -> MockFilmsListService {
-        var mockService = MockFilmsListService()
+        let mockService = MockFilmsListService()
         let films = try! JSONHelper.loadAndDecodeFilmsFromJSON() 
         mockService.result = .success(films)
         return mockService

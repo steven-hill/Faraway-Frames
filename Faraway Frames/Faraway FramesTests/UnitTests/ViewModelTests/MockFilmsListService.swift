@@ -8,10 +8,12 @@
 import Testing
 @testable import Faraway_Frames
 
-struct MockFilmsListService: FilmsListService {
+final class MockFilmsListService: FilmsListService {
     var result: Result<[Film], APIError>?
+    var fetchWasCalled = false
     
     func fetchAllFilms() async throws -> [Film] {
+        fetchWasCalled = true
         switch result {
         case .success(let films):
             return films
