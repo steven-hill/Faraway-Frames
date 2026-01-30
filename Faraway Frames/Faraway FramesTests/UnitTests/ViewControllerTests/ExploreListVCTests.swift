@@ -269,6 +269,84 @@ struct ExploreListVCTests {
         
         #expect(sut.films.count == 22, "Should have an array of all films.")
     }
+    
+    @Test func exploreListVC_searchBarIsNotEnabled_whenLoadingAllFilms() {
+        let mockFilmsListService = MockFilmsListService()
+        let imageLoader = MockImageLoader()
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
+        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        
+        sut.view.layoutIfNeeded()
+        
+        #expect(sut.viewModel.currentState == .loadingAllFilms, "State should be .loadingAllFilms.")
+        #expect(sut.searchController.searchBar.isEnabled == false, "Should be false.")
+    }
+    
+    @Test func exploreListVC_searchBarIsEnabled_WhenThereIsFilmsContentFromNetworkCall() async throws {
+        let mockFilmsListService = MockServiceHelper.setupMockServiceForSuccessCase()
+        let imageLoader = MockImageLoader()
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
+        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        
+        sut.loadViewIfNeeded()
+        try await Task.sleep(nanoseconds: 100)
+        
+        #expect(sut.films.count == 22, "Should have all 22 films to show.")
+        #expect(sut.searchController.searchBar.isEnabled == true, "Should be true.")
+    }
+    
+    @Test func exploreListVC_searchBarIsEnabled_WhenThereIsFilmsContentFromSearch() async throws {
+        let mockFilmsListService = MockServiceHelper.setupMockServiceForSuccessCase()
+        let imageLoader = MockImageLoader()
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
+        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        
+        sut.loadViewIfNeeded()
+        try await Task.sleep(nanoseconds: 100)
+        sut.searchController.searchBar.text = "Cas"
+        sut.updateSearchResults(for: sut.searchController)
+        
+        #expect(sut.films.count == 2, "Should have 2 films in search results.")
+        #expect(sut.searchController.searchBar.isEnabled == true, "Should be true.")
+    }
+    
+    @Test func exploreListVC_searchBarIsEnabled_WhenThereAreNoSearchResults() async throws {
+        let mockFilmsListService = MockServiceHelper.setupMockServiceForSuccessCase()
+        let imageLoader = MockImageLoader()
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
+        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        
+        sut.loadViewIfNeeded()
+        try await Task.sleep(nanoseconds: 100)
+        sut.searchController.searchBar.text = "No results found"
+        sut.updateSearchResults(for: sut.searchController)
+        
+        #expect(sut.viewModel.filteredFilms.count == 0, "Should have zero films in search results.")
+        #expect(sut.searchController.searchBar.isEnabled == true, "Should be true.")
+    }
+    
+    @Test("ExploreListVC search bar is not enabled for all API errors", arguments: [
+        APIError.invalidURL,
+        APIError.invalidResponse,
+        APIError.serverError(statusCode: 500),
+        APIError.decodingError,
+        APIError.unknown
+    ])
+    func exploreListVC_searchBarIsNotEnabledForAllErrors(expectedError: APIError) async throws {
+        let mockService = MockFilmsListService()
+        mockService.result = .failure(expectedError)
+        let imageLoader = MockImageLoader()
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: imageLoader)
+        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        
+        sut.loadViewIfNeeded()
+        await sut.viewModel.getAllFilms()
+        
+        sut.setNeedsUpdateContentUnavailableConfiguration()
+        sut.view.layoutIfNeeded()
+        
+        #expect(sut.searchController.searchBar.isEnabled == false, "Should be false.")
+    }
         
     // MARK: - Helper methods
     fileprivate func makeSUT() -> ExploreListVC {

@@ -134,6 +134,7 @@ final class ExploreListVC: UIViewController {
     override func updateContentUnavailableConfiguration(using state: UIContentUnavailableConfigurationState) {
         var config: UIContentUnavailableConfiguration? = nil
         var hideCollectionView = false
+        var searchBarIsEnabled = false
         switch viewModel.currentState {
         case .loadingAllFilms:
             config = createLoadingConfig()
@@ -141,15 +142,18 @@ final class ExploreListVC: UIViewController {
         case .content:
             config = nil
             hideCollectionView = false
+            searchBarIsEnabled = true
         case .emptySearchResults:
             config = createEmptySearchResultsConfig()
             hideCollectionView = true
+            searchBarIsEnabled = true
         case .error(let error):
             config = createErrorConfig(error: error)
             hideCollectionView = true
         }
         self.contentUnavailableConfiguration = config
         self.collectionView.isHidden = hideCollectionView
+        self.searchController.searchBar.isEnabled = searchBarIsEnabled
     }
     
     private func createLoadingConfig() -> UIContentUnavailableConfiguration {
