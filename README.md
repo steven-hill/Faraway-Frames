@@ -4,7 +4,7 @@
 ### An iOS app for exploring the Studio Ghibli movies.
 
 ### 🔍 Technical details
-- Built in Swift 6, for iOS 26.2 minimum deployment target with Xcode 26.2.
+- Built in Swift 6, for iOS 18.0+ and iPadOS 18.0+ minimum deployment target with Xcode 26.2.
 - MVVM.
 - UI framework is UIKit.
 - Swift concurrency uses the default settings.
