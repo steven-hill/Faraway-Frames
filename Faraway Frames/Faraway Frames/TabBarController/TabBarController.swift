@@ -11,10 +11,17 @@ final class TabBarController: UITabBarController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        viewControllers = [createExploreTab()]
+        tabs = [createExploreTab()]
+        mode = .tabSidebar
     }
     
-    private func createExploreTab() -> UISplitViewController {
+    private func createExploreTab() -> UITab {
+        return UITab(title: "Explore", image: UIImage(systemName: "film"), identifier: "exploreTab") { _ in
+            return self.createExploreSplitVC()
+        }
+    }
+    
+    private func createExploreSplitVC() -> UISplitViewController {
         let exploreSplitVC = ExploreSplitVC(style: .doubleColumn)
         exploreSplitVC.preferredDisplayMode = .oneBesideSecondary
         exploreSplitVC.delegate = self
@@ -30,13 +37,6 @@ final class TabBarController: UITabBarController {
         let exploreDetailVC = ExploreDetailVC()
         let exploreDetailNav = UINavigationController(rootViewController: exploreDetailVC)
         exploreSplitVC.setViewController(exploreDetailNav, for: .secondary)
-        
-        exploreSplitVC.tabBarItem = UITabBarItem(
-            title: "Explore",
-            image: UIImage(systemName: "film"),
-            tag: 0
-        )
-        
         return exploreSplitVC
     }
 }
@@ -53,7 +53,6 @@ extension TabBarController: UISplitViewControllerDelegate {
         else {
             return .primary
         }
-        
         return topColumnForCollapsing(secondaryRootVC: secondaryRootVC)
     }
     
