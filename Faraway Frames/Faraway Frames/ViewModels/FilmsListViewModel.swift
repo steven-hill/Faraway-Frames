@@ -23,7 +23,7 @@ final class FilmsListViewModel {
     private(set) var films: [Film] = []
     private(set) var currentState: FilmsListState = .loadingAllFilms
     var filteredFilms: [Film] = []
-    var viewModelError: APIError?
+    var filmsListError: APIError?
     
     init(filmsListService: FilmsListService, imageLoader: ImageLoader) {
         self.filmsListService = filmsListService
@@ -36,9 +36,9 @@ final class FilmsListViewModel {
             delegate?.didUpdateFilms(films)
             currentState = .content
         } catch let error as APIError {
-            viewModelError = error
-            delegate?.didFailToLoadFilms(withError: viewModelError ?? APIError.unknown)
-            currentState = .error(viewModelError ?? APIError.unknown)
+            filmsListError = error
+            delegate?.didFailToLoadFilms(withError: filmsListError ?? APIError.unknown)
+            currentState = .error(filmsListError ?? APIError.unknown)
         } catch {
             delegate?.didFailToLoadFilms(withError: APIError.unknown)
             currentState = .error(APIError.unknown)

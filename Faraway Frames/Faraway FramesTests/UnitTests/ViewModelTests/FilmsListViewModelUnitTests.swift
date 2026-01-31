@@ -28,7 +28,7 @@ struct FilmsListViewModelUnitTests {
         await viewModel.getAllFilms()
         
         #expect(viewModel.films.count == 22, "There should be 22 films.")
-        #expect(viewModel.viewModelError == nil, "Error should be nil.")
+        #expect(viewModel.filmsListError == nil, "Error should be nil.")
         #expect(viewModel.currentState == .content, "Should be `.content`.")
     }
     
@@ -71,7 +71,7 @@ struct FilmsListViewModelUnitTests {
         await viewModel.getAllFilms()
         
         #expect(viewModel.films.isEmpty, "Films array should be empty on failure.")
-        #expect(viewModel.viewModelError == expectedError, "Error property should match the API error.")
+        #expect(viewModel.filmsListError == expectedError, "Error property should match the API error.")
         #expect(viewModel.currentState == .error(expectedError), "Should be `.error(APIError)`.")
     }
     
