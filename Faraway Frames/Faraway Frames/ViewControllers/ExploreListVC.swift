@@ -63,15 +63,12 @@ final class ExploreListVC: UIViewController {
                                                   heightDimension: .fractionalHeight(1.0))
             let item = NSCollectionLayoutItem(layoutSize: itemSize)
             
-            let width = layoutEnvironment.container.effectiveContentSize.width
-            let columnCount = self.columnCount(for: width)
-            
             let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                                    heightDimension: .estimated(150))
             let group = NSCollectionLayoutGroup.horizontal(
                 layoutSize: groupSize,
                 repeatingSubitem: item,
-                count: columnCount)
+                count: 1)
             group.interItemSpacing = .fixed(10)
             
             let section = NSCollectionLayoutSection(group: group)
@@ -81,10 +78,6 @@ final class ExploreListVC: UIViewController {
             
             return section
         }
-    }
-    
-    func columnCount(for width: CGFloat) -> Int {
-        width > 800 ? 3 : 1
     }
     
     func updateCellImage(_ cell: UICollectionViewCell, film: Film, indexPath: IndexPath) async {
