@@ -46,25 +46,6 @@ extension TabBarController: UISplitViewControllerDelegate {
         _ splitViewController: UISplitViewController,
         topColumnForCollapsingToProposedTopColumn proposedTopColumn: UISplitViewController.Column
     ) -> UISplitViewController.Column {
-        
-        guard
-            let secondaryNavController = splitViewController.viewController(for: .secondary) as? UINavigationController,
-            let secondaryRootVC = secondaryNavController.viewControllers.first
-        else {
-            return .primary
-        }
-        return topColumnForCollapsing(secondaryRootVC: secondaryRootVC)
-    }
-    
-    // MARK: - Helper method
-    func topColumnForCollapsing(
-        secondaryRootVC: UIViewController?
-    ) -> UISplitViewController.Column {
-        
-        if secondaryRootVC is ExploreDetailVC {
-            return .primary
-        } else {
-            return .secondary
-        }
+        return .primary
     }
 }

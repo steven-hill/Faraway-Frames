@@ -72,32 +72,15 @@ struct TabBarControllerUnitTests {
         #expect(title == "Explore", "`Explore` should be the first tab's title.")
     }
     
-    @Test func tabBarController_collapsesSecondaryVC_forCompactWidth() {
-        let sut = makeSUT()
-        
-        let result = sut.topColumnForCollapsing(secondaryRootVC: ExploreDetailVC())
-        
-        #expect(result == .primary, "Should return primary column to avoid showing an empty detail state.")
-    }
-    
-    @Test func tabBarController_topColumnForCollapsingToProposedTopColumn_whenSecondaryIsNotDetail_returnsSecondary() {
-        let sut = makeSUT()
-        let otherVC = UIViewController()
-        
-        let result = sut.topColumnForCollapsing(secondaryRootVC: otherVC)
-        
-        #expect(result == .secondary, "Should return secondary if the secondary root VC is not `ExploreDetailsVC`.")
-    }
-    
     @Test func tabBarController_splitVC_returnsCorrectColumnFromDelegate() {
         let sut = makeSUT()
         let splitVC = sut.tabs.first?.viewController as! UISplitViewController
         let detailNav = UINavigationController(rootViewController: ExploreDetailVC())
         splitVC.setViewController(detailNav, for: .secondary)
         
-        let result = sut.splitViewController(splitVC, topColumnForCollapsingToProposedTopColumn: .secondary)
+        let result = sut.splitViewController(splitVC, topColumnForCollapsingToProposedTopColumn: .primary)
         
-        #expect(result == .primary, "Should be the primary column when the detail view is present.")
+        #expect(result == .primary, "Should display the primary column after the split view interface collapses.")
     }
     
     // MARK: - Helper method
