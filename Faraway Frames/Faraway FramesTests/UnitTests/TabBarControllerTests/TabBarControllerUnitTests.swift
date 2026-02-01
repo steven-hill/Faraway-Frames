@@ -86,7 +86,7 @@ struct TabBarControllerUnitTests {
     // MARK: - Helper method
     private func makeSUT() -> TabBarController {
         let mockContainer = MockContainer()
-        let sut = TabBarController(filmsListAPIClient: mockContainer.makeFilmsListService(), apiClientImageLoader: mockContainer.makeImageLoader())
+        let sut = TabBarController(dependencies: mockContainer)
         sut.loadViewIfNeeded()
         return sut
     }

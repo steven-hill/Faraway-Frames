@@ -15,7 +15,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         let window = UIWindow(windowScene: windowScene)
         let appContainer = AppDependencyContainer()
-        let tabBarController = TabBarController(filmsListAPIClient: appContainer.makeFilmsListService(), apiClientImageLoader: appContainer.makeImageLoader())
+        let tabBarController = TabBarController(dependencies: appContainer)
         window.rootViewController = tabBarController
         window.makeKeyAndVisible()
         self.window = window

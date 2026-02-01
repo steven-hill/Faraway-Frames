@@ -8,16 +8,14 @@
 import UIKit
 
 final class TabBarController: UITabBarController {
+    typealias Dependencies = FilmsListServicing & ImageLoading
+    private let dependencies: Dependencies
     
-    private let filmsListAPIClient: FilmsListService
-    private let apiClientImageLoader: ImageLoader
-    
-    init(filmsListAPIClient: FilmsListService, apiClientImageLoader: ImageLoader) {
-        self.filmsListAPIClient = filmsListAPIClient
-        self.apiClientImageLoader = apiClientImageLoader
+    init(dependencies: Dependencies) {
+        self.dependencies = dependencies
         super.init(nibName: nil, bundle: nil)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -39,7 +37,7 @@ final class TabBarController: UITabBarController {
         exploreSplitVC.preferredDisplayMode = .oneBesideSecondary
         exploreSplitVC.delegate = self
         
-        let filmsListViewModel = FilmsListViewModel(filmsListService: filmsListAPIClient, imageLoader: apiClientImageLoader)
+        let filmsListViewModel = FilmsListViewModel(filmsListService: dependencies.makeFilmsListService(), imageLoader: dependencies.makeImageLoader())
         let exploreListVC = ExploreListVC(viewModel: filmsListViewModel)
         let exploreListNav = UINavigationController(rootViewController: exploreListVC)
         exploreSplitVC.setViewController(exploreListNav, for: .primary)
