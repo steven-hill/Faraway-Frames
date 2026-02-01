@@ -9,6 +9,19 @@ import UIKit
 
 final class TabBarController: UITabBarController {
     
+    private let filmsListAPIClient: FilmsListService
+    private let apiClientImageLoader: ImageLoader
+    
+    init(filmsListAPIClient: FilmsListService, apiClientImageLoader: ImageLoader) {
+        self.filmsListAPIClient = filmsListAPIClient
+        self.apiClientImageLoader = apiClientImageLoader
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         tabs = [createExploreTab()]
@@ -26,9 +39,6 @@ final class TabBarController: UITabBarController {
         exploreSplitVC.preferredDisplayMode = .oneBesideSecondary
         exploreSplitVC.delegate = self
         
-        let filmsListAPIClient = FilmsListAPIClient()
-        let cacheManager = CacheManager()
-        let apiClientImageLoader = APIClientImageLoader(cacheManager: cacheManager)
         let filmsListViewModel = FilmsListViewModel(filmsListService: filmsListAPIClient, imageLoader: apiClientImageLoader)
         let exploreListVC = ExploreListVC(viewModel: filmsListViewModel)
         let exploreListNav = UINavigationController(rootViewController: exploreListVC)
