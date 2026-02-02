@@ -45,7 +45,6 @@ final class ExploreListVC: UIViewController {
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
         collectionView.delegate = self
         collectionView.translatesAutoresizingMaskIntoConstraints = false
-        collectionView.backgroundColor = .secondarySystemBackground
         view.addSubview(collectionView)
         
         NSLayoutConstraint.activate([
@@ -57,27 +56,10 @@ final class ExploreListVC: UIViewController {
     }
     
     private func createLayout() -> UICollectionViewLayout {
-        return UICollectionViewCompositionalLayout { (sectionIndex, layoutEnvironment) -> NSCollectionLayoutSection? in
-            
-            let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                                  heightDimension: .fractionalHeight(1.0))
-            let item = NSCollectionLayoutItem(layoutSize: itemSize)
-            
-            let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                                   heightDimension: .estimated(150))
-            let group = NSCollectionLayoutGroup.horizontal(
-                layoutSize: groupSize,
-                repeatingSubitem: item,
-                count: 1)
-            group.interItemSpacing = .fixed(10)
-            
-            let section = NSCollectionLayoutSection(group: group)
-            section.interGroupSpacing = 10
-            section.contentInsets = NSDirectionalEdgeInsets(
-                top: 10, leading: 10, bottom: 10, trailing: 10)
-            
-            return section
-        }
+        var config = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
+        config.backgroundColor = .systemBackground
+        config.showsSeparators = true
+        return UICollectionViewCompositionalLayout.list(using: config)
     }
     
     func updateCellImage(_ cell: UICollectionViewCell, film: Film, indexPath: IndexPath) async {
@@ -97,25 +79,26 @@ final class ExploreListVC: UIViewController {
             var config = UIListContentConfiguration.cell()
             config.text = film.title
             config.image = UIImage(systemName: "photo")
+            let filmImageSize = CGSize(width: 100, height: 150)
+            config.imageProperties.reservedLayoutSize = filmImageSize
+            config.imageProperties.maximumSize = filmImageSize
+            config.imageProperties.cornerRadius = 10
+            config.imageToTextPadding = 12
             cell.contentConfiguration = config
             cell.accessories = [.disclosureIndicator()]
-            
-            var background = UIBackgroundConfiguration.listCell()
-            background.backgroundColor = .tertiarySystemBackground
-            background.cornerRadius = 8
-            cell.backgroundConfiguration = background
+            cell.backgroundConfiguration = UIBackgroundConfiguration.listCell()
             
             Task {
                 await updateCellImage(cell, film: film, indexPath: indexPath)
             }
         }
         
-        dataSource = UICollectionViewDiffableDataSource<Section, Film.ID>(collectionView: collectionView, cellProvider: { (collectionView, indexPath, filmID) -> ExploreListCell in
-            guard let film = self.filmLookup[filmID] else {
+        dataSource = UICollectionViewDiffableDataSource<Section, Film.ID>(collectionView: collectionView) { [weak self] (collectionView, indexPath, filmID) -> ExploreListCell in
+            guard let self = self, let film = self.filmLookup[filmID] else {
                 return collectionView.dequeueConfiguredReusableCell(using: filmCellRegistration, for: indexPath, item: Film.sample)
             }
             return collectionView.dequeueConfiguredReusableCell(using: filmCellRegistration, for: indexPath, item: film)
-        })
+        }
     }
     
     private func getAllFilms() {
