@@ -13,7 +13,7 @@
 - Xcode 26
 
 ### Technical details
-- MVVM.
+- MVVM+C.
 - UI framework is UIKit.
 - Swift concurrency uses the default settings.
 - Networking with async/await, `URLSession` and `NSCache`.
