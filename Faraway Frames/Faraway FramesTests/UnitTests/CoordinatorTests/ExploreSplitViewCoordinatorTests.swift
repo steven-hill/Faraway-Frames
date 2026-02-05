@@ -65,6 +65,17 @@ struct ExploreSplitViewCoordinatorTests {
         #expect(sut.shouldDeselectAfterSelection == false, "Should be false.")
     }
     
+    @Test func exploreSplitViewCoordinator_didSelectFilm_withFilm_createsExploreDetailVC() {
+        let sut = makeSUT(with: ExploreSplitVCSpy(style: .doubleColumn))
+        
+        sut.start()
+        let film = Film.sample
+        sut.didSelectFilm(film)
+        
+        #expect(sut.exploreSplitVC.viewControllers.count == 2, "Should be 2.")
+        #expect(sut.exploreSplitVC.viewControllers[1] is ExploreDetailVC, "Should be an `ExploreDetailVC`.")
+    }
+    
     // MARK: - Helper Method
     private func makeSUT(with spy: UISplitViewController) -> ExploreSplitViewCoordinator {
         return ExploreSplitViewCoordinator(dependencies: MockContainer(), exploreSplitVC: spy)
