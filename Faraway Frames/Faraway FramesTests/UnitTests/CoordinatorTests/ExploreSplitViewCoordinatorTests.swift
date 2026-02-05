@@ -44,20 +44,41 @@ struct ExploreSplitViewCoordinatorTests {
     }
     
     @Test func exploreSplitViewCoordinator_returnsCorrectColumnFromDelegate() {
-        let sut = makeSUT()
+        let sut = makeSUT(with: ExploreSplitVCSpy())
         
         let result = sut.splitViewController(sut.exploreSplitVC, topColumnForCollapsingToProposedTopColumn: .primary)
         
         #expect(result == .primary, "Should display the primary column after the split view interface collapses.")
     }
     
-    // MARK: - Helper Method
-    private func makeSUT() -> ExploreSplitViewCoordinator {
-        let exploreSplitVCSpy = ExploreSplitVCSpy()
-        return ExploreSplitViewCoordinator(dependencies: MockContainer(), exploreSplitVC: exploreSplitVCSpy)
+    @Test func exploreSplitViewCoordinator_shouldDeselect_onIphone() {
+        let exploreSplitVCSpy = CollapsedSplitViewSpy()
+        let sut = makeSUT(with: exploreSplitVCSpy)
+
+        #expect(sut.shouldDeselectAfterSelection == true, "Should be true.")
     }
     
-    // MARK: - ExploreSplitVC Spy
+    @Test func exploreSplitViewCoordinator_shouldKeepSelection_onIpad() {
+        let exploreSplitVCSpy = ExpandedSplitViewSpy()
+        let sut = makeSUT(with: exploreSplitVCSpy)
+
+        #expect(sut.shouldDeselectAfterSelection == false, "Should be false.")
+    }
+    
+    // MARK: - Helper Method
+    private func makeSUT(with spy: UISplitViewController) -> ExploreSplitViewCoordinator {
+        return ExploreSplitViewCoordinator(dependencies: MockContainer(), exploreSplitVC: spy)
+    }
+    
+    // MARK: - ExploreSplitVC Spies
     final class ExploreSplitVCSpy: UISplitViewController {
+    }
+    
+    final class CollapsedSplitViewSpy: UISplitViewController {
+        override var isCollapsed: Bool { return true }
+    }
+
+    final class ExpandedSplitViewSpy: UISplitViewController {
+        override var isCollapsed: Bool { return false }
     }
 }

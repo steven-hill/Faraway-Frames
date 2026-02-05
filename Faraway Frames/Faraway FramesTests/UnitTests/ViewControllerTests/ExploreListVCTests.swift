@@ -338,6 +338,88 @@ struct ExploreListVCTests {
         
         #expect(sut.searchController.searchBar.isEnabled == false, "Should be false.")
     }
+    
+    @Test func exploreListVC_didSelectItemAt_notifiesDelegate_withCorrectFilm() {
+        let sut = makeSUT()
+        let spy = ExploreNavigationSpy()
+        sut.navigationDelegate = spy
+        let testFilm = Film.sample
+        let films = [testFilm]
+        sut.loadViewIfNeeded()
+        sut.didUpdateFilms(films)
+        
+        let indexPath = IndexPath(item: 0, section: 0)
+        sut.collectionView(sut.collectionView, didSelectItemAt: indexPath)
+        
+        #expect(spy.didSelectFilmCalled, "Delegate should be called.")
+        #expect(spy.selectedFilm?.id == testFilm.id, "Both ids should match.")
+        #expect(spy.selectedFilm?.title == "Castle in the Sky", "Should be `Castle in the Sky`.")
+    }
+    
+    @Test func exploreListVC_didSelectItemAt_doesNotNotifyDelegate_whenIndexPathIsInvalid() {
+        let sut = makeSUT()
+        let spy = ExploreNavigationSpy()
+        sut.navigationDelegate = spy
+        let testFilm = Film.sample
+        let films = [testFilm]
+        sut.loadViewIfNeeded()
+        sut.didUpdateFilms(films)
+        
+        let indexPath = IndexPath(item: 99, section: 0)
+        sut.collectionView(sut.collectionView, didSelectItemAt: indexPath)
+        
+        #expect(spy.didSelectFilmCalled == false, "Should be false.")
+    }
+    
+    @Test func exploreListVC_didSelectItemAt_doesNotNotifyDelegate_whenFilmIsMissingFromLookup() async {
+        let sut = makeSUT()
+        let spy = ExploreNavigationSpy()
+        sut.navigationDelegate = spy
+        let testID = Film.ID()
+        sut.loadViewIfNeeded()
+        var snapshot = NSDiffableDataSourceSnapshot<ExploreListVC.Section, Film.ID>()
+        snapshot.appendSections([.main])
+        snapshot.appendItems([testID], toSection: .main)
+        await sut.dataSource.apply(snapshot, animatingDifferences: false)
+        
+        let indexPath = IndexPath(item: 0, section: 0)
+        sut.collectionView(sut.collectionView, didSelectItemAt: indexPath)
+        
+        #expect(spy.didSelectFilmCalled == false, "Should be false.")
+    }
+    
+    @Test func exploreListVC_didSelectItemAt_deselectsItemOnIphone() {
+        let sut = makeSUT()
+        let spy = ExploreNavigationSpy()
+        spy.shouldDeselectAfterSelection = true
+        sut.navigationDelegate = spy
+        let testFilm = Film.sample
+        let films = [testFilm]
+        sut.loadViewIfNeeded()
+        sut.didUpdateFilms(films)
+        
+        let indexPath = IndexPath(item: 0, section: 0)
+        sut.collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
+        sut.collectionView(sut.collectionView, didSelectItemAt: indexPath)
+        
+        #expect(sut.collectionView.indexPathsForSelectedItems?.isEmpty == true, "Should be empty.")
+    }
+    
+    @Test func exploreListVC_didSelectItemAt_keepsItemSelectedOnIpad() {
+        let sut = makeSUT()
+        let spy = ExploreNavigationSpy()
+        sut.navigationDelegate = spy
+        let testFilm = Film.sample
+        let films = [testFilm]
+        sut.loadViewIfNeeded()
+        sut.didUpdateFilms(films)
+        
+        let indexPath = IndexPath(item: 0, section: 0)
+        sut.collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
+        sut.collectionView(sut.collectionView, didSelectItemAt: indexPath)
+        
+        #expect(sut.collectionView.indexPathsForSelectedItems?.isEmpty == false, "Should not be empty.")
+    }
         
     // MARK: - Helper methods
     fileprivate func makeSUT() -> ExploreListVC {
@@ -378,5 +460,17 @@ struct ExploreListVCTests {
         sut.collectionView = mockCV
         
         return (sut, cell, indexPath)
+    }
+    
+    // MARK: - Explore Navigation Delegate Spy
+    final class ExploreNavigationSpy: ExploreNavigationDelegate {
+        var shouldDeselectAfterSelection = false
+        var selectedFilm: Film?
+        var didSelectFilmCalled = false
+
+        func didSelectFilm(_ film: Film) {
+            selectedFilm = film
+            didSelectFilmCalled = true
+        }
     }
 }

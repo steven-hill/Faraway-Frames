@@ -29,6 +29,7 @@ final class ExploreSplitViewCoordinator: Coordinator {
         
         let filmsListViewModel = FilmsListViewModel(filmsListService: dependencies.makeFilmsListService(), imageLoader: dependencies.makeImageLoader())
         let exploreListVC = ExploreListVC(viewModel: filmsListViewModel)
+        exploreListVC.navigationDelegate = self 
         let exploreListNav = UINavigationController(rootViewController: exploreListVC)
         exploreSplitVC.setViewController(exploreListNav, for: .primary)
         
@@ -47,3 +48,11 @@ extension ExploreSplitViewCoordinator: UISplitViewControllerDelegate {
     }
 }
 
+extension ExploreSplitViewCoordinator: ExploreNavigationDelegate {
+    var shouldDeselectAfterSelection: Bool {
+        return exploreSplitVC.isCollapsed
+    }
+    
+    func didSelectFilm(_ film: Film) {
+    }
+}
