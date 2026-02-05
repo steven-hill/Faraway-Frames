@@ -12,6 +12,7 @@ final class ExploreListVC: UIViewController {
     enum Section: Int { case main }
     
     // MARK: - Properties
+    weak var navigationDelegate: ExploreNavigationDelegate?
     private(set) var films: [Film] = []
     var filmImage: UIImage?
     private(set) var filmLookup: [String: Film] = [:]
@@ -172,6 +173,14 @@ final class ExploreListVC: UIViewController {
 
 // MARK: - Collection View Delegate
 extension ExploreListVC: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard let filmId = dataSource.itemIdentifier(for: indexPath),
+              let selectedFilm = filmLookup[filmId] else { return }
+        navigationDelegate?.didSelectFilm(selectedFilm)
+        if navigationDelegate?.shouldDeselectAfterSelection == true {
+            collectionView.deselectItem(at: indexPath, animated: true)
+        }
+    }
 }
 
 // MARK: - Films List View Model Delegate
