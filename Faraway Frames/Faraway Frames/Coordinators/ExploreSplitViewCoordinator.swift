@@ -13,11 +13,12 @@ final class ExploreSplitViewCoordinator: Coordinator {
     typealias Dependencies = FilmsListServicing & ImageLoading
     private let dependencies: Dependencies
     let exploreSplitVC: UISplitViewController
-    private(set) var filmDetailViewModel = FilmDetailViewModel()
+    private(set) var filmDetailViewModel: FilmDetailViewModel
     
     init(dependencies: Dependencies, exploreSplitVC: UISplitViewController = ExploreSplitVC(style: .doubleColumn)) {
         self.dependencies = dependencies
         self.exploreSplitVC = exploreSplitVC
+        filmDetailViewModel = FilmDetailViewModel(film: nil, imageLoader: dependencies.makeImageLoader())
     }
     
     func start() {
@@ -34,7 +35,7 @@ final class ExploreSplitViewCoordinator: Coordinator {
         let exploreListNav = UINavigationController(rootViewController: exploreListVC)
         exploreSplitVC.setViewController(exploreListNav, for: .primary)
         
-        filmDetailViewModel = FilmDetailViewModel()
+        //filmDetailViewModel = FilmDetailViewModel(imageLoader: dependencies.makeImageLoader())
         let exploreDetailVC = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
         let exploreDetailNav = UINavigationController(rootViewController: exploreDetailVC)
         exploreSplitVC.setViewController(exploreDetailNav, for: .secondary)
