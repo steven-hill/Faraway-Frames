@@ -9,6 +9,6 @@ import Foundation
 
 protocol FilmsListViewModelDelegate: AnyObject {
     func didUpdateFilms(_ films: [Film])
-    func didFailToLoadFilms(withError error: APIError)
+    func didFailToLoadFilms()
     func didFailToMatchResults()
 }
