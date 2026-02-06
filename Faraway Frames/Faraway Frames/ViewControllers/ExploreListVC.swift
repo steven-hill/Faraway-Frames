@@ -198,7 +198,7 @@ extension ExploreListVC: FilmsListViewModelDelegate {
         dataSource.apply(snapshot, animatingDifferences: true)
     }
     
-    func didFailToLoadFilms(withError error: APIError) {
+    func didFailToLoadFilms() {
         setNeedsUpdateContentUnavailableConfiguration()
     }
     

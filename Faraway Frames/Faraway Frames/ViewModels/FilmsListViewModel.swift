@@ -37,10 +37,10 @@ final class FilmsListViewModel {
             currentState = .content
         } catch let error as APIError {
             filmsListError = error
-            delegate?.didFailToLoadFilms(withError: filmsListError ?? APIError.unknown)
+            delegate?.didFailToLoadFilms()
             currentState = .error(filmsListError ?? APIError.unknown)
         } catch {
-            delegate?.didFailToLoadFilms(withError: APIError.unknown)
+            delegate?.didFailToLoadFilms()
             currentState = .error(APIError.unknown)
         }
     }
