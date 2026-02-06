@@ -13,8 +13,7 @@ import UIKit
 struct ExploreDetailVCTests {
 
     @Test func exploreDetailVC_canInit_withFilm() {
-        let filmDetailViewModel = FilmDetailViewModel(film: .sample)
-        let sut = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
+        let sut = makeSUTWithNilFilm()
         _ = UINavigationController(rootViewController: sut)
         
         sut.loadViewIfNeeded()
@@ -23,8 +22,7 @@ struct ExploreDetailVCTests {
     }
     
     @Test func exploreDetailVC_canInit_whenFilmIsNil() {
-        let filmDetailViewModel = FilmDetailViewModel()
-        let sut = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
+        let sut = makeSUTWithNilFilm()
         _ = UINavigationController(rootViewController: sut)
         
         sut.loadViewIfNeeded()
@@ -33,8 +31,7 @@ struct ExploreDetailVCTests {
     }
     
     @Test func exploreDetailVC_viewDidLoad_setsDelegate() {
-        let filmDetailViewModel = FilmDetailViewModel(film: .sample)
-        let sut = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
+        let sut = makeSUTWithNilFilm()
         
         sut.loadViewIfNeeded()
         
@@ -43,7 +40,8 @@ struct ExploreDetailVCTests {
 
     @Test func exploreDetailVC_viewDidLoad_displaysFilmWhenFilmIsProvided() {
         let film = Film.sample
-        let filmDetailViewModel = FilmDetailViewModel(film: film)
+        let mockImageLoader = MockImageLoader()
+        let filmDetailViewModel = FilmDetailViewModel(film: film, imageLoader: mockImageLoader)
         let sut = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
         
         sut.loadViewIfNeeded()
@@ -55,8 +53,7 @@ struct ExploreDetailVCTests {
     }
     
     @Test func exploreDetailVC_viewDidLoad_displaysEmptyStateWhenFilmIsNil() {
-        let filmDetailViewModel = FilmDetailViewModel()
-        let sut = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
+        let sut = makeSUTWithNilFilm()
         
         sut.loadViewIfNeeded()
         sut.setNeedsUpdateContentUnavailableConfiguration()
@@ -68,7 +65,8 @@ struct ExploreDetailVCTests {
     
     @Test func exploreDetailVC_didUpdateFilmDetails_notifiesContentUnavailableCOnfigurationToUpdate() {
         let film = Film.sample
-        let filmDetailViewModel = FilmDetailViewModel(film: film)
+        let mockImageLoader = MockImageLoader()
+        let filmDetailViewModel = FilmDetailViewModel(film: film, imageLoader: mockImageLoader)
         let sut = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
         
         sut.loadViewIfNeeded()
@@ -79,9 +77,8 @@ struct ExploreDetailVCTests {
         #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
     }
     
-    @Test func exploreDetailVC_didUpdateWithEmptyState_notifiesContentUnavailableCOnfigurationToUpdate() {
-        let filmDetailViewModel = FilmDetailViewModel()
-        let sut = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
+    @Test func exploreDetailVC_didUpdateWithEmptyState_notifiesContentUnavailableConfigurationToUpdate() {
+        let sut = makeSUTWithNilFilm()
         
         sut.loadViewIfNeeded()
         sut.didUpdateWithEmptyState()
@@ -89,5 +86,13 @@ struct ExploreDetailVCTests {
         
         #expect(sut.filmDetailViewModel.currentState == .noFilmSelected, "Should be `.noFilmSelected`.")
         #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil.")
+    }
+    
+    //MARK: - Helper method
+    private func makeSUTWithNilFilm() -> ExploreDetailVC {
+        let mockImageLoader = MockImageLoader()
+        let filmDetailViewModel = FilmDetailViewModel(imageLoader: mockImageLoader)
+        let sut = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
+        return sut
     }
 }
