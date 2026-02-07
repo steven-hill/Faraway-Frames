@@ -7,6 +7,7 @@
 
 import Testing
 @testable import Faraway_Frames
+import UIKit
 
 @MainActor
 struct FilmDetailViewModelTests {
@@ -53,30 +54,64 @@ struct FilmDetailViewModelTests {
         #expect(sut.currentState == .noFilmSelected, "Should update the state to `.noFilmSelected` when a film is nil.")
     }
     
-    @Test func filmDetailViewModel_getMovieBanner_downloadsMovieBannerImageForFilm() async {
-        let film = Film.sample
-        let sut = makeSUT()
-        
-        let movieBanner = await sut.getMovieBanner(for: film)
-        
-        #expect(movieBanner != nil, "Movie banner should not be nil.")
+    @Test("Quick selection of films ignores the results of the cancelled task")
+    func filmDetailViewModel_setFilm_cancelsPreviousImageDownloadTask() async {
+        let filmA = Film.sample
+        let filmB = Film.sample
+        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
+        let sut = FilmDetailViewModel(imageLoader: mockImageLoader)
+        let spy = FilmDetailViewModelSpy()
+        sut.delegate = spy
+
+        sut.setFilm(filmA)
+        await Task.yield()
+        #expect(mockImageLoader.loadCount == 1)
+
+        sut.setFilm(filmB)
+        await Task.yield()
+        #expect(mockImageLoader.loadCount == 2)
+
+        mockImageLoader.resume(shouldSucceed: true)
+        mockImageLoader.resume(shouldSucceed: true)
+        await Task.yield()
+
+        #expect(spy.callCount == 3, "Should be called three times in total; once for filmA's initial content, twice for filmB's initial content and its movie banner.")
     }
 
-    @Test func filmDetailViewModel_getMovieBanner_returnsNilWhenFailedToDownloadMovieBannerImage() async {
+    @Test func filmDetailViewModel_getMovieBanner_returnsFallbackImage_whenFailedToDownloadMovieBannerImage() async {
         let film = Film.sample
-        var mockImageLoader = MockImageLoader()
-        mockImageLoader.shouldSucceed = false
+        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
         let sut = FilmDetailViewModel(imageLoader: mockImageLoader)
+        let spy = FilmDetailViewModelSpy()
+        sut.delegate = spy
         
-        let movieBanner = await sut.getMovieBanner(for: film)
+        sut.setFilm(film)
+        await Task.yield()
+        mockImageLoader.resume(shouldSucceed: false)
+        await Task.yield()
         
-        #expect(movieBanner == nil, "Movie banner should be nil.")
+        if case .content(_, let image) = sut.currentState {
+            #expect(image == UIImage(systemName: "movieclapper"), "Should show the film details with `movieclapper` as a fallback image.")
+            #expect(sut.currentState == .content(film, image: image), "Should have a `Film` and an image.")
+            #expect(spy.callCount == 2, "Should have called `didUpdateFilmDetails()` twice; once for the film object, and again for the image.")
+        }
     }
     
     //MARK: - Helper method
     private func makeSUT() -> FilmDetailViewModel {
         let mockImageLoader = MockImageLoader()
         return FilmDetailViewModel(imageLoader: mockImageLoader)
+    }
+    
+    //MARK: - Film Detail View Model Spy
+    final class FilmDetailViewModelSpy: FilmDetailViewModelDelegate {
+        var callCount = 0
+        func didUpdateFilmDetails() {
+            callCount += 1
+        }
+        
+        func didUpdateWithEmptyState() {
+        }
     }
 }
 

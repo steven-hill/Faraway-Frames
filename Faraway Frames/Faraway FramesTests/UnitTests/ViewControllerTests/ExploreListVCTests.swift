@@ -442,7 +442,7 @@ struct ExploreListVCTests {
         indexPath: IndexPath = IndexPath(item: 0, section: 0)
     ) -> (sut: ExploreListVC, cell: ExploreListCell, indexPath: IndexPath) {
         let mockFilmsListService = MockFilmsListService()
-        var imageLoader = MockImageLoader()
+        let imageLoader = MockImageLoader()
         imageLoader.shouldSucceed = shouldSucceed
         
         let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
