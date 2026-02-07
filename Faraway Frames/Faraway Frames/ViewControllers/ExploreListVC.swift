@@ -20,6 +20,7 @@ final class ExploreListVC: UIViewController {
     lazy var collectionView = UICollectionView()
     var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
     let searchController = UISearchController(searchResultsController: nil)
+    private var isRetrying = false
     
     init(viewModel: FilmsListViewModel) {
         self.viewModel = viewModel
@@ -150,9 +151,16 @@ final class ExploreListVC: UIViewController {
         config.image = UIImage(systemName: "exclamationmark.triangle")
         config.imageProperties.tintColor = .systemRed
         config.button = .prominentGlass()
-        config.button.title = "Retry"
+        config.button.title = isRetrying ? "Retrying..." : "Retry"
         config.buttonProperties.primaryAction = UIAction { [weak self] _ in
-            Task { await self?.viewModel.retryLoadingAllFilms() }
+            guard let self, self.isRetrying == false else { return }
+            self.isRetrying = true
+            self.setNeedsUpdateContentUnavailableConfiguration()
+            
+            Task { await self.viewModel.retryLoadingAllFilms()
+                self.isRetrying = false
+                self.setNeedsUpdateContentUnavailableConfiguration()
+            }
         }
         return config
     }
