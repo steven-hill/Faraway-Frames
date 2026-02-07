@@ -29,7 +29,7 @@ class ExploreDetailVC: UIViewController {
         switch filmDetailViewModel.currentState {
         case .noFilmSelected:
             config = createEmptyState()
-        case .content(let film):
+        case .content(let film, let image):
             config = nil
             title = film.title
         }

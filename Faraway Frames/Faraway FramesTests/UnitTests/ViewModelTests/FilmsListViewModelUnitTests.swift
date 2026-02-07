@@ -99,7 +99,7 @@ struct FilmsListViewModelUnitTests {
     
     @Test func filmsListViewModel_returnNilWhenFailedToDownloadFilmImage() async throws {
         let mockService = MockServiceHelper.setupMockServiceForSuccessCase()
-        var mockImageLoader = MockImageLoader()
+        let mockImageLoader = MockImageLoader()
         mockImageLoader.shouldSucceed = false
         let viewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
         

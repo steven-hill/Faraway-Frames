@@ -10,7 +10,15 @@ import UIKit
 
 final class FilmDetailViewModel {
     
+    // MARK: - State Definition
+    enum FilmDetailState: Equatable {
+        case noFilmSelected
+        case content(Film, image: UIImage? = nil)
+    }
+    
+    // MARK: - Properties
     private let imageLoader: ImageLoader
+    private var imageLoadTask: Task<Void, Never>?
     
     private(set) var currentState: FilmDetailState = .noFilmSelected {
         didSet {
@@ -19,38 +27,51 @@ final class FilmDetailViewModel {
     }
     weak var delegate: FilmDetailViewModelDelegate?
     
-    enum FilmDetailState: Equatable {
-        case noFilmSelected
-        case content(Film)
-    }
-    
+    // MARK: - Initialisation
     init(film: Film? = nil, imageLoader: ImageLoader) {
-        if let film {
-            currentState = .content(film)
-        }
         self.imageLoader = imageLoader
+        if let film {
+            setFilm(film)
+        }
     }
     
+    // MARK: - Methods
     func setFilm(_ film: Film?) {
-        if let film {
-            currentState = .content(film)
-        } else {
+        imageLoadTask?.cancel()
+        
+        guard let film = film else {
             currentState = .noFilmSelected
+            return
         }
+        currentState = .content(film)
+        getMovieBanner(for: film)
     }
     
     func updateUI() {
         switch currentState {
         case .noFilmSelected:
             delegate?.didUpdateWithEmptyState()
-        case .content(_):
+        case .content(let film, let image):
             delegate?.didUpdateFilmDetails()
         }
     }
     
-    func getMovieBanner(for film: Film) async -> UIImage? {
-        guard let url = URL(string: film.movieBanner) else { return nil }
-        let image = await imageLoader.loadImage(from: url)
-        return image
+    func getMovieBanner(for film: Film) {
+        let fallbackImage = UIImage(systemName: "movieclapper")
+        guard let url = URL(string: film.movieBanner) else {
+            currentState = .content(film, image: fallbackImage)
+            return
+        }
+        
+        imageLoadTask = Task {
+            do {
+                let downloadedImage = await imageLoader.loadImage(from: url)
+                if !Task.isCancelled {
+                    currentState = .content(film, image: downloadedImage)
+                }
+            } catch {
+                currentState = .content(film, image: fallbackImage)
+            }
+        }
     }
 }

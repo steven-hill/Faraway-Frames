@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 @testable import Faraway_Frames
 
-struct MockImageLoader: ImageLoader {
+final class MockImageLoader: ImageLoader {
     var shouldSucceed: Bool = true
     
     func loadImage(from url: URL) async -> UIImage? {
