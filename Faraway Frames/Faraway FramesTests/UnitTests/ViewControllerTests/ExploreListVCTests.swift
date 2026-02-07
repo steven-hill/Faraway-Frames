@@ -72,7 +72,7 @@ struct ExploreListVCTests {
         APIError.decodingError,
         APIError.unknown
     ])
-    func exploreListVC_showsErrorViewForAllErrors(expectedError: APIError) async throws {
+    func exploreListVC_showsErrorViewForAllErrors(expectedError: APIError) async {
         let mockService = MockFilmsListService()
         mockService.result = .failure(expectedError)
         let imageLoader = MockImageLoader()
@@ -87,6 +87,42 @@ struct ExploreListVCTests {
         
         #expect(sut.viewModel.currentState == .error(expectedError), "Should set the state to .error.")
         #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil.")
+    }
+    
+    @Test func exploreListVC_retry_callsFetchAllFilms() async {
+        let mockService = MockFilmsListService()
+        let imageLoader = MockImageLoader()
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: imageLoader)
+        let sut = ExploreListVC(viewModel: filmsListViewModel)
+
+        sut.loadViewIfNeeded()
+        await sut.viewModel.retryLoadingAllFilms()
+        
+        #expect(mockService.fetchWasCalled == true, "Should call fetchAllFilms once.")
+    }
+    
+    @Test("ExploreListVC shows error view for all API errors", arguments: [
+        APIError.invalidURL,
+        APIError.invalidResponse,
+        APIError.serverError(statusCode: 500),
+        APIError.decodingError,
+        APIError.unknown
+    ])
+    func exploreListVC_hasRetryButtonTitle_forAllErrors(expectedError: APIError) async {
+        let mockService = MockFilmsListService()
+        mockService.result = .failure(expectedError)
+        let imageLoader = MockImageLoader()
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: imageLoader)
+        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        sut.loadViewIfNeeded()
+        
+        await filmsListViewModel.getAllFilms()
+        let state = UIContentUnavailableConfigurationState(traitCollection: sut.traitCollection)
+        sut.updateContentUnavailableConfiguration(using: state)
+        let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
+        
+        #expect(config != nil, "Should not be nil.")
+        #expect(config?.button.title != nil, "Should have a title.")
     }
     
     @Test func exploreListVC_didUpdateFilms_updatesCollectionViewItemCount() {
