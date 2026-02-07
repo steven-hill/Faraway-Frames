@@ -9,6 +9,7 @@ import UIKit
 
 final class ExploreListVC: UIViewController {
     
+    // MARK: - Diffable DataSource Section Identifier Type
     enum Section: Int { case main }
     
     // MARK: - Properties
@@ -22,6 +23,7 @@ final class ExploreListVC: UIViewController {
     let searchController = UISearchController(searchResultsController: nil)
     private var isRetrying = false
     
+    // MARK: - Initialisation
     init(viewModel: FilmsListViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
