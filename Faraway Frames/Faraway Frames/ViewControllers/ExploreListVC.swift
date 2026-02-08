@@ -22,6 +22,7 @@ final class ExploreListVC: UIViewController {
     var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
     let searchController = UISearchController(searchResultsController: nil)
     private var isRetrying = false
+    private(set) var loadTask: Task<Void, Never>?
     
     // MARK: - Initialisation
     init(viewModel: FilmsListViewModel) {
@@ -42,7 +43,7 @@ final class ExploreListVC: UIViewController {
         configureCollectionView()
         configureDataSource()
         configureSearchController()
-        getAllFilms()
+        loadTask = getAllFilms()
     }
     
     private func configureCollectionView() {
@@ -105,7 +106,7 @@ final class ExploreListVC: UIViewController {
         }
     }
     
-    private func getAllFilms() {
+    private func getAllFilms() -> Task<Void, Never> {
         Task {
             await viewModel.getAllFilms()
         }
