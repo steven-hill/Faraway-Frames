@@ -9,90 +9,69 @@ import Testing
 import Foundation
 @testable import Faraway_Frames
 
-@Suite(.serialized)
+@MainActor
 struct FilmsListAPIClientTests {
     
-    @Test func fetchAllFilms_decodesDataOn200ResponseWithCorrectURL() async throws {
-        let urlString = makeFilmsURLString()
-        let filmsListAPIClient = await makeFilmsListAPIClient()
-        let mockFilmsData = makeValidMockFilmsData()
+    @Test func filmsListAPIClient_fetchAllFilms_decodesDataOn200Response_withCorrectURL() async throws {
+        let mockData = makeValidMockFilmsData()
+        let mockResponse = HTTPURLResponse(
+            url: URL(string: makeFilmsURLString())!,
+            statusCode: 200,
+            httpVersion: nil,
+            headerFields: nil
+        )!
+        let sut = makeSUT(data: mockData, response: mockResponse)
         
-        MockURLProtocol.requestHandler = { request in
-            #expect(request.url?.absoluteString == urlString)
-            let response = HTTPURLResponse(
-                url: request.url!,
-                statusCode: 200,
-                httpVersion: nil,
-                headerFields: nil
-            )!
-            return (response, mockFilmsData)
-        }
-        let result = try await filmsListAPIClient.fetchAllFilms()
+        let result = try await sut.fetchAllFilms()
         
         #expect(!result.isEmpty, "The films array should not be empty.")
         #expect(result.count == 1, "Should be one film in the array.")
+        #expect(result.first?.title == "Castle in the Sky", "Should be `Castle in the Sky`.")
     }
     
-    @Test func fetchAllFilms_throwsOnInvalidResponse() async throws {
-        let urlString = makeFilmsURLString()
-        let filmsListAPIClient = await makeFilmsListAPIClient()
-
-        MockURLProtocol.requestHandler = { request in
-            #expect(request.url?.absoluteString == urlString)
-            let response = URLResponse(
-                url: request.url!,
-                mimeType: nil,
-                expectedContentLength: 0,
-                textEncodingName: nil
-            )
-            return (response, Data())
-        }
+    @Test func filmsListAPIClient_fetchAllFilms_throwsOnInvalidResponse() async {
+        let mockData = Data()
+        let invalidResponse = URLResponse(
+            url: URL(string: makeFilmsURLString())!,
+            mimeType: nil,
+            expectedContentLength: 0,
+            textEncodingName: nil
+        )
+        let sut = makeSUT(data: mockData, response: invalidResponse)
         
         await #expect(throws: APIError.invalidResponse, "The error should be .invalidResponse.") {
-            try await filmsListAPIClient.fetchAllFilms()
+            try await sut.fetchAllFilms()
         }
     }
     
-    @Test func fetchAllFilms_throwsOnNon200To299Response() async throws {
-        let urlString = makeFilmsURLString()
-        let filmsListAPIClient = await makeFilmsListAPIClient()
+    @Test func filmsListAPIClient_fetchAllFilms_throwsOnNon200To299Response() async {
         let mockFilmsData = Data()
         let statusCode = 500
-        
-        MockURLProtocol.requestHandler = { request in
-            #expect(request.url?.absoluteString == urlString)
-            let response = HTTPURLResponse(
-                url: request.url!,
-                statusCode: statusCode,
-                httpVersion: nil,
-                headerFields: nil
-            )
-            return (response!, mockFilmsData)
-        }
+        let mockResponse = HTTPURLResponse(
+            url: URL(string: makeFilmsURLString())!,
+            statusCode: statusCode,
+            httpVersion: nil,
+            headerFields: nil
+        )!
+        let sut = makeSUT(data: mockFilmsData, response: mockResponse)
         
         await #expect(throws: APIError.serverError(statusCode: statusCode), "The error should be .serverError(statusCode: \(statusCode).") {
-            try await filmsListAPIClient.fetchAllFilms()
+            try await sut.fetchAllFilms()
         }
     }
     
-    @Test func fetchAllFilms_throwsOnDataDecodingError() async throws {
-        let urlString = makeFilmsURLString()
-        let filmsListAPIClient = await makeFilmsListAPIClient()
+    @Test func filmsListAPIClient_fetchAllFilms_throwsOnDataDecodingError() async {
         let mockInvalidData = "invalid data".data(using: .utf8)!
-        
-        MockURLProtocol.requestHandler = { request in
-            #expect(request.url?.absoluteString == urlString)
-            let response = HTTPURLResponse(
-                url: request.url!,
-                statusCode: 200,
-                httpVersion: nil,
-                headerFields: nil
-            )
-            return (response!, mockInvalidData)
-        }
+        let mockResponse = HTTPURLResponse(
+            url: URL(string: makeFilmsURLString())!,
+            statusCode: 200,
+            httpVersion: nil,
+            headerFields: nil
+        )!
+        let sut = makeSUT(data: mockInvalidData, response: mockResponse)
         
         await #expect(throws: APIError.decodingError, "The error should be .decodingError.") {
-            try await filmsListAPIClient.fetchAllFilms()
+            try await sut.fetchAllFilms()
         }
     }
     
@@ -101,9 +80,9 @@ struct FilmsListAPIClientTests {
         "https://ghibliapi.vercel.app/films"
     }
     
-    private func makeFilmsListAPIClient() async -> FilmsListAPIClient {
-        let mockSession = MockSession.createMockSession()
-        return await FilmsListAPIClient(session: mockSession)
+    private func makeSUT(data: Data, response: URLResponse) -> FilmsListAPIClient {
+        let session = StubNetworkSession(data: data, response: response)
+        return FilmsListAPIClient(session: session)
     }
     
     private func makeValidMockFilmsData() -> Data {

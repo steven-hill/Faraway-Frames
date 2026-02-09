@@ -8,10 +8,10 @@
 import Foundation
 
 final class FilmsListAPIClient: FilmsListService {
-    private let session: URLSession
+    private let session: NetworkSession
     private let decoder: JSONDecoder
     
-    init(session: URLSession = .shared, decoder: JSONDecoder = JSONDecoder()) {
+    init(session: NetworkSession = URLSession.shared, decoder: JSONDecoder = JSONDecoder()) {
         self.session = session
         self.decoder = decoder
     }

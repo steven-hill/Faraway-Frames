@@ -8,10 +8,10 @@
 import UIKit
 
 final class APIClientImageLoader: ImageLoader {
-    private let session: URLSession
+    private let session: NetworkSession
     private let cacheManager: CacheManagerProtocol
     
-    init(session: URLSession = .shared, cacheManager: CacheManagerProtocol) {
+    init(session: NetworkSession = URLSession.shared, cacheManager: CacheManagerProtocol) {
         self.session = session
         self.cacheManager = cacheManager
     }
