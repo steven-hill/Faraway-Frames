@@ -51,7 +51,7 @@ final class FilmDetailViewModel {
         switch currentState {
         case .noFilmSelected:
             delegate?.didUpdateWithEmptyState()
-        case .content(let film, let image):
+        case .content(_,_):
             delegate?.didUpdateFilmDetails()
         }
     }
