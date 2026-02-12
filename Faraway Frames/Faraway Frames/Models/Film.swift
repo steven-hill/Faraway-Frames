@@ -19,6 +19,7 @@ struct Film: Codable, Identifiable, Hashable {
     let producer: String
     let releaseDate: String
     let runningTime: String
+    let rottenTomatoesScore: String
     let people: [String]
     let url: String
     
@@ -29,6 +30,7 @@ struct Film: Codable, Identifiable, Hashable {
         case movieBanner = "movie_banner"
         case releaseDate = "release_date"
         case runningTime = "running_time"
+        case rottenTomatoesScore = "rt_score"
     }
 }
 
@@ -45,6 +47,7 @@ extension Film {
         producer: "Isao Takahata",
         releaseDate: "1986",
         runningTime: "124",
+        rottenTomatoesScore: "95",
         people: [
             "https://ghibliapi.vercel.app/people/598f7048-74ff-41e0-92ef-87dc1ad980a9",
             "https://ghibliapi.vercel.app/people/fe93adf2-2f3a-4ec4-9f68-5422f1b87c01",
