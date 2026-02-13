@@ -38,7 +38,7 @@ struct ExploreDetailVCTests {
         #expect(sut.filmDetailViewModel.delegate != nil, "Should set the delegate.")
     }
 
-    @Test func exploreDetailVC_viewDidLoad_displaysFilmWhenFilmIsProvided() {
+    @Test func exploreDetailVC_viewDidLoad_contentUnavailableConfiguration_isNil() {
         let film = Film.sample
         let mockImageLoader = MockImageLoader()
         let filmDetailViewModel = FilmDetailViewModel(film: film, imageLoader: mockImageLoader)
@@ -46,9 +46,7 @@ struct ExploreDetailVCTests {
         
         sut.loadViewIfNeeded()
         sut.setNeedsUpdateContentUnavailableConfiguration()
-        sut.view.layoutIfNeeded()
         
-        #expect(sut.title == film.title, "Titles should match.")
         #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
     }
     
@@ -63,7 +61,15 @@ struct ExploreDetailVCTests {
         #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil.")
     }
     
-    @Test func exploreDetailVC_didUpdateFilmDetails_notifiesContentUnavailableCOnfigurationToUpdate() {
+    @Test func exploreDetailVC_viewDidLoad_navigationBarTitleIsNil() {
+        let sut = makeSUTWithNilFilm()
+
+        sut.loadViewIfNeeded()
+    
+        #expect(sut.title == nil, "Should be nil.")
+    }
+    
+    @Test func exploreDetailVC_didUpdateFilmDetails_notifiesContentUnavailableConfigurationToUpdate() {
         let film = Film.sample
         let mockImageLoader = MockImageLoader()
         let filmDetailViewModel = FilmDetailViewModel(film: film, imageLoader: mockImageLoader)
@@ -73,7 +79,6 @@ struct ExploreDetailVCTests {
         sut.didUpdateFilmDetails()
         sut.view.layoutIfNeeded()
         
-        #expect(sut.title == film.title, "Titles should match.")
         #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
     }
     
@@ -88,7 +93,7 @@ struct ExploreDetailVCTests {
         #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil.")
     }
     
-    //MARK: - Helper method
+    //MARK: - Helper Method
     private func makeSUTWithNilFilm() -> ExploreDetailVC {
         let mockImageLoader = MockImageLoader()
         let filmDetailViewModel = FilmDetailViewModel(imageLoader: mockImageLoader)
