@@ -7,10 +7,108 @@
 
 import UIKit
 
-class ExploreDetailVC: UIViewController {
+final class ExploreDetailVC: UIViewController {
     
-    // MARK: - Property
+    // MARK: - Properties
     let filmDetailViewModel: FilmDetailViewModel
+    private var movieBannerHeightConstraint: NSLayoutConstraint?
+    
+    // MARK: - UI Components
+    private let scrollView = UIScrollView()
+    
+    private let contentView: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
+    }()
+    
+    private let movieBanner: UIImageView = {
+        let movieBanner = UIImageView()
+        movieBanner.contentMode = .scaleAspectFill
+        movieBanner.clipsToBounds = true
+        movieBanner.layer.cornerRadius = 12
+        movieBanner.translatesAutoresizingMaskIntoConstraints = false
+        return movieBanner
+    }()
+    
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.font = .preferredFont(forTextStyle: .extraLargeTitle2)
+        label.textColor = .label
+        label.numberOfLines = 0
+        label.adjustsFontForContentSizeCategory = true
+        label.adjustsFontSizeToFitWidth = true
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    } ()
+    
+    private let originalTitlesLabel: UILabel = {
+        let label = UILabel()
+        label.font = .preferredFont(forTextStyle: .title2)
+        label.textColor = .secondaryLabel
+        label.numberOfLines = 0
+        label.textAlignment = .center
+        label.adjustsFontForContentSizeCategory = true
+        label.adjustsFontSizeToFitWidth = true
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private let releaseDateAndRunningTimeLabel: UILabel = {
+        let label = UILabel()
+        label.font = .preferredFont(forTextStyle: .title2)
+        label.textColor = .secondaryLabel
+        label.numberOfLines = 0
+        label.textAlignment = .center
+        label.adjustsFontForContentSizeCategory = true
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private let rottenTomatoesScoreLabel: UILabel = {
+        let label = UILabel()
+        label.font = .preferredFont(forTextStyle: .title2)
+        label.numberOfLines = 0
+        label.adjustsFontForContentSizeCategory = true
+        label.textAlignment = .center
+        label.textColor = .systemRed
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private let synopsisHeaderLabel: UILabel = {
+        let label = UILabel()
+        label.font = .preferredFont(forTextStyle: .headline)
+        label.textColor = .label
+        label.text = "Synopsis"
+        label.numberOfLines = 0
+        label.adjustsFontForContentSizeCategory = true
+        label.textAlignment = .left
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private let synopsisLabel: UILabel = {
+        let label = UILabel()
+        label.font = .preferredFont(forTextStyle: .body)
+        label.textColor = .label
+        label.numberOfLines = 0
+        label.textAlignment = .natural
+        label.adjustsFontForContentSizeCategory = true
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private let creditsContainer: UIStackView = {
+        let creditsContainer = UIStackView()
+        creditsContainer.axis = .horizontal
+        creditsContainer.distribution = .fillEqually
+        creditsContainer.spacing = 20
+        creditsContainer.translatesAutoresizingMaskIntoConstraints = false
+        return creditsContainer
+    }()
     
     // MARK: - Initialisation
     init(filmDetailViewModel: FilmDetailViewModel) {
@@ -25,7 +123,16 @@ class ExploreDetailVC: UIViewController {
     // MARK: - View Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .tertiarySystemBackground
+        navigationItem.largeTitleDisplayMode = .never
         filmDetailViewModel.delegate = self
+        setupScrollView()
+        addSubviews()
+        setupConstraints()
+        registerForTraitChanges([UITraitHorizontalSizeClass.self]) { (self: Self, _) in
+            self.updateLayoutForCurrentSizeClass()
+        }
+        updateLayoutForCurrentSizeClass()
     }
     
     override func updateContentUnavailableConfiguration(using state: UIContentUnavailableConfigurationState) {
@@ -35,9 +142,23 @@ class ExploreDetailVC: UIViewController {
             config = createEmptyState()
         case .content(let film, let image):
             config = nil
-            title = film.title
+            createContent(film: film, image: image)
         }
         self.contentUnavailableConfiguration = config
+    }
+    
+    private func createContent(film: Film, image: UIImage?) {
+        movieBanner.image = image
+        titleLabel.text = film.title
+        originalTitlesLabel.text = "\(film.originalTitle) \n \(film.originalTitleRomanised)"
+        releaseDateAndRunningTimeLabel.text = "\(film.releaseDate) • \(film.runningTime) mins"
+        synopsisLabel.text = film.description
+        rottenTomatoesScoreLabel.text = "RT \(film.rottenTomatoesScore)%"
+        creditsContainer.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        let directorView = createCreditView(name: film.director, role: "Director")
+        let producerView = createCreditView(name: film.producer, role: "Producer")
+        creditsContainer.addArrangedSubview(directorView)
+        creditsContainer.addArrangedSubview(producerView)
     }
     
     private func createEmptyState() -> UIContentUnavailableConfiguration {
@@ -46,6 +167,105 @@ class ExploreDetailVC: UIViewController {
         config.text = "No Film Selected"
         config.secondaryText = "Pick a film from the list to see the details."
         return config
+    }
+    
+    private func updateLayoutForCurrentSizeClass() {
+        movieBannerHeightConstraint?.isActive = false
+        let multiplier: CGFloat = (traitCollection.horizontalSizeClass == .compact) ? 0.3 : 0.75
+        movieBannerHeightConstraint = movieBanner.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: multiplier)
+        movieBannerHeightConstraint?.isActive = true
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    private func createCreditView(name: String, role: String) -> UIStackView {
+        let nameLabel = UILabel()
+        nameLabel.text = name
+        nameLabel.font = .preferredFont(forTextStyle: .headline)
+        nameLabel.textColor = .label
+        nameLabel.numberOfLines = 0
+        nameLabel.adjustsFontForContentSizeCategory = true
+        
+        let roleLabel = UILabel()
+        roleLabel.text = role
+        roleLabel.font = .preferredFont(forTextStyle: .subheadline)
+        roleLabel.textColor = .secondaryLabel
+        roleLabel.numberOfLines = 0
+        roleLabel.adjustsFontForContentSizeCategory = true
+        
+        let stack = UIStackView(arrangedSubviews: [nameLabel, roleLabel])
+        stack.axis = .vertical
+        stack.spacing = 2
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
+    }
+    
+    private func setupScrollView() {
+        scrollView.bouncesVertically = true
+        scrollView.contentInsetAdjustmentBehavior = .never
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+    }
+    
+    private func addSubviews() {
+        view.addSubview(scrollView)
+        scrollView.addSubview(contentView)
+        contentView.addSubview(movieBanner)
+        contentView.addSubview(titleLabel)
+        contentView.addSubview(originalTitlesLabel)
+        contentView.addSubview(releaseDateAndRunningTimeLabel)
+        contentView.addSubview(synopsisHeaderLabel)
+        contentView.addSubview(synopsisLabel)
+        contentView.addSubview(rottenTomatoesScoreLabel)
+        contentView.addSubview(creditsContainer)
+    }
+    
+    private func setupConstraints() {
+        NSLayoutConstraint.activate([
+            scrollView.topAnchor.constraint(equalTo: view.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
+            contentView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
+            contentView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
+            
+            movieBanner.topAnchor.constraint(equalTo: contentView.topAnchor),
+            movieBanner.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            movieBanner.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            
+            titleLabel.topAnchor.constraint(equalTo: movieBanner.bottomAnchor, constant: 16),
+            titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            titleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            
+            originalTitlesLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 16),
+            originalTitlesLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            originalTitlesLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            
+            releaseDateAndRunningTimeLabel.topAnchor.constraint(equalTo: originalTitlesLabel.bottomAnchor, constant: 8),
+            releaseDateAndRunningTimeLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            releaseDateAndRunningTimeLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            
+            rottenTomatoesScoreLabel.topAnchor.constraint(equalTo: releaseDateAndRunningTimeLabel.bottomAnchor, constant: 8),
+            rottenTomatoesScoreLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            rottenTomatoesScoreLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            
+            synopsisHeaderLabel.topAnchor.constraint(equalTo: rottenTomatoesScoreLabel.bottomAnchor, constant: 16),
+            synopsisHeaderLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            synopsisHeaderLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            
+            synopsisLabel.topAnchor.constraint(equalTo: synopsisHeaderLabel.bottomAnchor, constant: 8),
+            synopsisLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            synopsisLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            
+            creditsContainer.topAnchor.constraint(equalTo: synopsisLabel.bottomAnchor, constant: 16),
+            creditsContainer.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            creditsContainer.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            creditsContainer.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -80)
+        ])
     }
 }
 
@@ -58,4 +278,12 @@ extension ExploreDetailVC: FilmDetailViewModelDelegate {
     func didUpdateWithEmptyState() {
         setNeedsUpdateContentUnavailableConfiguration()
     }
+}
+
+// MARK: - Preview
+#Preview("Explore Detail") {
+    let imageLoader = APIClientImageLoader(cacheManager: CacheManager())
+    let vm = FilmDetailViewModel(film: Film.sample, imageLoader: imageLoader)
+    let vc = ExploreDetailVC(filmDetailViewModel: vm)
+    return vc
 }
