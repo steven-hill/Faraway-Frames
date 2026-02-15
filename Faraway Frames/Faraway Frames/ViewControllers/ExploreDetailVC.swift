@@ -37,9 +37,9 @@ final class ExploreDetailVC: UIViewController {
         label.font = .preferredFont(forTextStyle: .extraLargeTitle2)
         label.textColor = .label
         label.numberOfLines = 0
+        label.textAlignment = .natural
         label.adjustsFontForContentSizeCategory = true
         label.adjustsFontSizeToFitWidth = true
-        label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     } ()
@@ -49,7 +49,7 @@ final class ExploreDetailVC: UIViewController {
         label.font = .preferredFont(forTextStyle: .title2)
         label.textColor = .secondaryLabel
         label.numberOfLines = 0
-        label.textAlignment = .center
+        label.textAlignment = .natural
         label.adjustsFontForContentSizeCategory = true
         label.adjustsFontSizeToFitWidth = true
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -61,7 +61,7 @@ final class ExploreDetailVC: UIViewController {
         label.font = .preferredFont(forTextStyle: .title2)
         label.textColor = .secondaryLabel
         label.numberOfLines = 0
-        label.textAlignment = .center
+        label.textAlignment = .natural
         label.adjustsFontForContentSizeCategory = true
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -72,8 +72,7 @@ final class ExploreDetailVC: UIViewController {
         label.font = .preferredFont(forTextStyle: .title2)
         label.numberOfLines = 0
         label.adjustsFontForContentSizeCategory = true
-        label.textAlignment = .center
-        label.textColor = .systemRed
+        label.textAlignment = .natural
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -150,10 +149,10 @@ final class ExploreDetailVC: UIViewController {
     private func createContent(film: Film, image: UIImage?) {
         movieBanner.image = image
         titleLabel.text = film.title
-        originalTitlesLabel.text = "\(film.originalTitle) \n \(film.originalTitleRomanised)"
+        originalTitlesLabel.text = "\(film.originalTitle) \n\(film.originalTitleRomanised)"
         releaseDateAndRunningTimeLabel.text = "\(film.releaseDate) • \(film.runningTime) mins"
         synopsisLabel.text = film.description
-        rottenTomatoesScoreLabel.text = "RT \(film.rottenTomatoesScore)%"
+        rottenTomatoesScoreLabel.attributedText = setScoreText(for: film.rottenTomatoesScore)
         creditsContainer.arrangedSubviews.forEach { $0.removeFromSuperview() }
         let directorView = createCreditView(name: film.director, role: "Director")
         let producerView = createCreditView(name: film.producer, role: "Producer")
@@ -177,6 +176,16 @@ final class ExploreDetailVC: UIViewController {
         UIView.animate(withDuration: 0.3) {
             self.view.layoutIfNeeded()
         }
+    }
+    
+    private func setScoreText(for string: String) -> NSMutableAttributedString {
+        let fullText = "Rotten Tomatoes \(string)%"
+        let attributedString = NSMutableAttributedString(string: fullText)
+        let rtRange = NSRange(location: 0, length: 16)
+        attributedString.addAttribute(.foregroundColor, value: UIColor.systemRed, range: rtRange)
+        let scoreRange = NSRange(location: 16, length: fullText.count - 16)
+        attributedString.addAttribute(.foregroundColor, value: UIColor.secondaryLabel, range: scoreRange)
+        return attributedString
     }
     
     private func createCreditView(name: String, role: String) -> UIStackView {
@@ -221,6 +230,7 @@ final class ExploreDetailVC: UIViewController {
     }
     
     private func setupConstraints() {
+        let padding: CGFloat = 16
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -237,33 +247,33 @@ final class ExploreDetailVC: UIViewController {
             movieBanner.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             movieBanner.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             
-            titleLabel.topAnchor.constraint(equalTo: movieBanner.bottomAnchor, constant: 16),
-            titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            titleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            titleLabel.topAnchor.constraint(equalTo: movieBanner.bottomAnchor, constant: padding),
+            titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: padding),
+            titleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -padding),
             
-            originalTitlesLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 16),
-            originalTitlesLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            originalTitlesLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            originalTitlesLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: padding),
+            originalTitlesLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: padding),
+            originalTitlesLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -padding),
             
-            releaseDateAndRunningTimeLabel.topAnchor.constraint(equalTo: originalTitlesLabel.bottomAnchor, constant: 8),
-            releaseDateAndRunningTimeLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            releaseDateAndRunningTimeLabel.topAnchor.constraint(equalTo: originalTitlesLabel.bottomAnchor, constant: padding),
+            releaseDateAndRunningTimeLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: padding),
             releaseDateAndRunningTimeLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             
-            rottenTomatoesScoreLabel.topAnchor.constraint(equalTo: releaseDateAndRunningTimeLabel.bottomAnchor, constant: 8),
-            rottenTomatoesScoreLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            rottenTomatoesScoreLabel.topAnchor.constraint(equalTo: releaseDateAndRunningTimeLabel.bottomAnchor, constant: padding),
+            rottenTomatoesScoreLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: padding),
             rottenTomatoesScoreLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             
-            synopsisHeaderLabel.topAnchor.constraint(equalTo: rottenTomatoesScoreLabel.bottomAnchor, constant: 16),
-            synopsisHeaderLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            synopsisHeaderLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            synopsisHeaderLabel.topAnchor.constraint(equalTo: rottenTomatoesScoreLabel.bottomAnchor, constant: padding),
+            synopsisHeaderLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: padding),
+            synopsisHeaderLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -padding),
             
             synopsisLabel.topAnchor.constraint(equalTo: synopsisHeaderLabel.bottomAnchor, constant: 8),
-            synopsisLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            synopsisLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            synopsisLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: padding),
+            synopsisLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -padding),
             
-            creditsContainer.topAnchor.constraint(equalTo: synopsisLabel.bottomAnchor, constant: 16),
-            creditsContainer.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            creditsContainer.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            creditsContainer.topAnchor.constraint(equalTo: synopsisLabel.bottomAnchor, constant: padding),
+            creditsContainer.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: padding),
+            creditsContainer.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -padding),
             creditsContainer.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -80)
         ])
     }
