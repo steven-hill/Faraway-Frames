@@ -1,19 +1,20 @@
 # Faraway-Frames
 ## Open a window into the world of Studio Ghibli
 
-### An iOS app for exploring the Studio Ghibli films.
+### An iOS and iPadOS app for exploring the Studio Ghibli films.
 
 ### Features
 - explore all Studio Ghibli films
 - search for films by title
+- view details about each film
 
 ### Requirements
 - Swift 6
-- iOS 18.0+ and iPadOS 18.0+
+- iOS 26 and iPadOS 26
 - Xcode 26
 
 ### Technical details
-- MVVM+C.
+- MVVM + Coordinator.
 - UI framework is UIKit.
 - Swift concurrency uses the default settings.
 - Networking with async/await, `URLSession` and `NSCache`.
