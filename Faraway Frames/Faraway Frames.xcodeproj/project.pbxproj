@@ -53,9 +53,9 @@
 			path = "Faraway Frames";
 			sourceTree = "<group>";
 		};
-		5B565FAE2F0C5F9E00A49426 /* Faraway FramesTests */ = {
+		5B565FAE2F0C5F9E00A49426 /* Faraway FramesUnitTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "Faraway FramesTests";
+			path = "Faraway FramesUnitTests";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -89,7 +89,7 @@
 			isa = PBXGroup;
 			children = (
 				5B565F762F0C4C8500A49426 /* Faraway Frames */,
-				5B565FAE2F0C5F9E00A49426 /* Faraway FramesTests */,
+				5B565FAE2F0C5F9E00A49426 /* Faraway FramesUnitTests */,
 				5B1014002F43C331007B3FCF /* Faraway FramesUITests */,
 				5B565F752F0C4C8500A49426 /* Products */,
 			);
@@ -167,7 +167,7 @@
 				5B565FB22F0C5F9E00A49426 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				5B565FAE2F0C5F9E00A49426 /* Faraway FramesTests */,
+				5B565FAE2F0C5F9E00A49426 /* Faraway FramesUnitTests */,
 			);
 			name = "Faraway FramesTests";
 			packageProductDependencies = (
