@@ -18,7 +18,7 @@
 - UI framework is UIKit.
 - Swift concurrency uses the default settings.
 - Networking with async/await, `URLSession` and `NSCache`.
-- The testing framework for unit tests is Swift Testing, and the project is built with TDD.
+- The testing frameworks used are Swift Testing and XCTest, and the project is built with TDD.
 
 ### API
 - [Studio Ghibli API](https://ghibliapi.vercel.app).
