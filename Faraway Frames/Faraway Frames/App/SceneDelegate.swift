@@ -17,24 +17,30 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         let window = UIWindow(windowScene: windowScene)
         
-        mainCoordinator = MainCoordinator(window: window, dependencies: appContainer)
+        if ProcessInfo.processInfo.isUITesting {
+            let mockDependenciesContainer = MockDependencies()
+            mainCoordinator = MainCoordinator(window: window, dependencies: mockDependenciesContainer)
+            UIView.setAnimationsEnabled(false)
+        } else {
+            mainCoordinator = MainCoordinator(window: window, dependencies: appContainer)
+        }
+        
         mainCoordinator?.start()
         self.window = window
     }
-
+    
     func sceneDidDisconnect(_ scene: UIScene) {
     }
-
+    
     func sceneDidBecomeActive(_ scene: UIScene) {
     }
-
+    
     func sceneWillResignActive(_ scene: UIScene) {
     }
-
+    
     func sceneWillEnterForeground(_ scene: UIScene) {
     }
-
+    
     func sceneDidEnterBackground(_ scene: UIScene) {
     }
 }
-
