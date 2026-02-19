@@ -24,10 +24,11 @@ final class ExploreListVCUITests: XCTestCase {
     
     func test_exploreListVC_hasTitle() {
         let title = app.staticTexts["Explore"]
+        
         XCTAssertTrue(title.exists, "Should have a title.")
     }
     
-    func test_exploreListVC_titleTransitionsToInlineOnScrollOnIphoneOnly() {
+    func test_exploreListVC_title_transitionsToInlineOnScrollOnIphoneOnly() {
         let title = app.staticTexts["Explore"]
         let initialY = title.frame.origin.y
 
@@ -40,5 +41,75 @@ final class ExploreListVCUITests: XCTestCase {
         } else {
             XCTAssertEqual(finalY, initialY, "The title should remain unchanged on iPad.")
         }
+    }
+    
+    func test_exploreListVC_displaysCollectionViewInContentState() {
+        let collectionView = app.collectionViews.element
+        
+        XCTAssertTrue(collectionView.exists, "Should exist.")
+        XCTAssertTrue(collectionView.cells.firstMatch.isHittable, "Should be able to be tapped.")
+    }
+    
+    func test_exploreListVC_searchTextField_initialState() {
+        let searchTextField = app.searchFields["ExploreListVC_SearchBar_SearchField"]
+        
+        XCTAssertTrue(searchTextField.exists, "Should exist.")
+        XCTAssertTrue(searchTextField.isHittable, "Should be able to be tapped.")
+        XCTAssertTrue(searchTextField.isEnabled, "Should be enabled.")
+        XCTAssertNotNil(searchTextField.placeholderValue, "Should have a placeholder.")
+    }
+    
+    func test_exploreListVC_searchTextField_displaysACancelButton_whenSearching() {
+        let searchTextField = app.searchFields["ExploreListVC_SearchBar_SearchField"]
+        searchTextField.tap()
+        searchTextField.typeText("Castle in the Sky")
+        
+        XCTAssertTrue(searchTextField.buttons.element.firstMatch.exists, "Should exist.")
+    }
+    
+    func test_exploreListVC_searchTextField_displaysTextTypedIntoItAndCanClearTextViaButton() {
+        let searchTextField = app.searchFields["ExploreListVC_SearchBar_SearchField"]
+        searchTextField.tap()
+        let keyboardIsOnScreen = app.keyboards.element.waitForExistence(timeout: 2)
+        XCTAssertTrue(keyboardIsOnScreen, "Keyboard should appear.")
+        
+        searchTextField.typeText("Castle in the Sky")
+        XCTAssertEqual(searchTextField.value as! String, "Castle in the Sky", "Should show the text that was typed in.")
+        
+        searchTextField.buttons.element.firstMatch.tap()
+        XCTAssertEqual(searchTextField.value as? String, searchTextField.placeholderValue, "Should revert to placeholder text.")
+    }
+    
+    func test_exploreListVC_searchTextField_canAlsoClearTextViaDeleteKey() {
+        let searchTextField = app.searchFields["ExploreListVC_SearchBar_SearchField"]
+        searchTextField.tap()
+
+        _ = app.keyboards.element.waitForExistence(timeout: 2)
+        searchTextField.typeText("C")
+        app.keys["delete"].firstMatch.tap()
+        
+        XCTAssertEqual(searchTextField.value as? String, searchTextField.placeholderValue, "Should revert to placeholder text.")
+    }
+    
+    func test_exploreListVC_searchResultsAppearForValidSearchQuery() {
+        let searchTextField = app.searchFields["ExploreListVC_SearchBar_SearchField"]
+        searchTextField.tap()
+        _ = app.keyboards.element.waitForExistence(timeout: 2)
+
+        searchTextField.typeText("Castle in the Sky")
+        
+        let collectionView = app.collectionViews.element
+        XCTAssertEqual(collectionView.cells.count, 1, "Should have one film in search results.")
+    }
+    
+    func test_exploreListVC_showsThereAreNoSearchResultsForInvalidSearchQuery() {
+        let searchTextField = app.searchFields["ExploreListVC_SearchBar_SearchField"]
+        searchTextField.tap()
+        _ = app.keyboards.element.waitForExistence(timeout: 2)
+
+        searchTextField.typeText("Invalid query")
+        
+        let collectionView = app.collectionViews.element
+        XCTAssertFalse(collectionView.exists, "Collection view should be hidden.")
     }
 }
