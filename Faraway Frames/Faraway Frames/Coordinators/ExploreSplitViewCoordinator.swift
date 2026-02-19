@@ -35,7 +35,6 @@ final class ExploreSplitViewCoordinator: Coordinator {
         let exploreListNav = UINavigationController(rootViewController: exploreListVC)
         exploreSplitVC.setViewController(exploreListNav, for: .primary)
         
-        //filmDetailViewModel = FilmDetailViewModel(imageLoader: dependencies.makeImageLoader())
         let exploreDetailVC = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
         let exploreDetailNav = UINavigationController(rootViewController: exploreDetailVC)
         exploreSplitVC.setViewController(exploreDetailNav, for: .secondary)
