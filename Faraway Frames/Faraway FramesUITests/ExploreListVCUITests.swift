@@ -22,19 +22,23 @@ final class ExploreListVCUITests: XCTestCase {
         app = nil
     }
     
-    func testExample() throws {
-        // UI tests must launch the application that they test.
-        let app = XCUIApplication()
-        app.launch()
-        
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+    func test_exploreListVC_hasTitle() {
+        let title = app.staticTexts["Explore"]
+        XCTAssertTrue(title.exists, "Should have a title.")
     }
     
-    @MainActor
-    func testLaunchPerformance() throws {
-        // This measures how long it takes to launch your application.
-        measure(metrics: [XCTApplicationLaunchMetric()]) {
-            XCUIApplication().launch()
+    func test_exploreListVC_titleTransitionsToInlineOnScrollOnIphoneOnly() {
+        let title = app.staticTexts["Explore"]
+        let initialY = title.frame.origin.y
+
+        let collectionView = app.collectionViews.element
+        collectionView.swipeUp()
+        let finalY = title.frame.origin.y
+        
+        if UIDevice.current.userInterfaceIdiom == .phone {
+            XCTAssertLessThan(finalY, initialY, "The title should move up into the navigation bar on iPhone.")
+        } else {
+            XCTAssertEqual(finalY, initialY, "The title should remain unchanged on iPad.")
         }
     }
 }
