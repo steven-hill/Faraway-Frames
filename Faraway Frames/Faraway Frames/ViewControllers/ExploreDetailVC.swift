@@ -41,6 +41,7 @@ final class ExploreDetailVC: UIViewController {
         label.adjustsFontForContentSizeCategory = true
         label.adjustsFontSizeToFitWidth = true
         label.translatesAutoresizingMaskIntoConstraints = false
+        label.accessibilityIdentifier = "ExploreDetailVC_TitleLabel"
         return label
     } ()
     
