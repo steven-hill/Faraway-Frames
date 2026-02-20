@@ -47,7 +47,18 @@ final class ExploreListVCUITests: XCTestCase {
         let collectionView = app.collectionViews.element
         
         XCTAssertTrue(collectionView.exists, "Should exist.")
+        XCTAssertGreaterThan(collectionView.cells.count, 0, "Should be more than zero cells.")
         XCTAssertTrue(collectionView.cells.firstMatch.isHittable, "Should be able to be tapped.")
+        XCTAssertTrue(collectionView.cells.element(boundBy: 0).images.element.exists, "Should have an image.")
+        XCTAssertFalse(collectionView.cells.element(boundBy: 0).label.isEmpty, "Should have a text label.")
+    }
+    
+    func test_exploreListVC_canNavigateToFilmDetails() {
+        let collectionView = app.collectionViews.element
+        collectionView.cells.element(boundBy: 0).tap()
+        
+        let filmTitle = app.staticTexts["ExploreDetailVC_TitleLabel"]
+        XCTAssertTrue(filmTitle.exists, "Tapping a cell should navigate to the detail view.")
     }
     
     func test_exploreListVC_searchTextField_initialState() {
@@ -83,13 +94,21 @@ final class ExploreListVCUITests: XCTestCase {
     func test_exploreListVC_searchResultsAppearForValidSearchQuery() {
         _ = setUpSearchTextFieldAndEnterText("Castle in the Sky")
         let collectionView = app.collectionViews.element
+        
         XCTAssertEqual(collectionView.cells.count, 1, "Should have one film in search results.")
     }
     
-    func test_exploreListVC_showsThereAreNoSearchResultsForInvalidSearchQuery() {
+    func test_exploreListVC_showsNoSearchResultsForInvalidSearchQuery() {
         _ = setUpSearchTextFieldAndEnterText("Invalid query")
         let collectionView = app.collectionViews.element
+        
         XCTAssertFalse(collectionView.exists, "Collection view should be hidden.")
+    }
+    
+    func test_exploreListVC_doesNotPerformSearchIfTextFieldIsEmpty() {
+        _ = setUpSearchTextFieldAndEnterText("")
+        
+        XCTAssertFalse(app.buttons["Search"].firstMatch.isEnabled, "Should be disabled.")
     }
     
     // MARK: - Helper method
