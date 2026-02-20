@@ -81,7 +81,6 @@ final class ExploreDetailVC: UIViewController {
         let label = UILabel()
         label.font = .preferredFont(forTextStyle: .headline)
         label.textColor = .label
-        label.text = "Synopsis"
         label.numberOfLines = 0
         label.adjustsFontForContentSizeCategory = true
         label.textAlignment = .left
@@ -151,6 +150,7 @@ final class ExploreDetailVC: UIViewController {
         titleLabel.text = film.title
         originalTitlesLabel.text = "\(film.originalTitle) \n\(film.originalTitleRomanised)"
         releaseDateAndRunningTimeLabel.text = "\(film.releaseDate) • \(film.runningTime) mins"
+        synopsisHeaderLabel.text = "Synopsis"
         synopsisLabel.text = film.description
         rottenTomatoesScoreLabel.attributedText = setScoreText(for: film.rottenTomatoesScore)
         creditsContainer.arrangedSubviews.forEach { $0.removeFromSuperview() }
