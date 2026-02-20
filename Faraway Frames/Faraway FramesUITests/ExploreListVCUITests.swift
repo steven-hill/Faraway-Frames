@@ -60,20 +60,13 @@ final class ExploreListVCUITests: XCTestCase {
     }
     
     func test_exploreListVC_searchTextField_displaysACancelButton_whenSearching() {
-        let searchTextField = app.searchFields["ExploreListVC_SearchBar_SearchField"]
-        searchTextField.tap()
-        searchTextField.typeText("Castle in the Sky")
+        let searchTextField = setUpSearchTextFieldAndEnterText("Castle in the Sky")
         
         XCTAssertTrue(searchTextField.buttons.element.firstMatch.exists, "Should exist.")
     }
     
     func test_exploreListVC_searchTextField_displaysTextTypedIntoItAndCanClearTextViaButton() {
-        let searchTextField = app.searchFields["ExploreListVC_SearchBar_SearchField"]
-        searchTextField.tap()
-        let keyboardIsOnScreen = app.keyboards.element.waitForExistence(timeout: 2)
-        XCTAssertTrue(keyboardIsOnScreen, "Keyboard should appear.")
-        
-        searchTextField.typeText("Castle in the Sky")
+        let searchTextField = setUpSearchTextFieldAndEnterText("Castle in the Sky")
         XCTAssertEqual(searchTextField.value as! String, "Castle in the Sky", "Should show the text that was typed in.")
         
         searchTextField.buttons.element.firstMatch.tap()
@@ -81,35 +74,29 @@ final class ExploreListVCUITests: XCTestCase {
     }
     
     func test_exploreListVC_searchTextField_canAlsoClearTextViaDeleteKey() {
-        let searchTextField = app.searchFields["ExploreListVC_SearchBar_SearchField"]
-        searchTextField.tap()
-
-        _ = app.keyboards.element.waitForExistence(timeout: 2)
-        searchTextField.typeText("C")
+        let searchTextField = setUpSearchTextFieldAndEnterText("C")
         app.keys["delete"].firstMatch.tap()
         
         XCTAssertEqual(searchTextField.value as? String, searchTextField.placeholderValue, "Should revert to placeholder text.")
     }
     
     func test_exploreListVC_searchResultsAppearForValidSearchQuery() {
-        let searchTextField = app.searchFields["ExploreListVC_SearchBar_SearchField"]
-        searchTextField.tap()
-        _ = app.keyboards.element.waitForExistence(timeout: 2)
-
-        searchTextField.typeText("Castle in the Sky")
-        
+        _ = setUpSearchTextFieldAndEnterText("Castle in the Sky")
         let collectionView = app.collectionViews.element
         XCTAssertEqual(collectionView.cells.count, 1, "Should have one film in search results.")
     }
     
     func test_exploreListVC_showsThereAreNoSearchResultsForInvalidSearchQuery() {
-        let searchTextField = app.searchFields["ExploreListVC_SearchBar_SearchField"]
-        searchTextField.tap()
-        _ = app.keyboards.element.waitForExistence(timeout: 2)
-
-        searchTextField.typeText("Invalid query")
-        
+        _ = setUpSearchTextFieldAndEnterText("Invalid query")
         let collectionView = app.collectionViews.element
         XCTAssertFalse(collectionView.exists, "Collection view should be hidden.")
+    }
+    
+    // MARK: - Helper method
+    private func setUpSearchTextFieldAndEnterText(_ text: String) -> XCUIElement {
+        let searchTextField = app.searchFields["ExploreListVC_SearchBar_SearchField"]
+        searchTextField.tap()
+        searchTextField.typeText(text)
+        return searchTextField
     }
 }
