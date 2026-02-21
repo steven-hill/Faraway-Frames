@@ -54,8 +54,7 @@ final class ExploreListVCUITests: XCTestCase {
     }
     
     func test_exploreListVC_canNavigateToFilmDetails() {
-        let collectionView = app.collectionViews.element
-        collectionView.cells.element(boundBy: 0).tap()
+        app.collectionViews.element.cells.element(boundBy: 0).tap()
         
         let filmTitle = app.staticTexts["ExploreDetailVC_TitleLabel"]
         XCTAssertTrue(filmTitle.exists, "Tapping a cell should navigate to the detail view.")
