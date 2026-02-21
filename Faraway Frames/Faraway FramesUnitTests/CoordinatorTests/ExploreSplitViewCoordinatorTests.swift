@@ -76,6 +76,17 @@ struct ExploreSplitViewCoordinatorTests {
         #expect(sut.exploreSplitVC.viewControllers[1] is ExploreDetailVC, "Should be an `ExploreDetailVC`.")
     }
     
+    @Test func exploreSplitViewCoordinator_didSelectFilm_withFilm_collapsesPrimaryViewControllerOnIpad() {
+        let exploreSplitVCSpy = ExpandedSplitViewSpy(style: .doubleColumn)
+        let sut = makeSUT(with: exploreSplitVCSpy)
+        
+        sut.start()
+        let film = Film.sample
+        sut.didSelectFilm(film)
+        
+        #expect(exploreSplitVCSpy.hideWasCalled == true, "Should collapse the primary view controller.")
+    }
+    
     // MARK: - Helper Method
     private func makeSUT(with spy: UISplitViewController) -> ExploreSplitViewCoordinator {
         return ExploreSplitViewCoordinator(dependencies: MockContainer(), exploreSplitVC: spy)
@@ -90,6 +101,11 @@ struct ExploreSplitViewCoordinatorTests {
     }
 
     final class ExpandedSplitViewSpy: UISplitViewController {
+        var hideWasCalled = false
         override var isCollapsed: Bool { return false }
+        
+        override func hide(_ column: UISplitViewController.Column) {
+            hideWasCalled = true
+        }
     }
 }
