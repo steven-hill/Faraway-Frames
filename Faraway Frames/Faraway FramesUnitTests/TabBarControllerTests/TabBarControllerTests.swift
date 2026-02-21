@@ -15,7 +15,6 @@ struct TabBarControllerTests {
     @Test func tabBarController_viewDidLoad_setsModeCorrectly() {
         let sut = TabBarController()
         sut.loadViewIfNeeded()
-        #expect(sut.mode == .tabSidebar, "Should be `.tabSidebar`.")
+        #expect(sut.mode == .tabBar, "Should be `.tabBar`.")
     }
 }
-

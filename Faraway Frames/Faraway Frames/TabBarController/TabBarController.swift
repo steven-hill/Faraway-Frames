@@ -11,7 +11,7 @@ final class TabBarController: UITabBarController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        mode = .tabSidebar
+        mode = .tabBar
     }
 }
 
