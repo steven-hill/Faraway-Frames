@@ -111,6 +111,20 @@ final class ExploreListVCUITests: XCTestCase {
         XCTAssertFalse(app.buttons["Search"].firstMatch.isEnabled, "Should be disabled.")
     }
     
+    func test_exploreListVC_on_iPadCanHideExploreListVCToRevealAllExploreDetailVC() throws {
+        guard UIDevice.current.userInterfaceIdiom == .pad else {
+            throw XCTSkip("iPad-only test")
+        }
+        let collectionView = app.collectionViews.element
+        XCTAssertFalse(app.staticTexts["ExploreDetailVC_TitleLabel"].firstMatch.isHittable, "Should not be visible.")
+        collectionView.cells.element(boundBy: 0).tap()
+        
+        app.navigationBars.buttons.firstMatch.tap()
+        
+        XCTAssertTrue(app.staticTexts["ExploreDetailVC_TitleLabel"].firstMatch.isHittable, "Should be visible.")
+        XCTAssertFalse(collectionView.isHittable, "Should be off screen.")
+    }
+    
     // MARK: - Helper method
     private func setUpSearchTextFieldAndEnterText(_ text: String) -> XCUIElement {
         let searchTextField = app.searchFields["ExploreListVC_SearchBar_SearchField"]
