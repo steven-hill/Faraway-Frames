@@ -53,11 +53,19 @@ final class ExploreListVCUITests: XCTestCase {
         XCTAssertFalse(collectionView.cells.element(boundBy: 0).label.isEmpty, "Should have a text label.")
     }
     
-    func test_exploreListVC_canNavigateToFilmDetails() {
-        app.collectionViews.element.cells.element(boundBy: 0).tap()
+    func test_exploreListVC_canNavigateThroughFilms() {
+        XCTAssertFalse(app.staticTexts["ExploreDetailVC_TitleLabel"].firstMatch.isHittable, "Should not be visible.")
+        let collectionView = app.collectionViews.element
+        collectionView.cells.element(boundBy: 0).tap()
         
-        let filmTitle = app.staticTexts["ExploreDetailVC_TitleLabel"]
-        XCTAssertTrue(filmTitle.exists, "Tapping a cell should navigate to the detail view.")
+        XCTAssertTrue(app.staticTexts["ExploreDetailVC_TitleLabel"].firstMatch.isHittable, "Should be visible.")
+        XCTAssertFalse(collectionView.isHittable, "Should be off screen.")
+        
+        app.navigationBars.buttons.firstMatch.tap()
+        collectionView.cells.element(boundBy: 1).tap()
+        
+        XCTAssertTrue(app.staticTexts["ExploreDetailVC_TitleLabel"].firstMatch.isHittable, "Should be visible.")
+        XCTAssertFalse(collectionView.isHittable, "Should be off screen.")
     }
     
     func test_exploreListVC_searchTextField_initialState() {
@@ -108,20 +116,6 @@ final class ExploreListVCUITests: XCTestCase {
         _ = setUpSearchTextFieldAndEnterText("")
         
         XCTAssertFalse(app.buttons["Search"].firstMatch.isEnabled, "Should be disabled.")
-    }
-    
-    func test_exploreListVC_on_iPadCanHideExploreListVCToRevealAllExploreDetailVC() throws {
-        guard UIDevice.current.userInterfaceIdiom == .pad else {
-            throw XCTSkip("iPad-only test")
-        }
-        let collectionView = app.collectionViews.element
-        XCTAssertFalse(app.staticTexts["ExploreDetailVC_TitleLabel"].firstMatch.isHittable, "Should not be visible.")
-        collectionView.cells.element(boundBy: 0).tap()
-        
-        app.navigationBars.buttons.firstMatch.tap()
-        
-        XCTAssertTrue(app.staticTexts["ExploreDetailVC_TitleLabel"].firstMatch.isHittable, "Should be visible.")
-        XCTAssertFalse(collectionView.isHittable, "Should be off screen.")
     }
     
     // MARK: - Helper method
