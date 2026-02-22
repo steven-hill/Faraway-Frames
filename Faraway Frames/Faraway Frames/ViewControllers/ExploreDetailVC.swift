@@ -29,20 +29,21 @@ final class ExploreDetailVC: UIViewController {
         movieBanner.clipsToBounds = true
         movieBanner.layer.cornerRadius = 12
         movieBanner.translatesAutoresizingMaskIntoConstraints = false
+        movieBanner.accessibilityIdentifier = "ExploreDetailVC_MovieBanner"
         return movieBanner
     }()
     
     private let titleLabel = FFLabel(font: .preferredFont(forTextStyle: .extraLargeTitle2), textColor: .label, accessibilityIdentifer: "ExploreDetailVC_TitleLabel")
 
-    private let originalTitlesLabel = FFLabel(font: .preferredFont(forTextStyle: .title2), textColor: .secondaryLabel)
+    private let originalTitlesLabel = FFLabel(font: .preferredFont(forTextStyle: .title2), textColor: .secondaryLabel, accessibilityIdentifer: "ExploreDetailVC_OriginalTitlesLabel")
 
-    private let releaseDateAndRunningTimeLabel = FFLabel(font: .preferredFont(forTextStyle: .title2), textColor: .secondaryLabel)
+    private let releaseDateAndRunningTimeLabel = FFLabel(font: .preferredFont(forTextStyle: .title2), textColor: .secondaryLabel, accessibilityIdentifer: "ExploreDetailVC_ReleaseDateAndRunningTimeLabel")
 
-    private let rottenTomatoesScoreLabel = FFLabel(font: .preferredFont(forTextStyle: .title2), textColor: nil)
+    private let rottenTomatoesScoreLabel = FFLabel(font: .preferredFont(forTextStyle: .title2), textColor: nil, accessibilityIdentifer: "ExploreDetailVC_RottenTomatoesScoreLabel")
     
-    private let synopsisHeaderLabel = FFLabel(font: .preferredFont(forTextStyle: .headline), textColor: .label)
+    private let synopsisHeaderLabel = FFLabel(font: .preferredFont(forTextStyle: .headline), textColor: .label, accessibilityIdentifer: "ExploreDetailVC_SynopsisHeaderLabel")
     
-    private let synopsisLabel = FFLabel(font: .preferredFont(forTextStyle: .body), textColor: .label)
+    private let synopsisLabel = FFLabel(font: .preferredFont(forTextStyle: .body), textColor: .label, accessibilityIdentifer: "ExploreDetailVC_SynopsisLabel")
     
     private let creditsContainer: UIStackView = {
         let creditsContainer = UIStackView()
@@ -50,6 +51,7 @@ final class ExploreDetailVC: UIViewController {
         creditsContainer.distribution = .fillEqually
         creditsContainer.spacing = 20
         creditsContainer.translatesAutoresizingMaskIntoConstraints = false
+        creditsContainer.accessibilityIdentifier = "ExploreDetailVC_CreditsContainer"
         return creditsContainer
     }()
     
