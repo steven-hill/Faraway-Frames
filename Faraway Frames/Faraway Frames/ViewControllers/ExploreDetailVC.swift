@@ -32,73 +32,17 @@ final class ExploreDetailVC: UIViewController {
         return movieBanner
     }()
     
-    private let titleLabel: UILabel = {
-        let label = UILabel()
-        label.font = .preferredFont(forTextStyle: .extraLargeTitle2)
-        label.textColor = .label
-        label.numberOfLines = 0
-        label.textAlignment = .natural
-        label.adjustsFontForContentSizeCategory = true
-        label.adjustsFontSizeToFitWidth = true
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.accessibilityIdentifier = "ExploreDetailVC_TitleLabel"
-        return label
-    } ()
+    private let titleLabel = FFLabel(font: .preferredFont(forTextStyle: .extraLargeTitle2), textColor: .label, accessibilityIdentifer: "ExploreDetailVC_TitleLabel")
+
+    private let originalTitlesLabel = FFLabel(font: .preferredFont(forTextStyle: .title2), textColor: .secondaryLabel)
+
+    private let releaseDateAndRunningTimeLabel = FFLabel(font: .preferredFont(forTextStyle: .title2), textColor: .secondaryLabel)
+
+    private let rottenTomatoesScoreLabel = FFLabel(font: .preferredFont(forTextStyle: .title2), textColor: nil)
     
-    private let originalTitlesLabel: UILabel = {
-        let label = UILabel()
-        label.font = .preferredFont(forTextStyle: .title2)
-        label.textColor = .secondaryLabel
-        label.numberOfLines = 0
-        label.textAlignment = .natural
-        label.adjustsFontForContentSizeCategory = true
-        label.adjustsFontSizeToFitWidth = true
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
+    private let synopsisHeaderLabel = FFLabel(font: .preferredFont(forTextStyle: .headline), textColor: .label)
     
-    private let releaseDateAndRunningTimeLabel: UILabel = {
-        let label = UILabel()
-        label.font = .preferredFont(forTextStyle: .title2)
-        label.textColor = .secondaryLabel
-        label.numberOfLines = 0
-        label.textAlignment = .natural
-        label.adjustsFontForContentSizeCategory = true
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
-    private let rottenTomatoesScoreLabel: UILabel = {
-        let label = UILabel()
-        label.font = .preferredFont(forTextStyle: .title2)
-        label.numberOfLines = 0
-        label.adjustsFontForContentSizeCategory = true
-        label.textAlignment = .natural
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
-    private let synopsisHeaderLabel: UILabel = {
-        let label = UILabel()
-        label.font = .preferredFont(forTextStyle: .headline)
-        label.textColor = .label
-        label.numberOfLines = 0
-        label.adjustsFontForContentSizeCategory = true
-        label.textAlignment = .left
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
-    private let synopsisLabel: UILabel = {
-        let label = UILabel()
-        label.font = .preferredFont(forTextStyle: .body)
-        label.textColor = .label
-        label.numberOfLines = 0
-        label.textAlignment = .natural
-        label.adjustsFontForContentSizeCategory = true
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
+    private let synopsisLabel = FFLabel(font: .preferredFont(forTextStyle: .body), textColor: .label)
     
     private let creditsContainer: UIStackView = {
         let creditsContainer = UIStackView()
