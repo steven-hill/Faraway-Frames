@@ -5,12 +5,14 @@
 //  Created by Steven Hill on 18/02/2026.
 //
 
-
 import Foundation
 
 final class MockDependencies: FilmsListServicing, ImageLoading {
+
+    private let shouldSucceed: Bool = ProcessInfo.processInfo.isUITestingMockNetworkSuccess
+    
     func makeFilmsListService() -> FilmsListService {
-        return MockFilmsListServiceForUITests()
+        return MockFilmsListServiceForUITests(shouldSucceed: shouldSucceed)
     }
     
     func makeImageLoader() -> ImageLoader {
