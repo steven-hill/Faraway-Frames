@@ -14,6 +14,7 @@ final class TabBarUITests: XCTestCase {
     override func setUpWithError() throws {
         app = XCUIApplication()
         app.launchArguments.append("-UITesting")
+        app.launchArguments.append("-UITestingMockNetworkSuccess")
         app.launch()
         continueAfterFailure = false
     }

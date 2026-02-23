@@ -8,7 +8,22 @@
 import Foundation
 
 final class MockFilmsListServiceForUITests: FilmsListService {
+    
+    let shouldSucceed: Bool
+    
+    init(shouldSucceed: Bool) {
+        self.shouldSucceed = shouldSucceed
+    }
+    
     func fetchAllFilms() async throws -> [Film] {
+        if shouldSucceed == true {
+            return try loadJSON()
+        } else {
+            throw getMockErrorFromEnvironment()
+        }
+    }
+    
+    private func loadJSON() throws -> [Film] {
         guard let bundle = Bundle(identifier: "com.StevenHill.Faraway-Frames"),
               let url = bundle.url(forResource: "GhibliFilmsUITests", withExtension: "json") else {
             fatalError("ghibliFilms JSON file not found")
@@ -18,6 +33,25 @@ final class MockFilmsListServiceForUITests: FilmsListService {
             return try JSONDecoder().decode([Film].self, from: data)
         } catch {
             fatalError("ghibliFilms JSON file decoding failed with error: \(error)")
+        }
+    }
+    
+    private func getMockErrorFromEnvironment() -> APIError {
+        let env = ProcessInfo.processInfo.environment
+        guard let type = env["MOCK_ERROR_TYPE"] else { return .unknown }
+        
+        switch type {
+        case "invalidURL":
+            return .invalidURL
+        case "invalidResponse":
+            return .invalidResponse
+        case "serverError":
+            let code = Int(env["MOCK_ERROR_CODE"] ?? "500") ?? 500
+            return .serverError(statusCode: code)
+        case "decodingError":
+            return .decodingError
+        default:
+            return .unknown
         }
     }
 }

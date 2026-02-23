@@ -14,6 +14,7 @@ final class ExploreDetailVCUITests: XCTestCase {
     override func setUpWithError() throws {
         app = XCUIApplication()
         app.launchArguments.append("-UITesting")
+        app.launchArguments.append("-UITestingMockNetworkSuccess")
         XCUIDevice.shared.orientation = .portrait
         app.launch()
         continueAfterFailure = false
@@ -21,6 +22,14 @@ final class ExploreDetailVCUITests: XCTestCase {
     
     override func tearDownWithError() throws {
         app = nil
+    }
+    
+    func test_exploreDetailVC_whenNoFilmIsSelected_displaysMessage() throws {
+        guard UIDevice.current.userInterfaceIdiom == .pad else {
+            throw XCTSkip("iPad-only test")
+        }
+        XCTAssertTrue(app.staticTexts["No Film Selected"].isHittable, "Should show a message.")
+        XCTAssertTrue(app.staticTexts["Pick a film from the list to see the details."].isHittable, "Should show a message.")
     }
     
     func test_exploreDetailVC_hasAllUIElements() {

@@ -12,9 +12,6 @@ final class ExploreListVCUITests: XCTestCase {
     private var app: XCUIApplication!
     
     override func setUpWithError() throws {
-        app = XCUIApplication()
-        app.launchArguments.append("-UITesting")
-        app.launch()
         continueAfterFailure = false
     }
     
@@ -23,12 +20,15 @@ final class ExploreListVCUITests: XCTestCase {
     }
     
     func test_exploreListVC_hasTitle() {
+        launchAppForNetworkSuccessCase()
+        
         let title = app.staticTexts["Explore"]
         
         XCTAssertTrue(title.exists, "Should have a title.")
     }
     
     func test_exploreListVC_title_transitionsToInlineOnScrollOnIphoneOnly() {
+        launchAppForNetworkSuccessCase()
         let title = app.staticTexts["Explore"]
         let initialY = title.frame.origin.y
 
@@ -44,6 +44,8 @@ final class ExploreListVCUITests: XCTestCase {
     }
     
     func test_exploreListVC_displaysCollectionViewInContentState() {
+        launchAppForNetworkSuccessCase()
+        
         let collectionView = app.collectionViews.element
         
         XCTAssertTrue(collectionView.exists, "Should exist.")
@@ -54,6 +56,8 @@ final class ExploreListVCUITests: XCTestCase {
     }
     
     func test_exploreListVC_canNavigateThroughFilms() {
+        launchAppForNetworkSuccessCase()
+        
         XCTAssertFalse(app.staticTexts["ExploreDetailVC_TitleLabel"].firstMatch.isHittable, "Should not be visible.")
         let collectionView = app.collectionViews.element
         collectionView.cells.element(boundBy: 0).tap()
@@ -68,7 +72,44 @@ final class ExploreListVCUITests: XCTestCase {
         XCTAssertFalse(collectionView.isHittable, "Should be off screen.")
     }
     
+    func test_exploreListVC_whenURLIsInvalid_showsErrorMessageAndRetryButton() {
+        launchAppForNetworkFailureCase(with: .invalidURL)
+        
+        XCTAssertTrue(app.staticTexts["Error loading films: Invalid URL"].exists, "Should show error message.")
+        XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
+    }
+    
+    func test_exploreListVC_whenResponseIsInvalid_showsErrorMessageAndRetryButton() {
+        launchAppForNetworkFailureCase(with: .invalidResponse)
+        
+        XCTAssertTrue(app.staticTexts["Error loading films: Invalid response"].exists, "Should show error message.")
+        XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
+    }
+    
+    func test_exploreListVC_whenServerReturns500Error_showsErrorMessageAndRetryButton() {
+        launchAppForNetworkFailureCase(with: .serverError(statusCode: 500))
+        
+        XCTAssertTrue(app.staticTexts["Error loading films: Server error with status code: 500"].exists, "Should show error message.")
+        XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
+    }
+    
+    func test_exploreListVC_forDecodingError_showsErrorMessageAndRetryButton() {
+        launchAppForNetworkFailureCase(with: .decodingError)
+        
+        XCTAssertTrue(app.staticTexts["Error loading films: Failed to decode data"].exists, "Should show error message.")
+        XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
+    }
+    
+    func test_exploreListVC_forUnknownError_showsErrorMessageAndRetryButton() {
+        launchAppForNetworkFailureCase(with: .unknown)
+        
+        XCTAssertTrue(app.staticTexts["Error loading films: Unknown error"].exists, "Should show error message.")
+        XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
+    }
+    
     func test_exploreListVC_searchTextField_initialState() {
+        launchAppForNetworkSuccessCase()
+        
         let searchTextField = app.searchFields["ExploreListVC_SearchBar_SearchField"]
         
         XCTAssertTrue(searchTextField.exists, "Should exist.")
@@ -78,12 +119,16 @@ final class ExploreListVCUITests: XCTestCase {
     }
     
     func test_exploreListVC_searchTextField_displaysACancelButton_whenSearching() {
+        launchAppForNetworkSuccessCase()
+        
         let searchTextField = setUpSearchTextFieldAndEnterText("Castle in the Sky")
         
         XCTAssertTrue(searchTextField.buttons.element.firstMatch.exists, "Should exist.")
     }
     
     func test_exploreListVC_searchTextField_displaysTextTypedIntoItAndCanClearTextViaButton() {
+        launchAppForNetworkSuccessCase()
+        
         let searchTextField = setUpSearchTextFieldAndEnterText("Castle in the Sky")
         XCTAssertEqual(searchTextField.value as! String, "Castle in the Sky", "Should show the text that was typed in.")
         
@@ -92,6 +137,8 @@ final class ExploreListVCUITests: XCTestCase {
     }
     
     func test_exploreListVC_searchTextField_canAlsoClearTextViaDeleteKey() {
+        launchAppForNetworkSuccessCase()
+        
         let searchTextField = setUpSearchTextFieldAndEnterText("C")
         app.keys["delete"].firstMatch.tap()
         
@@ -99,6 +146,8 @@ final class ExploreListVCUITests: XCTestCase {
     }
     
     func test_exploreListVC_searchResultsAppearForValidSearchQuery() {
+        launchAppForNetworkSuccessCase()
+        
         _ = setUpSearchTextFieldAndEnterText("Castle in the Sky")
         let collectionView = app.collectionViews.element
         
@@ -106,6 +155,8 @@ final class ExploreListVCUITests: XCTestCase {
     }
     
     func test_exploreListVC_showsNoSearchResultsForInvalidSearchQuery() {
+        launchAppForNetworkSuccessCase()
+        
         _ = setUpSearchTextFieldAndEnterText("Invalid query")
         let collectionView = app.collectionViews.element
         
@@ -113,12 +164,37 @@ final class ExploreListVCUITests: XCTestCase {
     }
     
     func test_exploreListVC_doesNotPerformSearchIfTextFieldIsEmpty() {
+        launchAppForNetworkSuccessCase()
+        
         _ = setUpSearchTextFieldAndEnterText("")
         
         XCTAssertFalse(app.buttons["Search"].firstMatch.isEnabled, "Should be disabled.")
     }
     
-    // MARK: - Helper method
+    func test_exploreListVC_searchTextField__isDisabled_whenNetworkCallFails() {
+        launchAppForNetworkFailureCase(with: .unknown)
+        let searchTextField = app.searchFields["ExploreListVC_SearchBar_SearchField"]
+        
+        XCTAssertTrue(searchTextField.exists, "Should exist.")
+        XCTAssertTrue(searchTextField.isHittable, "Should be able to be tapped.")
+        XCTAssertFalse(searchTextField.isEnabled, "Should be disabled.")
+        XCTAssertNotNil(searchTextField.placeholderValue, "Should have a placeholder.")
+    }
+    
+    // MARK: - Helper methods
+    private func launchAppForNetworkSuccessCase() {
+        app = XCUIApplication()
+        app.launchArguments.append("-UITesting")
+        app.launchArguments.append("-UITestingMockNetworkSuccess")
+        app.launch()
+    }
+    
+    private func launchAppForNetworkFailureCase(with error: UITestError) {
+        app = XCUIApplication()
+        app.launchArguments.append("-UITesting")
+        app.launch(with: error)
+    }
+    
     private func setUpSearchTextFieldAndEnterText(_ text: String) -> XCUIElement {
         let searchTextField = app.searchFields["ExploreListVC_SearchBar_SearchField"]
         searchTextField.tap()

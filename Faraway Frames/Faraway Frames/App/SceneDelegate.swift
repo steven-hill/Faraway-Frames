@@ -11,22 +11,26 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     var window: UIWindow?
     var mainCoordinator: MainCoordinator?
-    private let appContainer = AppDependencyContainer()
     
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         let window = UIWindow(windowScene: windowScene)
-        
-        if ProcessInfo.processInfo.isUITesting {
-            let mockDependenciesContainer = MockDependencies()
-            mainCoordinator = MainCoordinator(window: window, dependencies: mockDependenciesContainer)
-            UIView.setAnimationsEnabled(false)
-        } else {
-            mainCoordinator = MainCoordinator(window: window, dependencies: appContainer)
-        }
-        
+        setNetworkDependencies(with: window)
         mainCoordinator?.start()
         self.window = window
+    }
+    
+    private func setNetworkDependencies(with window: UIWindow) {
+        typealias Dependencies = FilmsListServicing & ImageLoading
+        let dependencies: Dependencies
+        
+        if ProcessInfo.processInfo.isUITesting {
+            UIView.setAnimationsEnabled(false)
+            dependencies = MockDependencies()
+        } else {
+            dependencies = AppDependencyContainer()
+        }
+        mainCoordinator = MainCoordinator(window: window, dependencies: dependencies)
     }
     
     func sceneDidDisconnect(_ scene: UIScene) {

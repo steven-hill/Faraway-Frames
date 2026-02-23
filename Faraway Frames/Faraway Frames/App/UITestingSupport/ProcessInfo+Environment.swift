@@ -11,4 +11,10 @@ extension ProcessInfo {
     var isUITesting: Bool {
         arguments.contains(LaunchArguments.uiTesting)
     }
+    var isUITestingMockNetworkSuccess: Bool {
+        arguments.contains(LaunchArguments.uiTestingMockNetworkSuccess)
+    }
+    var isUITestingMockNetworkFailure: Bool {
+        arguments.contains(LaunchArguments.uiTestingMockNetworkFailure)
+    }
 }
