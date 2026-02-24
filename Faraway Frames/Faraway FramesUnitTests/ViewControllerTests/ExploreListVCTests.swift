@@ -9,6 +9,8 @@ import Testing
 import UIKit
 @testable import Faraway_Frames
 
+private let isPad = DispatchQueue.main.sync { UIDevice.current.userInterfaceIdiom == .pad }
+
 @MainActor
 struct ExploreListVCTests {
     
@@ -101,14 +103,14 @@ struct ExploreListVCTests {
         #expect(mockService.fetchWasCalled == true, "Should call fetchAllFilms once.")
     }
     
-    @Test("ExploreListVC shows error view for all API errors", arguments: [
+    @Test("ExploreListVC shows retry button title for all API errors", arguments: [
         APIError.invalidURL,
         APIError.invalidResponse,
         APIError.serverError(statusCode: 500),
         APIError.decodingError,
         APIError.unknown
     ])
-    func exploreListVC_hasRetryButtonTitle_forAllErrors(expectedError: APIError) async {
+    func exploreListVC_showsRetryButtonTitle_forAllErrors(expectedError: APIError) async {
         let mockService = MockFilmsListService()
         mockService.result = .failure(expectedError)
         let imageLoader = MockImageLoader()
@@ -197,7 +199,7 @@ struct ExploreListVCTests {
         #expect(updatedConfig?.image == UIImage(systemName: "photo"), "Placeholder image should be used if image loading fails.")
     }
     
-    @Test func exploreListVC_setssearchControllerSearchResultsUpdater() {
+    @Test func exploreListVC_setsSearchControllerSearchResultsUpdater() {
         let sut = makeSUT()
         
         sut.loadViewIfNeeded()
@@ -214,7 +216,7 @@ struct ExploreListVCTests {
         #expect(((sut.searchController.searchBar.text?.isEmpty) != nil), "Search bar text should be nil on init.")
     }
     
-    @Test func exploreListVC_searchIsNotAttempted_whenSearchTextIsEmpty() async {
+    @Test func exploreListVC_whenSearchTextIsEmpty_searchIsNotAttempted() async {
         let mockFilmsListService = MockServiceHelper.setupMockServiceForSuccessCase()
         let imageLoader = MockImageLoader()
         let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
@@ -228,7 +230,7 @@ struct ExploreListVCTests {
         #expect(sut.films.count == 22, "When no search is attempted, the VC's films array should still contain all films.")
     }
     
-    @Test func exploreListVC_searchIsNotAttempted_whenFilmsArrayIsEmpty() {
+    @Test func exploreListVC_whenFilmsArrayIsEmpty_searchIsNotAttempted() {
         let sut = makeSUT()
 
         sut.updateSearchResults(for: sut.searchController)
@@ -238,7 +240,7 @@ struct ExploreListVCTests {
         #expect(sut.viewModel.filteredFilms.isEmpty, "View model's filtered films should be empty.")
     }
     
-    @Test func exploreListVC_showsFilteredResults_whenSearchWasSuccessful() async {
+    @Test func exploreListVC_whenSearchWasSuccessful_showsFilteredResults() async {
         let mockFilmsListService = MockServiceHelper.setupMockServiceForSuccessCase()
         let imageLoader = MockImageLoader()
         let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
@@ -266,7 +268,7 @@ struct ExploreListVCTests {
         #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil.")
     }
     
-    @Test func exploreListVC_showsEmptySearchResultsConfig_whenThereAreNoSearchResults() async {
+    @Test func exploreListVC_whenThereAreNoSearchResults_showsEmptySearchResultsConfig() async {
         let mockFilmsListService = MockServiceHelper.setupMockServiceForSuccessCase()
         let imageLoader = MockImageLoader()
         let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
@@ -297,7 +299,7 @@ struct ExploreListVCTests {
         #expect(sut.films.count == 22, "Should have an array of all films.")
     }
     
-    @Test func exploreListVC_searchBarIsNotEnabled_whenLoadingAllFilms() {
+    @Test func exploreListVC_whenLoadingAllFilms_searchBarIsNotEnabled() {
         let mockFilmsListService = MockFilmsListService()
         let imageLoader = MockImageLoader()
         let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
@@ -309,7 +311,7 @@ struct ExploreListVCTests {
         #expect(sut.searchController.searchBar.isEnabled == false, "Should be false.")
     }
     
-    @Test func exploreListVC_searchBarIsEnabled_WhenThereIsFilmsContentFromNetworkCall() async {
+    @Test func exploreListVC_whenThereIsFilmsContentFromNetworkCall_searchBarIsEnabled() async {
         let mockFilmsListService = MockServiceHelper.setupMockServiceForSuccessCase()
         let imageLoader = MockImageLoader()
         let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
@@ -322,7 +324,7 @@ struct ExploreListVCTests {
         #expect(sut.searchController.searchBar.isEnabled == true, "Should be true.")
     }
     
-    @Test func exploreListVC_searchBarIsEnabled_WhenThereIsFilmsContentFromSearch() async {
+    @Test func exploreListVC_whenThereIsFilmsContentFromSearch_searchBarIsEnabled() async {
         let mockFilmsListService = MockServiceHelper.setupMockServiceForSuccessCase()
         let imageLoader = MockImageLoader()
         let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
@@ -337,7 +339,7 @@ struct ExploreListVCTests {
         #expect(sut.searchController.searchBar.isEnabled == true, "Should be true.")
     }
     
-    @Test func exploreListVC_searchBarIsEnabled_WhenThereAreNoSearchResults() async {
+    @Test func exploreListVC_whenThereAreNoSearchResults_searchBarIsEnabled() async {
         let mockFilmsListService = MockServiceHelper.setupMockServiceForSuccessCase()
         let imageLoader = MockImageLoader()
         let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
@@ -392,7 +394,7 @@ struct ExploreListVCTests {
         #expect(spy.selectedFilm?.title == "Castle in the Sky", "Should be `Castle in the Sky`.")
     }
     
-    @Test func exploreListVC_didSelectItemAt_doesNotNotifyDelegate_whenIndexPathIsInvalid() {
+    @Test func exploreListVC_whenIndexPathIsInvalid_didSelectItemAt_doesNotNotifyDelegate() {
         let sut = makeSUT()
         let spy = ExploreNavigationSpy()
         sut.navigationDelegate = spy
@@ -407,7 +409,7 @@ struct ExploreListVCTests {
         #expect(spy.didSelectFilmCalled == false, "Should be false.")
     }
     
-    @Test func exploreListVC_didSelectItemAt_doesNotNotifyDelegate_whenFilmIsMissingFromLookup() async {
+    @Test func exploreListVC_whenFilmIsMissingFromLookup_didSelectItemAt_doesNotNotifyDelegate() async {
         let sut = makeSUT()
         let spy = ExploreNavigationSpy()
         sut.navigationDelegate = spy
@@ -423,8 +425,9 @@ struct ExploreListVCTests {
         
         #expect(spy.didSelectFilmCalled == false, "Should be false.")
     }
-    
-    @Test func exploreListVC_didSelectItemAt_deselectsItemOnIphone() {
+
+    @Test("iPhone only: collection view cell deselects after selection", .disabled(if: isPad))
+    func exploreListVC_didSelectItemAt_deselectsItem() {
         let sut = makeSUT()
         let spy = ExploreNavigationSpy()
         spy.shouldDeselectAfterSelection = true
@@ -441,7 +444,8 @@ struct ExploreListVCTests {
         #expect(sut.collectionView.indexPathsForSelectedItems?.isEmpty == true, "Should be empty.")
     }
     
-    @Test func exploreListVC_didSelectItemAt_keepsItemSelectedOnIpad() {
+    @Test("iPad only: collection view cell stays selected after selection", .enabled(if: isPad))
+    func exploreListVC_didSelectItemAt_keepsItemSelected() {
         let sut = makeSUT()
         let spy = ExploreNavigationSpy()
         sut.navigationDelegate = spy
