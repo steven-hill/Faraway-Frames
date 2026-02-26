@@ -150,7 +150,8 @@ final class ExploreListVC: UIViewController {
     
     private func createErrorConfig(error: APIError) -> UIContentUnavailableConfiguration {
         var config = UIContentUnavailableConfiguration.empty()
-        config.text = "Error loading films: \(error.description)"
+        config.text = "Error loading films"
+        config.secondaryText = "\(error.description)"
         config.image = UIImage(systemName: "exclamationmark.triangle")
         config.imageProperties.tintColor = .systemRed
         config.button = .prominentGlass()

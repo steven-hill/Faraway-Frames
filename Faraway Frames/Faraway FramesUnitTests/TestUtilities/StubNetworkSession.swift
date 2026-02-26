@@ -9,6 +9,7 @@ import Foundation
 @testable import Faraway_Frames
 
 struct StubNetworkSession: NetworkSession {
+    let configuration: URLSessionConfiguration = .default
     var data: Data?
     var response: URLResponse?
 

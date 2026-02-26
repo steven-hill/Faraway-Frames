@@ -12,6 +12,10 @@ extension XCUIApplication {
         self.launchArguments.append("-UITestingMockNetworkFailure")
         
         switch error {
+        case .notConnectedToInternet:
+            self.launchEnvironment["MOCK_ERROR_TYPE"] = "notConnectedToInternet"
+        case .networkTimeout:
+            self.launchEnvironment["MOCK_ERROR_TYPE"] = "networkTimeout"
         case .invalidURL:
             self.launchEnvironment["MOCK_ERROR_TYPE"] = "invalidURL"
         case .invalidResponse:

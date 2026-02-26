@@ -13,6 +13,8 @@ final class FilmsListAPIClient: FilmsListService {
     
     init(session: NetworkSession = URLSession.shared, decoder: JSONDecoder = JSONDecoder()) {
         self.session = session
+        self.session.configuration.timeoutIntervalForRequest = 15
+        self.session.configuration.timeoutIntervalForResource = 60
         self.decoder = decoder
     }
     

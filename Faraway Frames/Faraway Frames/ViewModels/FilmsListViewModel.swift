@@ -39,9 +39,21 @@ final class FilmsListViewModel {
             filmsListError = error
             delegate?.didFailToLoadFilms()
             currentState = .error(filmsListError ?? APIError.unknown)
-        } catch {
-            delegate?.didFailToLoadFilms()
-            currentState = .error(APIError.unknown)
+        } catch(let error) {
+            if let otherError = error as? URLError {
+                switch otherError.code {
+                case .notConnectedToInternet:
+                    currentState = .error(APIError.notConnectedToInternet)
+                case .timedOut:
+                    currentState = .error(APIError.networkTimeout)
+                default:
+                    currentState = .error(APIError.unknown)
+                }
+                delegate?.didFailToLoadFilms()
+            } else {
+                currentState = .error(APIError.unknown)
+                delegate?.didFailToLoadFilms()
+            }
         }
     }
     
