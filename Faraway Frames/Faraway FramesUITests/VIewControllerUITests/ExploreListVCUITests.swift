@@ -72,38 +72,59 @@ final class ExploreListVCUITests: XCTestCase {
         XCTAssertFalse(collectionView.isHittable, "Should be off screen.")
     }
     
+    func test_exploreListVC_whenNotConnectedToInternet_showsErrorMessageAndRetryButton() {
+        launchAppForNetworkFailureCase(with: .notConnectedToInternet)
+        
+        XCTAssertTrue(app.staticTexts["Error loading films"].exists, "Should show error text.")
+        XCTAssertTrue(app.staticTexts["The internet connection appears to be offline"].exists, "Should show error secondary text.")
+        XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
+    }
+    
+    func test_exploreListVC_whenNetworkRequestTimesOut_showsErrorMessageAndRetryButton() {
+        launchAppForNetworkFailureCase(with: .networkTimeout)
+        
+        XCTAssertTrue(app.staticTexts["Error loading films"].exists, "Should show error text.")
+        XCTAssertTrue(app.staticTexts["Network request timed out"].exists, "Should show error secondary text.")
+        XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
+    }
+    
     func test_exploreListVC_whenURLIsInvalid_showsErrorMessageAndRetryButton() {
         launchAppForNetworkFailureCase(with: .invalidURL)
         
-        XCTAssertTrue(app.staticTexts["Error loading films: Invalid URL"].exists, "Should show error message.")
+        XCTAssertTrue(app.staticTexts["Error loading films"].exists, "Should show error text.")
+        XCTAssertTrue(app.staticTexts["Invalid URL"].exists, "Should show error secondary text.")
         XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
     }
     
     func test_exploreListVC_whenResponseIsInvalid_showsErrorMessageAndRetryButton() {
         launchAppForNetworkFailureCase(with: .invalidResponse)
         
-        XCTAssertTrue(app.staticTexts["Error loading films: Invalid response"].exists, "Should show error message.")
+        XCTAssertTrue(app.staticTexts["Error loading films"].exists, "Should show error text.")
+        XCTAssertTrue(app.staticTexts["Invalid response"].exists, "Should show error secondary text.")
         XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
     }
     
     func test_exploreListVC_whenServerReturns500Error_showsErrorMessageAndRetryButton() {
         launchAppForNetworkFailureCase(with: .serverError(statusCode: 500))
         
-        XCTAssertTrue(app.staticTexts["Error loading films: Server error with status code: 500"].exists, "Should show error message.")
+        XCTAssertTrue(app.staticTexts["Error loading films"].exists, "Should show error text.")
+        XCTAssertTrue(app.staticTexts["Server error with status code: 500"].exists, "Should show error secondary text.")
         XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
     }
     
     func test_exploreListVC_forDecodingError_showsErrorMessageAndRetryButton() {
         launchAppForNetworkFailureCase(with: .decodingError)
         
-        XCTAssertTrue(app.staticTexts["Error loading films: Failed to decode data"].exists, "Should show error message.")
+        XCTAssertTrue(app.staticTexts["Error loading films"].exists, "Should show error text.")
+        XCTAssertTrue(app.staticTexts["Failed to decode data"].exists, "Should show error secondary text.")
         XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
     }
     
     func test_exploreListVC_forUnknownError_showsErrorMessageAndRetryButton() {
         launchAppForNetworkFailureCase(with: .unknown)
         
-        XCTAssertTrue(app.staticTexts["Error loading films: Unknown error"].exists, "Should show error message.")
+        XCTAssertTrue(app.staticTexts["Error loading films"].exists, "Should show error text.")
+        XCTAssertTrue(app.staticTexts["Unknown error"].exists, "Should show error secondary text.")
         XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
     }
     
