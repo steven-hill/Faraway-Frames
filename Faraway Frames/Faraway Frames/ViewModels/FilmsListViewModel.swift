@@ -23,7 +23,6 @@ final class FilmsListViewModel {
     private(set) var films: [Film] = []
     private(set) var currentState: FilmsListState = .loadingAllFilms
     var filteredFilms: [Film] = []
-    var filmsListError: APIError?
     
     init(filmsListService: FilmsListService, imageLoader: ImageLoader) {
         self.filmsListService = filmsListService
@@ -35,26 +34,29 @@ final class FilmsListViewModel {
             films = try await filmsListService.fetchAllFilms()
             delegate?.didUpdateFilms(films)
             currentState = .content
-        } catch let error as APIError {
-            filmsListError = error
+        } catch {
+            let networkError = handleFailure(error)
+            currentState = .error(networkError)
             delegate?.didFailToLoadFilms()
-            currentState = .error(filmsListError ?? APIError.unknown)
-        } catch(let error) {
-            if let otherError = error as? URLError {
-                switch otherError.code {
-                case .notConnectedToInternet:
-                    currentState = .error(APIError.notConnectedToInternet)
-                case .timedOut:
-                    currentState = .error(APIError.networkTimeout)
-                default:
-                    currentState = .error(APIError.unknown)
-                }
-                delegate?.didFailToLoadFilms()
-            } else {
-                currentState = .error(APIError.unknown)
-                delegate?.didFailToLoadFilms()
+        }
+    }
+    
+    private func handleFailure(_ error: Error) -> APIError {
+        if let apiError = error as? APIError {
+            return apiError
+        }
+        
+        if let urlError = error as? URLError {
+            switch urlError.code {
+            case .notConnectedToInternet:
+                return .noInternetConnection
+            case .timedOut:
+                return .networkTimeout
+            default:
+                return .unknown
             }
         }
+        return .unknown
     }
     
     func getImage(for film: Film) async -> UIImage? {

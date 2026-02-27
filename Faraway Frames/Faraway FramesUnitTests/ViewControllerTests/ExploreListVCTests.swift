@@ -68,6 +68,8 @@ struct ExploreListVCTests {
     }
     
     @Test("ExploreListVC shows error view for all API errors", arguments: [
+        APIError.noInternetConnection,
+        APIError.networkTimeout,
         APIError.invalidURL,
         APIError.invalidResponse,
         APIError.serverError(statusCode: 500),
@@ -104,6 +106,8 @@ struct ExploreListVCTests {
     }
     
     @Test("ExploreListVC shows retry button title for all API errors", arguments: [
+        APIError.noInternetConnection,
+        APIError.networkTimeout,
         APIError.invalidURL,
         APIError.invalidResponse,
         APIError.serverError(statusCode: 500),
@@ -355,6 +359,8 @@ struct ExploreListVCTests {
     }
     
     @Test("ExploreListVC search bar is not enabled for all API errors", arguments: [
+        APIError.noInternetConnection,
+        APIError.networkTimeout,
         APIError.invalidURL,
         APIError.invalidResponse,
         APIError.serverError(statusCode: 500),
