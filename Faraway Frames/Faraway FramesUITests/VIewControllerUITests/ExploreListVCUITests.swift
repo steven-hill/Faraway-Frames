@@ -73,7 +73,7 @@ final class ExploreListVCUITests: XCTestCase {
     }
     
     func test_exploreListVC_whenNotConnectedToInternet_showsErrorMessageAndRetryButton() {
-        launchAppForNetworkFailureCase(with: .notConnectedToInternet)
+        launchAppForNetworkFailureCase(with: .noInternetConnection)
         
         XCTAssertTrue(app.staticTexts["Error loading films"].exists, "Should show error text.")
         XCTAssertTrue(app.staticTexts["The internet connection appears to be offline"].exists, "Should show error secondary text.")

@@ -8,7 +8,7 @@
 import Foundation
 
 enum UITestError: Error {
-    case notConnectedToInternet
+    case noInternetConnection
     case networkTimeout
     case invalidURL
     case invalidResponse

@@ -41,8 +41,8 @@ final class MockFilmsListServiceForUITests: FilmsListService {
         guard let type = env["MOCK_ERROR_TYPE"] else { return .unknown }
         
         switch type {
-        case "notConnectedToInternet":
-            return .notConnectedToInternet
+        case "noInternetConnection":
+            return .noInternetConnection
         case "networkTimeout":
             return .networkTimeout
         case "invalidURL":
