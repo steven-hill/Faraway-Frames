@@ -74,10 +74,6 @@ final class ExploreDetailVC: UIViewController {
         setupScrollView()
         addSubviews()
         setupConstraints()
-        registerForTraitChanges([UITraitHorizontalSizeClass.self]) { (self: Self, _) in
-            self.updateLayoutForCurrentSizeClass()
-        }
-        updateLayoutForCurrentSizeClass()
     }
     
     override func updateContentUnavailableConfiguration(using state: UIContentUnavailableConfigurationState) {
@@ -114,14 +110,39 @@ final class ExploreDetailVC: UIViewController {
         config.secondaryText = "Pick a film from the list to see the details."
         return config
     }
-    
-    private func updateLayoutForCurrentSizeClass() {
-        movieBannerHeightConstraint?.isActive = false
-        let multiplier: CGFloat = (traitCollection.horizontalSizeClass == .compact) ? 0.3 : 0.75
-        movieBannerHeightConstraint = movieBanner.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: multiplier)
-        movieBannerHeightConstraint?.isActive = true
-        UIView.animate(withDuration: 0.3) {
+
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+
+        coordinator.animate(alongsideTransition: { _ in
+            self.updateLayoutFor(size: size)
             self.view.layoutIfNeeded()
+        })
+    }
+
+    private func updateLayoutFor(size: CGSize) {
+        movieBannerHeightConstraint?.isActive = false
+
+        let isPad = UIDevice.current.userInterfaceIdiom == .pad
+        let isPortrait = size.height >= size.width
+
+        let multiplier: CGFloat
+        if isPad {
+            multiplier = (traitCollection.horizontalSizeClass == .compact) ? 0.3 : 0.75
+        } else {
+            multiplier = isPortrait ? 0.3 : 0.75
+        }
+
+        movieBannerHeightConstraint =
+            movieBanner.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: multiplier)
+        movieBannerHeightConstraint?.isActive = true
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+
+        if movieBannerHeightConstraint == nil {
+            updateLayoutFor(size: view.bounds.size)
         }
     }
     
