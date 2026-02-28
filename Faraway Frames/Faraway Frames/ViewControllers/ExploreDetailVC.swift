@@ -12,6 +12,8 @@ final class ExploreDetailVC: UIViewController {
     // MARK: - Properties
     let filmDetailViewModel: FilmDetailViewModel
     private var movieBannerHeightConstraint: NSLayoutConstraint?
+    private var contentViewLeadingConstraint: NSLayoutConstraint?
+    private var contentViewTrailingConstraint: NSLayoutConstraint?
     
     // MARK: - UI Components
     private let scrollView = UIScrollView()
@@ -74,10 +76,6 @@ final class ExploreDetailVC: UIViewController {
         setupScrollView()
         addSubviews()
         setupConstraints()
-        registerForTraitChanges([UITraitHorizontalSizeClass.self]) { (self: Self, _) in
-            self.updateLayoutForCurrentSizeClass()
-        }
-        updateLayoutForCurrentSizeClass()
     }
     
     override func updateContentUnavailableConfiguration(using state: UIContentUnavailableConfigurationState) {
@@ -114,14 +112,51 @@ final class ExploreDetailVC: UIViewController {
         config.secondaryText = "Pick a film from the list to see the details."
         return config
     }
-    
-    private func updateLayoutForCurrentSizeClass() {
-        movieBannerHeightConstraint?.isActive = false
-        let multiplier: CGFloat = (traitCollection.horizontalSizeClass == .compact) ? 0.3 : 0.75
-        movieBannerHeightConstraint = movieBanner.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: multiplier)
-        movieBannerHeightConstraint?.isActive = true
-        UIView.animate(withDuration: 0.3) {
+
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+
+        coordinator.animate(alongsideTransition: { _ in
+            self.updateLayoutFor(size: size)
             self.view.layoutIfNeeded()
+        })
+    }
+
+    private func updateLayoutFor(size: CGSize) {
+        movieBannerHeightConstraint?.isActive = false
+        contentViewLeadingConstraint?.isActive = false
+        contentViewTrailingConstraint?.isActive = false
+        
+        let isPad = UIDevice.current.userInterfaceIdiom == .pad
+        let isPortrait = size.height >= size.width
+        
+        let multiplier: CGFloat
+        if isPad {
+            multiplier = (traitCollection.horizontalSizeClass == .compact) ? 0.3 : 0.75
+        } else {
+            multiplier = isPortrait ? 0.3 : 0.75
+        }
+        movieBannerHeightConstraint =
+        movieBanner.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: multiplier)
+        
+        if isPad || isPortrait {
+            contentViewLeadingConstraint = contentView.leadingAnchor.constraint(equalTo: view.leadingAnchor)
+            contentViewTrailingConstraint = contentView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+        } else {
+            contentViewLeadingConstraint = contentView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor)
+            contentViewTrailingConstraint = contentView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor)
+        }
+        
+        movieBannerHeightConstraint?.isActive = true
+        contentViewLeadingConstraint?.isActive = true
+        contentViewTrailingConstraint?.isActive = true
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        if movieBannerHeightConstraint == nil || contentViewLeadingConstraint == nil || contentViewTrailingConstraint == nil {
+            updateLayoutFor(size: view.bounds.size)
         }
     }
     
@@ -185,14 +220,11 @@ final class ExploreDetailVC: UIViewController {
             scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             
             contentView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
-            contentView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
-            contentView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
             contentView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
-            contentView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
             
             movieBanner.topAnchor.constraint(equalTo: contentView.topAnchor),
-            movieBanner.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            movieBanner.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            movieBanner.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            movieBanner.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             
             titleLabel.topAnchor.constraint(equalTo: movieBanner.bottomAnchor, constant: padding),
             titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: padding),

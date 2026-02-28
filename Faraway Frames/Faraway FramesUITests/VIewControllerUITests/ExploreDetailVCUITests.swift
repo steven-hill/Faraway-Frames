@@ -42,7 +42,9 @@ final class ExploreDetailVCUITests: XCTestCase {
         tapFirstCollectionViewCell()
         
         XCUIDevice.shared.orientation = .landscapeLeft
+        assertExploreDetailElementsExist()
         
+        XCUIDevice.shared.orientation = .landscapeRight
         assertExploreDetailElementsExist()
     }
     
