@@ -7,6 +7,7 @@
 - explore all Studio Ghibli films
 - search for films by title
 - view details about each film
+- support for portrait and landscape on iPhone and iPad
 
 ### Requirements
 - Swift 6
