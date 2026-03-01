@@ -109,7 +109,8 @@ struct FilmsListViewModelUnitTests {
         #expect(filmImage == nil, "Film image should be nil.")
     }
     
-    @Test func filmsListViewModel_filteredFilmsArray_isEmptyOnInit() {
+    @Test(.tags(.search))
+    func filmsListViewModel_filteredFilmsArray_isEmptyOnInit() {
         let mockService = MockServiceHelper.setupMockServiceForSuccessCase()
         let mockImageLoader = MockImageLoader()
         let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
@@ -117,7 +118,8 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.filteredFilms == [], "Should be empty at init.")
     }
     
-    @Test func filmsListViewModel_filter_doesNotUpdateFilteredFilmsArray_whenThereAreNoFilmsToSearchThrough() async {
+    @Test(.tags(.search))
+    func filmsListViewModel_filter_doesNotUpdateFilteredFilmsArray_whenThereAreNoFilmsToSearchThrough() async {
         let expectedError = APIError.unknown
         let mockService = MockFilmsListService()
         mockService.result = .failure(expectedError)
@@ -131,7 +133,8 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.filteredFilms.isEmpty, "Filtered films array should be empty.")
     }
     
-    @Test func filmsListViewModel_filter_withEmptyQuery_returnsAllFilmsAndAnEmptyFilteredFilmsArray() async {
+    @Test(.tags(.search))
+    func filmsListViewModel_filter_withEmptyQuery_returnsAllFilmsAndAnEmptyFilteredFilmsArray() async {
         let mockService = MockServiceHelper.setupMockServiceForSuccessCase()
         let mockImageLoader = MockImageLoader()
         let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
@@ -143,7 +146,8 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.filteredFilms.isEmpty, "Filtered films should be empty.")
     }
     
-    @Test func filmsListViewModel_filter_withPartialQueryMatch_returnsFilmsWithPartialMatches() async {
+    @Test(.tags(.search))
+    func filmsListViewModel_filter_withPartialQueryMatch_returnsFilmsWithPartialMatches() async {
         let mockService = MockServiceHelper.setupMockServiceForSuccessCase()
         let mockImageLoader = MockImageLoader()
         let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
@@ -155,7 +159,8 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.filteredFilms.count == 2, "Should have two films that have `cas` in the title.")
     }
     
-    @Test func filmsListViewModel_filter_isNotCaseSensitive() async {
+    @Test(.tags(.search))
+    func filmsListViewModel_filter_isNotCaseSensitive() async {
         let mockService = MockServiceHelper.setupMockServiceForSuccessCase()
         let mockImageLoader = MockImageLoader()
         let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
@@ -167,7 +172,8 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.filteredFilms.count == 2, "Should have two films that have `cas` in the title.")
     }
     
-    @Test func filmsListViewModel_filter_returnsEmptyArray_whenThereAreNoMatches() async {
+    @Test(.tags(.search))
+    func filmsListViewModel_filter_returnsEmptyArray_whenThereAreNoMatches() async {
         let mockService = MockServiceHelper.setupMockServiceForSuccessCase()
         let mockImageLoader = MockImageLoader()
         let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
@@ -179,7 +185,8 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.currentState == .emptySearchResults, "Should be `.emptySearchResults` state.")
     }
     
-    @Test func filmsListViewModel_filter_removesLeadingAndTrailingWhiteSpaces() async {
+    @Test(.tags(.search))
+    func filmsListViewModel_filter_removesLeadingAndTrailingWhiteSpaces() async {
         let mockService = MockServiceHelper.setupMockServiceForSuccessCase()
         let mockImageLoader = MockImageLoader()
         let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
@@ -190,7 +197,8 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.filteredFilms.count == 2, "Should be two films.")
     }
     
-    @Test func filmsListViewModel_filter_removesMultipleSpacesInBetweenWords() async {
+    @Test(.tags(.search))
+    func filmsListViewModel_filter_removesMultipleSpacesInBetweenWords() async {
         let mockService = MockServiceHelper.setupMockServiceForSuccessCase()
         let mockImageLoader = MockImageLoader()
         let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
@@ -201,7 +209,8 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.filteredFilms.count == 1, "Should be one film.")
     }
     
-    @Test func filmsListViewModel_filter_removesPunctuation() async {
+    @Test(.tags(.search))
+    func filmsListViewModel_filter_removesPunctuation() async {
         let mockService = MockServiceHelper.setupMockServiceForSuccessCase()
         let mockImageLoader = MockImageLoader()
         let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
