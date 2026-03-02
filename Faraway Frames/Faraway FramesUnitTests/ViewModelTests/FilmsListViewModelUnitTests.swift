@@ -12,7 +12,7 @@ import Testing
 @MainActor
 struct FilmsListViewModelUnitTests {
     
-    @Test func filmsListViewModel_currentStateIsLoadingAllFilms_OnInit() {
+    @Test func filmsListViewModel_onInit_currentStateIsLoadingAllFilms() {
         let mockService = MockServiceHelper.setupMockServiceForSuccessCase()
         let mockImageLoader = MockImageLoader()
         let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
@@ -20,7 +20,7 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.currentState == .loadingAllFilms, "Should be `.loadingAllFilms`.")
     }
     
-    @Test func filmsListViewModel_gets22FilmsInSuccessCase() async throws {
+    @Test func filmsListViewModel_whenNetworkRequestIsSuccessful_gets22Films() async {
         let mockService = MockServiceHelper.setupMockServiceForSuccessCase()
         let mockImageLoader = MockImageLoader()
         let viewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
@@ -41,7 +41,7 @@ struct FilmsListViewModelUnitTests {
         #expect(mockService.fetchWasCalled == true, "The service should be told to fetch films.")
     }
     
-    @Test func filmsListViewModel_getAllFilms_duringNetworkRequestStateIsLoadingAllFilms() async {
+    @Test func filmsListViewModel_getAllFilms_duringNetworkRequest_currentStateIsLoadingAllFilms() async {
         let mockService = MockFilmsListService()
         let mockImageLoader = MockImageLoader()
         let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
@@ -63,7 +63,7 @@ struct FilmsListViewModelUnitTests {
         APIError.decodingError,
         APIError.unknown
     ])
-    func filmsListViewModel_handlesErrors(expectedError: APIError) async {
+    func filmsListViewModel_handlesAPIError(expectedError: APIError) async {
         let mockService = MockFilmsListService()
         mockService.result = .failure(expectedError)
         let mockImageLoader = MockImageLoader()
@@ -86,7 +86,7 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.currentState == .error(.unknown))
     }
     
-    @Test func filmsListViewModel_downloadsImageForFilm() async throws {
+    @Test func filmsListViewModel_downloadsImageForFilm() async {
         let mockService = MockServiceHelper.setupMockServiceForSuccessCase()
         let mockImageLoader = MockImageLoader()
         let viewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
@@ -97,7 +97,7 @@ struct FilmsListViewModelUnitTests {
         #expect(filmImage != nil, "Film image should not be nil.")
     }
     
-    @Test func filmsListViewModel_returnNilWhenFailedToDownloadFilmImage() async throws {
+    @Test func filmsListViewModel_whenFailsToDownloadFilmImage_returnsNil() async {
         let mockService = MockServiceHelper.setupMockServiceForSuccessCase()
         let mockImageLoader = MockImageLoader()
         mockImageLoader.shouldSucceed = false
@@ -110,7 +110,7 @@ struct FilmsListViewModelUnitTests {
     }
     
     @Test(.tags(.search))
-    func filmsListViewModel_filteredFilmsArray_isEmptyOnInit() {
+    func filmsListViewModel_filteredFilmsArray_onInit_isEmpty() {
         let mockService = MockServiceHelper.setupMockServiceForSuccessCase()
         let mockImageLoader = MockImageLoader()
         let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
@@ -119,7 +119,7 @@ struct FilmsListViewModelUnitTests {
     }
     
     @Test(.tags(.search))
-    func filmsListViewModel_filter_doesNotUpdateFilteredFilmsArray_whenThereAreNoFilmsToSearchThrough() async {
+    func filmsListViewModel_filter_whenThereAreNoFilmsToSearchThrough_doesNotUpdateFilteredFilmsArray() async {
         let expectedError = APIError.unknown
         let mockService = MockFilmsListService()
         mockService.result = .failure(expectedError)
@@ -173,7 +173,7 @@ struct FilmsListViewModelUnitTests {
     }
     
     @Test(.tags(.search))
-    func filmsListViewModel_filter_returnsEmptyArray_whenThereAreNoMatches() async {
+    func filmsListViewModel_filter_whenThereAreNoMatches_returnsEmptyArray() async {
         let mockService = MockServiceHelper.setupMockServiceForSuccessCase()
         let mockImageLoader = MockImageLoader()
         let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
@@ -221,7 +221,7 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.filteredFilms[0].title == "Castle in the Sky", "Should be `Castle in the Sky`.")
     }
     
-    @Test func filmsListViewModel_resetAllFilms_resetsFilmsArrayToAllFilms() async throws {
+    @Test func filmsListViewModel_resetAllFilms_resetsFilmsArrayToAllFilms() async {
         let mockService = MockServiceHelper.setupMockServiceForSuccessCase()
         let mockImageLoader = MockImageLoader()
         let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
