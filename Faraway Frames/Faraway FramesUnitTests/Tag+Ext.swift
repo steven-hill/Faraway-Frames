@@ -1,0 +1,15 @@
+//
+//  Tag+Ext.swift
+//  Faraway FramesTests
+//
+//  Created by Steven Hill on 02/03/2026.
+//
+
+import Testing
+
+extension Tag {
+    @Tag static var codingKeysTest: Self
+    @Tag static var initialisation: Self
+    @Tag static var networkRequest: Self
+    @Tag static var search: Self
+}
