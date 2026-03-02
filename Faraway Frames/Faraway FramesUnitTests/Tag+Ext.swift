@@ -9,5 +9,6 @@ import Testing
 
 extension Tag {
     @Tag static var networkRequest: Self
+    @Tag static var decoding: Self
     @Tag static var search: Self
 }

@@ -20,7 +20,8 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.currentState == .loadingAllFilms, "Should be `.loadingAllFilms`.")
     }
     
-    @Test func filmsListViewModel_whenNetworkRequestIsSuccessful_gets22Films() async {
+    @Test(.tags(.networkRequest))
+    func filmsListViewModel_whenNetworkRequestIsSuccessful_gets22Films() async {
         let mockService = MockServiceHelper.setupMockServiceForSuccessCase()
         let mockImageLoader = MockImageLoader()
         let viewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
@@ -31,7 +32,8 @@ struct FilmsListViewModelUnitTests {
         #expect(viewModel.currentState == .content, "Should be `.content`.")
     }
     
-    @Test func filmsListViewModel_getAllFilms_makesANetworkRequest() async {
+    @Test(.tags(.networkRequest))
+    func filmsListViewModel_getAllFilms_makesANetworkRequest() async {
         let mockService = MockFilmsListService()
         let mockImageLoader = MockImageLoader()
         let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
@@ -41,7 +43,8 @@ struct FilmsListViewModelUnitTests {
         #expect(mockService.fetchWasCalled == true, "The service should be told to fetch films.")
     }
     
-    @Test func filmsListViewModel_getAllFilms_duringNetworkRequest_currentStateIsLoadingAllFilms() async {
+    @Test(.tags(.networkRequest))
+    func filmsListViewModel_getAllFilms_duringNetworkRequest_currentStateIsLoadingAllFilms() async {
         let mockService = MockFilmsListService()
         let mockImageLoader = MockImageLoader()
         let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
@@ -54,7 +57,7 @@ struct FilmsListViewModelUnitTests {
         await task.value
     }
     
-    @Test("ViewModel handles all API errors correctly", arguments: [
+    @Test("ViewModel handles all API errors correctly", .tags(.networkRequest), arguments: [
         APIError.noInternetConnection,
         APIError.networkTimeout,
         APIError.invalidURL,
@@ -75,7 +78,8 @@ struct FilmsListViewModelUnitTests {
         #expect(viewModel.currentState == .error(expectedError), "Should be `.error(APIError)`.")
     }
     
-    @Test func filmsListViewModel_handlesGenericError() async {
+    @Test(.tags(.networkRequest))
+    func filmsListViewModel_handlesGenericError() async {
         let mockService = MockFilmsListService()
         mockService.result = .failure(NSError(domain: "test", code: -1))
         let mockImageLoader = MockImageLoader()
@@ -86,7 +90,8 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.currentState == .error(.unknown))
     }
     
-    @Test func filmsListViewModel_downloadsImageForFilm() async {
+    @Test(.tags(.networkRequest))
+    func filmsListViewModel_downloadsImageForFilm() async {
         let mockService = MockServiceHelper.setupMockServiceForSuccessCase()
         let mockImageLoader = MockImageLoader()
         let viewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
@@ -97,7 +102,8 @@ struct FilmsListViewModelUnitTests {
         #expect(filmImage != nil, "Film image should not be nil.")
     }
     
-    @Test func filmsListViewModel_whenFailsToDownloadFilmImage_returnsNil() async {
+    @Test(.tags(.networkRequest))
+    func filmsListViewModel_whenFailsToDownloadFilmImage_returnsNil() async {
         let mockService = MockServiceHelper.setupMockServiceForSuccessCase()
         let mockImageLoader = MockImageLoader()
         mockImageLoader.shouldSucceed = false
@@ -247,7 +253,8 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.filteredFilms.isEmpty, "Should be empty.")
     }
     
-    @Test func filmsListViewModel_resetAllFilms_resetsFilmsArrayToAllFilms() async {
+    @Test(.tags(.networkRequest))
+    func filmsListViewModel_resetAllFilms_resetsFilmsArrayToAllFilms() async {
         let mockService = MockServiceHelper.setupMockServiceForSuccessCase()
         let mockImageLoader = MockImageLoader()
         let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
@@ -259,7 +266,8 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.currentState == .content, "Should be `.content`.")
     }
     
-    @Test func filmsListViewModel_retryLoadingAllFilms_makesAnotherNetworkCall() async {
+    @Test(.tags(.networkRequest))
+    func filmsListViewModel_retryLoadingAllFilms_makesAnotherNetworkCall() async {
         let mockService = MockFilmsListService()
         let mockImageLoader = MockImageLoader()
         let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)

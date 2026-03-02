@@ -10,6 +10,7 @@ import Foundation
 @testable import Faraway_Frames
 
 @MainActor
+@Suite(.tags(.decoding))
 struct DecodingAllFilmsTests {
     
     @Test func decodingJSON_fromBundleFile_toFilmsArray_successfullyReturns22Films() throws {

@@ -12,7 +12,8 @@ import Foundation
 @MainActor
 struct FilmsListAPIClientTests {
     
-    @Test func filmsListAPIClient_fetchAllFilms_decodesDataOn200Response_withCorrectURL() async throws {
+    @Test(.tags(.networkRequest, .decoding))
+    func filmsListAPIClient_fetchAllFilms_decodesDataOn200Response_withCorrectURL() async throws {
         let mockData = makeValidMockFilmsData()
         let mockResponse = HTTPURLResponse(
             url: URL(string: makeFilmsURLString())!,
@@ -29,7 +30,8 @@ struct FilmsListAPIClientTests {
         #expect(result.first?.title == "Castle in the Sky", "Should be `Castle in the Sky`.")
     }
     
-    @Test func filmsListAPIClient_fetchAllFilms_throwsOnInvalidResponse() async {
+    @Test(.tags(.networkRequest))
+    func filmsListAPIClient_fetchAllFilms_throwsOnInvalidResponse() async {
         let mockData = Data()
         let invalidResponse = URLResponse(
             url: URL(string: makeFilmsURLString())!,
@@ -44,7 +46,8 @@ struct FilmsListAPIClientTests {
         }
     }
     
-    @Test func filmsListAPIClient_fetchAllFilms_throwsOnNon200To299Response() async {
+    @Test(.tags(.networkRequest))
+    func filmsListAPIClient_fetchAllFilms_throwsOnNon200To299Response() async {
         let mockFilmsData = Data()
         let statusCode = 500
         let mockResponse = HTTPURLResponse(
@@ -60,7 +63,8 @@ struct FilmsListAPIClientTests {
         }
     }
     
-    @Test func filmsListAPIClient_fetchAllFilms_throwsOnDataDecodingError() async {
+    @Test(.tags(.networkRequest, .decoding))
+    func filmsListAPIClient_fetchAllFilms_throwsOnDataDecodingError() async {
         let mockInvalidData = "invalid data".data(using: .utf8)!
         let mockResponse = HTTPURLResponse(
             url: URL(string: makeFilmsURLString())!,
