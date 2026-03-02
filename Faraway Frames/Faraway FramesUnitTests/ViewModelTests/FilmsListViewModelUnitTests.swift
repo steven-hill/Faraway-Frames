@@ -221,6 +221,32 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.filteredFilms[0].title == "Castle in the Sky", "Should be `Castle in the Sky`.")
     }
     
+    @Test(.tags(.search))
+    func filmsListViewModel_filter_handlesEmoji() async {
+        let mockService = MockServiceHelper.setupMockServiceForSuccessCase()
+        let mockImageLoader = MockImageLoader()
+        let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
+        await sut.getAllFilms()
+        
+        sut.filterFilms(by: "😎")
+        
+        #expect(sut.filteredFilms.isEmpty, "Should be empty.")
+    }
+    
+    @Test(.tags(.search))
+    func filmsListViewModel_filter_handlesTextAndEmoji() async {
+        let mockService = MockServiceHelper.setupMockServiceForSuccessCase()
+        let mockImageLoader = MockImageLoader()
+        let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
+        await sut.getAllFilms()
+        
+        sut.filterFilms(by: "Castle in the Sky😎")
+        #expect(sut.filteredFilms.isEmpty, "Should be empty.")
+        
+        sut.filterFilms(by: "😎Castle in the Sky")
+        #expect(sut.filteredFilms.isEmpty, "Should be empty.")
+    }
+    
     @Test func filmsListViewModel_resetAllFilms_resetsFilmsArrayToAllFilms() async {
         let mockService = MockServiceHelper.setupMockServiceForSuccessCase()
         let mockImageLoader = MockImageLoader()
