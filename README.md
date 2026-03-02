@@ -17,7 +17,7 @@
 ### Technical details
 - MVVM + Coordinator.
 - UI framework is UIKit.
-- Swift concurrency uses the default settings.
+- Swift concurrency uses the default settings (for Swift 6).
 - Networking with async/await, `URLSession` and `NSCache`.
 - The testing frameworks used are Swift Testing and XCTest, and the project is built with TDD.
 
