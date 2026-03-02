@@ -8,8 +8,6 @@
 import Testing
 
 extension Tag {
-    @Tag static var codingKeysTest: Self
-    @Tag static var initialisation: Self
     @Tag static var networkRequest: Self
     @Tag static var search: Self
 }

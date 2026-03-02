@@ -14,8 +14,7 @@ private let isPad = DispatchQueue.main.sync { UIDevice.current.userInterfaceIdio
 @MainActor
 struct ExploreListVCTests {
     
-    @Test(.tags(.initialisation))
-    func exploreListVC_canInit() {
+    @Test func exploreListVC_canInit() {
         let sut = makeSUT()
         _ = UINavigationController(rootViewController: sut)
         
@@ -24,8 +23,7 @@ struct ExploreListVCTests {
         #expect((sut.navigationController != nil), "VC should be inside a navigation controller.")
     }
     
-    @Test(.tags(.initialisation))
-    func exploreListVC_initiallyHasNoFilms() {
+    @Test func exploreListVC_initiallyHasNoFilms() {
         let sut = makeSUT()
         
         sut.loadViewIfNeeded()
@@ -33,8 +31,7 @@ struct ExploreListVCTests {
         #expect(sut.films.isEmpty, "VC's films should be empty initially.")
     }
     
-    @Test(.tags(.initialisation))
-    func exploreListVC_setsViewModelDelegateToSelf() {
+    @Test func exploreListVC_setsViewModelDelegateToSelf() {
         let sut = makeSUT()
         
         sut.loadViewIfNeeded()
@@ -42,8 +39,7 @@ struct ExploreListVCTests {
         #expect(sut.viewModel.delegate != nil, "View model's delegate should be set.")
     }
     
-    @Test(.tags(.initialisation))
-    func exploreListVC_setsCollectionViewDelegate() {
+    @Test func exploreListVC_setsCollectionViewDelegate() {
         let sut = makeSUT()
         
         sut.loadViewIfNeeded()
@@ -51,8 +47,7 @@ struct ExploreListVCTests {
         #expect(sut.collectionView.delegate != nil, "Collection view delegate should be set.")
     }
     
-    @Test(.tags(.initialisation))
-    func exploreListVC_setsCollectionViewDataSource() {
+    @Test func exploreListVC_setsCollectionViewDataSource() {
         let sut = makeSUT()
         
         sut.loadViewIfNeeded()
