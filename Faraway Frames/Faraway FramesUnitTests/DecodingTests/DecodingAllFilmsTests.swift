@@ -52,7 +52,3 @@ struct DecodingAllFilmsTests {
         #expect(films[5].runningTime == "93", "Should return the running time of the sixth film.")
     }
 }
-
-extension Tag {
-  @Tag static var codingKeysTest: Self
-}
