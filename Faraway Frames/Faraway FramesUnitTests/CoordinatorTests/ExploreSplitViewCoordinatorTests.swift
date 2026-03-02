@@ -12,7 +12,7 @@ import UIKit
 @MainActor
 struct ExploreSplitViewCoordinatorTests {
     
-    @Test func exploreSplitViewCoordinator_setsDelegateCorrectly_onInit() {
+    @Test func exploreSplitViewCoordinator_onInit_setsDelegateCorrectly() {
         let exploreSplitVCSpy = ExploreSplitVCSpy(style: .doubleColumn)
         let sut = ExploreSplitViewCoordinator(dependencies: MockContainer(), exploreSplitVC: exploreSplitVCSpy)
         
@@ -51,14 +51,16 @@ struct ExploreSplitViewCoordinatorTests {
         #expect(result == .primary, "Should display the primary column after the split view interface collapses.")
     }
     
-    @Test func exploreSplitViewCoordinator_shouldDeselect_onIphone() {
+    @Test("iPhone only: collection view cell deselects after selection", .disabled(if: IpadHelper.isPad))
+    func exploreSplitViewCoordinator_shouldDeselectAfterSelection() {
         let exploreSplitVCSpy = CollapsedSplitViewSpy()
         let sut = makeSUT(with: exploreSplitVCSpy)
 
         #expect(sut.shouldDeselectAfterSelection == true, "Should be true.")
     }
     
-    @Test func exploreSplitViewCoordinator_shouldKeepSelection_onIpad() {
+    @Test("iPad only: collection view cell keeps selection after being selected", .enabled(if: IpadHelper.isPad))
+    func exploreSplitViewCoordinator_shouldKeepSelectionAfterSelection() {
         let exploreSplitVCSpy = ExpandedSplitViewSpy()
         let sut = makeSUT(with: exploreSplitVCSpy)
 
@@ -76,7 +78,8 @@ struct ExploreSplitViewCoordinatorTests {
         #expect(sut.exploreSplitVC.viewControllers[1] is ExploreDetailVC, "Should be an `ExploreDetailVC`.")
     }
     
-    @Test func exploreSplitViewCoordinator_didSelectFilm_withFilm_collapsesPrimaryViewControllerOnIpad() {
+    @Test("iPad only: collection view cell keeps selection after being selected", .enabled(if: IpadHelper.isPad))
+    func exploreSplitViewCoordinator_didSelectFilm_withFilm_collapsesPrimaryViewController() {
         let exploreSplitVCSpy = ExpandedSplitViewSpy(style: .doubleColumn)
         let sut = makeSUT(with: exploreSplitVCSpy)
         

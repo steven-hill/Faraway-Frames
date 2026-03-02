@@ -9,8 +9,6 @@ import Testing
 import UIKit
 @testable import Faraway_Frames
 
-private let isPad = DispatchQueue.main.sync { UIDevice.current.userInterfaceIdiom == .pad }
-
 @MainActor
 struct ExploreListVCTests {
     
@@ -446,7 +444,7 @@ struct ExploreListVCTests {
         #expect(spy.didSelectFilmCalled == false, "Should be false.")
     }
     
-    @Test("iPhone only: collection view cell deselects after selection", .disabled(if: isPad))
+    @Test("iPhone only: collection view cell deselects after selection", .disabled(if: IpadHelper.isPad))
     func exploreListVC_didSelectItemAt_deselectsItem() {
         let sut = makeSUT()
         let spy = ExploreNavigationSpy()
@@ -464,7 +462,7 @@ struct ExploreListVCTests {
         #expect(sut.collectionView.indexPathsForSelectedItems?.isEmpty == true, "Should be empty.")
     }
     
-    @Test("iPad only: collection view cell stays selected after selection", .enabled(if: isPad))
+    @Test("iPad only: collection view cell stays selected after selection", .enabled(if: IpadHelper.isPad))
     func exploreListVC_didSelectItemAt_keepsItemSelected() {
         let sut = makeSUT()
         let spy = ExploreNavigationSpy()
