@@ -172,7 +172,7 @@ struct ExploreListVCTests {
         #expect(sut.filmLookup["non existent ID"] == nil, "Should return nil if no film with that ID exists.")
     }
     
-    @Test func exploreListVC_updateCellImage_setsImageWhenCellHasNotBeenReused() async {
+    @Test func exploreListVC_updateCellImage_whenCellHasNotBeenReused_setsImage() async {
         let (sut, cell, indexPath) = makeSUTForUpdateCellImageTests()
         
         await sut.updateCellImage(cell, film: .sample, indexPath: indexPath)
@@ -182,18 +182,18 @@ struct ExploreListVCTests {
         #expect(updatedConfig?.image == sut.filmImage, "The cell's image should match the loaded image.")
     }
     
-    @Test func exploreListVC_updateCellImage_doesNotSetImageToFilmImage_ifCellWasReused() async {
+    @Test func exploreListVC_updateCellImage_whenCellWasReused_doesNotSetImageToFilmImage() async {
         let (sut, cell, _) = makeSUTForUpdateCellImageTests(indexPath: IndexPath(item: 1, section: 0))
         let originalIndexPath = IndexPath(item: 0, section: 0)
         
         await sut.updateCellImage(cell, film: .sample, indexPath: originalIndexPath)
         let updatedConfig = cell.contentConfiguration as? UIListContentConfiguration
         
-        #expect(updatedConfig?.image == nil, "The updated configuration should be nil as the cell was reused.")
+        #expect(updatedConfig?.image == nil, "The updated configuration should be nil because the cell was reused.")
         #expect(cell.imageView.image == UIImage(systemName: "photo"), "The default image should be set as a placeholder.")
     }
     
-    @Test func exploreListVC_updateCellImage_usesPlaceholder_whenImageLoadFails() async {
+    @Test func exploreListVC_updateCellImage_whenImageLoadFails_usesPlaceholder() async {
         let (sut, cell, indexPath) = makeSUTForUpdateCellImageTests(shouldSucceed: false)
         
         await sut.updateCellImage(cell, film: .sample, indexPath: indexPath)
