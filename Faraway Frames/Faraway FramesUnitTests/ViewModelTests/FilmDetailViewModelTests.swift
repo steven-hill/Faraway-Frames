@@ -26,7 +26,7 @@ struct FilmDetailViewModelTests {
         #expect(sut.currentState == .noFilmSelected, "Should be `.noFilmSelected` when film is nil.")
     }
     
-    @Test func filmDetailViewModel_setsCurrentStateToContent_whenFilmIsPassedIn() {
+    @Test func filmDetailViewModel_whenFilmIsPassedIn_setsCurrentStateToContent() {
         let film = Film.sample
         let mockImageLoader = MockImageLoader()
         let sut = FilmDetailViewModel(film: film, imageLoader: mockImageLoader)
@@ -36,7 +36,7 @@ struct FilmDetailViewModelTests {
         #expect(sut.currentState == .content(film), "Should be `.content` when film is provided.")
     }
     
-    @Test func filmDetailViewModel_setFilm_updatesCurrentState_whenThereIsAFilm() {
+    @Test func filmDetailViewModel_setFilm_whenThereIsAFilm_updatesCurrentState() {
         let film = Film.sample
         let sut = makeSUT()
         
@@ -45,7 +45,7 @@ struct FilmDetailViewModelTests {
         #expect(sut.currentState == .content(film), "Should update the state to `.content` when a film is set.")
     }
     
-    @Test func filmDetailViewModel_setFilm_updatesCurrentState_whenFilmIsNil() {
+    @Test func filmDetailViewModel_setFilm_whenFilmIsNil_updatesCurrentState() {
         let film: Film? = nil
         let sut = makeSUT()
         
@@ -78,7 +78,7 @@ struct FilmDetailViewModelTests {
         #expect(spy.callCount == 3, "Should be called three times in total; once for filmA's initial content, twice for filmB's initial content and its movie banner.")
     }
 
-    @Test func filmDetailViewModel_getMovieBanner_returnsFallbackImage_whenFailedToDownloadMovieBannerImage() async {
+    @Test func filmDetailViewModel_getMovieBanner_whenFailedToDownloadMovieBannerImage_returnsFallbackImage() async {
         let film = Film.sample
         let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
         let sut = FilmDetailViewModel(imageLoader: mockImageLoader)
