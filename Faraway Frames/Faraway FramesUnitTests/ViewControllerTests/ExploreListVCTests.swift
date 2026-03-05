@@ -178,8 +178,7 @@ struct ExploreListVCTests {
         await sut.updateCellImage(cell, film: .sample, indexPath: indexPath)
         let updatedConfig = cell.contentConfiguration as? UIListContentConfiguration
         
-        #expect(sut.filmImage == UIImage(systemName: "popcorn"), "Popcorn image means image loading succeeded.")
-        #expect(updatedConfig?.image == sut.filmImage, "The cell's image should match the loaded image.")
+        #expect(updatedConfig?.image == UIImage(systemName: "popcorn"), "The cell's image should be the loaded image.")
     }
     
     @Test func exploreListVC_updateCellImage_whenCellWasReused_doesNotSetImageToFilmImage() async {

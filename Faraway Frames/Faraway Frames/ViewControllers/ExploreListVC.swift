@@ -15,7 +15,6 @@ final class ExploreListVC: UIViewController {
     // MARK: - Properties
     weak var navigationDelegate: ExploreNavigationDelegate?
     private(set) var films: [Film] = []
-    var filmImage: UIImage?
     private(set) var filmLookup: [String: Film] = [:]
     let viewModel: FilmsListViewModel
     lazy var collectionView = UICollectionView()
@@ -67,15 +66,17 @@ final class ExploreListVC: UIViewController {
         return UICollectionViewCompositionalLayout.list(using: config)
     }
     
+    @MainActor
     func updateCellImage(_ cell: UICollectionViewCell, film: Film, indexPath: IndexPath) async {
-        filmImage = await viewModel.getImage(for: film)
+        let filmImage = await viewModel.getImage(for: film)
         
         guard let currentIndexPath = collectionView.indexPath(for: cell),
                 currentIndexPath == indexPath else { return }
         
-        var updatedConfig = cell.contentConfiguration as? UIListContentConfiguration
-        updatedConfig?.image = filmImage ?? UIImage(systemName: "photo")
-        cell.contentConfiguration = updatedConfig
+        if var config = cell.contentConfiguration as? UIListContentConfiguration {
+            config.image = filmImage ?? UIImage(systemName: "photo")
+            cell.contentConfiguration = config
+        }
     }
     
     private func configureDataSource() {
@@ -93,8 +94,9 @@ final class ExploreListVC: UIViewController {
             cell.accessories = [.disclosureIndicator()]
             cell.backgroundConfiguration = UIBackgroundConfiguration.listCell()
             
-            Task {
-                await updateCellImage(cell, film: film, indexPath: indexPath)
+            Task { [weak self, weak cell] in
+                guard let self, let cell else { return }
+                await self.updateCellImage(cell, film: film, indexPath: indexPath)
             }
         }
         
