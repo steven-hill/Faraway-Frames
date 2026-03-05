@@ -11,6 +11,5 @@ final class ExploreSplitVC: UISplitViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
     }
 }
