@@ -66,6 +66,7 @@ final class ExploreListVC: UIViewController {
         return UICollectionViewCompositionalLayout.list(using: config)
     }
     
+    @MainActor
     func updateCellImage(_ cell: UICollectionViewCell, film: Film, indexPath: IndexPath) async {
         let filmImage = await viewModel.getImage(for: film)
         
