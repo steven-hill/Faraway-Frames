@@ -94,8 +94,9 @@ final class ExploreListVC: UIViewController {
             cell.accessories = [.disclosureIndicator()]
             cell.backgroundConfiguration = UIBackgroundConfiguration.listCell()
             
-            Task {
-                await updateCellImage(cell, film: film, indexPath: indexPath)
+            Task { [weak self, weak cell] in
+                guard let self, let cell else { return }
+                await self.updateCellImage(cell, film: film, indexPath: indexPath)
             }
         }
         
