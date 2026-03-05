@@ -15,7 +15,6 @@ final class ExploreListVC: UIViewController {
     // MARK: - Properties
     weak var navigationDelegate: ExploreNavigationDelegate?
     private(set) var films: [Film] = []
-    var filmImage: UIImage?
     private(set) var filmLookup: [String: Film] = [:]
     let viewModel: FilmsListViewModel
     lazy var collectionView = UICollectionView()
@@ -68,7 +67,7 @@ final class ExploreListVC: UIViewController {
     }
     
     func updateCellImage(_ cell: UICollectionViewCell, film: Film, indexPath: IndexPath) async {
-        filmImage = await viewModel.getImage(for: film)
+        let filmImage = await viewModel.getImage(for: film)
         
         guard let currentIndexPath = collectionView.indexPath(for: cell),
                 currentIndexPath == indexPath else { return }
