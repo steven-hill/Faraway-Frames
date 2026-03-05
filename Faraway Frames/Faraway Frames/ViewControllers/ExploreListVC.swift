@@ -73,9 +73,10 @@ final class ExploreListVC: UIViewController {
         guard let currentIndexPath = collectionView.indexPath(for: cell),
                 currentIndexPath == indexPath else { return }
         
-        var updatedConfig = cell.contentConfiguration as? UIListContentConfiguration
-        updatedConfig?.image = filmImage ?? UIImage(systemName: "photo")
-        cell.contentConfiguration = updatedConfig
+        if var config = cell.contentConfiguration as? UIListContentConfiguration {
+            config.image = filmImage ?? UIImage(systemName: "photo")
+            cell.contentConfiguration = config
+        }
     }
     
     private func configureDataSource() {
