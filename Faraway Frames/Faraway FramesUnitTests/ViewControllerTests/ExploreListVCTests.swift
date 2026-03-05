@@ -190,7 +190,6 @@ struct ExploreListVCTests {
         let updatedConfig = cell.contentConfiguration as? UIListContentConfiguration
         
         #expect(updatedConfig?.image == nil, "The updated configuration should be nil because the cell was reused.")
-        #expect(cell.imageView.image == UIImage(systemName: "photo"), "The default image should be set as a placeholder.")
     }
     
     @Test func exploreListVC_updateCellImage_whenImageLoadFails_usesPlaceholder() async {
@@ -498,14 +497,14 @@ struct ExploreListVCTests {
     fileprivate func makeSUTForUpdateCellImageTests(
         shouldSucceed: Bool = true,
         indexPath: IndexPath = IndexPath(item: 0, section: 0)
-    ) -> (sut: ExploreListVC, cell: ExploreListCell, indexPath: IndexPath) {
+    ) -> (sut: ExploreListVC, cell: UICollectionViewListCell, indexPath: IndexPath) {
         let mockFilmsListService = MockFilmsListService()
         let imageLoader = MockImageLoader()
         imageLoader.shouldSucceed = shouldSucceed
         
         let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
         let sut = ExploreListVC(viewModel: filmsListViewModel)
-        let cell = ExploreListCell()
+        let cell = UICollectionViewListCell()
         cell.contentConfiguration = UIListContentConfiguration.cell()
         
         class MockCollectionView: UICollectionView {

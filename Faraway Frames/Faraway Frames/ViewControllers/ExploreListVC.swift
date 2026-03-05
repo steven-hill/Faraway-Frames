@@ -79,7 +79,7 @@ final class ExploreListVC: UIViewController {
     }
     
     private func configureDataSource() {
-        let filmCellRegistration = UICollectionView.CellRegistration<ExploreListCell, Film> { [weak self] (cell, indexPath, film) in
+        let filmCellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Film> { [weak self] (cell, indexPath, film) in
             guard let self else { return }
             var config = UIListContentConfiguration.cell()
             config.text = film.title
@@ -98,7 +98,7 @@ final class ExploreListVC: UIViewController {
             }
         }
         
-        dataSource = UICollectionViewDiffableDataSource<Section, Film.ID>(collectionView: collectionView) { [weak self] (collectionView, indexPath, filmID) -> ExploreListCell in
+        dataSource = UICollectionViewDiffableDataSource<Section, Film.ID>(collectionView: collectionView) { [weak self] (collectionView, indexPath, filmID) -> UICollectionViewListCell in
             guard let self = self, let film = self.filmLookup[filmID] else {
                 return collectionView.dequeueConfiguredReusableCell(using: filmCellRegistration, for: indexPath, item: Film.sample)
             }
