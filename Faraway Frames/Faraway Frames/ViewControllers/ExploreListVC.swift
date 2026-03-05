@@ -174,6 +174,7 @@ final class ExploreListVC: UIViewController {
         searchController.searchBar.delegate = self
         searchController.searchResultsUpdater = self
         searchController.searchBar.placeholder = "Search films"
+        searchController.searchBar.searchTextField.font = .preferredFont(forTextStyle: .title3)
         searchController.searchBar.searchTextField.accessibilityIdentifier = "ExploreListVC_SearchBar_SearchField"
         navigationItem.searchController = searchController
         navigationItem.hidesSearchBarWhenScrolling = false
