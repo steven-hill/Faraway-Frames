@@ -49,8 +49,6 @@ final class ExploreDetailVC: UIViewController {
     
     private let creditsContainer: UIStackView = {
         let creditsContainer = UIStackView()
-        creditsContainer.axis = .horizontal
-        creditsContainer.distribution = .fillEqually
         creditsContainer.spacing = 20
         creditsContainer.translatesAutoresizingMaskIntoConstraints = false
         creditsContainer.accessibilityIdentifier = "ExploreDetailVC_CreditsContainer"
@@ -76,6 +74,16 @@ final class ExploreDetailVC: UIViewController {
         setupScrollView()
         addSubviews()
         setupConstraints()
+        registerForTraitChanges([UITraitHorizontalSizeClass.self]) {
+            (self: Self, previousTraitCollection: UITraitCollection) in
+            self.updateLayoutForTraits()
+        }
+        updateLayoutForTraits()
+    }
+    
+    private func updateLayoutForTraits() {
+        creditsContainer.axis = (traitCollection.horizontalSizeClass == .regular) ? .horizontal : .vertical
+        creditsContainer.distribution = (traitCollection.horizontalSizeClass == .regular) ? .fillEqually : .fill
     }
     
     override func updateContentUnavailableConfiguration(using state: UIContentUnavailableConfigurationState) {
