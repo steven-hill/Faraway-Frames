@@ -55,10 +55,7 @@ struct ExploreListVCTests {
     
     @Test(.tags(.networkRequest))
     func exploreListVC_canUpdateFilmsArraySuccessfully() async {
-        let mockFilmsListService = MockServiceHelper.setupMockServiceForSuccessCase()
-        let imageLoader = MockImageLoader()
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
-        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        let sut = makeSUTForNetworkSuccess()
         
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
@@ -76,11 +73,7 @@ struct ExploreListVCTests {
         APIError.unknown
     ])
     func exploreListVC_showsErrorViewForAllErrors(expectedError: APIError) async {
-        let mockService = MockFilmsListService()
-        mockService.result = .failure(expectedError)
-        let imageLoader = MockImageLoader()
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: imageLoader)
-        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        let sut = makeSUTForNetworkFailure(error: expectedError)
         
         sut.loadViewIfNeeded()
         await sut.viewModel.getAllFilms()
@@ -115,14 +108,10 @@ struct ExploreListVCTests {
         APIError.unknown
     ])
     func exploreListVC_showsRetryButtonTitle_forAllErrors(expectedError: APIError) async {
-        let mockService = MockFilmsListService()
-        mockService.result = .failure(expectedError)
-        let imageLoader = MockImageLoader()
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: imageLoader)
-        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        let sut = makeSUTForNetworkFailure(error: expectedError)
         sut.loadViewIfNeeded()
         
-        await filmsListViewModel.getAllFilms()
+        await sut.viewModel.getAllFilms()
         let state = UIContentUnavailableConfigurationState(traitCollection: sut.traitCollection)
         sut.updateContentUnavailableConfiguration(using: state)
         let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
@@ -132,7 +121,7 @@ struct ExploreListVCTests {
     }
     
     @Test func exploreListVC_didUpdateFilms_updatesCollectionViewItemCount() {
-        let sut = createSUTForDataSource()
+        let sut = makeSUTForDataSource()
         
         let itemCount = sut.collectionView.numberOfItems(inSection: 0)
         
@@ -140,7 +129,7 @@ struct ExploreListVCTests {
     }
     
     @Test func exploreListVC_dataSource_returnsACell() {
-        let sut = createSUTForDataSource()
+        let sut = makeSUTForDataSource()
         
         let indexPath = IndexPath(item: 0, section: 0)
         let cell = sut.collectionView.dataSource?.collectionView(sut.collectionView, cellForItemAt: indexPath)
@@ -149,7 +138,7 @@ struct ExploreListVCTests {
     }
     
     @Test func exploreListVC_filmsLookup_populatesCorrectly() {
-        let sut = createSUTForDataSource()
+        let sut = makeSUTForDataSource()
         
         #expect(sut.filmLookup.count == 1, "Dictionary should have 1 film.")
     }
@@ -167,7 +156,7 @@ struct ExploreListVCTests {
     }
     
     @Test func exploreListVC_filmsLookup_returnsNilForUnknownID() {
-        let sut = createSUTForDataSource()
+        let sut = makeSUTForDataSource()
         
         #expect(sut.filmLookup["non existent ID"] == nil, "Should return nil if no film with that ID exists.")
     }
@@ -222,10 +211,7 @@ struct ExploreListVCTests {
     
     @Test(.tags(.search))
     func exploreListVC_whenSearchTextIsEmpty_searchIsNotAttempted() async {
-        let mockFilmsListService = MockServiceHelper.setupMockServiceForSuccessCase()
-        let imageLoader = MockImageLoader()
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
-        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        let sut = makeSUTForNetworkSuccess()
         
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
@@ -248,10 +234,7 @@ struct ExploreListVCTests {
     
     @Test(.tags(.search))
     func exploreListVC_whenSearchWasSuccessful_showsFilteredResults() async {
-        let mockFilmsListService = MockServiceHelper.setupMockServiceForSuccessCase()
-        let imageLoader = MockImageLoader()
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
-        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        let sut = makeSUTForNetworkSuccess()
         
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
@@ -263,10 +246,7 @@ struct ExploreListVCTests {
     
     @Test(.tags(.search))
     func exploreListVC_didFailToMatchResults_updatesContentUnavailableConfiguration() {
-        let mockFilmsListService = MockServiceHelper.setupMockServiceForSuccessCase()
-        let imageLoader = MockImageLoader()
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
-        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        let sut = makeSUTForNetworkSuccess()
         sut.loadViewIfNeeded()
         
         sut.didFailToMatchResults()
@@ -278,10 +258,7 @@ struct ExploreListVCTests {
     
     @Test(.tags(.search))
     func exploreListVC_whenThereAreNoSearchResults_showsEmptySearchResultsConfig() async {
-        let mockFilmsListService = MockServiceHelper.setupMockServiceForSuccessCase()
-        let imageLoader = MockImageLoader()
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
-        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        let sut = makeSUTForNetworkSuccess()
         
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
@@ -297,10 +274,7 @@ struct ExploreListVCTests {
     
     @Test(.tags(.search))
     func exploreListVC_searchBarCancelButtonTapped_resetsFilmsArrayToAllFilms() async {
-        let mockFilmsListService = MockServiceHelper.setupMockServiceForSuccessCase()
-        let imageLoader = MockImageLoader()
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
-        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        let sut = makeSUTForNetworkSuccess()
         
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
@@ -311,10 +285,7 @@ struct ExploreListVCTests {
     
     @Test(.tags(.search))
     func exploreListVC_whenLoadingAllFilms_searchBarIsNotEnabled() {
-        let mockFilmsListService = MockFilmsListService()
-        let imageLoader = MockImageLoader()
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
-        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        let sut = makeSUT()
         
         sut.view.layoutIfNeeded()
         
@@ -324,10 +295,7 @@ struct ExploreListVCTests {
     
     @Test(.tags(.search))
     func exploreListVC_whenThereIsFilmsContentFromNetworkCall_searchBarIsEnabled() async {
-        let mockFilmsListService = MockServiceHelper.setupMockServiceForSuccessCase()
-        let imageLoader = MockImageLoader()
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
-        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        let sut = makeSUTForNetworkSuccess()
         
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
@@ -338,10 +306,7 @@ struct ExploreListVCTests {
     
     @Test(.tags(.search))
     func exploreListVC_whenThereIsFilmsContentFromSearch_searchBarIsEnabled() async {
-        let mockFilmsListService = MockServiceHelper.setupMockServiceForSuccessCase()
-        let imageLoader = MockImageLoader()
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
-        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        let sut = makeSUTForNetworkSuccess()
         
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
@@ -354,10 +319,7 @@ struct ExploreListVCTests {
     
     @Test(.tags(.search))
     func exploreListVC_whenThereAreNoSearchResults_searchBarIsEnabled() async {
-        let mockFilmsListService = MockServiceHelper.setupMockServiceForSuccessCase()
-        let imageLoader = MockImageLoader()
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
-        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        let sut = makeSUTForNetworkSuccess()
         
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
@@ -378,11 +340,7 @@ struct ExploreListVCTests {
         APIError.unknown
     ])
     func exploreListVC_searchBarIsNotEnabledForAllErrors(expectedError: APIError) async throws {
-        let mockService = MockFilmsListService()
-        mockService.result = .failure(expectedError)
-        let imageLoader = MockImageLoader()
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: imageLoader)
-        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        let sut = makeSUTForNetworkFailure(error: expectedError)
         
         sut.loadViewIfNeeded()
         await sut.viewModel.getAllFilms()
@@ -477,7 +435,7 @@ struct ExploreListVCTests {
         #expect(sut.collectionView.indexPathsForSelectedItems?.isEmpty == false, "Should not be empty.")
     }
     
-    // MARK: - Helper methods
+    // MARK: - SUT Helper Methods
     fileprivate func makeSUT() -> ExploreListVC {
         let mockFilmsListService = MockFilmsListService()
         let imageLoader = MockImageLoader()
@@ -485,7 +443,22 @@ struct ExploreListVCTests {
         return ExploreListVC(viewModel: filmsListViewModel)
     }
     
-    fileprivate func createSUTForDataSource() -> ExploreListVC {
+    fileprivate func makeSUTForNetworkSuccess() -> ExploreListVC {
+        let mockFilmsListService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
+        let imageLoader = MockImageLoader()
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
+        return ExploreListVC(viewModel: filmsListViewModel)
+    }
+    
+    fileprivate func makeSUTForNetworkFailure(error: APIError) -> ExploreListVC {
+        let mockService = MockFilmsListService()
+        mockService.result = .failure(error)
+        let imageLoader = MockImageLoader()
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: imageLoader)
+        return ExploreListVC(viewModel: filmsListViewModel)
+    }
+    
+    fileprivate func makeSUTForDataSource() -> ExploreListVC {
         let sut = makeSUT()
         sut.loadViewIfNeeded()
         let films: [Film] = [.sample]
