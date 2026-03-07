@@ -4,10 +4,10 @@
 ### An iOS and iPadOS app for exploring the Studio Ghibli films.
 
 ### Features
-- explore all Studio Ghibli films
-- search for films by title
-- view details about each film
-- support for portrait and landscape on iPhone and iPad
+- Explore all Studio Ghibli films
+- Search for films by title
+- View details about each film
+- Support for portrait and landscape on iPhone and iPad
 
 ### Requirements
 - Swift 6
@@ -20,6 +20,7 @@
 - Swift concurrency uses the default settings (for Swift 6).
 - Networking with async/await, `URLSession` and `NSCache`.
 - The testing frameworks used are Swift Testing and XCTest, and the project is built with TDD.
+- Includes accessibility support for Dynamic Type, VoiceOver, and text contrast.
 
 ### API
 - [Studio Ghibli API](https://ghibliapi.vercel.app).
