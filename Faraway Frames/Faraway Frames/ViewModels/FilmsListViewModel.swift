@@ -9,10 +9,7 @@ import UIKit
 
 final class FilmsListViewModel {
     
-    private let filmsListService: FilmsListService
-    private let imageLoader: ImageLoader
-    weak var delegate: FilmsListViewModelDelegate?
-    
+    // MARK: - State Definition
     enum FilmsListState: Equatable {
         case loadingAllFilms
         case content
@@ -20,15 +17,21 @@ final class FilmsListViewModel {
         case error(APIError)
     }
     
+    // MARK: - Properties
+    private let filmsListService: FilmsListService
+    private let imageLoader: ImageLoader
+    weak var delegate: FilmsListViewModelDelegate?
     private(set) var films: [Film] = []
     private(set) var currentState: FilmsListState = .loadingAllFilms
     private(set) var filteredFilms: [Film] = []
     
+    // MARK: - Initialisation
     init(filmsListService: FilmsListService, imageLoader: ImageLoader) {
         self.filmsListService = filmsListService
         self.imageLoader = imageLoader
     }
     
+    // MARK: - Methods
     func getAllFilms() async {
         do {
             films = try await filmsListService.fetchAllFilms()
