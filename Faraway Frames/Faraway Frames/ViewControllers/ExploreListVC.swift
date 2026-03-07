@@ -125,6 +125,14 @@ final class ExploreListVC: UIViewController {
             config = nil
             collectionViewIsHidden = false
             searchBarIsEnabled = true
+            if UIAccessibility.isVoiceOverRunning {
+                if viewModel.filteredFilms.count > 0 {
+                    let message = viewModel.filteredFilms.count == 1 ? "1 result found" : "\(viewModel.filteredFilms.count) results found"
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        UIAccessibility.post(notification: .announcement, argument: message)
+                    }
+                }
+            }
         case .emptySearchResults:
             config = createEmptySearchResultsConfig()
             searchBarIsEnabled = true
@@ -134,6 +142,7 @@ final class ExploreListVC: UIViewController {
         self.contentUnavailableConfiguration = config
         self.collectionView.isHidden = collectionViewIsHidden
         self.searchController.searchBar.isEnabled = searchBarIsEnabled
+        UIAccessibility.post(notification: .layoutChanged, argument: config?.text)
     }
     
     private func createLoadingConfig() -> UIContentUnavailableConfiguration {

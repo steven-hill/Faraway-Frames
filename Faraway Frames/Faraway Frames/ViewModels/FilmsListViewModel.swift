@@ -22,7 +22,7 @@ final class FilmsListViewModel {
     
     private(set) var films: [Film] = []
     private(set) var currentState: FilmsListState = .loadingAllFilms
-    var filteredFilms: [Film] = []
+    private(set) var filteredFilms: [Film] = []
     
     init(filmsListService: FilmsListService, imageLoader: ImageLoader) {
         self.filmsListService = filmsListService
@@ -90,11 +90,13 @@ final class FilmsListViewModel {
     }
     
     func resetAllFilms() {
+        filteredFilms.removeAll()
         delegate?.didUpdateFilms(films)
         currentState = .content
     }
     
     func retryLoadingAllFilms() async {
+        filteredFilms.removeAll()
         currentState = .loadingAllFilms
         await getAllFilms()
     }
