@@ -24,6 +24,11 @@
 
 ### API
 - [Studio Ghibli API](https://ghibliapi.vercel.app).
-- No auth needed. 
+- No auth needed.
+
+### Getting started
+1. Clone the repo.
+2. Open `Faraway Frames.xcodeproj`.
+3. Build and run.
 
 ### 🚧 More coming soon as I build out the project.
