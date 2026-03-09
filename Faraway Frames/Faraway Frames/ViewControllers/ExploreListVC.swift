@@ -102,7 +102,7 @@ final class ExploreListVC: UIViewController {
         
         dataSource = UICollectionViewDiffableDataSource<Section, Film.ID>(collectionView: collectionView) { [weak self] (collectionView, indexPath, filmID) -> UICollectionViewListCell in
             guard let self = self, let film = self.filmLookup[filmID] else {
-                return collectionView.dequeueConfiguredReusableCell(using: filmCellRegistration, for: indexPath, item: Film.sample)
+                return UICollectionViewListCell()
             }
             return collectionView.dequeueConfiguredReusableCell(using: filmCellRegistration, for: indexPath, item: film)
         }
