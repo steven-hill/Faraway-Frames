@@ -11,5 +11,6 @@ import Foundation
 protocol FilmsListViewModelDelegate: AnyObject {
     func didUpdateFilms(_ films: [Film])
     func didFailToLoadFilms()
+    func didRetry()
     func didFailToMatchResults()
 }

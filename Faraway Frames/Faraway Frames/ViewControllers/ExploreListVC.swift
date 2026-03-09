@@ -20,7 +20,6 @@ final class ExploreListVC: UIViewController {
     lazy var collectionView = UICollectionView()
     var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
     let searchController = UISearchController(searchResultsController: nil)
-    private var isRetrying = false
     private(set) var loadTask: Task<Void, Never>?
     
     // MARK: - Initialisation
@@ -120,7 +119,7 @@ final class ExploreListVC: UIViewController {
         var searchBarIsEnabled = false
         switch viewModel.currentState {
         case .loadingAllFilms:
-            config = createLoadingConfig()
+            config = createLoadingConfig(with: "Fetching films...")
         case .content:
             config = nil
             collectionViewIsHidden = false
@@ -131,16 +130,19 @@ final class ExploreListVC: UIViewController {
             searchBarIsEnabled = true
         case .error(let error):
             config = createErrorConfig(error: error)
+        case .retrying:
+            config = createLoadingConfig(with: "Retrying...")
         }
+        
         self.contentUnavailableConfiguration = config
         self.collectionView.isHidden = collectionViewIsHidden
         self.searchController.searchBar.isEnabled = searchBarIsEnabled
         UIAccessibility.post(notification: .layoutChanged, argument: config?.text)
     }
     
-    private func createLoadingConfig() -> UIContentUnavailableConfiguration {
+    private func createLoadingConfig(with text: String) -> UIContentUnavailableConfiguration {
         var config = UIContentUnavailableConfiguration.loading()
-        config.text = "Fetching films..."
+        config.text = text
         config.textProperties.color = .systemGray
         return config
     }
@@ -159,14 +161,10 @@ final class ExploreListVC: UIViewController {
         config.image = UIImage(systemName: "exclamationmark.triangle")
         config.imageProperties.tintColor = .systemRed
         config.button = .prominentGlass()
-        config.button.title = isRetrying ? "Retrying..." : "Retry"
+        config.button.title = "Retry"
         config.buttonProperties.primaryAction = UIAction { [weak self] _ in
-            guard let self, self.isRetrying == false else { return }
-            self.isRetrying = true
-            self.setNeedsUpdateContentUnavailableConfiguration()
-            
+            guard let self else { return }
             Task { await self.viewModel.retryLoadingAllFilms()
-                self.isRetrying = false
                 self.setNeedsUpdateContentUnavailableConfiguration()
             }
         }
@@ -226,6 +224,10 @@ extension ExploreListVC: FilmsListViewModelDelegate {
     }
     
     func didFailToLoadFilms() {
+        setNeedsUpdateContentUnavailableConfiguration()
+    }
+    
+    func didRetry() {
         setNeedsUpdateContentUnavailableConfiguration()
     }
     
