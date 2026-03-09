@@ -16,6 +16,7 @@ final class FilmsListViewModel {
         case content
         case emptySearchResults
         case error(APIError)
+        case retrying
     }
     
     // MARK: - Properties
@@ -101,7 +102,8 @@ final class FilmsListViewModel {
     
     func retryLoadingAllFilms() async {
         filteredFilms.removeAll()
-        currentState = .loadingAllFilms
+        delegate?.didRetry()
+        currentState = .retrying
         await getAllFilms()
     }
 }
