@@ -40,17 +40,16 @@ struct FilmsListViewModelUnitTests {
     }
     
     @Test(.tags(.networkRequest))
-    func filmsListViewModel_getAllFilms_duringNetworkRequest_currentStateIsLoadingAllFilms() async {
+    func filmsListViewModel_getAllFilms_duringNetworkRequest_currentStateIsLoadingAllFilms() {
         let mockService = MockFilmsListService()
         let mockImageLoader = MockImageLoader()
         let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
 
-        let task = Task {
+        _ = Task {
             await sut.getAllFilms()
         }
 
         #expect(sut.currentState == .loadingAllFilms)
-        await task.value
     }
     
     @Test("ViewModel handles all API errors correctly", .tags(.networkRequest), arguments: [
