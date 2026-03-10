@@ -37,8 +37,8 @@ final class FilmsListViewModel {
     func getAllFilms() async {
         do {
             films = try await filmsListService.fetchAllFilms()
-            delegate?.didUpdateFilms(films)
             currentState = .content
+            delegate?.didUpdateFilms(films)
         } catch {
             let networkError = handleFailure(error)
             currentState = .error(networkError)
@@ -77,11 +77,11 @@ final class FilmsListViewModel {
         guard !query.isEmpty else { return }
         filteredFilms = films.filter { $0.title.lowercased().contains(query) }
         if filteredFilms.isEmpty {
-            delegate?.didFailToMatchResults()
             currentState = .emptySearchResults
+            delegate?.didFailToMatchResults()
         } else {
-            delegate?.didUpdateFilms(filteredFilms)
             currentState = .content
+            delegate?.didUpdateFilms(filteredFilms)
         }
     }
     
@@ -96,14 +96,14 @@ final class FilmsListViewModel {
     
     func resetAllFilms() {
         filteredFilms.removeAll()
-        delegate?.didUpdateFilms(films)
         currentState = .content
+        delegate?.didUpdateFilms(films)
     }
     
     func retryLoadingAllFilms() async {
         filteredFilms.removeAll()
-        delegate?.didRetry()
         currentState = .retrying
+        delegate?.didRetry()
         await getAllFilms()
     }
 }
