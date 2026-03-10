@@ -71,6 +71,24 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.currentState == .error(expectedError), "Should be `.error(APIError)`.")
     }
     
+    @Test("Covers `handleFailure()`",.tags(.networkRequest))
+    func filmsListViewModel_handlesNotConnectedToInternetURLError() async {
+        let sut = makeSUTForFailureCase(error: URLError(.notConnectedToInternet))
+        
+        await sut.getAllFilms()
+        
+        #expect(sut.currentState == .error(.noInternetConnection))
+    }
+    
+    @Test("Covers `handleFailure()`",.tags(.networkRequest))
+    func filmsListViewModel_handlesNetworkTimeOutURLError() async {
+        let sut = makeSUTForFailureCase(error: URLError(.timedOut))
+        
+        await sut.getAllFilms()
+        
+        #expect(sut.currentState == .error(.networkTimeout))
+    }
+    
     @Test(.tags(.networkRequest))
     func filmsListViewModel_handlesGenericError() async {
         let sut = makeSUTForFailureCase(error: NSError(domain: "test", code: -1))
