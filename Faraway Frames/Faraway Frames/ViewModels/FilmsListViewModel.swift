@@ -26,6 +26,7 @@ final class FilmsListViewModel {
     private(set) var films: [Film] = []
     private(set) var currentState: FilmsListState = .loadingAllFilms
     private(set) var filteredFilms: [Film] = []
+    private(set) var refreshTask: Task<Void, Never>?
     
     // MARK: - Initialisation
     init(filmsListService: FilmsListService, imageLoader: ImageLoader) {
@@ -36,10 +37,13 @@ final class FilmsListViewModel {
     // MARK: - Methods
     func getAllFilms() async {
         do {
+            try Task.checkCancellation()
             films = try await filmsListService.fetchAllFilms()
+            try Task.checkCancellation()
             currentState = .content
             delegate?.didUpdateFilms(films)
         } catch {
+            guard !Task.isCancelled else { return }
             let networkError = handleFailure(error)
             currentState = .error(networkError)
             delegate?.didFailToLoadFilms()
@@ -100,10 +104,13 @@ final class FilmsListViewModel {
         delegate?.didUpdateFilms(films)
     }
     
-    func retryLoadingAllFilms() async {
-        filteredFilms.removeAll()
-        currentState = .retrying
-        delegate?.didRetry()
-        await getAllFilms()
+    func retryLoadingAllFilms() {
+        refreshTask?.cancel()
+        refreshTask = Task {
+            filteredFilms.removeAll()
+            currentState = .retrying
+            delegate?.didRetry()
+            await getAllFilms()
+        }
     }
 }

@@ -41,6 +41,7 @@ final class ExploreListVC: UIViewController {
         configureCollectionView()
         configureDataSource()
         configureSearchController()
+        configureRefreshControl()
         loadTask = getAllFilms()
     }
     
@@ -164,9 +165,8 @@ final class ExploreListVC: UIViewController {
         config.button.title = "Retry"
         config.buttonProperties.primaryAction = UIAction { [weak self] _ in
             guard let self else { return }
-            Task { await self.viewModel.retryLoadingAllFilms()
-                self.setNeedsUpdateContentUnavailableConfiguration()
-            }
+            self.viewModel.retryLoadingAllFilms()
+            self.setNeedsUpdateContentUnavailableConfiguration()
         }
         return config
     }
@@ -194,6 +194,18 @@ final class ExploreListVC: UIViewController {
     func resetFilmsToAllFilms() {
         viewModel.resetAllFilms()
     }
+    
+    //MARK: - Refresh Control
+    private func configureRefreshControl() {
+        let refreshControl = UIRefreshControl()
+        refreshControl.attributedTitle = NSAttributedString(string: "Refreshing data...")
+        refreshControl.addAction(UIAction { [weak self] _ in
+            guard let self else { return }
+            self.viewModel.retryLoadingAllFilms()
+            setNeedsUpdateContentUnavailableConfiguration()
+        }, for: .valueChanged)
+        collectionView.refreshControl = refreshControl
+    }
 }
 
 // MARK: - Collection View Delegate
@@ -214,7 +226,7 @@ extension ExploreListVC: FilmsListViewModelDelegate {
         self.films = films
         let filmIds = films.map({ $0.id })
         filmLookup = Dictionary(uniqueKeysWithValues: films.map { ($0.id, $0) })
-
+        collectionView.refreshControl?.endRefreshing()
         setNeedsUpdateContentUnavailableConfiguration()
         
         var snapshot = NSDiffableDataSourceSnapshot<Section, Film.ID>()
@@ -224,6 +236,7 @@ extension ExploreListVC: FilmsListViewModelDelegate {
     }
     
     func didFailToLoadFilms() {
+        collectionView.refreshControl?.endRefreshing()
         setNeedsUpdateContentUnavailableConfiguration()
     }
     

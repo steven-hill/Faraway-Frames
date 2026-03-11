@@ -192,7 +192,7 @@ final class ExploreListVCUITests: XCTestCase {
         XCTAssertFalse(app.buttons["Search"].firstMatch.isEnabled, "Should be disabled.")
     }
     
-    func test_exploreListVC_searchTextField__isDisabled_whenNetworkCallFails() {
+    func test_exploreListVC_searchTextField_isDisabled_whenNetworkCallFails() {
         launchAppForNetworkFailureCase(with: .unknown)
         let searchTextField = app.searchFields["ExploreListVC_SearchBar_SearchField"]
         
