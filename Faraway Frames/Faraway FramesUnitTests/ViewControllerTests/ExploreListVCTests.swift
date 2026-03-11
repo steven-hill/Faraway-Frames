@@ -93,7 +93,8 @@ struct ExploreListVCTests {
         let sut = ExploreListVC(viewModel: filmsListViewModel)
         
         sut.loadViewIfNeeded()
-        await sut.viewModel.retryLoadingAllFilms()
+        sut.viewModel.retryLoadingAllFilms()
+        await sut.viewModel.refreshTask?.value
         
         #expect(mockService.fetchWasCalled == true, "Should call fetchAllFilms once.")
     }

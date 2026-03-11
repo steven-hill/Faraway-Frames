@@ -270,7 +270,8 @@ struct FilmsListViewModelUnitTests {
         let mockImageLoader = MockImageLoader()
         let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
         
-        await sut.retryLoadingAllFilms()
+        sut.retryLoadingAllFilms()
+        await sut.refreshTask?.value
         
         #expect(mockService.fetchWasCalled == true)
     }
@@ -280,7 +281,7 @@ struct FilmsListViewModelUnitTests {
         let mockImageLoader = MockImageLoader()
         let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
         
-        await sut.retryLoadingAllFilms()
+        sut.retryLoadingAllFilms()
         
         #expect(sut.filteredFilms.isEmpty, "Should be empty.")
     }
