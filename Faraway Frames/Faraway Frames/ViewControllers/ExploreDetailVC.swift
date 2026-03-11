@@ -32,6 +32,8 @@ final class ExploreDetailVC: UIViewController {
         movieBanner.layer.cornerRadius = 12
         movieBanner.translatesAutoresizingMaskIntoConstraints = false
         movieBanner.accessibilityIdentifier = "ExploreDetailVC_MovieBanner"
+        movieBanner.isAccessibilityElement = true
+        movieBanner.accessibilityTraits = .image
         return movieBanner
     }()
     
@@ -43,7 +45,7 @@ final class ExploreDetailVC: UIViewController {
 
     private let rottenTomatoesScoreLabel = FFLabel(font: .preferredFont(forTextStyle: .title2), textColor: nil, accessibilityIdentifer: "ExploreDetailVC_RottenTomatoesScoreLabel")
     
-    private let synopsisHeaderLabel = FFLabel(font: .preferredFont(forTextStyle: .headline), textColor: .label, accessibilityIdentifer: "ExploreDetailVC_SynopsisHeaderLabel")
+    private let synopsisHeaderLabel = FFLabel(font: .preferredFont(forTextStyle: .headline), textColor: .label, accessibilityIdentifer: "ExploreDetailVC_SynopsisHeaderLabel", accessibilityTraits: .header)
     
     private let synopsisLabel = FFLabel(font: .preferredFont(forTextStyle: .body), textColor: .label, accessibilityIdentifer: "ExploreDetailVC_SynopsisLabel")
     
@@ -79,6 +81,7 @@ final class ExploreDetailVC: UIViewController {
             self.updateLayoutForTraits()
         }
         updateLayoutForTraits()
+        UIAccessibility.post(notification: .screenChanged, argument: nil)
     }
     
     private func updateLayoutForTraits() {
@@ -100,10 +103,11 @@ final class ExploreDetailVC: UIViewController {
     
     private func createContent(film: Film, image: UIImage?) {
         movieBanner.image = image
+        movieBanner.accessibilityLabel = NSLocalizedString("Movie poster", comment: "")
         titleLabel.text = film.title
         originalTitlesLabel.text = "\(film.originalTitle) \n\(film.originalTitleRomanised)"
         releaseDateAndRunningTimeLabel.text = "\(film.releaseDate) • \(film.runningTime) mins"
-        synopsisHeaderLabel.text = "Synopsis"
+        synopsisHeaderLabel.text = NSLocalizedString("Synopsis", comment: "")
         synopsisLabel.text = film.description
         rottenTomatoesScoreLabel.attributedText = setScoreText(for: film.rottenTomatoesScore)
         creditsContainer.arrangedSubviews.forEach { $0.removeFromSuperview() }

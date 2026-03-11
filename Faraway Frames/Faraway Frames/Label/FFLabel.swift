@@ -18,11 +18,12 @@ final class FFLabel: UILabel {
         fatalError("init(coder:) has not been implemented")
     }
     
-    convenience init(font: UIFont, textColor: UIColor?, accessibilityIdentifer: String? = nil) {
+    convenience init(font: UIFont, textColor: UIColor?, accessibilityIdentifer: String? = nil, accessibilityTraits: UIAccessibilityTraits? = nil) {
         self.init(frame: .zero)
         self.font = font
         self.textColor = textColor
         self.accessibilityIdentifier = accessibilityIdentifer
+        self.accessibilityTraits = accessibilityTraits ?? []
     }
     
     private func configure() {
