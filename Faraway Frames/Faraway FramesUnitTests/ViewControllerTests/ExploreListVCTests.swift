@@ -436,6 +436,62 @@ struct ExploreListVCTests {
         #expect(sut.collectionView.indexPathsForSelectedItems?.isEmpty == false, "Should not be empty.")
     }
     
+    @Test("Refresh control is configured correctly")
+    func exploreListVC_viewDidLoad_configuresRefreshControl() {
+        let sut = makeSUT()
+        
+        sut.loadViewIfNeeded()
+        
+        #expect(sut.collectionView.refreshControl != nil, "Refresh control should not be nil.")
+    }
+    
+    @Test("Pull to refresh retries loading all films")
+    func exploreListVC_pullToRefresh_retriesLoadingAllFilms() async {
+        let mockService = MockFilmsListService()
+        let imageLoader = MockImageLoader()
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: imageLoader)
+        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        
+        sut.loadViewIfNeeded()
+        sut.collectionView.refreshControl?.sendActions(for: .valueChanged)
+        await sut.viewModel.refreshTask?.value
+        
+        #expect(mockService.fetchWasCalled == true, "Should call fetchAllFilms.")
+    }
+    
+    @Test("Pull to refresh updates Content Unavailable Configuration")
+    func exploreListVC_pullToRefresh_updatesContentUnavailableConfiguration() {
+        let sut = makeSUTForNetworkSuccess()
+        sut.loadViewIfNeeded()
+        
+        sut.collectionView.refreshControl?.sendActions(for: .valueChanged)
+
+        #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
+    }
+
+    @Test("Refreshing stops when films have loaded")
+    func exploreListVC_didUpdateFilms_stopsRefreshing() {
+        let sut = makeSUTForNetworkSuccess()
+        sut.loadViewIfNeeded()
+        
+        sut.collectionView.refreshControl?.sendActions(for: .valueChanged)
+        let films: [Film] = [.sample]
+        sut.didUpdateFilms(films)
+        
+        #expect(sut.collectionView.refreshControl?.isRefreshing == false, "Should be false.")
+    }
+    
+    @Test("Refreshing stops when failed to load films")
+    func exploreListVC_didFailToLoadFilms_stopsRefreshing() {
+        let sut = makeSUTForNetworkSuccess()
+        sut.loadViewIfNeeded()
+        
+        sut.collectionView.refreshControl?.sendActions(for: .valueChanged)
+        sut.didFailToLoadFilms()
+        
+        #expect(sut.collectionView.refreshControl?.isRefreshing == false, "Should be false.")
+    }
+    
     // MARK: - SUT Helper Methods
     fileprivate func makeSUT() -> ExploreListVC {
         let mockFilmsListService = MockFilmsListService()

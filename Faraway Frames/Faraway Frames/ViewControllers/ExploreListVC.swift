@@ -195,6 +195,7 @@ final class ExploreListVC: UIViewController {
         viewModel.resetAllFilms()
     }
     
+    //MARK: - Refresh Control
     private func configureRefreshControl() {
         let refreshControl = UIRefreshControl()
         refreshControl.attributedTitle = NSAttributedString(string: "Refreshing data...")
