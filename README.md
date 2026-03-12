@@ -7,20 +7,22 @@
 - Explore all Studio Ghibli films
 - Search for films by title
 - View details about each film
-- Support for portrait and landscape on iPhone and iPad
+- Supports portrait and landscape on iPhone and iPad
 
-### Requirements
+### Targets
 - Swift 6
+- Swift concurrency settings:
+  - Approachable Concurrency = Yes
+  - Default Actor Isolation = MainActor
 - iOS 26 and iPadOS 26
 - Xcode 26
 
 ### Technical details
 - MVVM + Coordinator.
 - UI framework is UIKit.
-- Swift concurrency uses the default settings (for Swift 6).
-- Networking with async/await, `URLSession` and `NSCache`.
+- Networking with async/await, `URLSession`, and `NSCache` for image caching.
 - The testing frameworks used are Swift Testing and XCTest, and the project is built with TDD.
-- Includes accessibility support for Dynamic Type, VoiceOver, and text contrast.
+- Includes accessibility support for Dynamic Type and VoiceOver.
 
 ### API
 - [Studio Ghibli API](https://ghibliapi.vercel.app).
