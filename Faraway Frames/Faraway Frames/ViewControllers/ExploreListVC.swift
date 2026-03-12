@@ -37,12 +37,19 @@ final class ExploreListVC: UIViewController {
         super.viewDidLoad()
         navigationController?.navigationBar.prefersLargeTitles = true
         title = "Explore"
+        setUpBackButton()
         viewModel.delegate = self
         configureCollectionView()
         configureDataSource()
         configureSearchController()
         configureRefreshControl()
         loadTask = getAllFilms()
+    }
+    
+    private func setUpBackButton() {
+        let backButton = UIBarButtonItem()
+        backButton.accessibilityLabel = "Back to films list"
+        navigationItem.backBarButtonItem = backButton
     }
     
     private func configureCollectionView() {
