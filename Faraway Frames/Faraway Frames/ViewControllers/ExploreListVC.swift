@@ -175,7 +175,9 @@ final class ExploreListVC: UIViewController {
     private func handleVoiceOverAnnouncement(for count: Int) {
         guard UIAccessibility.isVoiceOverRunning, count > 0 else { return }
         let message = String(format: NSLocalizedString("%d found", comment: "VoiceOver search results count"), count)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+        Task {
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            guard !Task.isCancelled else { return }
             UIAccessibility.post(notification: .announcement, argument: message)
         }
     }
