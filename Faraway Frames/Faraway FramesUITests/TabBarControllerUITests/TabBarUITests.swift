@@ -23,7 +23,7 @@ final class TabBarUITests: XCTestCase {
         app = nil
     }
     
-    func test_tabBar_iPhone_whenLoaded_existsAndIsHittable() throws {
+    func test_tabBar_whenLoaded_existsAndIsHittable() throws {
         guard UIDevice.current.userInterfaceIdiom == .phone else {
             throw XCTSkip("iPhone-only test")
         }
@@ -32,7 +32,7 @@ final class TabBarUITests: XCTestCase {
         XCTAssertTrue(app.tabBars.firstMatch.isHittable, "Should be able to be tapped.")
     }
     
-    func test_tabBarButtons_iPad_whenLoaded_existAndAreHittable() throws {
+    func test_tabBarButtons_whenLoaded_existAndAreHittable() throws {
         guard UIDevice.current.userInterfaceIdiom == .pad else {
             throw XCTSkip("iPad-only test")
         }
@@ -45,7 +45,7 @@ final class TabBarUITests: XCTestCase {
         XCTAssertFalse(app.buttons.matching(identifier: "Explore").element(boundBy: 2).exists, "Should not exist.")
     }
     
-    func test_tabBar_iPhone_hasCorrectNumberOfTabs() throws {
+    func test_tabBar_hasCorrectNumberOfTabs() throws {
         guard UIDevice.current.userInterfaceIdiom == .phone else {
             throw XCTSkip("iPhone-only test")
         }
@@ -54,13 +54,13 @@ final class TabBarUITests: XCTestCase {
         XCTAssertEqual(numberOfTabs, 1, "Should have one tab.")
     }
     
-    func test_tabBar_firstTabIsSelectedOnInit() {
+    func test_tabBar_onInit_firstTabIsSelected() {
         let tab = app.buttons.matching(identifier: "Explore")
         
         XCTAssertTrue(tab.element.firstMatch.isSelected, "Should be selected.")
     }
     
-    func test_tabBar_iPhoneCanNavigateBackFromExploreDetailVCToExploreListVC() throws {
+    func test_tabBar_canNavigateBackFromExploreDetailVCToExploreListVC() throws {
         guard UIDevice.current.userInterfaceIdiom == .phone else {
             throw XCTSkip("iPhone-only test")
         }

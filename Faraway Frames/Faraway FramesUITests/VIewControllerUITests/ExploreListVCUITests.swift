@@ -27,7 +27,7 @@ final class ExploreListVCUITests: XCTestCase {
         XCTAssertTrue(title.exists, "Should have a title.")
     }
     
-    func test_exploreListVC_title_whenInPortrait_transitionsToInlineOnScroll() throws {
+    func test_exploreListVC_title_inPortrait_transitionsToInlineOnScroll() throws {
         guard UIDevice.current.userInterfaceIdiom == .phone else {
             throw XCTSkip("iPhone-only test")
         }
@@ -43,7 +43,7 @@ final class ExploreListVCUITests: XCTestCase {
         XCTAssertLessThan(finalY, initialY, "The title should move up into the navigation bar on iPhone.")
     }
     
-    func test_exploreListVC_displaysCollectionViewInContentState() {
+    func test_exploreListVC_inContentState_displaysCollectionView() {
         launchAppForNetworkSuccessCase()
         
         let collectionView = app.collectionViews.element
@@ -139,7 +139,7 @@ final class ExploreListVCUITests: XCTestCase {
         XCTAssertNotNil(searchTextField.placeholderValue, "Should have a placeholder.")
     }
     
-    func test_exploreListVC_searchTextField_displaysACancelButton_whenSearching() {
+    func test_exploreListVC_searchTextField_whenSearching_displaysACancelButton() {
         launchAppForNetworkSuccessCase()
         
         let searchTextField = setUpSearchTextFieldAndEnterText("Castle in the Sky")
@@ -157,7 +157,7 @@ final class ExploreListVCUITests: XCTestCase {
         XCTAssertEqual(searchTextField.value as? String, searchTextField.placeholderValue, "Should revert to placeholder text.")
     }
     
-    func test_exploreListVC_searchTextField_canAlsoClearTextViaDeleteKey() {
+    func test_exploreListVC_searchTextField_canClearTextViaDeleteKey() {
         launchAppForNetworkSuccessCase()
         
         let searchTextField = setUpSearchTextFieldAndEnterText("C")
@@ -166,7 +166,7 @@ final class ExploreListVCUITests: XCTestCase {
         XCTAssertEqual(searchTextField.value as? String, searchTextField.placeholderValue, "Should revert to placeholder text.")
     }
     
-    func test_exploreListVC_searchResultsAppearForValidSearchQuery() {
+    func test_exploreListVC_searchTextField_withValidSearchQuery_showsSearchResults() {
         launchAppForNetworkSuccessCase()
         
         _ = setUpSearchTextFieldAndEnterText("Castle in the Sky")
@@ -175,7 +175,7 @@ final class ExploreListVCUITests: XCTestCase {
         XCTAssertEqual(collectionView.cells.count, 1, "Should have one film in search results.")
     }
     
-    func test_exploreListVC_showsNoSearchResultsForInvalidSearchQuery() {
+    func test_exploreListVC_searchTextField_withInValidSearchQuery_showsNoSearchResults() {
         launchAppForNetworkSuccessCase()
         
         _ = setUpSearchTextFieldAndEnterText("Invalid query")
@@ -184,7 +184,7 @@ final class ExploreListVCUITests: XCTestCase {
         XCTAssertFalse(collectionView.exists, "Collection view should be hidden.")
     }
     
-    func test_exploreListVC_doesNotPerformSearchIfTextFieldIsEmpty() {
+    func test_exploreListVC_searchTextField_searchQueryisEmpty_isDisabled() {
         launchAppForNetworkSuccessCase()
         
         _ = setUpSearchTextFieldAndEnterText("")
@@ -192,7 +192,7 @@ final class ExploreListVCUITests: XCTestCase {
         XCTAssertFalse(app.buttons["Search"].firstMatch.isEnabled, "Should be disabled.")
     }
     
-    func test_exploreListVC_searchTextField_isDisabled_whenNetworkCallFails() {
+    func test_exploreListVC_searchTextField_whenNetworkCallFails_isDisabled() {
         launchAppForNetworkFailureCase(with: .unknown)
         let searchTextField = app.searchFields["ExploreListVC_SearchBar_SearchField"]
         
@@ -209,7 +209,7 @@ final class ExploreListVCUITests: XCTestCase {
         
         try app.performAccessibilityAudit(for: [.contrast]) { issue in
             guard let element = issue.element,
-            element.elementType == .searchField else { return true }
+                  element.elementType == .searchField else { return true }
             return false
         }
     }
