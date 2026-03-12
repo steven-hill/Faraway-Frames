@@ -202,6 +202,18 @@ final class ExploreListVCUITests: XCTestCase {
         XCTAssertNotNil(searchTextField.placeholderValue, "Should have a placeholder.")
     }
     
+    func test_exploreListVC_searchTextField_text_inDarkMode_meetsMinimumContrastRatio() throws {
+        launchAppForNetworkSuccessCase()
+        
+        XCUIDevice.shared.appearance = .dark
+        
+        try app.performAccessibilityAudit(for: [.contrast]) { issue in
+            guard let element = issue.element,
+            element.elementType == .searchField else { return true }
+            return false
+        }
+    }
+    
     // MARK: - Helper methods
     private func launchAppForNetworkSuccessCase() {
         app = XCUIApplication()
