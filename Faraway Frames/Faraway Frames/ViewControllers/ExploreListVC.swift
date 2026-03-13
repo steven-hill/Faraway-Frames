@@ -92,7 +92,7 @@ final class ExploreListVC: UIViewController {
             var config = UIListContentConfiguration.cell()
             config.text = film.title
             config.image = UIImage(systemName: "photo")
-            let filmImageSize = CGSize(width: 100, height: 150)
+            let filmImageSize = CGSize(width: 60, height: 90)
             config.imageProperties.reservedLayoutSize = filmImageSize
             config.imageProperties.maximumSize = filmImageSize
             config.imageProperties.cornerRadius = 10
