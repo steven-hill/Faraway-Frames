@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SwiftUI
 
 final class ExploreListVC: UIViewController {
     
@@ -74,36 +75,37 @@ final class ExploreListVC: UIViewController {
     }
     
     @MainActor
-    func updateCellImage(_ cell: UICollectionViewCell, film: Film, indexPath: IndexPath) async {
+    func updateCellImage(_ cell: UICollectionViewCell, filmID: Film.ID, indexPath: IndexPath) async {
+        guard let film = filmLookup[filmID] else { return }
+        
         let filmImage = await viewModel.getImage(for: film)
         
         guard let currentIndexPath = collectionView.indexPath(for: cell),
-                currentIndexPath == indexPath else { return }
+              currentIndexPath == indexPath else { return }
         
-        if var config = cell.contentConfiguration as? UIListContentConfiguration {
-            config.image = filmImage ?? UIImage(systemName: "photo")
-            cell.contentConfiguration = config
+        if let currentFilmID = dataSource.itemIdentifier(for: indexPath),
+           currentFilmID != filmID {
+            return
+        }
+        
+        cell.contentConfiguration = UIHostingConfiguration {
+            FilmRowView(film: film, image: filmImage)
         }
     }
     
     private func configureDataSource() {
         let filmCellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Film> { [weak self] (cell, indexPath, film) in
             guard let self else { return }
-            var config = UIListContentConfiguration.cell()
-            config.text = film.title
-            config.image = UIImage(systemName: "photo")
-            let filmImageSize = CGSize(width: 60, height: 90)
-            config.imageProperties.reservedLayoutSize = filmImageSize
-            config.imageProperties.maximumSize = filmImageSize
-            config.imageProperties.cornerRadius = 10
-            config.imageToTextPadding = 12
-            cell.contentConfiguration = config
+            let placeholderImage = UIImage(systemName: "photo")
+            
+            cell.contentConfiguration = UIHostingConfiguration {
+                FilmRowView(film: film, image: placeholderImage)
+            }
             cell.accessories = [.disclosureIndicator()]
-            cell.backgroundConfiguration = UIBackgroundConfiguration.listCell()
             
             Task { [weak self, weak cell] in
                 guard let self, let cell else { return }
-                await self.updateCellImage(cell, film: film, indexPath: indexPath)
+                await self.updateCellImage(cell, filmID: film.id, indexPath: indexPath)
             }
         }
         
