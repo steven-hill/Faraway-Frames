@@ -7,6 +7,7 @@
 
 import Testing
 import UIKit
+import SwiftUI
 @testable import Faraway_Frames
 
 @MainActor
