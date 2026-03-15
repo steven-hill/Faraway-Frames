@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SwiftUI
 
 final class ExploreListVC: UIViewController {
     
@@ -74,15 +75,21 @@ final class ExploreListVC: UIViewController {
     }
     
     @MainActor
-    func updateCellImage(_ cell: UICollectionViewCell, film: Film, indexPath: IndexPath) async {
+    func updateCellImage(_ cell: UICollectionViewCell, filmID: Film.ID, indexPath: IndexPath) async {
+        guard let film = filmLookup[filmID] else { return }
+        
         let filmImage = await viewModel.getImage(for: film)
         
         guard let currentIndexPath = collectionView.indexPath(for: cell),
-                currentIndexPath == indexPath else { return }
+              currentIndexPath == indexPath else { return }
         
-        if var config = cell.contentConfiguration as? UIListContentConfiguration {
-            config.image = filmImage ?? UIImage(systemName: "photo")
-            cell.contentConfiguration = config
+        if let currentFilmID = dataSource.itemIdentifier(for: indexPath),
+           currentFilmID != filmID {
+            return
+        }
+        
+        cell.contentConfiguration = UIHostingConfiguration {
+            FilmRowView(film: film, image: filmImage)
         }
     }
     
@@ -103,7 +110,7 @@ final class ExploreListVC: UIViewController {
             
             Task { [weak self, weak cell] in
                 guard let self, let cell else { return }
-                await self.updateCellImage(cell, film: film, indexPath: indexPath)
+                await self.updateCellImage(cell, filmID: film.id, indexPath: indexPath)
             }
         }
         

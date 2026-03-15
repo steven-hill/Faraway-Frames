@@ -163,33 +163,28 @@ struct ExploreListVCTests {
         #expect(sut.filmLookup["non existent ID"] == nil, "Should return nil if no film with that ID exists.")
     }
     
-    @Test func exploreListVC_updateCellImage_whenCellHasNotBeenReused_setsImage() async {
-        let (sut, cell, indexPath) = makeSUTForUpdateCellImageTests()
+    @Test func exploreListVC_updateCellImage_whenImageLoadingSucceeds_setsCellContentConfigurationCorrectly() async {
+        let (sut, cell, film, indexPath) = makeSUTForUpdateCellImageTests(shouldSucceed: true, dataSourceFilmID: "2baf70d1-42bb-4437-b551-e5fed5a87abe")
         
-        await sut.updateCellImage(cell, film: .sample, indexPath: indexPath)
-        let updatedConfig = cell.contentConfiguration as? UIListContentConfiguration
+        await sut.updateCellImage(cell, filmID: film.id, indexPath: indexPath)
         
-        #expect(updatedConfig?.image == UIImage(systemName: "popcorn"), "The cell's image should be the loaded image.")
+        #expect(cell.contentConfiguration is UIHostingConfiguration<FilmRowView, EmptyView>, "Cell should have been updated with `UIHostingConfiguration` and `FilmRowView`.")
     }
     
-    @Test func exploreListVC_updateCellImage_whenCellWasReused_doesNotSetImageToFilmImage() async {
-        let (sut, cell, _) = makeSUTForUpdateCellImageTests(indexPath: IndexPath(item: 1, section: 0))
-        let originalIndexPath = IndexPath(item: 0, section: 0)
+    @Test func exploreListVC_updateCellImage_whenFilmIDDoesNotMatchIndexPath_cellContentConfigurationIsNotUpdated() async {
+        let (sut, cell, film, indexPath) = makeSUTForUpdateCellImageTests(shouldSucceed: true, dataSourceFilmID: "Mismatch")
+                
+        await sut.updateCellImage(cell, filmID: film.id, indexPath: indexPath)
         
-        await sut.updateCellImage(cell, film: .sample, indexPath: originalIndexPath)
-        let updatedConfig = cell.contentConfiguration as? UIListContentConfiguration
-        
-        #expect(updatedConfig?.image == nil, "The updated configuration should be nil because the cell was reused.")
+        #expect(cell.contentConfiguration is UIListContentConfiguration, "The configuration should still be `UIListContentConfiguration`.")
     }
     
-    @Test func exploreListVC_updateCellImage_whenImageLoadFails_usesPlaceholder() async {
-        let (sut, cell, indexPath) = makeSUTForUpdateCellImageTests(shouldSucceed: false)
+    @Test func exploreListVC_updateCellImage_whenImageLoadFails_setsCellContentConfigurationCorrectly() async {
+        let (sut, cell, film, indexPath) = makeSUTForUpdateCellImageTests(shouldSucceed: false, dataSourceFilmID: "2baf70d1-42bb-4437-b551-e5fed5a87abe")
         
-        await sut.updateCellImage(cell, film: .sample, indexPath: indexPath)
-        let updatedConfig = cell.contentConfiguration as? UIListContentConfiguration
+        await sut.updateCellImage(cell, filmID: film.id, indexPath: indexPath)
         
-        #expect(updatedConfig?.image != nil, "Should not be nil.")
-        #expect(updatedConfig?.image == UIImage(systemName: "photo"), "Placeholder image should be used if image loading fails.")
+        #expect(cell.contentConfiguration is UIHostingConfiguration<FilmRowView, EmptyView>, "Cell should have been updated with `UIHostingConfiguration` and `FilmRowView`.")
     }
     
     @Test(.tags(.search))
