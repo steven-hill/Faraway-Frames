@@ -524,28 +524,56 @@ struct ExploreListVCTests {
     }
     
     fileprivate func makeSUTForUpdateCellImageTests(
-        shouldSucceed: Bool = true,
-        indexPath: IndexPath = IndexPath(item: 0, section: 0)
-    ) -> (sut: ExploreListVC, cell: UICollectionViewListCell, indexPath: IndexPath) {
+        shouldSucceed: Bool,
+        indexPath: IndexPath = IndexPath(item: 0, section: 0),
+        dataSourceFilmID: String
+    ) -> (sut: ExploreListVC, cell: UICollectionViewListCell, film: Film, indexPath: IndexPath) {
         let mockFilmsListService = MockFilmsListService()
         let imageLoader = MockImageLoader()
         imageLoader.shouldSucceed = shouldSucceed
-        
         let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
         let sut = ExploreListVC(viewModel: filmsListViewModel)
+        let film = Film.sample
         let cell = UICollectionViewListCell()
         cell.contentConfiguration = UIListContentConfiguration.cell()
         
-        class MockCollectionView: UICollectionView {
-            var overrideIndexPath: IndexPath?
-            override func indexPath(for cell: UICollectionViewCell) -> IndexPath? { overrideIndexPath }
+        let mockCV = MockCollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+        mockCV.knownCell = cell
+        mockCV.knownIndexPath = indexPath
+        sut.collectionView = mockCV
+
+        let mockDataSource = MockDataSource()
+        mockDataSource.mockItemID = dataSourceFilmID
+        sut.dataSource = mockDataSource
+        
+        sut.didUpdateFilms([film])
+        return (sut, cell, film, indexPath)
+    }
+    
+    // MARK: - Mock CollectionView
+    final class MockCollectionView: UICollectionView {
+        var knownCell: UICollectionViewCell?
+        var knownIndexPath: IndexPath?
+        
+        override func indexPath(for cell: UICollectionViewCell) -> IndexPath? {
+            return (cell === knownCell) ? knownIndexPath : nil
+        }
+    }
+    
+    // MARK: - Mock DataSource
+    final class MockDataSource: UICollectionViewDiffableDataSource<ExploreListVC.Section, Film.ID> {
+        var mockItemID: Film.ID?
+        
+        override func itemIdentifier(for indexPath: IndexPath) -> Film.ID? {
+            return mockItemID
         }
         
-        let mockCV = MockCollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
-        mockCV.overrideIndexPath = indexPath
-        sut.collectionView = mockCV
-        
-        return (sut, cell, indexPath)
+        init() {
+            let dummyCV = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+            super.init(collectionView: dummyCV) { _, _, _ in
+                UICollectionViewListCell()
+            }
+        }
     }
     
     // MARK: - Explore Navigation Delegate Spy
