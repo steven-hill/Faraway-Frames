@@ -175,8 +175,8 @@ struct ExploreListVCTests {
         let (sut, cell, film, indexPath) = makeSUTForUpdateCellImageTests(shouldSucceed: true, dataSourceFilmID: "Mismatch")
                 
         await sut.updateCellImage(cell, filmID: film.id, indexPath: indexPath)
-        
-        #expect(cell.contentConfiguration is UIListContentConfiguration, "The configuration should still be `UIListContentConfiguration`.")
+       
+        #expect(cell.contentConfiguration is UIHostingConfiguration<FilmRowView, EmptyView>, "Should have the original configuration because the IDs did not match.")
     }
     
     @Test func exploreListVC_updateCellImage_whenImageLoadFails_setsCellContentConfigurationCorrectly() async {
@@ -530,8 +530,11 @@ struct ExploreListVCTests {
         let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
         let sut = ExploreListVC(viewModel: filmsListViewModel)
         let film = Film.sample
+        let placeholderImage = UIImage(systemName: "photo")
         let cell = UICollectionViewListCell()
-        cell.contentConfiguration = UIListContentConfiguration.cell()
+        cell.contentConfiguration = UIHostingConfiguration {
+            FilmRowView(film: film, image: placeholderImage)
+        }
         
         let mockCV = MockCollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
         mockCV.knownCell = cell

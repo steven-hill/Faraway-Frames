@@ -96,17 +96,12 @@ final class ExploreListVC: UIViewController {
     private func configureDataSource() {
         let filmCellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Film> { [weak self] (cell, indexPath, film) in
             guard let self else { return }
-            var config = UIListContentConfiguration.cell()
-            config.text = film.title
-            config.image = UIImage(systemName: "photo")
-            let filmImageSize = CGSize(width: 60, height: 90)
-            config.imageProperties.reservedLayoutSize = filmImageSize
-            config.imageProperties.maximumSize = filmImageSize
-            config.imageProperties.cornerRadius = 10
-            config.imageToTextPadding = 12
-            cell.contentConfiguration = config
+            let placeholderImage = UIImage(systemName: "photo")
+            
+            cell.contentConfiguration = UIHostingConfiguration {
+                FilmRowView(film: film, image: placeholderImage)
+            }
             cell.accessories = [.disclosureIndicator()]
-            cell.backgroundConfiguration = UIBackgroundConfiguration.listCell()
             
             Task { [weak self, weak cell] in
                 guard let self, let cell else { return }
