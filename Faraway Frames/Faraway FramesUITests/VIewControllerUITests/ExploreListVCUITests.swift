@@ -51,8 +51,8 @@ final class ExploreListVCUITests: XCTestCase {
         XCTAssertTrue(collectionView.exists, "Should exist.")
         XCTAssertGreaterThan(collectionView.cells.count, 0, "Should be more than zero cells.")
         XCTAssertTrue(collectionView.cells.firstMatch.isHittable, "Should be able to be tapped.")
-        XCTAssertTrue(collectionView.cells.element(boundBy: 0).images.element.exists, "Should have an image.")
-        XCTAssertFalse(collectionView.cells.element(boundBy: 0).label.isEmpty, "Should have a text label.")
+        XCTAssertTrue(collectionView.cells.images["Film_Cell_Poster"].exists, "Cells should have an image.")
+        XCTAssertTrue(collectionView.cells.staticTexts["Film_Cell_Title"].exists, "Cells should have a text label.")
     }
     
     func test_exploreListVC_canNavigateThroughFilms() {
