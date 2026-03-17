@@ -21,17 +21,21 @@ struct FilmRowView: View {
         if isAccessibilitySize {
             VStack(alignment: .leading, spacing: 8) {
                 poster
-                Text(film.title)
-                    .font(.body)
+                filmTitle
             }
         } else {
             HStack(spacing: 12) {
                 poster
-                Text(film.title)
-                    .font(.body)
+                filmTitle
                 Spacer()
             }
         }
+    }
+    
+    private var filmTitle: some View {
+        Text(film.title)
+            .font(.body)
+            .accessibilityIdentifier("Film_Cell_Title")
     }
     
     private var poster: some View {
@@ -43,6 +47,7 @@ struct FilmRowView: View {
             }
         }()
         return applyPosterStyle(to: sourceImage)
+            .accessibilityIdentifier("Film_Cell_Poster")
     }
     
     @ViewBuilder
