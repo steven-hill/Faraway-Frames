@@ -18,18 +18,23 @@ struct FilmRowView: View {
     }
     
     var body: some View {
-        if isAccessibilitySize {
-            VStack(alignment: .leading, spacing: 8) {
-                poster
-                filmTitle
-            }
-        } else {
-            HStack(spacing: 12) {
-                poster
-                filmTitle
-                Spacer()
+        Group {
+            if isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 8) {
+                    poster
+                    filmTitle
+                }
+            } else {
+                HStack(spacing: 12) {
+                    poster
+                    filmTitle
+                    Spacer()
+                }
             }
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Film: \(film.title)")
+        .accessibilityHint("Double tap for film details")
     }
     
     private var filmTitle: some View {
