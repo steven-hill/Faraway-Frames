@@ -25,9 +25,16 @@ final class MainCoordinator: Coordinator {
         exploreSplitViewCoordinator.start()
         childCoordinators.append(exploreSplitViewCoordinator)
         
+        let assistantCoordinator = AssistantCoordinator()
+        assistantCoordinator.start()
+        childCoordinators.append(assistantCoordinator)
+        
         tabBarController.tabs = [
             UITab(title: "Explore", image: UIImage(systemName: "film"), identifier: "exploreTab") { _ in
                 return exploreSplitViewCoordinator.exploreSplitVC
+            },
+            UITab(title: "Assistant", image: UIImage(systemName: "sparkles"), identifier: "assistantTab") { _ in
+                return assistantCoordinator.assistantVC
             }
         ]
         
