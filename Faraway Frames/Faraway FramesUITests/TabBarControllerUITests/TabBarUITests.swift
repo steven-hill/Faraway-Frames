@@ -36,13 +36,12 @@ final class TabBarUITests: XCTestCase {
         guard UIDevice.current.userInterfaceIdiom == .pad else {
             throw XCTSkip("iPad-only test")
         }
-        
+
         XCTAssertEqual(app.buttons.matching(identifier: "Explore").count, 2, "Should be 2.")
         XCTAssertTrue(app.buttons.matching(identifier: "Explore").element(boundBy: 0).exists, "Should exist.")
         XCTAssertTrue(app.buttons.matching(identifier: "Explore").element(boundBy: 1).exists, "Should exist.")
         XCTAssertTrue(app.buttons.matching(identifier: "Explore").element(boundBy: 0).isHittable, "Should be able to be tapped.")
         XCTAssertTrue(app.buttons.matching(identifier: "Explore").element(boundBy: 1).isHittable, "Should be able to be tapped.")
-        XCTAssertFalse(app.buttons.matching(identifier: "Explore").element(boundBy: 2).exists, "Should not exist.")
         
         XCTAssertEqual(app.buttons.matching(identifier: "Assistant").count, 2, "Should be 2.")
         XCTAssertTrue(app.buttons.matching(identifier: "Assistant").element(boundBy: 0).exists, "Should exist.")
