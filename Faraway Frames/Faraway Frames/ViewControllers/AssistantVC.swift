@@ -9,7 +9,10 @@ import UIKit
 
 final class AssistantVC: UIViewController {
 
+    // MARK: - View Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationController?.navigationBar.prefersLargeTitles = true
+        title = "Assistant"
     }
 }

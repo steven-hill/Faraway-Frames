@@ -8,16 +8,19 @@
 import XCTest
 
 final class AssistantVCUITests: XCTestCase {
+    
+    private var app: XCUIApplication!
 
     override func setUpWithError() throws {
+        app = XCUIApplication()
+        app.launch()
         continueAfterFailure = false
     }
 
     override func tearDownWithError() throws {
+        app = nil
     }
 
-    func testExample() throws {
-        let app = XCUIApplication()
-        app.launch()
+    func testExample() {
     }
 }
