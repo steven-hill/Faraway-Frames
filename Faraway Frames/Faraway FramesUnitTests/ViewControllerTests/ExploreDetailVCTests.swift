@@ -12,7 +12,7 @@ import UIKit
 @MainActor
 struct ExploreDetailVCTests {
     
-    @Test func exploreDetailVC_whenFilmIsNil_canInit() {
+    @Test func exploreDetailVC_whenFilmIsNil_isInsideANavigationController() {
         let sut = makeSUTWhenFilmIsNil()
         _ = UINavigationController(rootViewController: sut)
         
@@ -21,13 +21,29 @@ struct ExploreDetailVCTests {
         #expect(sut.navigationController != nil, "VC should be inside a navigation controller.")
     }
     
-    @Test func exploreDetailVC_withFilm_canInit() {
+    @Test func exploreDetailVC_withFilm_isInsideANavigationController() {
         let sut = makeSUTWithFilm()
         _ = UINavigationController(rootViewController: sut)
         
         sut.loadViewIfNeeded()
         
         #expect(sut.navigationController != nil, "VC should be inside a navigation controller.")
+    }
+    
+    @Test func exploreDetailVC_whenFilmIsNil_canLoadView() {
+        let sut = makeSUTWhenFilmIsNil()
+        
+        sut.loadViewIfNeeded()
+        
+        #expect(sut.view != nil, "VC should load the view.")
+    }
+    
+    @Test func exploreDetailVC_withFilm_canLoadView() {
+        let sut = makeSUTWithFilm()
+        
+        sut.loadViewIfNeeded()
+        
+        #expect(sut.view != nil, "VC should load the view.")
     }
     
     @Test func exploreDetailVC_viewDidLoad_whenFilmIsNil_setsDelegate() {
