@@ -19,6 +19,4 @@ struct AssistantVCTests {
         
         #expect(sut.view != nil, "VC should load the view.")
     }
-    
-    
 }

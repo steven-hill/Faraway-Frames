@@ -13,13 +13,21 @@ import SwiftUI
 @MainActor
 struct ExploreListVCTests {
     
-    @Test func exploreListVC_canInit() {
+    @Test func exploreListVC_canLoadView() {
+        let sut = makeSUT()
+        
+        sut.loadViewIfNeeded()
+        
+        #expect(sut.view != nil, "Should not be nil.")
+    }
+    
+    @Test func exploreListVC_isInsideANavigationController() {
         let sut = makeSUT()
         _ = UINavigationController(rootViewController: sut)
         
         sut.loadViewIfNeeded()
         
-        #expect((sut.navigationController != nil), "VC should be inside a navigation controller.")
+        #expect(sut.navigationController != nil, "VC should be inside a navigation controller.")
     }
     
     @Test func exploreListVC_initiallyHasNoFilms() {
