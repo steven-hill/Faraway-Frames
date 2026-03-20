@@ -34,7 +34,7 @@ final class MainCoordinator: Coordinator {
                 return exploreSplitViewCoordinator.exploreSplitVC
             },
             UITab(title: "Assistant", image: UIImage(systemName: "sparkles"), identifier: "assistantTab") { _ in
-                return assistantCoordinator.assistantVC
+                return assistantCoordinator.navigationController
             }
         ]
         

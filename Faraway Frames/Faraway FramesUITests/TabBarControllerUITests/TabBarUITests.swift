@@ -74,4 +74,14 @@ final class TabBarUITests: XCTestCase {
         
         XCTAssertTrue(app.searchFields["ExploreListVC_SearchBar_SearchField"].exists, "Should exist.")
     }
+    
+    func test_tabBar_canNavigateFromExploreTabToAssistantTab() throws {
+        guard UIDevice.current.userInterfaceIdiom == .phone else {
+            throw XCTSkip("iPhone-only test")
+        }
+        app.tabBars.buttons["Assistant"].firstMatch.tap()
+        let title = app.staticTexts["Assistant"]
+        
+        XCTAssertTrue(title.exists, "Should have a title.")
+    }
 }

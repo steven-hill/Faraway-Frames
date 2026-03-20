@@ -9,16 +9,13 @@ import UIKit
 
 final class AssistantCoordinator: Coordinator {
     let assistantVC: UIViewController
+    var navigationController = UINavigationController()
     
     init(assistantVC: UIViewController = AssistantVC()) {
         self.assistantVC = assistantVC
     }
     
     func start() {
-        createAssistantVC()
-    }
-    
-    private func createAssistantVC() {
-        let _ = UINavigationController(rootViewController: assistantVC)
+        navigationController = UINavigationController(rootViewController: assistantVC)
     }
 }
