@@ -36,6 +36,12 @@ final class TabBarUITests: XCTestCase {
         guard UIDevice.current.userInterfaceIdiom == .pad else {
             throw XCTSkip("iPad-only test")
         }
+        
+        XCTAssertEqual(app.buttons.matching(identifier: "Home").count, 2, "Should be 2.")
+        XCTAssertTrue(app.buttons.matching(identifier: "Home").element(boundBy: 0).exists, "Should exist.")
+        XCTAssertTrue(app.buttons.matching(identifier: "Home").element(boundBy: 1).exists, "Should exist.")
+        XCTAssertTrue(app.buttons.matching(identifier: "Home").element(boundBy: 0).isHittable, "Should be able to be tapped.")
+        XCTAssertTrue(app.buttons.matching(identifier: "Home").element(boundBy: 1).isHittable, "Should be able to be tapped.")
 
         XCTAssertEqual(app.buttons.matching(identifier: "Explore").count, 2, "Should be 2.")
         XCTAssertTrue(app.buttons.matching(identifier: "Explore").element(boundBy: 0).exists, "Should exist.")
@@ -56,23 +62,29 @@ final class TabBarUITests: XCTestCase {
         }
         let numberOfTabs = app.tabBars.firstMatch.buttons.count
         
-        XCTAssertEqual(numberOfTabs, 2, "Should have two tabs.")
+        XCTAssertEqual(numberOfTabs, 3, "Should have three tabs.")
     }
     
-    func test_tabBar_onInit_firstTabIsSelected() {
-        let tab = app.buttons.matching(identifier: "Explore")
+    func test_tabBar_onInit_homeTabIsSelected() {
+        let tab = app.buttons.matching(identifier: "Home")
         
-        XCTAssertTrue(tab.element.firstMatch.isSelected, "Should be selected.")
+        XCTAssertTrue(tab.element.firstMatch.isSelected, "Home should be selected.")
     }
     
-    func test_tabBar_canNavigateBackFromExploreDetailVCToExploreListVC() throws {
+    func test_tabBar_canNavigatefromHomeToExploreAndBackToHome() throws {
         guard UIDevice.current.userInterfaceIdiom == .phone else {
             throw XCTSkip("iPhone-only test")
         }
-        app.collectionViews.element.cells.element(boundBy: 0).tap()
-        app.tabBars.buttons.element(boundBy: 0).tap()
-        
+        app.tabBars.buttons["Explore"].firstMatch.tap()
         XCTAssertTrue(app.searchFields["ExploreListVC_SearchBar_SearchField"].exists, "Should exist.")
+        
+        app.collectionViews.element.cells.element(boundBy: 0).tap()
+        app.tabBars.buttons["Explore"].firstMatch.tap()
+        XCTAssertTrue(app.searchFields["ExploreListVC_SearchBar_SearchField"].exists, "Should exist.")
+        
+        app.tabBars.buttons["Home"].firstMatch.tap()
+        let title = app.staticTexts["Home"]
+        XCTAssertTrue(title.exists, "Should exist.")
     }
     
     func test_tabBar_canNavigateFromExploreTabToAssistantTab() throws {
