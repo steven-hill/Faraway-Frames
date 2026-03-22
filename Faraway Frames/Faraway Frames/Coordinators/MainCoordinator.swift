@@ -37,7 +37,7 @@ final class MainCoordinator: Coordinator {
             UITab(title: "Home", image: UIImage(systemName: "house"), identifier: "homeTab") { _ in
                 return homeCoordinator.navigationController
             },
-            UITab(title: "Explore", image: UIImage(systemName: "film"), identifier: "exploreTab") { _ in
+            UITab(title: "Explore", image: UIImage(systemName: "film.stack.fill"), identifier: "exploreTab") { _ in
                 return exploreSplitViewCoordinator.exploreSplitVC
             },
             UITab(title: "Assistant", image: UIImage(systemName: "sparkles"), identifier: "assistantTab") { _ in
