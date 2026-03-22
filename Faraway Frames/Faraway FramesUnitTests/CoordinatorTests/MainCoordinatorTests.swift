@@ -17,12 +17,21 @@ struct MainCoordinatorTests {
         #expect(sut.childCoordinators.isEmpty, "Should be empty on init.")
     }
     
+    @Test func mainCoordinator_start_createsHomeCoordinatorAsChildCoordinator() {
+        let (sut, _) = makeSUT()
+        
+        sut.start()
+        
+        let childCoordinator = sut.childCoordinators.first as? HomeCoordinator
+        #expect(childCoordinator != nil, "Should not be nil.")
+    }
+    
     @Test func mainCoordinator_start_createsExploreSplitViewCoordinatorAsChildCoordinator() {
         let (sut, _) = makeSUT()
         
         sut.start()
         
-        let childCoordinator = sut.childCoordinators.first as? ExploreSplitViewCoordinator
+        let childCoordinator = sut.childCoordinators[1] as? ExploreSplitViewCoordinator
         #expect(childCoordinator != nil, "Should not be nil.")
     }
     
@@ -31,16 +40,16 @@ struct MainCoordinatorTests {
         
         sut.start()
         
-        let childCoordinator = sut.childCoordinators[1] as? AssistantCoordinator
+        let childCoordinator = sut.childCoordinators[2] as? AssistantCoordinator
         #expect(childCoordinator != nil, "Should not be nil.")
     }
     
-    @Test func mainCoordinator_start_createsExploreTabAndAssistantTab() {
+    @Test func mainCoordinator_start_createsThreeTabs() {
         let (sut, _) = makeSUT()
         
         sut.start()
         
-        #expect(sut.tabBarController.tabs.count == 2, "Should be two.")
+        #expect(sut.tabBarController.tabs.count == 3, "Should be three tabs.")
     }
     
     @Test func mainCoordinator_start_setsRootViewController() {
