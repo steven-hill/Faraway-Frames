@@ -9,7 +9,10 @@ import UIKit
 
 final class HomeVC: UIViewController {
 
+    // MARK: - View Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationController?.navigationBar.prefersLargeTitles = true
+        title = "Home"
     }
 }
