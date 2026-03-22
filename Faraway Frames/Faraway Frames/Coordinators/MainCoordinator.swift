@@ -21,6 +21,10 @@ final class MainCoordinator: Coordinator {
     }
     
     func start() {
+        let homeCoordinator = HomeCoordinator()
+        homeCoordinator.start()
+        childCoordinators.append(homeCoordinator)
+        
         let exploreSplitViewCoordinator = ExploreSplitViewCoordinator(dependencies: dependencies)
         exploreSplitViewCoordinator.start()
         childCoordinators.append(exploreSplitViewCoordinator)
@@ -30,6 +34,9 @@ final class MainCoordinator: Coordinator {
         childCoordinators.append(assistantCoordinator)
         
         tabBarController.tabs = [
+            UITab(title: "Home", image: UIImage(systemName: "house"), identifier: "homeTab") { _ in
+                return homeCoordinator.navigationController
+            },
             UITab(title: "Explore", image: UIImage(systemName: "film"), identifier: "exploreTab") { _ in
                 return exploreSplitViewCoordinator.exploreSplitVC
             },
