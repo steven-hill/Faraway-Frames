@@ -220,18 +220,26 @@ final class ExploreListVCUITests: XCTestCase {
         app.launchArguments.append("-UITesting")
         app.launchArguments.append("-UITestingMockNetworkSuccess")
         app.launch()
+        navigateToExploreListVC()
     }
     
     private func launchAppForNetworkFailureCase(with error: UITestError) {
         app = XCUIApplication()
         app.launchArguments.append("-UITesting")
         app.launch(with: error)
+        navigateToExploreListVC()
     }
     
     private func setUpSearchTextFieldAndEnterText(_ text: String) -> XCUIElement {
+        navigateToExploreListVC()
         let searchTextField = app.searchFields["ExploreListVC_SearchBar_SearchField"]
         searchTextField.tap()
         searchTextField.typeText(text)
         return searchTextField
+    }
+    
+    private func navigateToExploreListVC() {
+        let exploreTab = app.buttons.matching(identifier: "Explore")
+        exploreTab.element.tap()
     }
 }
