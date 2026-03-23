@@ -28,17 +28,24 @@ final class ExploreDetailVCUITests: XCTestCase {
         guard UIDevice.current.userInterfaceIdiom == .pad else {
             throw XCTSkip("iPad-only test")
         }
+        
+        navigateToExploreTab()
+        
         XCTAssertTrue(app.staticTexts["No Film Selected"].isHittable, "Should show a message.")
         XCTAssertTrue(app.staticTexts["Pick a film from the list to see the details."].isHittable, "Should show a message.")
     }
     
     func test_exploreDetailVC_hasAllUIElements() {
+        navigateToExploreTab()
+        
         tapFirstCollectionViewCell()
         
         assertExploreDetailElementsExist()
     }
     
     func test_exploreDetailVC_hasAllUIElementsAfterDeviceRotation() {
+        navigateToExploreTab()
+        
         tapFirstCollectionViewCell()
         
         XCUIDevice.shared.orientation = .landscapeLeft
@@ -64,6 +71,11 @@ final class ExploreDetailVCUITests: XCTestCase {
         for element in elements {
             XCTAssertTrue(element.exists, "\(element) should be onscreen.")
         }
+    }
+    
+    private func navigateToExploreTab() {
+        let exploreTab = app.buttons.matching(identifier: "Explore")
+        exploreTab.element.firstMatch.tap()
     }
     
     private func tapFirstCollectionViewCell() {
