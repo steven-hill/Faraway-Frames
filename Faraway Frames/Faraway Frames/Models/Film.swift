@@ -23,7 +23,7 @@ struct Film: Codable, Identifiable, Hashable {
     let people: [String]
     let url: String
     
-    enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case id, title, image, description, director, producer, people, url
         case originalTitle = "original_title"
         case originalTitleRomanised = "original_title_romanised"
