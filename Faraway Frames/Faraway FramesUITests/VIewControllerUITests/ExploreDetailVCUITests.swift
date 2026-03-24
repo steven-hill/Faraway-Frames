@@ -29,14 +29,14 @@ final class ExploreDetailVCUITests: XCTestCase {
             throw XCTSkip("iPad-only test")
         }
         
-        navigateToExploreTab()
+        NavigationHelper.navigateToExploreTab(app: app)
         
         XCTAssertTrue(app.staticTexts["No Film Selected"].isHittable, "Should show a message.")
         XCTAssertTrue(app.staticTexts["Pick a film from the list to see the details."].isHittable, "Should show a message.")
     }
     
     func test_exploreDetailVC_hasAllUIElements() {
-        navigateToExploreTab()
+        NavigationHelper.navigateToExploreTab(app: app)
         
         tapFirstCollectionViewCell()
         
@@ -44,7 +44,7 @@ final class ExploreDetailVCUITests: XCTestCase {
     }
     
     func test_exploreDetailVC_hasAllUIElementsAfterDeviceRotation() {
-        navigateToExploreTab()
+        NavigationHelper.navigateToExploreTab(app: app)
         
         tapFirstCollectionViewCell()
         
@@ -71,11 +71,6 @@ final class ExploreDetailVCUITests: XCTestCase {
         for element in elements {
             XCTAssertTrue(element.exists, "\(element) should be onscreen.")
         }
-    }
-    
-    private func navigateToExploreTab() {
-        let exploreTab = app.buttons.matching(identifier: "Explore")
-        exploreTab.element.firstMatch.tap()
     }
     
     private func tapFirstCollectionViewCell() {
