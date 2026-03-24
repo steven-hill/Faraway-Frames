@@ -237,9 +237,4 @@ final class ExploreListVCUITests: XCTestCase {
         searchTextField.typeText(text)
         return searchTextField
     }
-    
-    private func navigateToExploreTab() {
-        let exploreTab = app.buttons.matching(identifier: "Explore")
-        exploreTab.element.firstMatch.tap()
-    }
 }
