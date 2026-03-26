@@ -6,11 +6,14 @@
 //
 
 import Testing
+@testable import Faraway_Frames
 
+@MainActor
 struct HomeWatchedViewModelUnitTests {
 
-    @Test func homeWatchedViewModel() async throws {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
+    @Test func homeWatchedViewModel_onInit_hasNoFilms() {
+        let sut = HomeWatchedViewModel()
+        
+        #expect(sut.watchedFilms.isEmpty)
     }
-
 }
