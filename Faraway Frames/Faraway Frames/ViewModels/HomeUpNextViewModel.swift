@@ -8,4 +8,6 @@
 import Foundation
 
 final class HomeUpNextViewModel {
+    // MARK: - Properties
+    private(set) var upNextFilms: [Film] = []
 }

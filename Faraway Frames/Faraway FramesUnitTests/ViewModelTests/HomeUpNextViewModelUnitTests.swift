@@ -6,9 +6,14 @@
 //
 
 import Testing
+@testable import Faraway_Frames
 
+@MainActor
 struct HomeUpNextViewModelUnitTests {
 
     @Test func homeUpNextViewModel_onInit_hasNoFilms() {
+        let sut = HomeUpNextViewModel()
+        
+        #expect(sut.upNextFilms.isEmpty)
     }
 }
