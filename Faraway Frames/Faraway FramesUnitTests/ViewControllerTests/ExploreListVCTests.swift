@@ -497,21 +497,21 @@ struct ExploreListVCTests {
     }
     
     // MARK: - SUT Helper Methods
-    fileprivate func makeSUT() -> ExploreListVC {
+    private func makeSUT() -> ExploreListVC {
         let mockFilmsListService = MockFilmsListService()
         let imageLoader = MockImageLoader()
         let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
         return ExploreListVC(viewModel: filmsListViewModel)
     }
     
-    fileprivate func makeSUTForNetworkSuccess() -> ExploreListVC {
+    private func makeSUTForNetworkSuccess() -> ExploreListVC {
         let mockFilmsListService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
         let imageLoader = MockImageLoader()
         let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
         return ExploreListVC(viewModel: filmsListViewModel)
     }
     
-    fileprivate func makeSUTForNetworkFailure(error: APIError) -> ExploreListVC {
+    private func makeSUTForNetworkFailure(error: APIError) -> ExploreListVC {
         let mockService = MockFilmsListService()
         mockService.result = .failure(error)
         let imageLoader = MockImageLoader()
@@ -519,7 +519,7 @@ struct ExploreListVCTests {
         return ExploreListVC(viewModel: filmsListViewModel)
     }
     
-    fileprivate func makeSUTForDataSource() -> ExploreListVC {
+    private func makeSUTForDataSource() -> ExploreListVC {
         let sut = makeSUT()
         sut.loadViewIfNeeded()
         let films: [Film] = [.sample]
@@ -527,7 +527,7 @@ struct ExploreListVCTests {
         return sut
     }
     
-    fileprivate func makeSUTForUpdateCellImageTests(
+    private func makeSUTForUpdateCellImageTests(
         shouldSucceed: Bool,
         indexPath: IndexPath = IndexPath(item: 0, section: 0),
         dataSourceFilmID: String
@@ -558,7 +558,7 @@ struct ExploreListVCTests {
     }
     
     // MARK: - Mock CollectionView
-    final class MockCollectionView: UICollectionView {
+    private final class MockCollectionView: UICollectionView {
         var knownCell: UICollectionViewCell?
         var knownIndexPath: IndexPath?
         
@@ -568,7 +568,7 @@ struct ExploreListVCTests {
     }
     
     // MARK: - Mock DataSource
-    final class MockDataSource: UICollectionViewDiffableDataSource<ExploreListVC.Section, Film.ID> {
+    private final class MockDataSource: UICollectionViewDiffableDataSource<ExploreListVC.Section, Film.ID> {
         var mockItemID: Film.ID?
         
         override func itemIdentifier(for indexPath: IndexPath) -> Film.ID? {
@@ -584,7 +584,7 @@ struct ExploreListVCTests {
     }
     
     // MARK: - Explore Navigation Delegate Spy
-    final class ExploreNavigationSpy: ExploreNavigationDelegate {
+    private final class ExploreNavigationSpy: ExploreNavigationDelegate {
         var shouldDeselectAfterSelection = false
         var selectedFilm: Film?
         var didSelectFilmCalled = false
