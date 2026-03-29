@@ -19,7 +19,7 @@
 
 ### Technical details
 - MVVM + Coordinator.
-- UIKit app with a bit of SwiftUI.
+- UIKit app with SwiftUI for collection view cell content.
 - Networking with async/await, `URLSession`, and `NSCache` for image caching.
 - The testing frameworks used are Swift Testing and XCTest, and the project is built with TDD.
 - Includes accessibility support for Dynamic Type and VoiceOver.
