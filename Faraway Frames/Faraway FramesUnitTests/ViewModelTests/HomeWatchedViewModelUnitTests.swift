@@ -14,6 +14,6 @@ struct HomeWatchedViewModelUnitTests {
     @Test func homeWatchedViewModel_onInit_hasNoFilms() {
         let sut = HomeWatchedViewModel()
         
-        #expect(sut.watchedFilms.isEmpty)
+        #expect(sut.watchedFilms.isEmpty, "Should be empty.")
     }
 }
