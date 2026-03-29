@@ -10,4 +10,5 @@ import Foundation
 final class HomeWatchedViewModel {
     // MARK: - Properties
     private(set) var watchedFilms: [Film] = []
+    weak var delegate: HomeWatchedViewModelDelegate?
 }
