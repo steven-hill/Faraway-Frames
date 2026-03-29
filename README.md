@@ -10,7 +10,7 @@
 - Supports portrait and landscape on iPhone and iPad
 
 ### Targets
-- Swift 6
+- Swift 6.2
 - Swift concurrency settings:
   - Approachable Concurrency = Yes
   - Default Actor Isolation = MainActor
