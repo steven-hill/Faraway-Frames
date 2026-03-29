@@ -10,13 +10,28 @@ import UIKit
 final class HomeVC: UIViewController {
     
     // MARK: - Properties
+    let upNextViewModel: HomeUpNextViewModel
+    let watchedViewModel: HomeWatchedViewModel
     lazy var collectionView = UICollectionView()
+    
+    // MARK: - Initialisation
+    init(upNextViewModel: HomeUpNextViewModel, watchedViewModel: HomeWatchedViewModel) {
+        self.upNextViewModel = upNextViewModel
+        self.watchedViewModel = watchedViewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     // MARK: - View Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.navigationBar.prefersLargeTitles = true
         title = "Home"
+        upNextViewModel.delegate = self
+        watchedViewModel.delegate = self
         configureCollectionView()
     }
     
@@ -40,4 +55,12 @@ final class HomeVC: UIViewController {
         }
         return layout
     }
+}
+
+// MARK: - Up Next View Model Delegate
+extension HomeVC: HomeUpNextViewModelDelegate {
+}
+
+// MARK: - Watched View Model Delegate
+extension HomeVC: HomeWatchedViewModelDelegate {
 }
