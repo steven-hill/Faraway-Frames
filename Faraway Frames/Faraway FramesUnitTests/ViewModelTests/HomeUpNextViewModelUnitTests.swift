@@ -14,6 +14,6 @@ struct HomeUpNextViewModelUnitTests {
     @Test func homeUpNextViewModel_onInit_hasNoFilms() {
         let sut = HomeUpNextViewModel()
         
-        #expect(sut.upNextFilms.isEmpty)
+        #expect(sut.upNextFilms.isEmpty, "Should be empty.")
     }
 }
