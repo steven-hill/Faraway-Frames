@@ -32,4 +32,9 @@ final class HomeVCUITests: XCTestCase {
         XCTAssertTrue(title.exists, "Should have a title.")
     }
 
+    func test_homeVC_hasCollectionView() {
+        let collectionView = app.collectionViews.element
+        
+        XCTAssertTrue(collectionView.exists, "Should exist.")
+    }
 }
