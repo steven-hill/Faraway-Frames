@@ -156,7 +156,7 @@ struct ExploreListVCTests {
     @Test func exploreListVC_filmsLookup_returnsCorrectFilm() {
         let sut = makeSUT()
         sut.loadViewIfNeeded()
-        let films: [Film] = [.sample]
+        let films: [Film] = [Film.sample[0]]
         
         sut.didUpdateFilms(films)
         
@@ -360,7 +360,7 @@ struct ExploreListVCTests {
         let sut = makeSUT()
         let spy = ExploreNavigationSpy()
         sut.navigationDelegate = spy
-        let testFilm = Film.sample
+        let testFilm = Film.sample[0]
         let films = [testFilm]
         sut.loadViewIfNeeded()
         sut.didUpdateFilms(films)
@@ -377,7 +377,7 @@ struct ExploreListVCTests {
         let sut = makeSUT()
         let spy = ExploreNavigationSpy()
         sut.navigationDelegate = spy
-        let testFilm = Film.sample
+        let testFilm = Film.sample[0]
         let films = [testFilm]
         sut.loadViewIfNeeded()
         sut.didUpdateFilms(films)
@@ -411,7 +411,7 @@ struct ExploreListVCTests {
         let spy = ExploreNavigationSpy()
         spy.shouldDeselectAfterSelection = true
         sut.navigationDelegate = spy
-        let testFilm = Film.sample
+        let testFilm = Film.sample[0]
         let films = [testFilm]
         sut.loadViewIfNeeded()
         sut.didUpdateFilms(films)
@@ -428,7 +428,7 @@ struct ExploreListVCTests {
         let sut = makeSUT()
         let spy = ExploreNavigationSpy()
         sut.navigationDelegate = spy
-        let testFilm = Film.sample
+        let testFilm = Film.sample[0]
         let films = [testFilm]
         sut.loadViewIfNeeded()
         sut.didUpdateFilms(films)
@@ -479,7 +479,7 @@ struct ExploreListVCTests {
         sut.loadViewIfNeeded()
         
         sut.collectionView.refreshControl?.sendActions(for: .valueChanged)
-        let films: [Film] = [.sample]
+        let films: [Film] = [Film.sample[0]]
         sut.didUpdateFilms(films)
         
         #expect(sut.collectionView.refreshControl?.isRefreshing == false, "Should be false.")
@@ -522,7 +522,7 @@ struct ExploreListVCTests {
     private func makeSUTForDataSource() -> ExploreListVC {
         let sut = makeSUT()
         sut.loadViewIfNeeded()
-        let films: [Film] = [.sample]
+        let films: [Film] = [Film.sample[0]]
         sut.didUpdateFilms(films)
         return sut
     }
@@ -537,7 +537,7 @@ struct ExploreListVCTests {
         imageLoader.shouldSucceed = shouldSucceed
         let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
         let sut = ExploreListVC(viewModel: filmsListViewModel)
-        let film = Film.sample
+        let film = Film.sample[0]
         let placeholderImage = UIImage(systemName: "photo")
         let cell = UICollectionViewListCell()
         cell.contentConfiguration = UIHostingConfiguration {

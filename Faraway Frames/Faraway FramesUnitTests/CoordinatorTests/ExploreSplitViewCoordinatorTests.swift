@@ -71,7 +71,7 @@ struct ExploreSplitViewCoordinatorTests {
         let sut = makeSUT(with: ExploreSplitVCSpy(style: .doubleColumn))
         
         sut.start()
-        let film = Film.sample
+        let film = Film.sample[0]
         sut.didSelectFilm(film)
         
         #expect(sut.exploreSplitVC.viewControllers.count == 2, "Should be 2.")
@@ -84,7 +84,7 @@ struct ExploreSplitViewCoordinatorTests {
         let sut = makeSUT(with: exploreSplitVCSpy)
         
         sut.start()
-        let film = Film.sample
+        let film = Film.sample[0]
         sut.didSelectFilm(film)
         
         #expect(exploreSplitVCSpy.hideWasCalled == true, "Should collapse the primary view controller.")

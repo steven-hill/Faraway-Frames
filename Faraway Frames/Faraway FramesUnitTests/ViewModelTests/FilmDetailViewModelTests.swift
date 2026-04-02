@@ -27,7 +27,7 @@ struct FilmDetailViewModelTests {
     }
     
     @Test func filmDetailViewModel_whenFilmIsPassedIn_setsCurrentStateToContent() {
-        let film = Film.sample
+        let film = Film.sample[0]
         let mockImageLoader = MockImageLoader()
         let sut = FilmDetailViewModel(film: film, imageLoader: mockImageLoader)
         
@@ -37,7 +37,7 @@ struct FilmDetailViewModelTests {
     }
     
     @Test func filmDetailViewModel_setFilm_whenThereIsAFilm_updatesCurrentState() {
-        let film = Film.sample
+        let film = Film.sample[0]
         let sut = makeSUT()
         
         sut.setFilm(film)
@@ -56,8 +56,8 @@ struct FilmDetailViewModelTests {
     
     @Test("Quick selection of films ignores the results of the cancelled task")
     func filmDetailViewModel_setFilm_cancelsPreviousImageDownloadTask() async {
-        let filmA = Film.sample
-        let filmB = Film.sample
+        let filmA = Film.sample[0]
+        let filmB = Film.sample[1]
         let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
         let sut = FilmDetailViewModel(imageLoader: mockImageLoader)
         let spy = FilmDetailViewModelSpy()
@@ -79,7 +79,7 @@ struct FilmDetailViewModelTests {
     }
 
     @Test func filmDetailViewModel_getMovieBanner_whenFailedToDownloadMovieBannerImage_returnsFallbackImage() async {
-        let film = Film.sample
+        let film = Film.sample[0]
         let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
         let sut = FilmDetailViewModel(imageLoader: mockImageLoader)
         let spy = FilmDetailViewModelSpy()
