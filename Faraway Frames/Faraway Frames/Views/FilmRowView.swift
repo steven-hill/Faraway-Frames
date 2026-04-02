@@ -65,6 +65,6 @@ struct FilmRowView: View {
 }
 
 #Preview {
-    let film = Film.sample
+    let film = Film.sample[0]
     FilmRowView(film: film, image: nil)
 }
