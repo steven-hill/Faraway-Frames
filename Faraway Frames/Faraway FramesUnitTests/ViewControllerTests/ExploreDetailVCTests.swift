@@ -137,7 +137,7 @@ struct ExploreDetailVCTests {
     }
     
     private func makeSUTWithFilm() -> ExploreDetailVC {
-        let film = Film.sample
+        let film = Film.sample[0]
         let mockImageLoader = MockImageLoader()
         let filmDetailViewModel = FilmDetailViewModel(film: film, imageLoader: mockImageLoader)
         let sut = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
