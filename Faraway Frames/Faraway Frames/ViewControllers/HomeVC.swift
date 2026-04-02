@@ -64,3 +64,11 @@ extension HomeVC: HomeUpNextViewModelDelegate {
 // MARK: - Watched View Model Delegate
 extension HomeVC: HomeWatchedViewModelDelegate {
 }
+
+// MARK: - Preview
+#Preview("HomeVC") {
+    let upNextViewModel = HomeUpNextViewModel()
+    let watchedViewModel = HomeWatchedViewModel()
+    let vc = HomeVC(upNextViewModel: upNextViewModel, watchedViewModel: watchedViewModel)
+    return vc
+}
