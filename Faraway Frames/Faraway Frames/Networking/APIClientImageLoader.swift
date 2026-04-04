@@ -29,7 +29,6 @@ final class APIClientImageLoader: ImageLoader {
         let image: UIImage?
         let key = url.absoluteString as NSString
         if let cachedImage = cacheManager.getData(forKey: key) {
-            print("image from NSCache: \(cachedImage)")
             return cachedImage
         }
         
@@ -37,7 +36,6 @@ final class APIClientImageLoader: ImageLoader {
         if let cachedResponse = session.configuration.urlCache?.cachedResponse(for: request),
         let imageFromURLCache = UIImage(data: cachedResponse.data) {
             cacheManager.setData(imageFromURLCache, forKey: key)
-            print("image from URL cache: \(imageFromURLCache)")
             return imageFromURLCache
         }
         
