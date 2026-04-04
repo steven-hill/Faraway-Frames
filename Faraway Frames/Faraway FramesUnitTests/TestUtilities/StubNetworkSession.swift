@@ -13,7 +13,7 @@ struct StubNetworkSession: NetworkSession {
     var data: Data?
     var response: URLResponse?
     
-    init(configuration: URLSessionConfiguration = .default, data: Data? = nil, response: URLResponse? = nil) {
+    init(configuration: URLSessionConfiguration = .ephemeral, data: Data? = nil, response: URLResponse? = nil) {
         self.configuration = configuration
         self.data = data
         self.response = response

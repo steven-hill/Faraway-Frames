@@ -64,7 +64,7 @@ struct APIClientImageLoaderTests {
         let cachedResponse = CachedURLResponse(response: mockResponse, data: imageData)
         testCache.removeAllCachedResponses()
         testCache.storeCachedResponse(cachedResponse, for: URLRequest(url: testURL))
-        let configuration = URLSessionConfiguration.default
+        let configuration = URLSessionConfiguration.ephemeral
         configuration.urlCache = testCache
         let session = StubNetworkSession(configuration: configuration)
         let sut = APIClientImageLoader(session: session, cacheManager: cacheManager)
