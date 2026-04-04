@@ -13,7 +13,7 @@ import UIKit
 struct APIClientImageLoaderTests {
     
     @Test(.tags(.networkRequest))
-    func apiClientImageLoader_whenSuccessful_shouldSaveImageToCache() async {
+    func apiClientImageLoader_whenSuccessful_shouldSaveImageToNSCache() async {
         let cacheManager = MockCacheManager()
         let testImage = makeTestImage()
         let testURL = makeTestURL()
@@ -32,7 +32,7 @@ struct APIClientImageLoaderTests {
         #expect(cacheManager.setDataCalled == true, "Should be true.")
     }
     
-    @Test func apiClientImageLoader_ifImageExistsInCache_shouldRetrieveImageFromCache() async {
+    @Test func apiClientImageLoader_ifImageExistsInNSCache_shouldRetrieveImageFromNSCache() async {
         let session = StubNetworkSession()
         let cacheManager = MockCacheManager()
         let urlString = makeURLString()
