@@ -67,7 +67,6 @@ struct APIClientImageLoaderTests {
         let configuration = URLSessionConfiguration.default
         configuration.urlCache = testCache
         let session = StubNetworkSession(configuration: configuration)
-        
         let sut = APIClientImageLoader(session: session, cacheManager: cacheManager)
         
         let retrievedImage = await sut.loadImage(from: testURL)
