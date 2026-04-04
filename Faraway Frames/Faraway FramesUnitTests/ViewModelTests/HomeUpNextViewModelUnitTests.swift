@@ -10,6 +10,12 @@ import Testing
 
 @MainActor
 struct HomeUpNextViewModelUnitTests {
+    
+    @Test func homeUpNextViewModel_currentStateOnInit_isNoFilms() {
+        let sut = HomeUpNextViewModel()
+        
+        #expect(sut.currentState == .noFilms, "Should be `.noFilms` on init.")
+    }
 
     @Test func homeUpNextViewModel_onInit_hasNoFilms() {
         let sut = HomeUpNextViewModel()

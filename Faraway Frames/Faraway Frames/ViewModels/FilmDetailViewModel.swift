@@ -19,7 +19,6 @@ final class FilmDetailViewModel {
     // MARK: - Properties
     private let imageLoader: ImageLoader
     private var imageLoadTask: Task<Void, Never>?
-    
     private(set) var currentState: FilmDetailState = .noFilmSelected {
         didSet {
             updateUI()
