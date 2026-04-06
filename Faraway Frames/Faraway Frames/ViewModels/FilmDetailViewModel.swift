@@ -62,7 +62,8 @@ final class FilmDetailViewModel: FilmDetailViewModelProtocol {
             return
         }
         
-        imageLoadTask = Task {
+        imageLoadTask = Task { [weak self] in
+            guard let self, !Task.isCancelled else { return }
             do {
                 let downloadedImage = await imageLoader.loadImage(from: url)
                 if !Task.isCancelled {
