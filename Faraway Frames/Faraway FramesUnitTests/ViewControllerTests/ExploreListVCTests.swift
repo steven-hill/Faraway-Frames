@@ -130,6 +130,15 @@ struct ExploreListVCTests {
         #expect(config?.button.title != nil, "Should have a title.")
     }
     
+    @Test func exploreListVC_viewWillDisappear_cancelsLoadTask() {
+        let sut = makeSUT()
+        sut.loadViewIfNeeded()
+        
+        sut.viewWillDisappear(false)
+        
+        #expect(sut.loadTask?.isCancelled == true, "Should have been cancelled.")
+    }
+    
     @Test func exploreListVC_didUpdateFilms_updatesCollectionViewItemCount() {
         let sut = makeSUTForDataSource()
         
