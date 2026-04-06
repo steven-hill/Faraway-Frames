@@ -20,11 +20,10 @@ struct Film: Codable, Identifiable, Hashable {
     let releaseDate: String
     let runningTime: String
     let rottenTomatoesScore: String
-    let people: [String]
     let url: String
     
     private enum CodingKeys: String, CodingKey {
-        case id, title, image, description, director, producer, people, url
+        case id, title, image, description, director, producer, url
         case originalTitle = "original_title"
         case originalTitleRomanised = "original_title_romanised"
         case movieBanner = "movie_banner"
@@ -49,15 +48,6 @@ extension Film {
             releaseDate: "1986",
             runningTime: "124",
             rottenTomatoesScore: "95",
-            people: [
-                "https://ghibliapi.vercel.app/people/598f7048-74ff-41e0-92ef-87dc1ad980a9",
-                "https://ghibliapi.vercel.app/people/fe93adf2-2f3a-4ec4-9f68-5422f1b87c01",
-                "https://ghibliapi.vercel.app/people/3bc0b41e-3569-4d20-ae73-2da329bf0786",
-                "https://ghibliapi.vercel.app/people/40c005ce-3725-4f15-8409-3e1b1b14b583",
-                "https://ghibliapi.vercel.app/people/5c83c12a-62d5-4e92-8672-33ac76ae1fa0",
-                "https://ghibliapi.vercel.app/people/e08880d0-6938-44f3-b179-81947e7873fc",
-                "https://ghibliapi.vercel.app/people/2a1dad70-802a-459d-8cc2-4ebd8821248b"
-            ],
             url: "https://ghibliapi.vercel.app/films/2baf70d1-42bb-4437-b551-e5fed5a87abe"
         ),
         Film(
@@ -73,7 +63,6 @@ extension Film {
             releaseDate: "1988",
             runningTime: "89",
             rottenTomatoesScore: "97",
-            people: ["https://ghibliapi.vercel.app/people/"],
             url: "https://ghibliapi.vercel.app/films/12cfb892-aac0-4c5b-94af-521852e46d6a"
         ),
         Film(
@@ -89,7 +78,6 @@ extension Film {
             releaseDate: "1988",
             runningTime: "89",
             rottenTomatoesScore: "97",
-            people: ["https://ghibliapi.vercel.app/people/"],
             url: "https://ghibliapi.vercel.app/films/12cfb892-aac0-4c5b-94af-521852e46d6a"
         ),
         Film(
@@ -105,7 +93,6 @@ extension Film {
             releaseDate: "1988",
             runningTime: "89",
             rottenTomatoesScore: "97",
-            people: ["https://ghibliapi.vercel.app/people/"],
             url: "https://ghibliapi.vercel.app/films/12cfb892-aac0-4c5b-94af-521852e46d6a"
         ),
         Film(
@@ -121,7 +108,6 @@ extension Film {
             releaseDate: "1988",
             runningTime: "86",
             rottenTomatoesScore: "93",
-            people: ["https://ghibliapi.vercel.app/people/"],
             url: "https://vercel.app"
         ),
         Film(
@@ -137,7 +123,6 @@ extension Film {
             releaseDate: "1991",
             runningTime: "119",
             rottenTomatoesScore: "100",
-            people: ["https://ghibliapi.vercel.app/people/"],
             url: "https://vercel.app"
         ),
         Film(
@@ -153,7 +138,6 @@ extension Film {
             releaseDate: "1992",
             runningTime: "93",
             rottenTomatoesScore: "94",
-            people: ["https://ghibliapi.vercel.app/people/"],
             url: "https://vercel.app"
         ),
         Film(
@@ -169,7 +153,6 @@ extension Film {
             releaseDate: "1994",
             runningTime: "119",
             rottenTomatoesScore: "78",
-            people: ["https://ghibliapi.vercel.app/people/"],
             url: "https://vercel.app"
         ),
         Film(
@@ -185,7 +168,6 @@ extension Film {
             releaseDate: "1997",
             runningTime: "134",
             rottenTomatoesScore: "93",
-            people: ["https://vercel.app"],
             url: "https://vercel.app"
         ),
         Film(
@@ -201,7 +183,6 @@ extension Film {
             releaseDate: "2001",
             runningTime: "125",
             rottenTomatoesScore: "96",
-            people: ["https://vercel.app"],
             url: "https://vercel.app"
         ),
         Film(
@@ -217,7 +198,6 @@ extension Film {
             releaseDate: "2004",
             runningTime: "119",
             rottenTomatoesScore: "87",
-            people: ["https://vercel.app"],
             url: "https://vercel.app"
         ),
         Film(
@@ -233,7 +213,6 @@ extension Film {
             releaseDate: "2008",
             runningTime: "101",
             rottenTomatoesScore: "91",
-            people: ["https://vercel.app"],
             url: "https://vercel.app"
         )
     ]
