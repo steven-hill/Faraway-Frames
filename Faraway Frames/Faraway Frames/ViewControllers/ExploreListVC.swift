@@ -50,6 +50,7 @@ final class ExploreListVC: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         loadTask?.cancel()
+        loadTask = nil
     }
     
     private func setUpBackButton() {
