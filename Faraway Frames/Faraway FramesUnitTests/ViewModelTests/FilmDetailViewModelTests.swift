@@ -54,7 +54,7 @@ struct FilmDetailViewModelTests {
         #expect(sut.currentState == .noFilmSelected, "Should update the state to `.noFilmSelected` when a film is nil.")
     }
     
-    @Test("Quick selection of films ignores the results of the cancelled task")
+    @Test("Quick selection of films ignores the results of the cancelled task", .tags(.networkRequest))
     func filmDetailViewModel_setFilm_cancelsPreviousImageDownloadTask() async {
         let filmA = Film.sample[0]
         let filmB = Film.sample[1]
@@ -78,7 +78,7 @@ struct FilmDetailViewModelTests {
         #expect(spy.callCount == 3, "Should be called three times in total; once for filmA's initial content, twice for filmB's initial content and its movie banner.")
     }
 
-    @Test func filmDetailViewModel_getMovieBanner_whenFailedToDownloadMovieBannerImage_returnsFallbackImage() async {
+    @Test(.tags(.networkRequest)) func filmDetailViewModel_getMovieBanner_whenFailedToDownloadMovieBannerImage_returnsFallbackImage() async {
         let film = Film.sample[0]
         let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
         let sut = FilmDetailViewModel(imageLoader: mockImageLoader)
@@ -97,6 +97,17 @@ struct FilmDetailViewModelTests {
         }
     }
     
+    @Test(.tags(.networkRequest)) func filmDetailViewModel_cancelImageLoad_marksTaskForCancellationAndSetsItToNil() {
+        let sut = makeSUT()
+        sut.setFilm(Film.sample[0])
+        let capturedTask = sut.imageLoadTask
+        
+        sut.cancelImageLoad()
+        
+        #expect(capturedTask?.isCancelled == true, "Should be marked for cancellation.")
+        #expect(sut.imageLoadTask == nil, "Should be nil.")
+    }
+    
     //MARK: - Helper method
     private func makeSUT() -> FilmDetailViewModel {
         let mockImageLoader = MockImageLoader()
@@ -110,8 +121,7 @@ struct FilmDetailViewModelTests {
             callCount += 1
         }
         
-        func didUpdateWithEmptyState() {
-        }
+        func didUpdateWithEmptyState() {}
     }
 }
 
