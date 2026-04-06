@@ -121,8 +121,7 @@ struct FilmDetailViewModelTests {
             callCount += 1
         }
         
-        func didUpdateWithEmptyState() {
-        }
+        func didUpdateWithEmptyState() {}
     }
 }
 
