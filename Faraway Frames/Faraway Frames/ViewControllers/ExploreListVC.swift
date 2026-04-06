@@ -47,6 +47,11 @@ final class ExploreListVC: UIViewController {
         loadTask = getAllFilms()
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        loadTask?.cancel()
+    }
+    
     private func setUpBackButton() {
         let backButton = UIBarButtonItem()
         backButton.accessibilityLabel = "Back to films list"
