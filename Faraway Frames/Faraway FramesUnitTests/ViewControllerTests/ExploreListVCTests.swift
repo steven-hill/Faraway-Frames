@@ -133,10 +133,12 @@ struct ExploreListVCTests {
     @Test func exploreListVC_viewWillDisappear_cancelsLoadTask() {
         let sut = makeSUT()
         sut.loadViewIfNeeded()
+        let capturedTask = sut.loadTask
         
         sut.viewWillDisappear(false)
         
-        #expect(sut.loadTask?.isCancelled == true, "Should have been cancelled.")
+        #expect(capturedTask?.isCancelled == true, "Should be marked as cancelled.")
+        #expect(sut.loadTask == nil, "Should be nil.")
     }
     
     @Test func exploreListVC_didUpdateFilms_updatesCollectionViewItemCount() {
