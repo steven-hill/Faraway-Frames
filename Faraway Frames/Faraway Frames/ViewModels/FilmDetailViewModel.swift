@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-final class FilmDetailViewModel {
+final class FilmDetailViewModel: FilmDetailViewModelProtocol {
     
     // MARK: - State Definition
     enum FilmDetailState: Equatable {
