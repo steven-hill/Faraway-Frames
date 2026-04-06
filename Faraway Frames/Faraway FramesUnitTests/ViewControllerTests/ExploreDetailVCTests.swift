@@ -143,4 +143,12 @@ struct ExploreDetailVCTests {
         let sut = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
         return sut
     }
+    
+    private final class FilmDetailViewModelSpy: FilmDetailViewModelProtocol {
+        private(set) var cancelImageLoadCallCount = 0
+        
+        func cancelImageLoad() {
+            cancelImageLoadCallCount += 1
+        }
+    }
 }
