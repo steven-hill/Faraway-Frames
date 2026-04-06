@@ -7,6 +7,9 @@
 
 import Foundation
 
-protocol FilmDetailViewModelProtocol {
+protocol FilmDetailViewModelProtocol: AnyObject {
+    var delegate: FilmDetailViewModelDelegate? { get set }
+    var currentState: FilmDetailViewModel.FilmDetailState { get }
+    func setFilm(_ film: Film?)
     func cancelImageLoad()
 }

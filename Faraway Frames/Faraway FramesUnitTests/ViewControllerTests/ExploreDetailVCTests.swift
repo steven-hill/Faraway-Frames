@@ -144,9 +144,12 @@ struct ExploreDetailVCTests {
         return sut
     }
     
+    //MARK: - Film Detail View Model Spy
     private final class FilmDetailViewModelSpy: FilmDetailViewModelProtocol {
+        var currentState: FilmDetailViewModel.FilmDetailState = .noFilmSelected
+        weak var delegate: FilmDetailViewModelDelegate?
         private(set) var cancelImageLoadCallCount = 0
-        
+        func setFilm(_ film: Film?) {}
         func cancelImageLoad() {
             cancelImageLoadCallCount += 1
         }
