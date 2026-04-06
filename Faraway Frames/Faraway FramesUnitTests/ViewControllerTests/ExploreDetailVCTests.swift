@@ -107,6 +107,16 @@ struct ExploreDetailVCTests {
         #expect(sut.title == nil, "Should be nil.")
     }
     
+    @Test(.tags(.networkRequest))
+    func exploreDetailVC_viewWillDisappear_callsCancelImageLoadOnViewModel() {
+        let spy = FilmDetailViewModelSpy()
+        let sut = ExploreDetailVC(filmDetailViewModel: spy)
+        
+        sut.viewWillDisappear(false)
+        
+        #expect(spy.cancelImageLoadCallCount == 1, "Should be called once.")
+    }
+    
     @Test func exploreDetailVC_didUpdateFilmDetails_notifiesContentUnavailableConfigurationToUpdate() {
         let sut = makeSUTWithFilm()
         
@@ -146,7 +156,7 @@ struct ExploreDetailVCTests {
     
     //MARK: - Film Detail View Model Spy
     private final class FilmDetailViewModelSpy: FilmDetailViewModelProtocol {
-        var currentState: FilmDetailViewModel.FilmDetailState = .noFilmSelected
+        var currentState: FilmDetailViewModel.FilmDetailState = .content(Film.sample[0], image: nil)
         weak var delegate: FilmDetailViewModelDelegate?
         private(set) var cancelImageLoadCallCount = 0
         func setFilm(_ film: Film?) {}
