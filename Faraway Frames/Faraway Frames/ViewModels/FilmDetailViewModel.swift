@@ -73,4 +73,9 @@ final class FilmDetailViewModel {
             }
         }
     }
+    
+    func cancelImageLoad() {
+        imageLoadTask?.cancel()
+        imageLoadTask = nil
+    }
 }
