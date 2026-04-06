@@ -130,7 +130,8 @@ struct ExploreListVCTests {
         #expect(config?.button.title != nil, "Should have a title.")
     }
     
-    @Test func exploreListVC_viewWillDisappear_cancelsLoadTask() {
+    @Test(.tags(.networkRequest))
+    func exploreListVC_viewWillDisappear_cancelsLoadTask() {
         let sut = makeSUT()
         sut.loadViewIfNeeded()
         let capturedTask = sut.loadTask
