@@ -152,8 +152,7 @@ final class ExploreDetailVC: UIViewController {
         } else {
             multiplier = isPortrait ? 0.3 : 0.75
         }
-        movieBannerHeightConstraint =
-        movieBanner.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: multiplier)
+        movieBannerHeightConstraint = movieBanner.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: multiplier)
         
         if isPad || isPortrait {
             contentViewLeadingConstraint = contentView.leadingAnchor.constraint(equalTo: view.leadingAnchor)
