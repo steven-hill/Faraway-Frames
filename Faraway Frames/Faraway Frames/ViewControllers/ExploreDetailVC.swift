@@ -81,7 +81,6 @@ final class ExploreDetailVC: UIViewController {
             self.updateLayoutForTraits()
         }
         updateLayoutForTraits()
-        UIAccessibility.post(notification: .screenChanged, argument: nil)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
