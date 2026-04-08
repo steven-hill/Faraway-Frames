@@ -83,11 +83,6 @@ final class ExploreDetailVC: UIViewController {
         updateLayoutForTraits()
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        filmDetailViewModel.cancelImageLoad()
-    }
-    
     private func updateLayoutForTraits() {
         creditsContainer.axis = (traitCollection.horizontalSizeClass == .regular) ? .horizontal : .vertical
         creditsContainer.distribution = (traitCollection.horizontalSizeClass == .regular) ? .fillEqually : .fill
