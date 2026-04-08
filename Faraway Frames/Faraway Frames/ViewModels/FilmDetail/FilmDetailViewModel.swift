@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-final class FilmDetailViewModel: FilmDetailViewModelProtocol {
+final class FilmDetailViewModel {
     
     // MARK: - State Definition
     enum FilmDetailState: Equatable {
@@ -73,10 +73,5 @@ final class FilmDetailViewModel: FilmDetailViewModelProtocol {
                 currentState = .content(film, image: fallbackImage)
             }
         }
-    }
-    
-    func cancelImageLoad() {
-        imageLoadTask?.cancel()
-        imageLoadTask = nil
     }
 }

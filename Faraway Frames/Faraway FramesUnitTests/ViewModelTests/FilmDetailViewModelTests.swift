@@ -64,10 +64,12 @@ struct FilmDetailViewModelTests {
         sut.delegate = spy
 
         sut.setFilm(filmA)
+        let taskA = sut.imageLoadTask
         await Task.yield()
         #expect(mockImageLoader.loadCount == 1)
 
         sut.setFilm(filmB)
+        #expect(taskA?.isCancelled == true, "TaskA should be cancelled.")
         await Task.yield()
         #expect(mockImageLoader.loadCount == 2)
 
@@ -95,17 +97,6 @@ struct FilmDetailViewModelTests {
             #expect(sut.currentState == .content(film, image: image), "Should have a `Film` and an image.")
             #expect(spy.callCount == 2, "Should have called `didUpdateFilmDetails()` twice; once for the film object, and again for the image.")
         }
-    }
-    
-    @Test(.tags(.networkRequest)) func filmDetailViewModel_cancelImageLoad_marksTaskForCancellationAndSetsItToNil() {
-        let sut = makeSUT()
-        sut.setFilm(Film.sample[0])
-        let capturedTask = sut.imageLoadTask
-        
-        sut.cancelImageLoad()
-        
-        #expect(capturedTask?.isCancelled == true, "Should be marked for cancellation.")
-        #expect(sut.imageLoadTask == nil, "Should be nil.")
     }
     
     //MARK: - Helper method
