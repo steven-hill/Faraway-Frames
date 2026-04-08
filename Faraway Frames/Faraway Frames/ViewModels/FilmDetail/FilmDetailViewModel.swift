@@ -74,9 +74,4 @@ final class FilmDetailViewModel: FilmDetailViewModelProtocol {
             }
         }
     }
-    
-    func cancelImageLoad() {
-        imageLoadTask?.cancel()
-        imageLoadTask = nil
-    }
 }
