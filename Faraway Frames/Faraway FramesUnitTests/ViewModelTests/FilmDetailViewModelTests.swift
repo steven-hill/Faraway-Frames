@@ -64,10 +64,12 @@ struct FilmDetailViewModelTests {
         sut.delegate = spy
 
         sut.setFilm(filmA)
+        let taskA = sut.imageLoadTask
         await Task.yield()
         #expect(mockImageLoader.loadCount == 1)
 
         sut.setFilm(filmB)
+        #expect(taskA?.isCancelled == true, "TaskA should be cancelled.")
         await Task.yield()
         #expect(mockImageLoader.loadCount == 2)
 
