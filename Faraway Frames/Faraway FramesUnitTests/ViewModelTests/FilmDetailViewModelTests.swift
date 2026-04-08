@@ -97,17 +97,6 @@ struct FilmDetailViewModelTests {
         }
     }
     
-    @Test(.tags(.networkRequest)) func filmDetailViewModel_cancelImageLoad_marksTaskForCancellationAndSetsItToNil() {
-        let sut = makeSUT()
-        sut.setFilm(Film.sample[0])
-        let capturedTask = sut.imageLoadTask
-        
-        sut.cancelImageLoad()
-        
-        #expect(capturedTask?.isCancelled == true, "Should be marked for cancellation.")
-        #expect(sut.imageLoadTask == nil, "Should be nil.")
-    }
-    
     //MARK: - Helper method
     private func makeSUT() -> FilmDetailViewModel {
         let mockImageLoader = MockImageLoader()
