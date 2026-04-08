@@ -10,7 +10,7 @@ import UIKit
 final class ExploreDetailVC: UIViewController {
     
     // MARK: - Properties
-    let filmDetailViewModel: FilmDetailViewModelProtocol
+    let filmDetailViewModel: FilmDetailViewModel
     private var movieBannerHeightConstraint: NSLayoutConstraint?
     private var contentViewLeadingConstraint: NSLayoutConstraint?
     private var contentViewTrailingConstraint: NSLayoutConstraint?
@@ -58,7 +58,7 @@ final class ExploreDetailVC: UIViewController {
     }()
     
     // MARK: - Initialisation
-    init(filmDetailViewModel: FilmDetailViewModelProtocol) {
+    init(filmDetailViewModel: FilmDetailViewModel) {
         self.filmDetailViewModel = filmDetailViewModel
         super.init(nibName: nil, bundle: nil)
     }
