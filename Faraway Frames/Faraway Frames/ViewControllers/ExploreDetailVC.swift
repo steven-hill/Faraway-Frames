@@ -62,7 +62,7 @@ final class ExploreDetailVC: UIViewController {
         config.baseBackgroundColor = .secondarySystemBackground
         config.baseForegroundColor = .label
         config.background.cornerRadius = 10
-        config.title = "Add to Up Next"
+        config.title = "Add To Up Next"
         config.titleLineBreakMode = .byWordWrapping
         config.titleAlignment = .center
         config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
@@ -82,7 +82,7 @@ final class ExploreDetailVC: UIViewController {
         config.baseBackgroundColor = .secondarySystemBackground
         config.baseForegroundColor = .label
         config.background.cornerRadius = 10
-        config.title = "Mark as Watched"
+        config.title = "Mark As Watched"
         config.titleLineBreakMode = .byWordWrapping
         config.titleAlignment = .center
         config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
