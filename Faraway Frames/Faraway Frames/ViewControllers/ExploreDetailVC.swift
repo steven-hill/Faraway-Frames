@@ -58,48 +58,63 @@ final class ExploreDetailVC: UIViewController {
     }()
     
     private let addToUpNextButton: UIButton = {
-        let addToUpNextButton = UIButton()
-        addToUpNextButton.setTitle("Add to Up Next", for: .normal)
-        addToUpNextButton.titleLabel?.font = .preferredFont(forTextStyle: .body)
-        addToUpNextButton.titleLabel?.adjustsFontForContentSizeCategory = true
-        addToUpNextButton.titleLabel?.numberOfLines = 0
-        addToUpNextButton.backgroundColor = .secondarySystemBackground
-        addToUpNextButton.setTitleColor(.label, for: .normal)
-        addToUpNextButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
-        addToUpNextButton.layer.cornerRadius = 10
-        addToUpNextButton.translatesAutoresizingMaskIntoConstraints = false
-        addToUpNextButton.accessibilityIdentifier = "ExploreDetailVC_AddToUpNextButton"
-        return addToUpNextButton
+        var config = UIButton.Configuration.filled()
+        config.baseBackgroundColor = .secondarySystemBackground
+        config.baseForegroundColor = .label
+        config.background.cornerRadius = 10
+        config.title = "Add to Up Next"
+        config.titleLineBreakMode = .byWordWrapping
+        config.titleAlignment = .center
+        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+            var outgoing = incoming
+            outgoing.font = UIFont.preferredFont(forTextStyle: .body)
+            return outgoing
+        }
+        config.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
+        let button = UIButton(configuration: config)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
+        return button
     }()
     
     private let markAsWatchedButton: UIButton = {
-        let markAsWatchedButton = UIButton()
-        markAsWatchedButton.setTitle("Mark as Watched", for: .normal)
-        markAsWatchedButton.titleLabel?.font = .preferredFont(forTextStyle: .body)
-        markAsWatchedButton.titleLabel?.adjustsFontForContentSizeCategory = true
-        markAsWatchedButton.titleLabel?.numberOfLines = 0
-        markAsWatchedButton.backgroundColor = .secondarySystemBackground
-        markAsWatchedButton.setTitleColor(.label, for: .normal)
-        markAsWatchedButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
-        markAsWatchedButton.layer.cornerRadius = 10
-        markAsWatchedButton.translatesAutoresizingMaskIntoConstraints = false
-        markAsWatchedButton.accessibilityIdentifier = "ExploreDetailVC_MarkAsWatchedButton"
-        return markAsWatchedButton
+        var config = UIButton.Configuration.filled()
+        config.baseBackgroundColor = .secondarySystemBackground
+        config.baseForegroundColor = .label
+        config.background.cornerRadius = 10
+        config.title = "Mark as Watched"
+        config.titleLineBreakMode = .byWordWrapping
+        config.titleAlignment = .center
+        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+            var outgoing = incoming
+            outgoing.font = UIFont.preferredFont(forTextStyle: .body)
+            return outgoing
+        }
+        config.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
+        let button = UIButton(configuration: config)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
+        return button
     }()
     
     private let moreLikeThisButton: UIButton = {
-        let moreLikeThisButton = UIButton()
-        moreLikeThisButton.setTitle("More Like This", for: .normal)
-        moreLikeThisButton.titleLabel?.font = .preferredFont(forTextStyle: .body)
-        moreLikeThisButton.titleLabel?.adjustsFontForContentSizeCategory = true
-        moreLikeThisButton.titleLabel?.numberOfLines = 0
-        moreLikeThisButton.backgroundColor = .secondarySystemBackground
-        moreLikeThisButton.setTitleColor(.label, for: .normal)
-        moreLikeThisButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
-        moreLikeThisButton.layer.cornerRadius = 10
-        moreLikeThisButton.translatesAutoresizingMaskIntoConstraints = false
-        moreLikeThisButton.accessibilityIdentifier = "ExploreDetailVC_MoreLikeThisButton"
-        return moreLikeThisButton
+        var config = UIButton.Configuration.filled()
+        config.baseBackgroundColor = .secondarySystemBackground
+        config.baseForegroundColor = .label
+        config.background.cornerRadius = 10
+        config.title = "More Like This"
+        config.titleLineBreakMode = .byWordWrapping
+        config.titleAlignment = .center
+        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+            var outgoing = incoming
+            outgoing.font = UIFont.preferredFont(forTextStyle: .body)
+            return outgoing
+        }
+        config.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
+        let button = UIButton(configuration: config)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
+        return button
     }()
     
     private let buttonsContainer: UIStackView = {
