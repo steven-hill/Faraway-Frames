@@ -310,7 +310,11 @@ final class ExploreDetailVC: UIViewController {
             creditsContainer.topAnchor.constraint(equalTo: synopsisLabel.bottomAnchor, constant: padding),
             creditsContainer.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: padding),
             creditsContainer.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -padding),
-            creditsContainer.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -80)
+            
+            buttonsContainer.topAnchor.constraint(equalTo: creditsContainer.bottomAnchor, constant: padding),
+            buttonsContainer.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: padding),
+            buttonsContainer.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -padding),
+            buttonsContainer.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -100)
         ])
     }
 }
