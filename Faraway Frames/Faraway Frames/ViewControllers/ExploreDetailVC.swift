@@ -57,6 +57,76 @@ final class ExploreDetailVC: UIViewController {
         return creditsContainer
     }()
     
+    private let addToUpNextButton: UIButton = {
+        var config = UIButton.Configuration.filled()
+        config.baseBackgroundColor = .secondarySystemBackground
+        config.baseForegroundColor = .label
+        config.background.cornerRadius = 10
+        config.title = "Add To Up Next"
+        config.titleLineBreakMode = .byWordWrapping
+        config.titleAlignment = .center
+        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+            var outgoing = incoming
+            outgoing.font = UIFont.preferredFont(forTextStyle: .body)
+            return outgoing
+        }
+        config.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
+        let button = UIButton(configuration: config)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
+        return button
+    }()
+    
+    private let markAsWatchedButton: UIButton = {
+        var config = UIButton.Configuration.filled()
+        config.baseBackgroundColor = .secondarySystemBackground
+        config.baseForegroundColor = .label
+        config.background.cornerRadius = 10
+        config.title = "Mark As Watched"
+        config.titleLineBreakMode = .byWordWrapping
+        config.titleAlignment = .center
+        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+            var outgoing = incoming
+            outgoing.font = UIFont.preferredFont(forTextStyle: .body)
+            return outgoing
+        }
+        config.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
+        let button = UIButton(configuration: config)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
+        return button
+    }()
+    
+    private let moreLikeThisButton: UIButton = {
+        var config = UIButton.Configuration.filled()
+        config.baseBackgroundColor = .secondarySystemBackground
+        config.baseForegroundColor = .label
+        config.background.cornerRadius = 10
+        config.title = "More Like This"
+        config.titleLineBreakMode = .byWordWrapping
+        config.titleAlignment = .center
+        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+            var outgoing = incoming
+            outgoing.font = UIFont.preferredFont(forTextStyle: .body)
+            return outgoing
+        }
+        config.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
+        let button = UIButton(configuration: config)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
+        return button
+    }()
+    
+    private let buttonsContainer: UIStackView = {
+        let buttonsContainer = UIStackView()
+        buttonsContainer.spacing = 20
+        buttonsContainer.distribution = .fillEqually
+        buttonsContainer.alignment = .fill
+        buttonsContainer.translatesAutoresizingMaskIntoConstraints = false
+        buttonsContainer.accessibilityIdentifier = "ExploreDetailVC_ButtonsContainer"
+        return buttonsContainer
+    }()
+    
     // MARK: - Initialisation
     init(filmDetailViewModel: FilmDetailViewModel) {
         self.filmDetailViewModel = filmDetailViewModel
@@ -86,6 +156,7 @@ final class ExploreDetailVC: UIViewController {
     private func updateLayoutForTraits() {
         creditsContainer.axis = (traitCollection.horizontalSizeClass == .regular) ? .horizontal : .vertical
         creditsContainer.distribution = (traitCollection.horizontalSizeClass == .regular) ? .fillEqually : .fill
+        buttonsContainer.axis = (traitCollection.horizontalSizeClass == .regular) ? .horizontal: .vertical
     }
     
     override func updateContentUnavailableConfiguration(using state: UIContentUnavailableConfigurationState) {
@@ -114,6 +185,9 @@ final class ExploreDetailVC: UIViewController {
         let producerView = createCreditView(name: film.producer, role: "Producer")
         creditsContainer.addArrangedSubview(directorView)
         creditsContainer.addArrangedSubview(producerView)
+        buttonsContainer.addArrangedSubview(addToUpNextButton)
+        buttonsContainer.addArrangedSubview(markAsWatchedButton)
+        buttonsContainer.addArrangedSubview(moreLikeThisButton)
     }
     
     private func createEmptyState() -> UIContentUnavailableConfiguration {
@@ -126,7 +200,6 @@ final class ExploreDetailVC: UIViewController {
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-
         coordinator.animate(alongsideTransition: { _ in
             self.updateLayoutFor(size: size)
             self.view.layoutIfNeeded()
@@ -219,6 +292,7 @@ final class ExploreDetailVC: UIViewController {
         contentView.addSubview(synopsisLabel)
         contentView.addSubview(rottenTomatoesScoreLabel)
         contentView.addSubview(creditsContainer)
+        contentView.addSubview(buttonsContainer)
     }
     
     private func setupConstraints() {
@@ -263,7 +337,11 @@ final class ExploreDetailVC: UIViewController {
             creditsContainer.topAnchor.constraint(equalTo: synopsisLabel.bottomAnchor, constant: padding),
             creditsContainer.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: padding),
             creditsContainer.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -padding),
-            creditsContainer.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -80)
+            
+            buttonsContainer.topAnchor.constraint(equalTo: creditsContainer.bottomAnchor, constant: padding),
+            buttonsContainer.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: padding),
+            buttonsContainer.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -padding),
+            buttonsContainer.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -100)
         ])
     }
 }
