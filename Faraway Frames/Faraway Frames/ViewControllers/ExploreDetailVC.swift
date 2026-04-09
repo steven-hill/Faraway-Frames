@@ -57,6 +57,39 @@ final class ExploreDetailVC: UIViewController {
         return creditsContainer
     }()
     
+    private let addToUpNextButton: UIButton = {
+        let addToUpNextButton = UIButton()
+        addToUpNextButton.setTitle("Add to Up Next", for: .normal)
+        addToUpNextButton.backgroundColor = .secondarySystemBackground
+        addToUpNextButton.setTitleColor(.black, for: .normal)
+        addToUpNextButton.layer.cornerRadius = 10
+        addToUpNextButton.translatesAutoresizingMaskIntoConstraints = false
+        addToUpNextButton.accessibilityIdentifier = "ExploreDetailVC_AddToUpNextButton"
+        return addToUpNextButton
+    }()
+    
+    private let addToWatchedButton: UIButton = {
+        let addToWatchedButton = UIButton()
+        addToWatchedButton.setTitle("Add to Watched", for: .normal)
+        addToWatchedButton.backgroundColor = .secondarySystemBackground
+        addToWatchedButton.setTitleColor(.black, for: .normal)
+        addToWatchedButton.layer.cornerRadius = 10
+        addToWatchedButton.translatesAutoresizingMaskIntoConstraints = false
+        addToWatchedButton.accessibilityIdentifier = "ExploreDetailVC_AddToWatchedButton"
+        return addToWatchedButton
+    }()
+    
+    private let moreLikeThisButton: UIButton = {
+        let moreLikeThisButton = UIButton()
+        moreLikeThisButton.setTitle("More Like This", for: .normal)
+        moreLikeThisButton.backgroundColor = .secondarySystemBackground
+        moreLikeThisButton.setTitleColor(.black, for: .normal)
+        moreLikeThisButton.layer.cornerRadius = 10
+        moreLikeThisButton.translatesAutoresizingMaskIntoConstraints = false
+        moreLikeThisButton.accessibilityIdentifier = "ExploreDetailVC_MoreLikeThisButton"
+        return moreLikeThisButton
+    }()
+    
     // MARK: - Initialisation
     init(filmDetailViewModel: FilmDetailViewModel) {
         self.filmDetailViewModel = filmDetailViewModel
