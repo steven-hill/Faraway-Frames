@@ -72,19 +72,19 @@ final class ExploreDetailVC: UIViewController {
         return addToUpNextButton
     }()
     
-    private let addToWatchedButton: UIButton = {
-        let addToWatchedButton = UIButton()
-        addToWatchedButton.setTitle("Add to Watched", for: .normal)
-        addToWatchedButton.titleLabel?.font = .preferredFont(forTextStyle: .body)
-        addToWatchedButton.titleLabel?.adjustsFontForContentSizeCategory = true
-        addToWatchedButton.titleLabel?.numberOfLines = 0
-        addToWatchedButton.backgroundColor = .secondarySystemBackground
-        addToWatchedButton.setTitleColor(.label, for: .normal)
-        addToWatchedButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
-        addToWatchedButton.layer.cornerRadius = 10
-        addToWatchedButton.translatesAutoresizingMaskIntoConstraints = false
-        addToWatchedButton.accessibilityIdentifier = "ExploreDetailVC_AddToWatchedButton"
-        return addToWatchedButton
+    private let markAsWatchedButton: UIButton = {
+        let markAsWatchedButton = UIButton()
+        markAsWatchedButton.setTitle("Mark as Watched", for: .normal)
+        markAsWatchedButton.titleLabel?.font = .preferredFont(forTextStyle: .body)
+        markAsWatchedButton.titleLabel?.adjustsFontForContentSizeCategory = true
+        markAsWatchedButton.titleLabel?.numberOfLines = 0
+        markAsWatchedButton.backgroundColor = .secondarySystemBackground
+        markAsWatchedButton.setTitleColor(.label, for: .normal)
+        markAsWatchedButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
+        markAsWatchedButton.layer.cornerRadius = 10
+        markAsWatchedButton.translatesAutoresizingMaskIntoConstraints = false
+        markAsWatchedButton.accessibilityIdentifier = "ExploreDetailVC_MarkAsWatchedButton"
+        return markAsWatchedButton
     }()
     
     private let moreLikeThisButton: UIButton = {
@@ -171,7 +171,7 @@ final class ExploreDetailVC: UIViewController {
         creditsContainer.addArrangedSubview(directorView)
         creditsContainer.addArrangedSubview(producerView)
         buttonsContainer.addArrangedSubview(addToUpNextButton)
-        buttonsContainer.addArrangedSubview(addToWatchedButton)
+        buttonsContainer.addArrangedSubview(markAsWatchedButton)
         buttonsContainer.addArrangedSubview(moreLikeThisButton)
     }
     
