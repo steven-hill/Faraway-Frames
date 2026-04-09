@@ -61,7 +61,7 @@ final class ExploreDetailVC: UIViewController {
         let addToUpNextButton = UIButton()
         addToUpNextButton.setTitle("Add to Up Next", for: .normal)
         addToUpNextButton.backgroundColor = .secondarySystemBackground
-        addToUpNextButton.setTitleColor(.black, for: .normal)
+        addToUpNextButton.setTitleColor(.label, for: .normal)
         addToUpNextButton.layer.cornerRadius = 10
         addToUpNextButton.translatesAutoresizingMaskIntoConstraints = false
         addToUpNextButton.accessibilityIdentifier = "ExploreDetailVC_AddToUpNextButton"
@@ -72,7 +72,7 @@ final class ExploreDetailVC: UIViewController {
         let addToWatchedButton = UIButton()
         addToWatchedButton.setTitle("Add to Watched", for: .normal)
         addToWatchedButton.backgroundColor = .secondarySystemBackground
-        addToWatchedButton.setTitleColor(.black, for: .normal)
+        addToWatchedButton.setTitleColor(.label, for: .normal)
         addToWatchedButton.layer.cornerRadius = 10
         addToWatchedButton.translatesAutoresizingMaskIntoConstraints = false
         addToWatchedButton.accessibilityIdentifier = "ExploreDetailVC_AddToWatchedButton"
@@ -83,7 +83,7 @@ final class ExploreDetailVC: UIViewController {
         let moreLikeThisButton = UIButton()
         moreLikeThisButton.setTitle("More Like This", for: .normal)
         moreLikeThisButton.backgroundColor = .secondarySystemBackground
-        moreLikeThisButton.setTitleColor(.black, for: .normal)
+        moreLikeThisButton.setTitleColor(.label, for: .normal)
         moreLikeThisButton.layer.cornerRadius = 10
         moreLikeThisButton.translatesAutoresizingMaskIntoConstraints = false
         moreLikeThisButton.accessibilityIdentifier = "ExploreDetailVC_MoreLikeThisButton"
