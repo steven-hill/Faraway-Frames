@@ -60,6 +60,9 @@ final class ExploreDetailVC: UIViewController {
     private let addToUpNextButton: UIButton = {
         let addToUpNextButton = UIButton()
         addToUpNextButton.setTitle("Add to Up Next", for: .normal)
+        addToUpNextButton.titleLabel?.font = .preferredFont(forTextStyle: .body)
+        addToUpNextButton.titleLabel?.adjustsFontForContentSizeCategory = true
+        addToUpNextButton.titleLabel?.numberOfLines = 0
         addToUpNextButton.backgroundColor = .secondarySystemBackground
         addToUpNextButton.setTitleColor(.label, for: .normal)
         addToUpNextButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
@@ -72,6 +75,9 @@ final class ExploreDetailVC: UIViewController {
     private let addToWatchedButton: UIButton = {
         let addToWatchedButton = UIButton()
         addToWatchedButton.setTitle("Add to Watched", for: .normal)
+        addToWatchedButton.titleLabel?.font = .preferredFont(forTextStyle: .body)
+        addToWatchedButton.titleLabel?.adjustsFontForContentSizeCategory = true
+        addToWatchedButton.titleLabel?.numberOfLines = 0
         addToWatchedButton.backgroundColor = .secondarySystemBackground
         addToWatchedButton.setTitleColor(.label, for: .normal)
         addToWatchedButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
@@ -84,6 +90,9 @@ final class ExploreDetailVC: UIViewController {
     private let moreLikeThisButton: UIButton = {
         let moreLikeThisButton = UIButton()
         moreLikeThisButton.setTitle("More Like This", for: .normal)
+        moreLikeThisButton.titleLabel?.font = .preferredFont(forTextStyle: .body)
+        moreLikeThisButton.titleLabel?.adjustsFontForContentSizeCategory = true
+        moreLikeThisButton.titleLabel?.numberOfLines = 0
         moreLikeThisButton.backgroundColor = .secondarySystemBackground
         moreLikeThisButton.setTitleColor(.label, for: .normal)
         moreLikeThisButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
