@@ -126,7 +126,6 @@ final class ExploreDetailVC: UIViewController {
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-
         coordinator.animate(alongsideTransition: { _ in
             self.updateLayoutFor(size: size)
             self.view.layoutIfNeeded()
