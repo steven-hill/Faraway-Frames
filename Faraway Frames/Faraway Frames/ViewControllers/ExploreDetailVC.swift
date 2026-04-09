@@ -90,6 +90,16 @@ final class ExploreDetailVC: UIViewController {
         return moreLikeThisButton
     }()
     
+    private let buttonsContainer: UIStackView = {
+        let buttonsContainer = UIStackView()
+        buttonsContainer.spacing = 20
+        buttonsContainer.distribution = .fillEqually
+        buttonsContainer.alignment = .fill
+        buttonsContainer.translatesAutoresizingMaskIntoConstraints = false
+        buttonsContainer.accessibilityIdentifier = "ExploreDetailVC_ButtonsContainer"
+        return buttonsContainer
+    }()
+    
     // MARK: - Initialisation
     init(filmDetailViewModel: FilmDetailViewModel) {
         self.filmDetailViewModel = filmDetailViewModel
@@ -119,6 +129,7 @@ final class ExploreDetailVC: UIViewController {
     private func updateLayoutForTraits() {
         creditsContainer.axis = (traitCollection.horizontalSizeClass == .regular) ? .horizontal : .vertical
         creditsContainer.distribution = (traitCollection.horizontalSizeClass == .regular) ? .fillEqually : .fill
+        buttonsContainer.axis = (traitCollection.horizontalSizeClass == .regular) ? .horizontal: .vertical
     }
     
     override func updateContentUnavailableConfiguration(using state: UIContentUnavailableConfigurationState) {
@@ -147,6 +158,9 @@ final class ExploreDetailVC: UIViewController {
         let producerView = createCreditView(name: film.producer, role: "Producer")
         creditsContainer.addArrangedSubview(directorView)
         creditsContainer.addArrangedSubview(producerView)
+        buttonsContainer.addArrangedSubview(addToUpNextButton)
+        buttonsContainer.addArrangedSubview(addToWatchedButton)
+        buttonsContainer.addArrangedSubview(moreLikeThisButton)
     }
     
     private func createEmptyState() -> UIContentUnavailableConfiguration {
@@ -251,6 +265,7 @@ final class ExploreDetailVC: UIViewController {
         contentView.addSubview(synopsisLabel)
         contentView.addSubview(rottenTomatoesScoreLabel)
         contentView.addSubview(creditsContainer)
+        contentView.addSubview(buttonsContainer)
     }
     
     private func setupConstraints() {
