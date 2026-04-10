@@ -55,6 +55,17 @@ final class ExploreDetailVCUITests: XCTestCase {
         assertExploreDetailElementsExist()
     }
     
+    func test_exploreDetailVC_buttonsAreHittable() {
+        NavigationHelper.navigateToExploreTab(app: app)
+        tapFirstCollectionViewCell()
+        
+        app.swipeUp()
+        
+        XCTAssertTrue(app.buttons["ExploreDetailVC_AddToUpNextButton"].isHittable, "Should be hittable.")
+        XCTAssertTrue(app.buttons["ExploreDetailVC_MarkAsWatchedButton"].isHittable, "Should be hittable.")
+        XCTAssertTrue(app.buttons["ExploreDetailVC_MoreLikeThisButton"].isHittable, "Should be hittable.")
+    }
+    
     // MARK: - Helper methods
     private func assertExploreDetailElementsExist() {
         let elements = [
@@ -65,11 +76,14 @@ final class ExploreDetailVCUITests: XCTestCase {
             app.staticTexts["ExploreDetailVC_RottenTomatoesScoreLabel"],
             app.staticTexts["ExploreDetailVC_SynopsisHeaderLabel"],
             app.staticTexts["ExploreDetailVC_SynopsisLabel"],
-            app.otherElements["ExploreDetailVC_CreditsContainer"]
+            app.otherElements["ExploreDetailVC_CreditsContainer"],
+            app.buttons["ExploreDetailVC_AddToUpNextButton"],
+            app.buttons["ExploreDetailVC_MarkAsWatchedButton"],
+            app.buttons["ExploreDetailVC_MoreLikeThisButton"]
         ]
         
         for element in elements {
-            XCTAssertTrue(element.exists, "\(element) should be onscreen.")
+            XCTAssertTrue(element.exists, "\(element) should exist.")
         }
     }
     

@@ -72,6 +72,7 @@ final class ExploreDetailVC: UIViewController {
         }
         config.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
         let button = UIButton(configuration: config)
+        button.accessibilityIdentifier = "ExploreDetailVC_AddToUpNextButton"
         button.translatesAutoresizingMaskIntoConstraints = false
         button.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
         return button
@@ -92,6 +93,7 @@ final class ExploreDetailVC: UIViewController {
         }
         config.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
         let button = UIButton(configuration: config)
+        button.accessibilityIdentifier = "ExploreDetailVC_MarkAsWatchedButton"
         button.translatesAutoresizingMaskIntoConstraints = false
         button.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
         return button
@@ -112,6 +114,7 @@ final class ExploreDetailVC: UIViewController {
         }
         config.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
         let button = UIButton(configuration: config)
+        button.accessibilityIdentifier = "ExploreDetailVC_MoreLikeThisButton"
         button.translatesAutoresizingMaskIntoConstraints = false
         button.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
         return button
