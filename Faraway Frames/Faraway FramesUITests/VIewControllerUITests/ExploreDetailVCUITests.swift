@@ -65,11 +65,14 @@ final class ExploreDetailVCUITests: XCTestCase {
             app.staticTexts["ExploreDetailVC_RottenTomatoesScoreLabel"],
             app.staticTexts["ExploreDetailVC_SynopsisHeaderLabel"],
             app.staticTexts["ExploreDetailVC_SynopsisLabel"],
-            app.otherElements["ExploreDetailVC_CreditsContainer"]
+            app.otherElements["ExploreDetailVC_CreditsContainer"],
+            app.buttons["ExploreDetailVC_AddToUpNextButton"],
+            app.buttons["ExploreDetailVC_MarkAsWatchedButton"],
+            app.buttons["ExploreDetailVC_MoreLikeThisButton"]
         ]
         
         for element in elements {
-            XCTAssertTrue(element.exists, "\(element) should be onscreen.")
+            XCTAssertTrue(element.exists, "\(element) should exist.")
         }
     }
     
