@@ -61,9 +61,9 @@ final class ExploreDetailVCUITests: XCTestCase {
         
         app.swipeUp()
         
-        XCTAssertTrue(app.buttons["ExploreDetailVC_AddToUpNextButton"].isHittable)
-        XCTAssertTrue(app.buttons["ExploreDetailVC_MarkAsWatchedButton"].isHittable)
-        XCTAssertTrue(app.buttons["ExploreDetailVC_MoreLikeThisButton"].isHittable)
+        XCTAssertTrue(app.buttons["ExploreDetailVC_AddToUpNextButton"].isHittable, "Should be hittable.")
+        XCTAssertTrue(app.buttons["ExploreDetailVC_MarkAsWatchedButton"].isHittable, "Should be hittable.")
+        XCTAssertTrue(app.buttons["ExploreDetailVC_MoreLikeThisButton"].isHittable, "Should be hittable.")
     }
     
     // MARK: - Helper methods
