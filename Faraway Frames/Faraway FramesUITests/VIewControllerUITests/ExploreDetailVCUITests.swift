@@ -55,6 +55,17 @@ final class ExploreDetailVCUITests: XCTestCase {
         assertExploreDetailElementsExist()
     }
     
+    func test_exploreDetailVC_buttonsAreHittable() {
+        NavigationHelper.navigateToExploreTab(app: app)
+        tapFirstCollectionViewCell()
+        
+        app.swipeUp()
+        
+        XCTAssertTrue(app.buttons["ExploreDetailVC_AddToUpNextButton"].isHittable)
+        XCTAssertTrue(app.buttons["ExploreDetailVC_MarkAsWatchedButton"].isHittable)
+        XCTAssertTrue(app.buttons["ExploreDetailVC_MoreLikeThisButton"].isHittable)
+    }
+    
     // MARK: - Helper methods
     private func assertExploreDetailElementsExist() {
         let elements = [
