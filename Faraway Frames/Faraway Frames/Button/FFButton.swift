@@ -40,7 +40,7 @@ final class FFButton: UIButton {
         heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
     }
     
-    func set(title: String, accessibilityIdentifier: String) {
+    private func set(title: String, accessibilityIdentifier: String) {
         configuration?.title = title
         self.accessibilityIdentifier = accessibilityIdentifier
     }
