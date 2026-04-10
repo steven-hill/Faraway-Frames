@@ -57,68 +57,11 @@ final class ExploreDetailVC: UIViewController {
         return creditsContainer
     }()
     
-    private let addToUpNextButton: UIButton = {
-        var config = UIButton.Configuration.filled()
-        config.baseBackgroundColor = .secondarySystemBackground
-        config.baseForegroundColor = .label
-        config.background.cornerRadius = 10
-        config.title = "Add To Up Next"
-        config.titleLineBreakMode = .byWordWrapping
-        config.titleAlignment = .center
-        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
-            var outgoing = incoming
-            outgoing.font = UIFont.preferredFont(forTextStyle: .body)
-            return outgoing
-        }
-        config.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
-        let button = UIButton(configuration: config)
-        button.accessibilityIdentifier = "ExploreDetailVC_AddToUpNextButton"
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
-        return button
-    }()
-    
-    private let markAsWatchedButton: UIButton = {
-        var config = UIButton.Configuration.filled()
-        config.baseBackgroundColor = .secondarySystemBackground
-        config.baseForegroundColor = .label
-        config.background.cornerRadius = 10
-        config.title = "Mark As Watched"
-        config.titleLineBreakMode = .byWordWrapping
-        config.titleAlignment = .center
-        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
-            var outgoing = incoming
-            outgoing.font = UIFont.preferredFont(forTextStyle: .body)
-            return outgoing
-        }
-        config.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
-        let button = UIButton(configuration: config)
-        button.accessibilityIdentifier = "ExploreDetailVC_MarkAsWatchedButton"
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
-        return button
-    }()
-    
-    private let moreLikeThisButton: UIButton = {
-        var config = UIButton.Configuration.filled()
-        config.baseBackgroundColor = .secondarySystemBackground
-        config.baseForegroundColor = .label
-        config.background.cornerRadius = 10
-        config.title = "More Like This"
-        config.titleLineBreakMode = .byWordWrapping
-        config.titleAlignment = .center
-        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
-            var outgoing = incoming
-            outgoing.font = UIFont.preferredFont(forTextStyle: .body)
-            return outgoing
-        }
-        config.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
-        let button = UIButton(configuration: config)
-        button.accessibilityIdentifier = "ExploreDetailVC_MoreLikeThisButton"
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
-        return button
-    }()
+    private let addToUpNextButton = FFButton(title: "Add To Up Next", accessibilityIdentifier: "ExploreDetailVC_AddToUpNextButton")
+
+    private let markAsWatchedButton = FFButton(title: "Mark As Watched", accessibilityIdentifier: "ExploreDetailVC_MarkAsWatchedButton")
+
+    private let moreLikeThisButton = FFButton(title: "More Like This", accessibilityIdentifier: "ExploreDetailVC_MoreLikeThisButton")
     
     private let buttonsContainer: UIStackView = {
         let buttonsContainer = UIStackView()
