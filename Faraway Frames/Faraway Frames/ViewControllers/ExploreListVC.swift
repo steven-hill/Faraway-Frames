@@ -36,7 +36,7 @@ final class ExploreListVC: UIViewController {
     // MARK: - View Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.largeTitleDisplayMode = UIDevice.current.userInterfaceIdiom == .phone ? .inline : .automatic
         title = "Explore"
         setUpBackButton()
         viewModel.delegate = self
