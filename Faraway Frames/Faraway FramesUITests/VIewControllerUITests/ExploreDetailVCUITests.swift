@@ -32,7 +32,7 @@ final class ExploreDetailVCUITests: XCTestCase {
         NavigationHelper.navigateToExploreTab(app: app)
         
         XCTAssertTrue(app.staticTexts["No Film Selected"].isHittable, "Should show a message.")
-        XCTAssertTrue(app.staticTexts["Pick a film from the list to see the details."].isHittable, "Should show a message.")
+        XCTAssertTrue(app.staticTexts["Select a film from the list for more details."].isHittable, "Should show a message.")
     }
     
     func test_exploreDetailVC_hasAllUIElements() {
