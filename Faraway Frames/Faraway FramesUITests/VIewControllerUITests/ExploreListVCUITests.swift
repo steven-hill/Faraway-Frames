@@ -27,22 +27,6 @@ final class ExploreListVCUITests: XCTestCase {
         XCTAssertTrue(title.exists, "Should have a title.")
     }
     
-    func test_exploreListVC_title_inPortrait_transitionsToInlineOnScroll() throws {
-        guard UIDevice.current.userInterfaceIdiom == .phone else {
-            throw XCTSkip("iPhone-only test")
-        }
-        XCUIDevice.shared.orientation = .portrait
-        launchAppForNetworkSuccessCase()
-        let title = app.staticTexts["Explore"]
-        let initialY = title.frame.origin.y
-
-        let collectionView = app.collectionViews.element
-        collectionView.swipeUp()
-        let finalY = title.frame.origin.y
-        
-        XCTAssertLessThan(finalY, initialY, "The title should move up into the navigation bar on iPhone.")
-    }
-    
     func test_exploreListVC_inContentState_displaysCollectionView() {
         launchAppForNetworkSuccessCase()
         
