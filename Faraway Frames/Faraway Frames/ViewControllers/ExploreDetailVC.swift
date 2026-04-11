@@ -140,7 +140,7 @@ final class ExploreDetailVC: UIViewController {
         var config = UIContentUnavailableConfiguration.empty()
         config.image = UIImage(systemName: "movieclapper")
         config.text = "No Film Selected"
-        config.secondaryText = "Pick a film from the list to see the details."
+        config.secondaryText = "Select a film from the list for more details."
         return config
     }
 
