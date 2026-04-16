@@ -26,12 +26,18 @@ final class FilmsListAPIClient: FilmsListService {
             throw APIError.invalidURL
         }
         
+        let request = URLRequest(url: url)
+        if let cachedFilms = session.configuration.urlCache?.cachedResponse(for: request),
+           let films = try? decoder.decode([Film].self, from: cachedFilms.data) {
+            return films
+        }
+        
         let (data, response) = try await session.data(from: url)
         
         guard let httpResponse = response as? HTTPURLResponse else {
             throw APIError.invalidResponse
         }
-
+        
         guard (200...299).contains(httpResponse.statusCode) else {
             throw(APIError.serverError(statusCode: httpResponse.statusCode))
         }
