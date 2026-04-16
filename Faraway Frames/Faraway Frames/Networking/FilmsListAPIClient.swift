@@ -11,10 +11,12 @@ final class FilmsListAPIClient: FilmsListService {
     private let session: NetworkSession
     private let decoder: JSONDecoder
     
-    init(session: NetworkSession = URLSession.shared, decoder: JSONDecoder = JSONDecoder()) {
-        self.session = session
-        self.session.configuration.timeoutIntervalForRequest = 15
-        self.session.configuration.timeoutIntervalForResource = 60
+    init(session: NetworkSession? = nil, decoder: JSONDecoder = JSONDecoder()) {
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 15
+        config.timeoutIntervalForResource = 60
+        config.requestCachePolicy = .returnCacheDataElseLoad
+        self.session = session ?? URLSession(configuration: config)
         self.decoder = decoder
     }
     
