@@ -25,7 +25,7 @@ final class MockFilmsListServiceForUITests: FilmsListService {
     
     private func loadJSON() throws -> [Film] {
         guard let bundle = Bundle(identifier: "com.StevenHill.Faraway-Frames"),
-              let url = bundle.url(forResource: "GhibliFilmsUITests", withExtension: "json") else {
+              let url = bundle.url(forResource: "ghibliFilms", withExtension: "json") else {
             fatalError("ghibliFilms JSON file not found")
         }
         do {
