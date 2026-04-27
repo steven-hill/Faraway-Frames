@@ -11,9 +11,18 @@ import Testing
 final class MockFilmsListService: FilmsListService {
     var result: Result<[Film], Error>?
     var fetchWasCalled = false
+    private var continuation: CheckedContinuation<[Film], Error>?
+    var shouldPauseForLoadingStateTest = false
     
     func fetchAllFilms() async throws -> [Film] {
         fetchWasCalled = true
+        
+        if shouldPauseForLoadingStateTest {
+            return try await withCheckedThrowingContinuation { continuation in
+                self.continuation = continuation
+            }
+        }
+        
         switch result {
         case .success(let films):
             return films
@@ -21,6 +30,14 @@ final class MockFilmsListService: FilmsListService {
             throw error
         case .none:
             throw APIError.unknown
+        }
+    }
+    
+    func resume() {
+        switch result {
+        case .success(let films): continuation?.resume(returning: films)
+        case .failure(let error): continuation?.resume(throwing: error)
+        case .none: continuation?.resume(throwing: APIError.unknown)
         }
     }
 }

@@ -37,6 +37,7 @@ final class FilmsListViewModel {
     
     // MARK: - Methods
     func getAllFilms() async {
+        currentState = .loadingAllFilms
         do {
             try Task.checkCancellation()
             films = try await filmsListService.fetchAllFilms()
