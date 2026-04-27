@@ -15,7 +15,7 @@ struct FilmsListViewModelUnitTests {
     @Test func filmsListViewModel_onInit_currentStateIsIdle() {
         let sut = makeSUTForSuccessCase()
         
-        #expect(sut.currentState == .loadingAllFilms, "Should be `.idle`.")
+        #expect(sut.currentState == .idle, "Should be `.idle`.")
     }
     
     @Test(.tags(.networkRequest))
