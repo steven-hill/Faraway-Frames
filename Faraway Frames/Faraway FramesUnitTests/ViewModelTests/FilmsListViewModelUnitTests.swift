@@ -12,10 +12,10 @@ import Testing
 @MainActor
 struct FilmsListViewModelUnitTests {
     
-    @Test func filmsListViewModel_onInit_currentStateIsLoadingAllFilms() {
+    @Test func filmsListViewModel_onInit_currentStateIsIdle() {
         let sut = makeSUTForSuccessCase()
         
-        #expect(sut.currentState == .loadingAllFilms, "Should be `.loadingAllFilms`.")
+        #expect(sut.currentState == .loadingAllFilms, "Should be `.idle`.")
     }
     
     @Test(.tags(.networkRequest))
