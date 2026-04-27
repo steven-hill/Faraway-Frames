@@ -301,9 +301,25 @@ struct ExploreListVCTests {
     }
     
     @Test(.tags(.search))
-    func exploreListVC_whenLoadingAllFilms_searchBarIsNotEnabled() {
+    func exploreListVC_whenViewModelStateIsIdle_searchBarIsNotEnabled() {
         let sut = makeSUT()
         
+        sut.view.layoutIfNeeded()
+        
+        #expect(sut.viewModel.currentState == .idle, "State should be .idle.")
+        #expect(sut.searchController.searchBar.isEnabled == false, "Should be false.")
+    }
+    
+    @Test(.tags(.search))
+    func exploreListVC_whenLoadingAllFilms_searchBarIsNotEnabled() async {
+        let mockFilmsListService = MockFilmsListService()
+        let imageLoader = MockImageLoader()
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
+        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        mockFilmsListService.shouldPauseForLoadingStateTest = true
+        
+        sut.loadViewIfNeeded()
+        await Task.yield()
         sut.view.layoutIfNeeded()
         
         #expect(sut.viewModel.currentState == .loadingAllFilms, "State should be .loadingAllFilms.")

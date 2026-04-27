@@ -12,6 +12,7 @@ final class FilmsListViewModel {
     
     // MARK: - State Definition
     enum FilmsListState: Equatable {
+        case idle
         case loadingAllFilms
         case content
         case emptySearchResults
@@ -24,7 +25,7 @@ final class FilmsListViewModel {
     private let imageLoader: ImageLoader
     weak var delegate: FilmsListViewModelDelegate?
     private(set) var films: [Film] = []
-    private(set) var currentState: FilmsListState = .loadingAllFilms
+    private(set) var currentState: FilmsListState = .idle
     private(set) var filteredFilms: [Film] = []
     private(set) var refreshTask: Task<Void, Never>?
     
@@ -36,6 +37,7 @@ final class FilmsListViewModel {
     
     // MARK: - Methods
     func getAllFilms() async {
+        currentState = .loadingAllFilms
         do {
             try Task.checkCancellation()
             films = try await filmsListService.fetchAllFilms()
