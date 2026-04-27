@@ -18,9 +18,7 @@ final class MockFilmsListService: FilmsListService {
         fetchWasCalled = true
         
         if shouldPauseForLoadingStateTest {
-            return try await withCheckedThrowingContinuation { continuation in
-                self.continuation = continuation
-            }
+            return try await withCheckedThrowingContinuation { self.continuation = $0 }
         }
         
         switch result {
