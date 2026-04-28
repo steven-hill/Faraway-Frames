@@ -51,6 +51,13 @@
 			);
 			target = 5B565F732F0C4C8500A49426 /* Faraway Frames */;
 		};
+		5BB9D8D42FA12F65009C4047 /* Exceptions for "Faraway FramesUnitTests" folder in "Faraway Frames" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				NetworkingTests/MockFileManager.swift,
+			);
+			target = 5B565F732F0C4C8500A49426 /* Faraway Frames */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -71,6 +78,9 @@
 		};
 		5B565FAE2F0C5F9E00A49426 /* Faraway FramesUnitTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				5BB9D8D42FA12F65009C4047 /* Exceptions for "Faraway FramesUnitTests" folder in "Faraway Frames" target */,
+			);
 			path = "Faraway FramesUnitTests";
 			sourceTree = "<group>";
 		};
