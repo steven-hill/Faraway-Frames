@@ -34,6 +34,22 @@ struct FilmsListAPIClientTests {
         #expect(films.count == 2, "Should be two films as in the cached mock data.")
     }
     
+    @Test func filmsListAPIClient_fetchAllFilms_savesAllFilmsJSONToFileManager() async throws {
+        let mockData = makeValidMockFilmsData()
+        let mockResponse = HTTPURLResponse(
+            url: URL(string: makeFilmsURLString())!,
+            statusCode: 200,
+            httpVersion: nil,
+            headerFields: nil
+        )!
+        let sut = makeSUT(data: mockData, response: mockResponse)
+        
+        _ = try await sut.fetchAllFilms()
+        
+        #expect(mockFM.writeCalled, "Should have asked File Manager to write the data to disk.")
+    }
+    
+    
     @Test(.tags(.networkRequest, .decoding))
     func filmsListAPIClient_fetchAllFilms_decodesDataOn200Response_withCorrectURL() async throws {
         let mockData = makeValidMockFilmsData()
