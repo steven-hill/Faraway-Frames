@@ -10,14 +10,16 @@ import Foundation
 final class FilmsListAPIClient: FilmsListService {
     private let session: NetworkSession
     private let decoder: JSONDecoder
+    private let fileManager: FileManaging
     
-    init(session: NetworkSession? = nil, decoder: JSONDecoder = JSONDecoder()) {
+    init(session: NetworkSession? = nil, decoder: JSONDecoder = JSONDecoder(), fileManager: FileManaging = FileManager.default) {
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 15
         config.timeoutIntervalForResource = 60
         config.requestCachePolicy = .returnCacheDataElseLoad
         self.session = session ?? URLSession(configuration: config)
         self.decoder = decoder
+        self.fileManager = fileManager
     }
     
     func fetchAllFilms() async throws -> [Film] {
