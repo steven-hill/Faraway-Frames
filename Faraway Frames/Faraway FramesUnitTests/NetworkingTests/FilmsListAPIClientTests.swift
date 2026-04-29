@@ -124,7 +124,7 @@ struct FilmsListAPIClientTests {
     
     private func makeSUT(data: Data, response: URLResponse) -> FilmsListAPIClient {
         let session = StubNetworkSession(data: data, response: response)
-        return FilmsListAPIClient(session: session, fileManager: MockFileManager())
+        return FilmsListAPIClient(session: session)
     }
     
     private func makeTestURLCacheFilmsData() -> Data {
