@@ -21,6 +21,7 @@
 - MVVM + Coordinator.
 - UIKit app with SwiftUI for collection view cell content.
 - Networking with async/await, `URLSession`, and `NSCache` and `URLCache` for caching of network responses.
+- Includes saving of data from API to `FileManager` to enable offline support.
 - The testing frameworks used are Swift Testing and XCTest, and the project is built with TDD.
 - Includes accessibility support for Dynamic Type and VoiceOver.
 
