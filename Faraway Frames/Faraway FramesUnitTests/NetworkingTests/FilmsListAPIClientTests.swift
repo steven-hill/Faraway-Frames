@@ -34,7 +34,7 @@ struct FilmsListAPIClientTests {
         #expect(films.count == 2, "Should be two films as in the cached mock data.")
     }
     
-    @Test func filmsListAPIClient_fetchAllFilms_savesAllFilmsJSONToFileManager() async throws {
+    @Test func filmsListAPIClient_saveFilmsDataToFileManager_savesAllFilmsDataToFileManager() {
         let mockData = makeValidMockFilmsData()
         let mockResponse = HTTPURLResponse(
             url: URL(string: makeFilmsURLString())!,
@@ -42,13 +42,18 @@ struct FilmsListAPIClientTests {
             httpVersion: nil,
             headerFields: nil
         )!
-        let sut = makeSUT(data: mockData, response: mockResponse)
+        let mockFM = MockFileManager()
+        let session = StubNetworkSession(data: mockData, response: mockResponse)
+        let sut = FilmsListAPIClient(session: session, fileManager: mockFM)
         
-        _ = try await sut.fetchAllFilms()
+        sut.saveFilmsDataToFileManager(data: mockData)
+
+        let rootURL = URL(filePath: mockFM.filePath, directoryHint: .isDirectory)
+        let expectedPath = rootURL.appending(path: "ghibliFilms.json").path
         
-        #expect(mockFM.writeCalled, "Should have asked File Manager to write the data to disk.")
+        #expect(mockFM.writeWasCalled, "Should have asked File Manager to write the data to disk.")
+        #expect(mockFM.mockFiles[expectedPath] == mockData, "Should be equal.")
     }
-    
     
     @Test(.tags(.networkRequest, .decoding))
     func filmsListAPIClient_fetchAllFilms_decodesDataOn200Response_withCorrectURL() async throws {
