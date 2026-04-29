@@ -6,6 +6,7 @@
 //
 
 import Foundation
+@testable import Faraway_Frames
 
 final class MockFileManager: FileManaging {
     var mockFiles: [String: Data] = [:]
