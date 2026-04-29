@@ -8,10 +8,12 @@
 import Foundation
 
 protocol FileManaging {
-    func createFile(
-        atPath path: String,
-        contents data: Data?,
-        attributes attr: [FileAttributeKey : Any]?) -> Bool
+    func urls(for directory: FileManager.SearchPathDirectory,
+              in domainMask: FileManager.SearchPathDomainMask
+    ) -> [URL]
+    func createFile(atPath path: String,
+                    contents data: Data?,
+                    attributes attr: [FileAttributeKey : Any]?) -> Bool
 }
 
 extension FileManager: FileManaging {}

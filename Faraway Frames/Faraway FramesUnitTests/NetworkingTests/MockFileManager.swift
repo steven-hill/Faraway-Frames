@@ -11,6 +11,10 @@ final class MockFileManager: FileManaging {
     var mockFiles: [String: Data] = [:]
     var writeWasCalled = false
     
+    func urls(for directory: FileManager.SearchPathDirectory, in domainMask: FileManager.SearchPathDomainMask) -> [URL] {
+        []
+    }
+    
     func createFile(atPath path: String, contents data: Data?, attributes attr: [FileAttributeKey : Any]?) -> Bool {
         writeWasCalled = true
         mockFiles[path] = data
