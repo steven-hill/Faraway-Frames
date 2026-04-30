@@ -45,13 +45,7 @@ final class FilmsListAPIClient: FilmsListService {
         }
         
         saveFilmsDataToFileManager(data: data)
-        
-        do {
-            let decodedData = try decoder.decode([Film].self, from: data)
-            return decodedData
-        } catch {
-            throw APIError.decodingError
-        }
+        return try decodeFilms(from: data)
     }
     
     private func decodeFilms(from data: Data) throws -> [Film] {
