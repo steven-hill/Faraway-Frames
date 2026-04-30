@@ -54,6 +54,14 @@ final class FilmsListAPIClient: FilmsListService {
         }
     }
     
+    private func decodeFilms(from data: Data) throws -> [Film] {
+        do {
+            return try decoder.decode([Film].self, from: data)
+        } catch {
+            throw APIError.decodingError
+        }
+    }
+    
     func saveFilmsDataToFileManager(data: Data) {
         if let url = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?.appending(path: "ghibliFilms.json") {
             _ = fileManager.createFile(atPath: url.path, contents: data, attributes: nil)
