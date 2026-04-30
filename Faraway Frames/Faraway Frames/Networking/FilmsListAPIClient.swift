@@ -30,7 +30,7 @@ final class FilmsListAPIClient: FilmsListService {
         
         let request = URLRequest(url: url)
         if let cachedFilms = session.configuration.urlCache?.cachedResponse(for: request),
-           let films = try? decoder.decode([Film].self, from: cachedFilms.data) {
+           let films = try? decodeFilms(from: cachedFilms.data) {
             return films
         }
         
