@@ -27,10 +27,8 @@ final class FilmsListAPIClient: FilmsListService {
         guard let url = URL(string: urlString) else {
             throw APIError.invalidURL
         }
-        
-        let request = URLRequest(url: url)
-        if let cachedFilms = session.configuration.urlCache?.cachedResponse(for: request),
-           let films = try? decoder.decode([Film].self, from: cachedFilms.data) {
+
+        if let films = getFilmsFromURLCache(using: url) {
             return films
         }
         
@@ -45,10 +43,18 @@ final class FilmsListAPIClient: FilmsListService {
         }
         
         saveFilmsDataToFileManager(data: data)
-        
+        return try decodeFilms(from: data)
+    }
+    
+    private func getFilmsFromURLCache(using url: URL) -> [Film]? {
+        let request = URLRequest(url: url)
+        guard let cachedFilms = session.configuration.urlCache?.cachedResponse(for: request) else { return nil }
+        return try? decodeFilms(from: cachedFilms.data)
+    }
+    
+    private func decodeFilms(from data: Data) throws -> [Film] {
         do {
-            let decodedData = try decoder.decode([Film].self, from: data)
-            return decodedData
+            return try decoder.decode([Film].self, from: data)
         } catch {
             throw APIError.decodingError
         }
