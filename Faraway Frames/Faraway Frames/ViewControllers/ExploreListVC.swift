@@ -134,9 +134,7 @@ final class ExploreListVC: UIViewController {
         var collectionViewIsHidden = true
         var searchBarIsEnabled = false
         switch viewModel.currentState {
-        case .idle:
-            config = createIdleConfig()
-        case .loadingAllFilms:
+        case .idle, .loadingAllFilms:
             config = createLoadingConfig(with: "Fetching films...")
         case .content:
             config = nil
