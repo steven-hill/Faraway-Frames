@@ -134,9 +134,7 @@ final class ExploreListVC: UIViewController {
         var collectionViewIsHidden = true
         var searchBarIsEnabled = false
         switch viewModel.currentState {
-        case .idle:
-            config = createIdleConfig()
-        case .loadingAllFilms:
+        case .idle, .loadingAllFilms:
             config = createLoadingConfig(with: "Fetching films...")
         case .content:
             config = nil
@@ -156,11 +154,6 @@ final class ExploreListVC: UIViewController {
         self.collectionView.isHidden = collectionViewIsHidden
         self.searchController.searchBar.isEnabled = searchBarIsEnabled
         UIAccessibility.post(notification: .layoutChanged, argument: config?.text)
-    }
-    
-    private func createIdleConfig() -> UIContentUnavailableConfiguration {
-        let config = UIContentUnavailableConfiguration.empty()
-        return config
     }
     
     private func createLoadingConfig(with text: String) -> UIContentUnavailableConfiguration {
