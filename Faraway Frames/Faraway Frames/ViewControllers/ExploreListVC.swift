@@ -156,11 +156,6 @@ final class ExploreListVC: UIViewController {
         UIAccessibility.post(notification: .layoutChanged, argument: config?.text)
     }
     
-    private func createIdleConfig() -> UIContentUnavailableConfiguration {
-        let config = UIContentUnavailableConfiguration.empty()
-        return config
-    }
-    
     private func createLoadingConfig(with text: String) -> UIContentUnavailableConfiguration {
         var config = UIContentUnavailableConfiguration.loading()
         config.text = text
