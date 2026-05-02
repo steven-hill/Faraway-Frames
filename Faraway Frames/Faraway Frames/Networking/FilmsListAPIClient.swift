@@ -66,7 +66,7 @@ final class FilmsListAPIClient: FilmsListService {
         }
     }
     
-    func loadFilmsDataFromFileManager() {
-        
+    func loadFilmsDataFromFileManager() -> Data? {
+        return Data()
     }
 }

@@ -12,6 +12,7 @@ final class MockFileManager: FileManaging {
     var mockFiles: [String: Data] = [:]
     let filePath = "/dev/null"
     var writeWasCalled = false
+    var readWasCalled = false
     
     func urls(for directory: FileManager.SearchPathDirectory, in domainMask: FileManager.SearchPathDomainMask) -> [URL] {
         return [URL(filePath: filePath, directoryHint: .isDirectory)]
@@ -21,5 +22,13 @@ final class MockFileManager: FileManaging {
         writeWasCalled = true
         mockFiles[path] = data
         return true
+    }
+    
+    func contents(atPath path: String) -> Data? {
+        readWasCalled = true
+        if let data = mockFiles[path] {
+            return data
+        }
+        return nil
     }
 }

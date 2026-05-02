@@ -68,7 +68,7 @@ struct FilmsListAPIClientTests {
         let sut = FilmsListAPIClient(session: session, fileManager: mockFM)
         sut.saveFilmsDataToFileManager(data: mockData)
 
-        sut.loadFilmsDataFromFileManager()
+        _ = sut.loadFilmsDataFromFileManager()
     }
     
     @Test(.tags(.networkRequest, .decoding))

@@ -14,6 +14,7 @@ protocol FileManaging {
     func createFile(atPath path: String,
                     contents data: Data?,
                     attributes attr: [FileAttributeKey : Any]?) -> Bool
+    func contents(atPath path: String) -> Data?
 }
 
 extension FileManager: FileManaging {}
