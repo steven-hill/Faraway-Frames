@@ -65,4 +65,8 @@ final class FilmsListAPIClient: FilmsListService {
             _ = fileManager.createFile(atPath: url.path, contents: data, attributes: nil)
         }
     }
+    
+    func loadFilmsDataFromFileManager() {
+        
+    }
 }

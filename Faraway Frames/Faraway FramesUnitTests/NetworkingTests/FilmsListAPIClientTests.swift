@@ -55,6 +55,22 @@ struct FilmsListAPIClientTests {
         #expect(mockFM.mockFiles[expectedPath] == mockData, "Should be equal.")
     }
     
+    @Test func filmsListAPIClient_loadFilmsDataFromFileManager_loadsAllFilmsDataFromFileManager() {
+        let mockData = makeValidMockFilmsData()
+        let mockResponse = HTTPURLResponse(
+            url: URL(string: makeFilmsURLString())!,
+            statusCode: 200,
+            httpVersion: nil,
+            headerFields: nil
+        )!
+        let mockFM = MockFileManager()
+        let session = StubNetworkSession(data: mockData, response: mockResponse)
+        let sut = FilmsListAPIClient(session: session, fileManager: mockFM)
+        sut.saveFilmsDataToFileManager(data: mockData)
+
+        sut.loadFilmsDataFromFileManager()
+    }
+    
     @Test(.tags(.networkRequest, .decoding))
     func filmsListAPIClient_fetchAllFilms_decodesDataOn200Response_withCorrectURL() async throws {
         let mockData = makeValidMockFilmsData()
