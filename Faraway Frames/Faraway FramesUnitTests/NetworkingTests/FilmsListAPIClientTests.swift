@@ -75,6 +75,24 @@ struct FilmsListAPIClientTests {
         #expect(mockData == retrievedData, "Data retrieved from File Manager should match the data that was saved.")
     }
     
+    @Test func filmsListAPIClient_loadFilmsDataFromFileManager_returnsNilIfNoFileExists() {
+        let mockData = makeValidMockFilmsData()
+        let mockResponse = HTTPURLResponse(
+            url: URL(string: makeFilmsURLString())!,
+            statusCode: 200,
+            httpVersion: nil,
+            headerFields: nil
+        )!
+        let mockFM = MockFileManager()
+        let session = StubNetworkSession(data: mockData, response: mockResponse)
+        let sut = FilmsListAPIClient(session: session, fileManager: mockFM)
+        
+        let retrievedData = sut.loadFilmsDataFromFileManager()
+        
+        #expect(mockFM.readWasCalled == false, "Should have not have been called.")
+        #expect(retrievedData == nil, "Should be nil.")
+    }
+    
     @Test(.tags(.networkRequest, .decoding))
     func filmsListAPIClient_fetchAllFilms_decodesDataOn200Response_withCorrectURL() async throws {
         let mockData = makeValidMockFilmsData()
