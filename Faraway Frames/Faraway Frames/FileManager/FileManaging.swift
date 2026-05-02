@@ -8,13 +8,21 @@
 import Foundation
 
 protocol FileManaging {
+    func createDirectory(at url: URL,
+                         withIntermediateDirectories createIntermediates: Bool,
+                         attributes: [FileAttributeKey : Any]?) throws
     func urls(for directory: FileManager.SearchPathDirectory,
-              in domainMask: FileManager.SearchPathDomainMask
-    ) -> [URL]
-    func createFile(atPath path: String,
-                    contents data: Data?,
-                    attributes attr: [FileAttributeKey : Any]?) -> Bool
-    func contents(atPath path: String) -> Data?
+              in domainMask: FileManager.SearchPathDomainMask) -> [URL]
+    func fileExists(atPath path: String) -> Bool
+    func write(data: Data, to url: URL, options: Data.WritingOptions) throws
+    func read(from url: URL) throws -> Data
 }
 
-extension FileManager: FileManaging {}
+extension FileManager: FileManaging {
+    func write(data: Data, to url: URL, options: Data.WritingOptions) throws {
+        try data.write(to: url, options: options)
+    }
+    func read(from url: URL) throws -> Data {
+        try Data(contentsOf: url)
+    }
+}
