@@ -27,7 +27,7 @@ final class FilmsListAPIClient: FilmsListService {
         guard let url = URL(string: urlString) else {
             throw APIError.invalidURL
         }
-
+        
         if let films = getFilmsFromURLCache(using: url) {
             return films
         }
@@ -61,12 +61,29 @@ final class FilmsListAPIClient: FilmsListService {
     }
     
     func saveFilmsDataToFileManager(data: Data) {
-        if let url = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?.appending(path: "ghibliFilms.json") {
-            _ = fileManager.createFile(atPath: url.path, contents: data, attributes: nil)
+        guard let directoryURL = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else { return }
+        let folderURL = directoryURL.appending(path: "GhibliFilms")
+        let fileURL = folderURL.appending(path: "AllGhibliFilms.json")
+        do {
+            try fileManager.createDirectory(at: folderURL, withIntermediateDirectories: true, attributes: nil)
+            try fileManager.write(data: data, to: fileURL, options: .atomic)
+        } catch {
+            print("DEBUG: Failed to save to FM: \(error.localizedDescription)")
         }
     }
     
     func loadFilmsDataFromFileManager() -> Data? {
-        return Data()
+        guard let directoryURL = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else { return nil }
+        let folderURL = directoryURL.appending(path: "GhibliFilms")
+        let fileURL = folderURL.appending(path: "AllGhibliFilms.json")
+        if fileManager.fileExists(atPath: fileURL.path) {
+            do {
+                let data = try fileManager.read(from: fileURL)
+                return data
+            } catch {
+                return nil
+            }
+        }
+        return nil
     }
 }
