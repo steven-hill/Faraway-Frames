@@ -47,12 +47,13 @@ struct FilmsListAPIClientTests {
         let sut = FilmsListAPIClient(session: session, fileManager: mockFM)
         
         sut.saveFilmsDataToFileManager(data: mockData)
-
-        let rootURL = URL(filePath: mockFM.filePath, directoryHint: .isDirectory)
-        let expectedPath = rootURL.appending(path: "ghibliFilms.json").path
+        let expectedURL = mockFM.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+            .appending(path: "GhibliFilms")
+            .appending(path: "AllGhibliFilms.json")
         
-        #expect(mockFM.writeWasCalled, "Should have asked File Manager to write the data to disk.")
-        #expect(mockFM.mockFiles[expectedPath] == mockData, "Should be equal.")
+        #expect(mockFM.didCreateDirectory, "File Manager should have created the directory.")
+        #expect(mockFM.writeWasCalled, "Should be true.")
+        #expect(mockFM.mockStorage[expectedURL] == mockData, "Data in File Manager should match the data that was saved.")
     }
     
     @Test func filmsListAPIClient_loadFilmsDataFromFileManager_loadsAllFilmsDataFromFileManager() {
@@ -67,8 +68,11 @@ struct FilmsListAPIClientTests {
         let session = StubNetworkSession(data: mockData, response: mockResponse)
         let sut = FilmsListAPIClient(session: session, fileManager: mockFM)
         sut.saveFilmsDataToFileManager(data: mockData)
-
-        _ = sut.loadFilmsDataFromFileManager()
+        
+        let retrievedData = sut.loadFilmsDataFromFileManager()
+        
+        #expect(mockFM.readWasCalled, "Should have asked File Manager to read the data.")
+        #expect(mockData == retrievedData, "Data retrieved from File Manager should match the data that was saved.")
     }
     
     @Test(.tags(.networkRequest, .decoding))
