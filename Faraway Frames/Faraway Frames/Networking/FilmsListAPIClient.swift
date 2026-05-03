@@ -32,18 +32,27 @@ final class FilmsListAPIClient: FilmsListService {
             return films
         }
         
-        let (data, response) = try await session.data(from: url)
-        
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw APIError.invalidResponse
+        do {
+            let (data, response) = try await session.data(from: url)
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw APIError.invalidResponse
+            }
+            
+            guard (200...299).contains(httpResponse.statusCode) else {
+                throw(APIError.serverError(statusCode: httpResponse.statusCode))
+            }
+            
+            saveFilmsDataToFileManager(data: data)
+            return try decodeFilms(from: data)
+        } catch {
+            if error is URLError {
+                if let dataInFileManager = loadFilmsDataFromFileManager() {
+                    return try decodeFilms(from: dataInFileManager)
+                }
+            }
+            throw error
         }
-        
-        guard (200...299).contains(httpResponse.statusCode) else {
-            throw(APIError.serverError(statusCode: httpResponse.statusCode))
-        }
-        
-        saveFilmsDataToFileManager(data: data)
-        return try decodeFilms(from: data)
     }
     
     private func getFilmsFromURLCache(using url: URL) -> [Film]? {
