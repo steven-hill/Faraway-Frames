@@ -61,7 +61,7 @@ final class FilmsListViewModel {
             case .notConnectedToInternet:
                 return .noInternetConnection
             case .networkConnectionLost:
-                return .noInternetConnection
+                return .networkConnectionLost
             case .timedOut:
                 return .networkTimeout
             default:
