@@ -133,6 +133,7 @@ struct FilmsListViewModelUnitTests {
     
     @Test("ViewModel handles attempted search after network failure", .tags(.search), arguments: [
         APIError.noInternetConnection,
+        APIError.networkConnectionLost,
         APIError.networkTimeout,
         APIError.invalidURL,
         APIError.invalidResponse,
