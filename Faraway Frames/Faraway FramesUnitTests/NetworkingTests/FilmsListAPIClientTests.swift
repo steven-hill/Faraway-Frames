@@ -160,14 +160,35 @@ struct FilmsListAPIClientTests {
         }
     }
     
+    @Test("`FilmsListAPIClient` handles URLError network connectivity issues with fallback", .tags(.networkRequest), arguments: [
+        URLError(.notConnectedToInternet),
+        URLError(.networkConnectionLost)
+    ])
+    func filmsListAPIClient__fetchAllFilms_ifThereAreNetworkConnectivityIssues_usesFileManagerData(expectedError: URLError) async throws {
+        let mockFM = MockFileManager()
+        let mockData = makeValidMockFilmsData()
+        let expectedURL = mockFM.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+            .appending(path: "GhibliFilms")
+            .appending(path: "AllGhibliFilms.json")
+        try mockFM.write(data: mockData, to: expectedURL, options: .atomic)
+        let session = StubNetworkSession(error: expectedError)
+        let sut = FilmsListAPIClient(session: session, fileManager: mockFM)
+
+        let films = try await sut.fetchAllFilms()
+
+        #expect(films.count == 1, "Should be 1 film.")
+        #expect(films.first?.title == "Castle in the Sky", "Should be `Castle in the Sky`.")
+    }
+    
     // MARK: - Helper methods
     private func makeFilmsURLString() -> String {
         "https://ghibliapi.vercel.app/films"
     }
     
     private func makeSUT(data: Data, response: URLResponse) -> FilmsListAPIClient {
+        let mockFM = MockFileManager()
         let session = StubNetworkSession(data: data, response: response)
-        return FilmsListAPIClient(session: session)
+        return FilmsListAPIClient(session: session, fileManager: mockFM)
     }
     
     private func makeTestURLCacheFilmsData() -> Data {
