@@ -14,6 +14,8 @@ extension XCUIApplication {
         switch error {
         case .noInternetConnection:
             self.launchEnvironment["MOCK_ERROR_TYPE"] = "noInternetConnection"
+        case .networkConnectionLost:
+            self.launchEnvironment["MOCK_ERROR_TYPE"] = "networkConnectionLost"
         case .networkTimeout:
             self.launchEnvironment["MOCK_ERROR_TYPE"] = "networkTimeout"
         case .invalidURL:
