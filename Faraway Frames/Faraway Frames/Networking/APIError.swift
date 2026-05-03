@@ -9,6 +9,7 @@ import Foundation
 
 enum APIError: Error, Equatable {
     case noInternetConnection
+    case networkConnectionLost
     case networkTimeout
     case invalidURL
     case invalidResponse
@@ -20,6 +21,8 @@ enum APIError: Error, Equatable {
         switch self {
         case .noInternetConnection:
             return "The internet connection appears to be offline"
+        case .networkConnectionLost:
+            return "Network connection lost"
         case .networkTimeout:
             return "Network request timed out"
         case .invalidURL:

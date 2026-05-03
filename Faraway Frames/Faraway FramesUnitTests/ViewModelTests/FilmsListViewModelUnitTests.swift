@@ -57,6 +57,7 @@ struct FilmsListViewModelUnitTests {
     
     @Test("ViewModel handles all API errors correctly", .tags(.networkRequest), arguments: [
         APIError.noInternetConnection,
+        APIError.networkConnectionLost,
         APIError.networkTimeout,
         APIError.invalidURL,
         APIError.invalidResponse,
