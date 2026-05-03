@@ -74,6 +74,7 @@ struct ExploreListVCTests {
     
     @Test("ExploreListVC shows error view for all API errors", .tags(.networkRequest), arguments: [
         APIError.noInternetConnection,
+        APIError.networkConnectionLost,
         APIError.networkTimeout,
         APIError.invalidURL,
         APIError.invalidResponse,
@@ -110,6 +111,7 @@ struct ExploreListVCTests {
     
     @Test("ExploreListVC shows retry button title for all API errors", arguments: [
         APIError.noInternetConnection,
+        APIError.networkConnectionLost,
         APIError.networkTimeout,
         APIError.invalidURL,
         APIError.invalidResponse,
@@ -365,6 +367,7 @@ struct ExploreListVCTests {
     
     @Test("ExploreListVC search bar is not enabled for all API errors", .tags(.search), arguments: [
         APIError.noInternetConnection,
+        APIError.networkConnectionLost,
         APIError.networkTimeout,
         APIError.invalidURL,
         APIError.invalidResponse,
