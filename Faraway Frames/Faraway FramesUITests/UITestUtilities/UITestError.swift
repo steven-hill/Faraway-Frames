@@ -9,6 +9,7 @@ import Foundation
 
 enum UITestError: Error {
     case noInternetConnection
+    case networkConnectionLost
     case networkTimeout
     case invalidURL
     case invalidResponse

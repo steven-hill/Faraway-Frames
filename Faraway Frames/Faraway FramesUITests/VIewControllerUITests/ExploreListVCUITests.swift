@@ -64,6 +64,14 @@ final class ExploreListVCUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
     }
     
+    func test_exploreListVC_whenNetworkConnectionIsLost_showsErrorMessageAndRetryButton() {
+        launchAppForNetworkFailureCase(with: .networkConnectionLost)
+        
+        XCTAssertTrue(app.staticTexts["Error loading films"].exists, "Should show error text.")
+        XCTAssertTrue(app.staticTexts["Network connection lost"].exists, "Should show error secondary text.")
+        XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
+    }
+    
     func test_exploreListVC_whenNetworkRequestTimesOut_showsErrorMessageAndRetryButton() {
         launchAppForNetworkFailureCase(with: .networkTimeout)
         

@@ -56,11 +56,12 @@ final class FilmsListViewModel {
         if let apiError = error as? APIError {
             return apiError
         }
-        
         if let urlError = error as? URLError {
             switch urlError.code {
             case .notConnectedToInternet:
                 return .noInternetConnection
+            case .networkConnectionLost:
+                return .networkConnectionLost
             case .timedOut:
                 return .networkTimeout
             default:
