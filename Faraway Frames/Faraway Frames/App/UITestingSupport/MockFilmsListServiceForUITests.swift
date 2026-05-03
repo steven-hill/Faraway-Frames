@@ -43,6 +43,8 @@ final class MockFilmsListServiceForUITests: FilmsListService {
         switch type {
         case "noInternetConnection":
             return .noInternetConnection
+        case "networkConnectionLost":
+            return .networkConnectionLost
         case "networkTimeout":
             return .networkTimeout
         case "invalidURL":
