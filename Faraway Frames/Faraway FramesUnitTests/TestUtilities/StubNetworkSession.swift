@@ -12,17 +12,21 @@ struct StubNetworkSession: NetworkSession {
     var configuration: URLSessionConfiguration
     var data: Data?
     var response: URLResponse?
+    var error: Error?
     
-    init(configuration: URLSessionConfiguration = .ephemeral, data: Data? = nil, response: URLResponse? = nil) {
+    init(configuration: URLSessionConfiguration = .ephemeral, data: Data? = nil, response: URLResponse? = nil, error: Error? = nil) {
         self.configuration = configuration
         self.data = data
         self.response = response
     }
-
+    
     func data(from url: URL) async throws -> (Data, URLResponse) {
-        guard let data = data, let response = response else {
-            fatalError("MockSession must be configured with data/response.")
+        if let error = error {
+            throw error
         }
-        return (data, response)
+        if let data = data, let response = response {
+            return (data, response)
+        }
+        throw URLError(.notConnectedToInternet)
     }
 }
