@@ -8,5 +8,5 @@
 import Foundation
 
 enum GhibliAPI {
-    static let urlString = "https://ghibliapi.vercel.app/films"
+    static let allFilmsURLString = "https://ghibliapi.vercel.app/films"
 }
