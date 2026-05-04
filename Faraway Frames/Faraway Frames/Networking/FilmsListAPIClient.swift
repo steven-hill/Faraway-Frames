@@ -71,8 +71,8 @@ final class FilmsListAPIClient: FilmsListService {
     
     func saveFilmsDataToFileManager(data: Data) {
         guard let directoryURL = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else { return }
-        let folderURL = directoryURL.appending(path: "GhibliFilms")
-        let fileURL = folderURL.appending(path: "AllGhibliFilms.json")
+        let folderURL = directoryURL.appending(path: Paths.folderPath)
+        let fileURL = folderURL.appending(path: Paths.filePath)
         do {
             try fileManager.createDirectory(at: folderURL, withIntermediateDirectories: true, attributes: nil)
             try fileManager.write(data: data, to: fileURL, options: .atomic)
@@ -83,8 +83,8 @@ final class FilmsListAPIClient: FilmsListService {
     
     func loadFilmsDataFromFileManager() -> Data? {
         guard let directoryURL = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else { return nil }
-        let folderURL = directoryURL.appending(path: "GhibliFilms")
-        let fileURL = folderURL.appending(path: "AllGhibliFilms.json")
+        let folderURL = directoryURL.appending(path:  Paths.folderPath)
+        let fileURL = folderURL.appending(path: Paths.filePath)
         if fileManager.fileExists(atPath: fileURL.path) {
             do {
                 let data = try fileManager.read(from: fileURL)
