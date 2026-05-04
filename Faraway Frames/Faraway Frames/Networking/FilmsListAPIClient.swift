@@ -11,6 +11,11 @@ final class FilmsListAPIClient: FilmsListService {
     private let session: NetworkSession
     private let decoder: JSONDecoder
     private let fileManager: FileManaging
+    private var fileURL: URL? {
+        fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?
+            .appending(path: Paths.folderPath)
+            .appending(path: Paths.filePath)
+    }
     
     init(session: NetworkSession? = nil, decoder: JSONDecoder = JSONDecoder(), fileManager: FileManaging = FileManager.default) {
         let config = URLSessionConfiguration.default
@@ -70,9 +75,8 @@ final class FilmsListAPIClient: FilmsListService {
     }
     
     func saveFilmsDataToFileManager(data: Data) {
-        guard let directoryURL = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else { return }
-        let folderURL = directoryURL.appending(path: Paths.folderPath)
-        let fileURL = folderURL.appending(path: Paths.filePath)
+        guard let fileURL = fileURL else { return }
+        let folderURL = fileURL.deletingLastPathComponent()
         do {
             try fileManager.createDirectory(at: folderURL, withIntermediateDirectories: true, attributes: nil)
             try fileManager.write(data: data, to: fileURL, options: .atomic)
@@ -82,17 +86,7 @@ final class FilmsListAPIClient: FilmsListService {
     }
     
     func loadFilmsDataFromFileManager() -> Data? {
-        guard let directoryURL = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else { return nil }
-        let folderURL = directoryURL.appending(path:  Paths.folderPath)
-        let fileURL = folderURL.appending(path: Paths.filePath)
-        if fileManager.fileExists(atPath: fileURL.path) {
-            do {
-                let data = try fileManager.read(from: fileURL)
-                return data
-            } catch {
-                return nil
-            }
-        }
-        return nil
+        guard let fileURL = fileURL, fileManager.fileExists(atPath: fileURL.path) else { return nil }
+        return try? fileManager.read(from: fileURL)
     }
 }
