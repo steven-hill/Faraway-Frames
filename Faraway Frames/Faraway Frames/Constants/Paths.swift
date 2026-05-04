@@ -6,3 +6,8 @@
 //
 
 import Foundation
+
+struct Paths {
+    static let folderPath = "GhibliFilms"
+    static let filePath = "AllGhibliFilms.json"
+}
