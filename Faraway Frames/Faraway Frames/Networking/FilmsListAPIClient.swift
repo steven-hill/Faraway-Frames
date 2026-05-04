@@ -11,6 +11,11 @@ final class FilmsListAPIClient: FilmsListService {
     private let session: NetworkSession
     private let decoder: JSONDecoder
     private let fileManager: FileManaging
+    private var fileURL: URL? {
+        fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?
+            .appending(path: Paths.folderPath)
+            .appending(path: Paths.filePath)
+    }
     
     init(session: NetworkSession? = nil, decoder: JSONDecoder = JSONDecoder(), fileManager: FileManaging = FileManager.default) {
         let config = URLSessionConfiguration.default
