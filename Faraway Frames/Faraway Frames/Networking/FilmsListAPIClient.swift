@@ -23,7 +23,7 @@ final class FilmsListAPIClient: FilmsListService {
     }
     
     func fetchAllFilms() async throws -> [Film] {
-        let urlString = "https://ghibliapi.vercel.app/films"
+        let urlString = GhibliAPI.allFilmsURLString
         guard let url = URL(string: urlString) else {
             throw APIError.invalidURL
         }
