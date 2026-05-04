@@ -34,13 +34,13 @@ final class MainCoordinator: Coordinator {
         childCoordinators.append(assistantCoordinator)
         
         tabBarController.tabs = [
-            UITab(title: "Home", image: UIImage(systemName: "house"), identifier: "homeTab") { _ in
+            UITab(title: "Home", image: SFSymbols.house, identifier: "homeTab") { _ in
                 return homeCoordinator.navigationController
             },
-            UITab(title: "Explore", image: UIImage(systemName: "film.stack.fill"), identifier: "exploreTab") { _ in
+            UITab(title: "Explore", image: SFSymbols.filmStack, identifier: "exploreTab") { _ in
                 return exploreSplitViewCoordinator.exploreSplitVC
             },
-            UITab(title: "Assistant", image: UIImage(systemName: "sparkles"), identifier: "assistantTab") { _ in
+            UITab(title: "Assistant", image: SFSymbols.sparkles, identifier: "assistantTab") { _ in
                 return assistantCoordinator.navigationController
             }
         ]

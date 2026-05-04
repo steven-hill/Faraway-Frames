@@ -569,7 +569,7 @@ struct ExploreListVCTests {
         let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
         let sut = ExploreListVC(viewModel: filmsListViewModel)
         let film = Film.sample[0]
-        let placeholderImage = UIImage(systemName: "photo")
+        let placeholderImage = SFSymbols.photo
         let cell = UICollectionViewListCell()
         cell.contentConfiguration = UIHostingConfiguration {
             FilmRowView(film: film, image: placeholderImage)

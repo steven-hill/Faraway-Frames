@@ -93,7 +93,7 @@ struct FilmDetailViewModelTests {
         await Task.yield()
         
         if case .content(_, let image) = sut.currentState {
-            #expect(image == UIImage(systemName: "movieclapper"), "Should show the film details with `movieclapper` as a fallback image.")
+            #expect(image == SFSymbols.movieClapper, "Should show the film details with `movieclapper` as a fallback image.")
             #expect(sut.currentState == .content(film, image: image), "Should have a `Film` and an image.")
             #expect(spy.callCount == 2, "Should have called `didUpdateFilmDetails()` twice; once for the film object, and again for the image.")
         }

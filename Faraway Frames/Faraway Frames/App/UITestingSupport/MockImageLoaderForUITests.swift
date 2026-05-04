@@ -10,7 +10,7 @@ import UIKit
 final class MockImageLoaderForUITests: ImageLoader {
     func loadImage(from url: URL) async -> UIImage? {
         let image: UIImage?
-        image = UIImage(systemName: "popcorn")
+        image = SFSymbols.popcorn
         return image
     }
 }

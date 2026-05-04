@@ -56,7 +56,7 @@ final class FilmDetailViewModel {
     }
     
     func getMovieBanner(for film: Film) {
-        let fallbackImage = UIImage(systemName: "movieclapper")
+        let fallbackImage = SFSymbols.movieClapper
         guard let url = URL(string: film.movieBanner) else {
             currentState = .content(film, image: fallbackImage)
             return

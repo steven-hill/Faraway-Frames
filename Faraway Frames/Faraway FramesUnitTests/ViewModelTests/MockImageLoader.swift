@@ -15,7 +15,7 @@ final class MockImageLoader: ImageLoader {
     func loadImage(from url: URL) async -> UIImage? {
         let image: UIImage?
         if shouldSucceed {
-            image = UIImage(systemName: "popcorn")
+            image = SFSymbols.popcorn
         } else {
             return nil
         }
