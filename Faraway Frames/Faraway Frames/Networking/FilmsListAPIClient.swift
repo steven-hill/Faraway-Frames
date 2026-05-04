@@ -86,17 +86,7 @@ final class FilmsListAPIClient: FilmsListService {
     }
     
     func loadFilmsDataFromFileManager() -> Data? {
-        guard let directoryURL = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else { return nil }
-        let folderURL = directoryURL.appending(path:  Paths.folderPath)
-        let fileURL = folderURL.appending(path: Paths.filePath)
-        if fileManager.fileExists(atPath: fileURL.path) {
-            do {
-                let data = try fileManager.read(from: fileURL)
-                return data
-            } catch {
-                return nil
-            }
-        }
-        return nil
+        guard let fileURL = fileURL, fileManager.fileExists(atPath: fileURL.path) else { return nil }
+        return try? fileManager.read(from: fileURL)
     }
 }
