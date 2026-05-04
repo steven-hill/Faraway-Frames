@@ -138,7 +138,7 @@ final class ExploreDetailVC: UIViewController {
     
     private func createEmptyState() -> UIContentUnavailableConfiguration {
         var config = UIContentUnavailableConfiguration.empty()
-        config.image = UIImage(systemName: "movieclapper")
+        config.image = SFSymbols.movieClapper
         config.text = "No Film Selected"
         config.secondaryText = "Select a film from the list for more details."
         return config

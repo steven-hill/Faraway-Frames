@@ -82,7 +82,7 @@ struct APIClientImageLoaderTests {
     }
     
     private func makeTestImage() -> UIImage {
-        UIImage(systemName: "popcorn")!
+        SFSymbols.photo!
     }
     
     private func makeTestURL() -> URL {

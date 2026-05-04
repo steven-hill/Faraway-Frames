@@ -21,7 +21,7 @@ final class ExploreDetailMovieBannerMockImageLoader: ImageLoader {
     }
 
     func resume(shouldSucceed: Bool) {
-        let image = shouldSucceed ? UIImage(systemName: "popcorn") : UIImage(systemName: "movieclapper")
+        let image = shouldSucceed ? SFSymbols.popcorn : SFSymbols.movieClapper
         continuation?.resume(returning: image)
         continuation = nil
     }

@@ -102,7 +102,7 @@ final class ExploreListVC: UIViewController {
     private func configureDataSource() {
         let filmCellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Film> { [weak self] (cell, indexPath, film) in
             guard let self else { return }
-            let placeholderImage = UIImage(systemName: "photo")
+            let placeholderImage = SFSymbols.photo
             
             cell.contentConfiguration = UIHostingConfiguration {
                 FilmRowView(film: film, image: placeholderImage)
@@ -174,7 +174,7 @@ final class ExploreListVC: UIViewController {
         var config = UIContentUnavailableConfiguration.empty()
         config.text = "Error loading films"
         config.secondaryText = "\(error.description)"
-        config.image = UIImage(systemName: "exclamationmark.triangle")
+        config.image = SFSymbols.exclamationMarkTriangle
         config.imageProperties.tintColor = .systemRed
         config.button = .prominentGlass()
         config.button.title = "Retry"
