@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Paths {
+enum Paths {
     static let folderPath = "GhibliFilms"
     static let filePath = "AllGhibliFilms.json"
 }
