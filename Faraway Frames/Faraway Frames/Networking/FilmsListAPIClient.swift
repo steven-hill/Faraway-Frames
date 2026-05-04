@@ -75,9 +75,8 @@ final class FilmsListAPIClient: FilmsListService {
     }
     
     func saveFilmsDataToFileManager(data: Data) {
-        guard let directoryURL = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else { return }
-        let folderURL = directoryURL.appending(path: Paths.folderPath)
-        let fileURL = folderURL.appending(path: Paths.filePath)
+        guard let fileURL = fileURL else { return }
+        let folderURL = fileURL.deletingLastPathComponent()
         do {
             try fileManager.createDirectory(at: folderURL, withIntermediateDirectories: true, attributes: nil)
             try fileManager.write(data: data, to: fileURL, options: .atomic)
