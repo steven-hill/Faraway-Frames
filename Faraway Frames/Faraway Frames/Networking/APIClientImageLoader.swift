@@ -14,7 +14,6 @@ final class APIClientImageLoader: ImageLoader {
     init(session: NetworkSession? = nil, cacheManager: CacheManagerProtocol) {
         let config = URLSessionConfiguration.default
         config.urlCache = URLCache(memoryCapacity: 50 * 1024 * 1024, diskCapacity: 200 * 1024 * 1024, diskPath: "com.stevenhill.farawayframes.cache")
-        config.requestCachePolicy = .returnCacheDataElseLoad
         self.session = session ?? URLSession(configuration: config)
         self.cacheManager = cacheManager
     }

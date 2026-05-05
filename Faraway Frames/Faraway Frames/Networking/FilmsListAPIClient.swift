@@ -21,7 +21,6 @@ final class FilmsListAPIClient: FilmsListService {
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 15
         config.timeoutIntervalForResource = 60
-        config.requestCachePolicy = .returnCacheDataElseLoad
         self.session = session ?? URLSession(configuration: config)
         self.decoder = decoder
         self.fileManager = fileManager
@@ -31,10 +30,6 @@ final class FilmsListAPIClient: FilmsListService {
         let urlString = GhibliAPI.allFilmsURLString
         guard let url = URL(string: urlString) else {
             throw APIError.invalidURL
-        }
-        
-        if let films = getFilmsFromURLCache(using: url) {
-            return films
         }
         
         do {
@@ -58,12 +53,6 @@ final class FilmsListAPIClient: FilmsListService {
             }
             throw error
         }
-    }
-    
-    private func getFilmsFromURLCache(using url: URL) -> [Film]? {
-        let request = URLRequest(url: url)
-        guard let cachedFilms = session.configuration.urlCache?.cachedResponse(for: request) else { return nil }
-        return try? decodeFilms(from: cachedFilms.data)
     }
     
     private func decodeFilms(from data: Data) throws -> [Film] {
