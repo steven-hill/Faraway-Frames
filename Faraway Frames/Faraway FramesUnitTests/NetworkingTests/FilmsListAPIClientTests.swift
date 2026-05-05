@@ -53,7 +53,7 @@ struct FilmsListAPIClientTests {
         #expect(mockData == retrievedData, "Data retrieved from File Manager should match the data that was saved.")
     }
     
-    @Test func filmsListAPIClient_loadFilmsDataFromFileManager_returnsNilIfNoFileExists() {
+    @Test func filmsListAPIClient_loadFilmsDataFromFileManager_ifNoFileExists_returnsNil() {
         let mockData = makeValidMockFilmsData()
         let mockResponse = HTTPURLResponse(
             url: URL(string: makeFilmsURLString())!,
@@ -72,7 +72,7 @@ struct FilmsListAPIClientTests {
     }
     
     @Test(.tags(.networkRequest, .decoding))
-    func filmsListAPIClient_fetchAllFilms_decodesDataOn200Response_withCorrectURL() async throws {
+    func filmsListAPIClient_fetchAllFilms_withCorrectURL_decodesDataOn200Response() async throws {
         let mockData = makeValidMockFilmsData()
         let mockResponse = HTTPURLResponse(
             url: URL(string: makeFilmsURLString())!,
