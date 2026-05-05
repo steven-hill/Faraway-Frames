@@ -25,7 +25,7 @@ final class ExploreDetailVCUITests: XCTestCase {
     }
     
     func test_exploreDetailVC_whenNoFilmIsSelected_displaysMessage() throws {
-        guard UIDevice.current.userInterfaceIdiom == .pad else {
+        guard CurrentDevice.isIPad else {
             throw XCTSkip("iPad-only test")
         }
         

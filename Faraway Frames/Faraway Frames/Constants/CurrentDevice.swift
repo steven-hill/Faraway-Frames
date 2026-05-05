@@ -8,6 +8,6 @@
 import UIKit
 
 enum CurrentDevice {
-    static var isPad: Bool = UIDevice.current.userInterfaceIdiom == .pad
-    static var isPhone: Bool = UIDevice.current.userInterfaceIdiom == .phone
+    static var isIPad: Bool = UIDevice.current.userInterfaceIdiom == .pad
+    static var isIPhone: Bool = UIDevice.current.userInterfaceIdiom == .phone
 }
