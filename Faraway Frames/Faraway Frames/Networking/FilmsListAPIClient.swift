@@ -33,10 +33,6 @@ final class FilmsListAPIClient: FilmsListService {
             throw APIError.invalidURL
         }
         
-        if let films = getFilmsFromURLCache(using: url) {
-            return films
-        }
-        
         do {
             let (data, response) = try await session.data(from: url)
             
@@ -58,12 +54,6 @@ final class FilmsListAPIClient: FilmsListService {
             }
             throw error
         }
-    }
-    
-    private func getFilmsFromURLCache(using url: URL) -> [Film]? {
-        let request = URLRequest(url: url)
-        guard let cachedFilms = session.configuration.urlCache?.cachedResponse(for: request) else { return nil }
-        return try? decodeFilms(from: cachedFilms.data)
     }
     
     private func decodeFilms(from data: Data) throws -> [Film] {
