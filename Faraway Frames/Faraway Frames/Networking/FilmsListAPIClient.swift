@@ -21,7 +21,7 @@ final class FilmsListAPIClient: FilmsListService {
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 15
         config.timeoutIntervalForResource = 60
-        config.requestCachePolicy = .returnCacheDataElseLoad
+        config.requestCachePolicy = .useProtocolCachePolicy
         self.session = session ?? URLSession(configuration: config)
         self.decoder = decoder
         self.fileManager = fileManager
