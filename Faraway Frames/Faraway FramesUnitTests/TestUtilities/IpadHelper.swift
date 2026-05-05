@@ -8,5 +8,5 @@
 import UIKit
 
 struct IpadHelper {
-    static let isPad = DispatchQueue.main.sync { UIDevice.current.userInterfaceIdiom == .pad }
+    static let isPad = DispatchQueue.main.sync { CurrentDevice.isIPad }
 }

@@ -157,7 +157,7 @@ final class ExploreDetailVC: UIViewController {
         contentViewLeadingConstraint?.isActive = false
         contentViewTrailingConstraint?.isActive = false
         
-        let isPad = UIDevice.current.userInterfaceIdiom == .pad
+        let isPad = CurrentDevice.isIPad
         let isPortrait = size.height >= size.width
         
         let multiplier: CGFloat
