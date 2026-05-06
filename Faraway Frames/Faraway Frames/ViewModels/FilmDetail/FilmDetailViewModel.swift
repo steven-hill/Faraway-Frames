@@ -64,12 +64,10 @@ final class FilmDetailViewModel {
         
         imageLoadTask = Task { [weak self] in
             guard let self, !Task.isCancelled else { return }
-            do {
-                let downloadedImage = await imageLoader.loadImage(from: url)
-                if !Task.isCancelled {
-                    currentState = .content(film, image: downloadedImage)
-                }
-            } catch {
+            let downloadedImage = await imageLoader.loadImage(from: url)
+            if !Task.isCancelled {
+                currentState = .content(film, image: downloadedImage ?? fallbackImage)
+            } else {
                 currentState = .content(film, image: fallbackImage)
             }
         }
