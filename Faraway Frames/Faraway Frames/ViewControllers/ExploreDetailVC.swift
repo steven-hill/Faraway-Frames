@@ -158,12 +158,8 @@ final class ExploreDetailVC: UIViewController {
         contentViewTrailingConstraint?.isActive = false
         
         let isPortrait = size.height >= size.width
-        let multiplier: CGFloat
-        if CurrentDevice.isIPad {
-            multiplier = (traitCollection.horizontalSizeClass == .compact) ? 0.3 : 0.75
-        } else {
-            multiplier = isPortrait ? 0.3 : 0.75
-        }
+        let isCompact = CurrentDevice.isIPad ? traitCollection.horizontalSizeClass == .compact : isPortrait
+        let multiplier: CGFloat = isCompact ? 0.3 : 0.75
         movieBannerHeightConstraint = movieBanner.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: multiplier)
         
         if CurrentDevice.isIPad || isPortrait {
