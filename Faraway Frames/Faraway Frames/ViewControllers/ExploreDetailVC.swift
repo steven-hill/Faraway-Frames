@@ -27,7 +27,6 @@ final class ExploreDetailVC: UIViewController {
     
     private let movieBanner: UIImageView = {
         let movieBanner = UIImageView()
-        movieBanner.contentMode = .scaleAspectFill
         movieBanner.clipsToBounds = true
         movieBanner.layer.cornerRadius = 12
         movieBanner.translatesAutoresizingMaskIntoConstraints = false
@@ -119,6 +118,7 @@ final class ExploreDetailVC: UIViewController {
     
     private func createContent(film: Film, image: UIImage?) {
         movieBanner.image = image
+        movieBanner.contentMode = (movieBanner.image == SFSymbols.movieClapper) ? .scaleAspectFit : .scaleAspectFill
         movieBanner.accessibilityLabel = NSLocalizedString("Movie poster", comment: "")
         titleLabel.text = film.title
         originalTitlesLabel.text = "\(film.originalTitle) \n\(film.originalTitleRomanised)"
