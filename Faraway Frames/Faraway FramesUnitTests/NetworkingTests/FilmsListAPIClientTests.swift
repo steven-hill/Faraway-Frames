@@ -138,11 +138,17 @@ struct FilmsListAPIClientTests {
         }
     }
     
-    @Test("`FilmsListAPIClient` handles URLError network connectivity issues with fallback", .tags(.networkRequest), arguments: [
-        URLError(.notConnectedToInternet),
-        URLError(.networkConnectionLost)
+    @Test("`FilmsListAPIClient` handles any error by trying to read from `FileManager` fallback", .tags(.networkRequest), arguments: [
+        APIError.noInternetConnection,
+        APIError.networkConnectionLost,
+        APIError.networkTimeout,
+        APIError.invalidURL,
+        APIError.invalidResponse,
+        APIError.serverError(statusCode: 500),
+        APIError.decodingError,
+        APIError.unknown
     ])
-    func filmsListAPIClient__fetchAllFilms_ifThereAreNetworkConnectivityIssues_usesFileManagerData(expectedError: URLError) async throws {
+    func filmsListAPIClient_fetchAllFilms_ifThereIsAnError_checksForDataInFileManager(expectedError: APIError) async throws {
         let mockFM = MockFileManager()
         let mockData = makeValidMockFilmsData()
         let expectedURL = mockFM.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
