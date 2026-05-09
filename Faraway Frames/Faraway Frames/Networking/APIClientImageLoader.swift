@@ -19,7 +19,6 @@ final class APIClientImageLoader: ImageLoader {
     }
     
     func loadImage(from url: URL) async -> UIImage? {
-        let image: UIImage?
         let key = url.absoluteString as NSString
         if let cachedImage = cacheManager.getData(forKey: key) {
             return cachedImage
@@ -41,6 +40,5 @@ final class APIClientImageLoader: ImageLoader {
         } catch {
             return nil
         }
-        return image
     }
 }
