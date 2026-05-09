@@ -33,10 +33,9 @@ final class APIClientImageLoader: ImageLoader {
         
         do {
             let (data, _) = try await session.data(from: url)
-            image = UIImage(data: data)
-            if let imageToBeCached = image {
-                cacheManager.setData(imageToBeCached, forKey: key)
-            }
+            guard let image = UIImage(data: data) else { return nil }
+            cacheManager.setData(image, forKey: key)
+            return image
         } catch {
             return nil
         }
