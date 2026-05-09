@@ -46,11 +46,9 @@ final class FilmsListAPIClient: FilmsListService {
             saveFilmsDataToFileManager(data: data)
             return try decodeFilms(from: data)
         } catch {
-            if error is URLError {
                 if let dataInFileManager = loadFilmsDataFromFileManager() {
                     return try decodeFilms(from: dataInFileManager)
                 }
-            }
             throw error
         }
     }
