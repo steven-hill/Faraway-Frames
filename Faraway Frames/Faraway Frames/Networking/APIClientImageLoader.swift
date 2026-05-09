@@ -19,7 +19,6 @@ final class APIClientImageLoader: ImageLoader {
     }
     
     func loadImage(from url: URL) async -> UIImage? {
-        let image: UIImage?
         let key = url.absoluteString as NSString
         if let cachedImage = cacheManager.getData(forKey: key) {
             return cachedImage
@@ -27,20 +26,18 @@ final class APIClientImageLoader: ImageLoader {
         
         let request = URLRequest(url: url)
         if let cachedResponse = session.configuration.urlCache?.cachedResponse(for: request),
-        let imageFromURLCache = UIImage(data: cachedResponse.data) {
+           let imageFromURLCache = UIImage(data: cachedResponse.data) {
             cacheManager.setData(imageFromURLCache, forKey: key)
             return imageFromURLCache
         }
         
         do {
             let (data, _) = try await session.data(from: url)
-            image = UIImage(data: data)
-            if let imageToBeCached = image {
-                cacheManager.setData(imageToBeCached, forKey: key)
-            }
+            guard let image = UIImage(data: data) else { return nil }
+            cacheManager.setData(image, forKey: key)
+            return image
         } catch {
             return nil
         }
-        return image
     }
 }
