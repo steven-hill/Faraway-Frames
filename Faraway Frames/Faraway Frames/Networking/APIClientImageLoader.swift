@@ -26,7 +26,7 @@ final class APIClientImageLoader: ImageLoader {
         
         let request = URLRequest(url: url)
         if let cachedResponse = session.configuration.urlCache?.cachedResponse(for: request),
-        let imageFromURLCache = UIImage(data: cachedResponse.data) {
+           let imageFromURLCache = UIImage(data: cachedResponse.data) {
             cacheManager.setData(imageFromURLCache, forKey: key)
             return imageFromURLCache
         }
