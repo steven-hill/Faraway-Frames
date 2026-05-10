@@ -131,6 +131,16 @@ final class ExploreListVC: UIViewController {
             }
             return collectionView.dequeueConfiguredReusableCell(using: filmCellRegistration, for: indexPath, item: film)
         }
+        
+        dataSource.supplementaryViewProvider = { (collectionView, kind, indexPath) in
+            guard kind == UICollectionView.elementKindSectionHeader else { return nil }
+            let header = collectionView.dequeueReusableSupplementaryView(
+                ofKind: kind,
+                withReuseIdentifier: NetworkErrorReusableView.identifier,
+                for: indexPath
+            ) as? NetworkErrorReusableView
+            return header
+        }
     }
     
     private func getAllFilms() -> Task<Void, Never> {
