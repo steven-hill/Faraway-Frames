@@ -8,5 +8,6 @@
 import Foundation
 
 protocol FilmsListService {
+    var isUsingFileManagerData: Bool { get }
     func fetchAllFilms() async throws -> [Film]
 }
