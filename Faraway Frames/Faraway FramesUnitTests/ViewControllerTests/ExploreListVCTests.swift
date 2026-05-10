@@ -542,9 +542,7 @@ struct ExploreListVCTests {
             let kind = UICollectionView.elementKindSectionHeader
             let header = sut.dataSource.supplementaryViewProvider?(sut.collectionView, kind, indexPath)
             
-            // Assert
-            #expect(header is OfflineHeaderView, "Should return the custom header view.")
-        
+            #expect(header is NetworkErrorReusableView, "Should return the header view.")
         //#expect(headerView is ExploreListHeaderView)
     }
     
