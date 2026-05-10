@@ -260,6 +260,7 @@ extension ExploreListVC: UICollectionViewDelegate {
 // MARK: - Films List View Model Delegate
 extension ExploreListVC: FilmsListViewModelDelegate {
     func didUpdateFilms(_ films: [Film]) {
+        collectionView.setCollectionViewLayout(createLayout(), animated: true)
         self.films = films
         let filmIds = films.map({ $0.id })
         filmLookup = Dictionary(uniqueKeysWithValues: films.map { ($0.id, $0) })
