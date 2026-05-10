@@ -16,6 +16,7 @@ final class FilmsListAPIClient: FilmsListService {
             .appending(path: Paths.folderPath)
             .appending(path: Paths.filePath)
     }
+    private(set) var isUsingFileManagerData: Bool = false
     
     init(session: NetworkSession? = nil, decoder: JSONDecoder = JSONDecoder(), fileManager: FileManaging = FileManager.default) {
         let config = URLSessionConfiguration.default
@@ -27,6 +28,7 @@ final class FilmsListAPIClient: FilmsListService {
     }
     
     func fetchAllFilms() async throws -> [Film] {
+        isUsingFileManagerData = false
         let urlString = GhibliAPI.allFilmsURLString
         guard let url = URL(string: urlString) else {
             throw APIError.invalidURL
@@ -47,6 +49,7 @@ final class FilmsListAPIClient: FilmsListService {
             return try decodeFilms(from: data)
         } catch {
                 if let dataInFileManager = loadFilmsDataFromFileManager() {
+                    isUsingFileManagerData = true
                     return try decodeFilms(from: dataInFileManager)
                 }
             throw error

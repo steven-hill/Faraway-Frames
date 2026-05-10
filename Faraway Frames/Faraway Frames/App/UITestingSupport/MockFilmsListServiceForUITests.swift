@@ -8,7 +8,7 @@
 import Foundation
 
 final class MockFilmsListServiceForUITests: FilmsListService {
-    
+    var isUsingFileManagerData: Bool = false
     let shouldSucceed: Bool
     
     init(shouldSucceed: Bool) {
