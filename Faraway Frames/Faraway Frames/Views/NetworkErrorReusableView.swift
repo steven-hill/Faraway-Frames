@@ -26,6 +26,7 @@ final class NetworkErrorReusableView: UICollectionReusableView {
         label.numberOfLines = 0
         label.textColor = .label
         label.text = "Network error\n Using archived data"
+        label.accessibilityIdentifier = "Network_Error_Reusable_View"
         return label
     }()
     
