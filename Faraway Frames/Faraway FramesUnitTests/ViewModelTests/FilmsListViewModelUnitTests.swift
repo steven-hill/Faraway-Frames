@@ -25,7 +25,7 @@ struct FilmsListViewModelUnitTests {
         await sut.getAllFilms()
         
         #expect(sut.films.count == 22, "There should be 22 films.")
-        #expect(sut.currentState == .content, "Should be `.content`.")
+        #expect(sut.currentState == .content(isUsingArchivedData: false), "Should be `.content(isUsingArchivedData: false)`.")
     }
     
     @Test(.tags(.networkRequest))
@@ -255,7 +255,7 @@ struct FilmsListViewModelUnitTests {
         sut.resetAllFilms()
         
         #expect(sut.films.count == 22, "Should have 22 films.")
-        #expect(sut.currentState == .content, "Should be `.content`.")
+        #expect(sut.currentState == .content(isUsingArchivedData: false), "Should be `.content(isUsingArchivedData: false)`.")
     }
     
     @Test func filmsListViewModel_resetAllFilms_emptiesFilteredFilms() async {
