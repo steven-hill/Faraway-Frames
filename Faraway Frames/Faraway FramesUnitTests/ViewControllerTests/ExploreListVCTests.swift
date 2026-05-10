@@ -527,23 +527,47 @@ struct ExploreListVCTests {
         #expect(sut.collectionView.refreshControl?.isRefreshing == false, "Should be false.")
     }
     
-    @Test("When there is a network error and data in File Manager is being used, collection view uses supplementary header view.")
-    func exploreListVC_whenShowingDataFromFileManager_setsHeaderModeToSupplementary() {
+    @Test("When there is a network error and data in File Manager is being used, collection view displays supplementary header view.")
+    func exploreListVC_whenShowingDataFromFileManager_setsHeaderModeToSupplementary() async {
         let mockFilmsListService = MockFilmsListService()
         mockFilmsListService.isUsingFileManagerData = true
         let imageLoader = MockImageLoader()
         let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
         let sut = ExploreListVC(viewModel: filmsListViewModel)
-        
         sut.loadViewIfNeeded()
         
-//        let headerView = sut.collectionView.supplementaryView(forElementKind: ExploreListVC.Section.main.rawValue, at: IndexPath(item: 0, section: 0))
+        let films: [Film] = [Film.sample[0]]
+        sut.didUpdateFilms(films)
+        await Task.yield()
+        sut.collectionView.layoutIfNeeded()
+        
         let indexPath = IndexPath(item: 0, section: 0)
-            let kind = UICollectionView.elementKindSectionHeader
-            let header = sut.dataSource.supplementaryViewProvider?(sut.collectionView, kind, indexPath)
+        let kind = UICollectionView.elementKindSectionHeader
+        let header = sut.collectionView.supplementaryView(forElementKind: kind, at: indexPath)
             
-            #expect(header is NetworkErrorReusableView, "Should return the header view.")
-        //#expect(headerView is ExploreListHeaderView)
+        #expect(header != nil, "Should not be nil.")
+        #expect(header is NetworkErrorReusableView, "Should be the custom header view.")
+    }
+    
+    @Test("When data in File Manager is not being used, collection view has no header view.")
+    func exploreListVC_whenFileManagerDataIsNotUsed_doesNotShowCollectionViewHeader() async {
+        let mockFilmsListService = MockFilmsListService()
+        mockFilmsListService.isUsingFileManagerData = false
+        let imageLoader = MockImageLoader()
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
+        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        sut.loadViewIfNeeded()
+        
+        let films: [Film] = [Film.sample[0]]
+        sut.didUpdateFilms(films)
+        await Task.yield()
+        sut.collectionView.layoutIfNeeded()
+        
+        let indexPath = IndexPath(item: 0, section: 0)
+        let kind = UICollectionView.elementKindSectionHeader
+        let header = sut.collectionView.supplementaryView(forElementKind: kind, at: indexPath)
+            
+        #expect(header == nil, "Should be nil.")
     }
     
     // MARK: - SUT Helper Methods
