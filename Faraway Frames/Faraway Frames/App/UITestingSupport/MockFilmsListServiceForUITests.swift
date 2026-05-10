@@ -8,15 +8,16 @@
 import Foundation
 
 final class MockFilmsListServiceForUITests: FilmsListService {
-    var isUsingFileManagerData: Bool = false
+    let isUsingFileManagerData: Bool
     let shouldSucceed: Bool
     
-    init(shouldSucceed: Bool) {
+    init(shouldSucceed: Bool, isUsingFileManagerData: Bool) {
         self.shouldSucceed = shouldSucceed
+        self.isUsingFileManagerData = isUsingFileManagerData
     }
     
     func fetchAllFilms() async throws -> [Film] {
-        if shouldSucceed == true {
+        if shouldSucceed == true || isUsingFileManagerData == true {
             return try loadJSON()
         } else {
             throw getMockErrorFromEnvironment()
