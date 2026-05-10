@@ -166,6 +166,7 @@ struct FilmsListAPIClientTests {
 
         let films = try await sut.fetchAllFilms()
 
+        #expect(sut.isUsingFileManagerData, "Should be true.")
         #expect(films.count == 1, "Should be 1 film.")
         #expect(films.first?.title == "Castle in the Sky", "Should be `Castle in the Sky`.")
     }
