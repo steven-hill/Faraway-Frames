@@ -12,6 +12,12 @@ import Foundation
 @MainActor
 struct FilmsListAPIClientTests {
     
+    @Test func filmsListAPIClient_onInit_isUsingFileManagerData_isFalse() {
+        let mockFM = MockFileManager()
+        let sut = FilmsListAPIClient(session: nil, fileManager: mockFM)
+        #expect(!sut.isUsingFileManagerData, "Should be false.")
+    }
+    
     @Test func filmsListAPIClient_saveFilmsDataToFileManager_savesAllFilmsDataToFileManager() {
         let mockData = makeValidMockFilmsData()
         let mockResponse = HTTPURLResponse(
