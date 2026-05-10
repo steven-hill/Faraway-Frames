@@ -80,13 +80,7 @@ final class ExploreListVC: UIViewController {
         var config = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
         config.backgroundColor = .systemBackground
         config.showsSeparators = true
-        
-        if viewModel.currentState == .content(isUsingArchivedData: true) {
-            config.headerMode = .supplementary
-        } else {
-            config.headerMode = .none
-        }
-        
+        config.headerMode = viewModel.currentState == .content(isUsingArchivedData: true) ? .supplementary : .none
         return UICollectionViewCompositionalLayout.list(using: config)
     }
     
