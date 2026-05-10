@@ -219,8 +219,7 @@ final class ExploreListVCUITests: XCTestCase {
     // MARK: - Helper methods
     private func launchAppForNetworkSuccessCase() {
         app = XCUIApplication()
-        app.launchArguments.append("-UITesting")
-        app.launchArguments.append("-UITestingMockNetworkSuccess")
+        app.launchArguments = ["-UITesting", "-UITestingMockNetworkSuccess"]
         app.launch()
         NavigationHelper.navigateToExploreTab(app: app)
     }
