@@ -63,6 +63,9 @@ final class ExploreListVC: UIViewController {
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
         collectionView.delegate = self
         collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.register(NetworkErrorReusableView.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+            withReuseIdentifier: NetworkErrorReusableView.identifier)
         view.addSubview(collectionView)
         
         NSLayoutConstraint.activate([
@@ -77,6 +80,7 @@ final class ExploreListVC: UIViewController {
         var config = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
         config.backgroundColor = .systemBackground
         config.showsSeparators = true
+        config.headerMode = viewModel.currentState == .content(isUsingArchivedData: true) ? .supplementary : .none
         return UICollectionViewCompositionalLayout.list(using: config)
     }
     
@@ -121,6 +125,16 @@ final class ExploreListVC: UIViewController {
             }
             return collectionView.dequeueConfiguredReusableCell(using: filmCellRegistration, for: indexPath, item: film)
         }
+        
+        dataSource.supplementaryViewProvider = { (collectionView, kind, indexPath) in
+            guard kind == UICollectionView.elementKindSectionHeader else { return nil }
+            let header = collectionView.dequeueReusableSupplementaryView(
+                ofKind: kind,
+                withReuseIdentifier: NetworkErrorReusableView.identifier,
+                for: indexPath
+            ) as? NetworkErrorReusableView
+            return header
+        }
     }
     
     private func getAllFilms() -> Task<Void, Never> {
@@ -136,7 +150,7 @@ final class ExploreListVC: UIViewController {
         switch viewModel.currentState {
         case .idle, .loadingAllFilms:
             config = createLoadingConfig(with: "Fetching films...")
-        case .content:
+        case .content(isUsingArchivedData: false), .content(isUsingArchivedData: true):
             config = nil
             collectionViewIsHidden = false
             searchBarIsEnabled = true
@@ -240,6 +254,7 @@ extension ExploreListVC: UICollectionViewDelegate {
 // MARK: - Films List View Model Delegate
 extension ExploreListVC: FilmsListViewModelDelegate {
     func didUpdateFilms(_ films: [Film]) {
+        collectionView.setCollectionViewLayout(createLayout(), animated: true)
         self.films = films
         let filmIds = films.map({ $0.id })
         filmLookup = Dictionary(uniqueKeysWithValues: films.map { ($0.id, $0) })

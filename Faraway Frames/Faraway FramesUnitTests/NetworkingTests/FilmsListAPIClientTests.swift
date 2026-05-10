@@ -12,6 +12,12 @@ import Foundation
 @MainActor
 struct FilmsListAPIClientTests {
     
+    @Test func filmsListAPIClient_onInit_isUsingFileManagerData_isFalse() {
+        let mockFM = MockFileManager()
+        let sut = FilmsListAPIClient(session: nil, fileManager: mockFM)
+        #expect(!sut.isUsingFileManagerData, "Should be false.")
+    }
+    
     @Test func filmsListAPIClient_saveFilmsDataToFileManager_savesAllFilmsDataToFileManager() {
         let mockData = makeValidMockFilmsData()
         let mockResponse = HTTPURLResponse(
@@ -160,6 +166,7 @@ struct FilmsListAPIClientTests {
 
         let films = try await sut.fetchAllFilms()
 
+        #expect(sut.isUsingFileManagerData, "Should be true.")
         #expect(films.count == 1, "Should be 1 film.")
         #expect(films.first?.title == "Castle in the Sky", "Should be `Castle in the Sky`.")
     }

@@ -9,6 +9,7 @@ import Testing
 @testable import Faraway_Frames
 
 final class MockFilmsListService: FilmsListService {
+    var isUsingFileManagerData: Bool = false
     var result: Result<[Film], Error>?
     var fetchWasCalled = false
     private var continuation: CheckedContinuation<[Film], Error>?
@@ -19,6 +20,10 @@ final class MockFilmsListService: FilmsListService {
         
         if shouldPauseForLoadingStateTest {
             return try await withCheckedThrowingContinuation { self.continuation = $0 }
+        }
+        
+        if isUsingFileManagerData {
+            return []
         }
         
         switch result {

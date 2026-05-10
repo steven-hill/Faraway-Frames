@@ -14,7 +14,7 @@ final class FilmsListViewModel {
     enum FilmsListState: Equatable {
         case idle
         case loadingAllFilms
-        case content
+        case content(isUsingArchivedData: Bool)
         case emptySearchResults
         case error(APIError)
         case retrying
@@ -42,7 +42,7 @@ final class FilmsListViewModel {
             try Task.checkCancellation()
             films = try await filmsListService.fetchAllFilms()
             try Task.checkCancellation()
-            currentState = .content
+            currentState = .content(isUsingArchivedData: filmsListService.isUsingFileManagerData)
             delegate?.didUpdateFilms(films)
         } catch {
             guard !Task.isCancelled else { return }
@@ -87,7 +87,7 @@ final class FilmsListViewModel {
             currentState = .emptySearchResults
             delegate?.didFailToMatchResults()
         } else {
-            currentState = .content
+            currentState = .content(isUsingArchivedData: filmsListService.isUsingFileManagerData)
             delegate?.didUpdateFilms(filteredFilms)
         }
     }
@@ -103,7 +103,7 @@ final class FilmsListViewModel {
     
     func resetAllFilms() {
         filteredFilms.removeAll()
-        currentState = .content
+        currentState = .content(isUsingArchivedData: filmsListService.isUsingFileManagerData)
         delegate?.didUpdateFilms(films)
     }
     

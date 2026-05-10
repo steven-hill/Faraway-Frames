@@ -25,7 +25,7 @@ struct FilmsListViewModelUnitTests {
         await sut.getAllFilms()
         
         #expect(sut.films.count == 22, "There should be 22 films.")
-        #expect(sut.currentState == .content, "Should be `.content`.")
+        #expect(sut.currentState == .content(isUsingArchivedData: false), "Should be `.content(isUsingArchivedData: false)`.")
     }
     
     @Test(.tags(.networkRequest))
@@ -122,6 +122,29 @@ struct FilmsListViewModelUnitTests {
         let filmImage = await sut.getImage(for: sut.films[0])
         
         #expect(filmImage == nil, "Film image should be nil.")
+    }
+    
+    @Test(.tags(.networkRequest))
+    func filmsListViewModel_getAllFilms_whenUsingFileManagerData_currentStateIsCorrect() async {
+        let mockService = MockFilmsListService()
+        let mockImageLoader = MockImageLoader()
+        let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
+        mockService.isUsingFileManagerData = true
+        
+        await sut.getAllFilms()
+        
+        #expect(sut.currentState == .content(isUsingArchivedData: true), "Should be set to true.")
+    }
+    
+    @Test(.tags(.networkRequest))
+    func filmsListViewModel_getAllFilms_whenNotUsingFileManagerToReturnFilms_currentStateIsCorrect() async {
+        let mockService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
+        let mockImageLoader = MockImageLoader()
+        let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
+        
+        await sut.getAllFilms()
+        
+        #expect(sut.currentState == .content(isUsingArchivedData: false), "Should be set to false.")
     }
     
     @Test(.tags(.search))
@@ -255,7 +278,7 @@ struct FilmsListViewModelUnitTests {
         sut.resetAllFilms()
         
         #expect(sut.films.count == 22, "Should have 22 films.")
-        #expect(sut.currentState == .content, "Should be `.content`.")
+        #expect(sut.currentState == .content(isUsingArchivedData: false), "Should be `.content(isUsingArchivedData: false)`.")
     }
     
     @Test func filmsListViewModel_resetAllFilms_emptiesFilteredFilms() async {
