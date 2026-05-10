@@ -10,5 +10,6 @@ import Foundation
 enum LaunchArguments {
     static let uiTesting = "-UITesting"
     static let uiTestingMockNetworkSuccess = "-UITestingMockNetworkSuccess"
+    static let uiTestingMockNetworkFailureWithFileManagerData = "-UITestingMockNetworkFailureWithFileManagerData"
     static let uiTestingMockNetworkFailure = "-UITestingMockNetworkFailure"
 }
