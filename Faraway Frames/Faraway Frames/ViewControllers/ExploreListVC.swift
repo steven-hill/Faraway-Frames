@@ -63,6 +63,9 @@ final class ExploreListVC: UIViewController {
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
         collectionView.delegate = self
         collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.register(NetworkErrorReusableView.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+            withReuseIdentifier: NetworkErrorReusableView.identifier)
         view.addSubview(collectionView)
         
         NSLayoutConstraint.activate([

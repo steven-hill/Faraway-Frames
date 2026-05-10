@@ -527,6 +527,27 @@ struct ExploreListVCTests {
         #expect(sut.collectionView.refreshControl?.isRefreshing == false, "Should be false.")
     }
     
+    @Test("When there is a network error and data in File Manager is being used, collection view uses supplementary header view.")
+    func exploreListVC_whenShowingDataFromFileManager_setsHeaderModeToSupplementary() {
+        let mockFilmsListService = MockFilmsListService()
+        mockFilmsListService.isUsingFileManagerData = true
+        let imageLoader = MockImageLoader()
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
+        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        
+        sut.loadViewIfNeeded()
+        
+//        let headerView = sut.collectionView.supplementaryView(forElementKind: ExploreListVC.Section.main.rawValue, at: IndexPath(item: 0, section: 0))
+        let indexPath = IndexPath(item: 0, section: 0)
+            let kind = UICollectionView.elementKindSectionHeader
+            let header = sut.dataSource.supplementaryViewProvider?(sut.collectionView, kind, indexPath)
+            
+            // Assert
+            #expect(header is OfflineHeaderView, "Should return the custom header view.")
+        
+        //#expect(headerView is ExploreListHeaderView)
+    }
+    
     // MARK: - SUT Helper Methods
     private func makeSUT() -> ExploreListVC {
         let mockFilmsListService = MockFilmsListService()
