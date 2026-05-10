@@ -206,6 +206,16 @@ final class ExploreListVCUITests: XCTestCase {
         }
     }
     
+    func test_exploreListVC_whenUsingFileManagerData_collectionViewHeaderAppears() {
+        app = XCUIApplication()
+        app.launchArguments = ["-UITesting", "-UITestingMockNetworkFailureWithFileManagerData"]
+        app.launch()
+        NavigationHelper.navigateToExploreTab(app: app)
+        
+        let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
+        XCTAssertTrue(header.waitForExistence(timeout: 1))
+    }
+    
     // MARK: - Helper methods
     private func launchAppForNetworkSuccessCase() {
         app = XCUIApplication()
