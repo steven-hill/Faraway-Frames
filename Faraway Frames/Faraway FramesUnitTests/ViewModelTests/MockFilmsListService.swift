@@ -22,6 +22,10 @@ final class MockFilmsListService: FilmsListService {
             return try await withCheckedThrowingContinuation { self.continuation = $0 }
         }
         
+        if isUsingFileManagerData {
+            return []
+        }
+        
         switch result {
         case .success(let films):
             return films

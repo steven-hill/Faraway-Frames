@@ -124,6 +124,29 @@ struct FilmsListViewModelUnitTests {
         #expect(filmImage == nil, "Film image should be nil.")
     }
     
+    @Test(.tags(.networkRequest))
+    func filmsListViewModel_getAllFilms_whenUsingFileManagerData_currentStateIsCorrect() async {
+        let mockService = MockFilmsListService()
+        let mockImageLoader = MockImageLoader()
+        let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
+        mockService.isUsingFileManagerData = true
+        
+        await sut.getAllFilms()
+        
+        #expect(sut.currentState == .content(isUsingArchivedData: true), "Should be set to true.")
+    }
+    
+    @Test(.tags(.networkRequest))
+    func filmsListViewModel_getAllFilms_whenNotUsingFileManagerToReturnFilms_currentStateIsCorrect() async {
+        let mockService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
+        let mockImageLoader = MockImageLoader()
+        let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
+        
+        await sut.getAllFilms()
+        
+        #expect(sut.currentState == .content(isUsingArchivedData: false), "Should be set to false.")
+    }
+    
     @Test(.tags(.search))
     func filmsListViewModel_filteredFilmsArray_onInit_isEmpty() {
         let sut = makeSUTForSuccessCase()
