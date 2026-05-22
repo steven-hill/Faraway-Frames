@@ -120,7 +120,15 @@ final class ExploreDetailVC: UIViewController {
         movieBanner.image = image
         movieBanner.contentMode = (movieBanner.image == SFSymbols.movieClapper) ? .scaleAspectFit : .scaleAspectFill
         titleLabel.text = film.title
-        originalTitlesLabel.text = "\(film.originalTitle) \n\(film.originalTitleRomanised)"
+        originalTitlesLabel.text = "\(film.originalTitle)\n\(film.originalTitleRomanised)"
+        let prefix = "Original Title: "
+        let japaneseTitle = film.originalTitle
+        let combinedSpokenString = NSMutableAttributedString(string: "\(prefix)\(japaneseTitle)")
+        let prefixLength = (prefix as NSString).length
+        let japaneseLength = (japaneseTitle as NSString).length
+        let japaneseRange = NSRange(location: prefixLength, length: japaneseLength)
+        combinedSpokenString.addAttribute(.accessibilitySpeechLanguage, value: "ja", range: japaneseRange)
+        originalTitlesLabel.accessibilityAttributedLabel = combinedSpokenString
         releaseDateAndRunningTimeLabel.text = "\(film.releaseDate) • \(film.runningTime) mins"
         releaseDateAndRunningTimeLabel.accessibilityLabel = "Released in \(film.releaseDate), running time \(film.runningTime) minutes"
         synopsisHeaderLabel.text = NSLocalizedString("Synopsis", comment: "")
