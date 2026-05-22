@@ -18,25 +18,44 @@ final class NetworkErrorReusableView: UICollectionReusableView {
         return view
     }()
     
-    let label: UILabel = {
+    let titleLabel: UILabel = {
         let label = UILabel()
         label.font = .preferredFont(forTextStyle: .subheadline)
         label.adjustsFontForContentSizeCategory = true
         label.textAlignment = .center
         label.numberOfLines = 0
         label.textColor = .label
-        label.text = "Network error\n Using archived data"
-        label.accessibilityIdentifier = "Network_Error_Reusable_View"
+        label.text = "Network error"
         return label
+    }()
+    
+    let descriptionLabel: UILabel = {
+        let label = UILabel()
+        label.font = .preferredFont(forTextStyle: .footnote)
+        label.adjustsFontForContentSizeCategory = true
+        label.textAlignment = .center
+        label.numberOfLines = 0
+        label.textColor = .secondaryLabel
+        label.text = "Using archived data"
+        return label
+    }()
+    
+    private let textStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.spacing = 4
+        return stackView
     }()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         addSubview(containerView)
-        containerView.addSubview(label)
-        
+        containerView.addSubview(textStackView)
+        textStackView.addArrangedSubview(titleLabel)
+        textStackView.addArrangedSubview(descriptionLabel)
         containerView.translatesAutoresizingMaskIntoConstraints = false
-        label.translatesAutoresizingMaskIntoConstraints = false
+        textStackView.translatesAutoresizingMaskIntoConstraints = false
+        textStackView.accessibilityIdentifier = "Network_Error_Reusable_View"
         
         NSLayoutConstraint.activate([
             containerView.topAnchor.constraint(equalTo: topAnchor, constant: 4),
@@ -44,10 +63,10 @@ final class NetworkErrorReusableView: UICollectionReusableView {
             containerView.trailingAnchor.constraint(equalTo: trailingAnchor),
             containerView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -4),
             
-            label.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 10),
-            label.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 12),
-            label.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -12),
-            label.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -10)
+            textStackView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 10),
+            textStackView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 12),
+            textStackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -12),
+            textStackView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -10)
         ])
     }
     
