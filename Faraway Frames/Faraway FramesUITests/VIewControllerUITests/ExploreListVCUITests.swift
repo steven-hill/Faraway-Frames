@@ -16,6 +16,7 @@ final class ExploreListVCUITests: XCTestCase {
     }
     
     override func tearDownWithError() throws {
+        XCUIDevice.shared.appearance = .light
         app = nil
     }
     
@@ -221,9 +222,8 @@ final class ExploreListVCUITests: XCTestCase {
     }
     
     func test_exploreListVC_searchTextField_text_inDarkMode_meetsMinimumContrastRatio() throws {
-        launchAppForNetworkSuccessCase()
-        
         XCUIDevice.shared.appearance = .dark
+        launchAppForNetworkSuccessCase()
         
         try app.performAccessibilityAudit(for: [.contrast]) { issue in
             guard let element = issue.element,
