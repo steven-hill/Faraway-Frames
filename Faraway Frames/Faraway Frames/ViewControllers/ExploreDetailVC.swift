@@ -121,6 +121,7 @@ final class ExploreDetailVC: UIViewController {
         titleLabel.text = film.title
         originalTitlesLabel.text = "\(film.originalTitle) \n\(film.originalTitleRomanised)"
         releaseDateAndRunningTimeLabel.text = "\(film.releaseDate) • \(film.runningTime) mins"
+        releaseDateAndRunningTimeLabel.accessibilityLabel = "Released in \(film.releaseDate), running time \(film.runningTime) minutes"
         synopsisHeaderLabel.text = NSLocalizedString("Synopsis", comment: "")
         synopsisLabel.text = film.description
         rottenTomatoesScoreLabel.attributedText = setScoreText(for: film.rottenTomatoesScore)
