@@ -130,7 +130,7 @@ struct ExploreDetailVCTests {
     
     @Test func exploreDetailVC_createContent_setsCorrectAccessibilityLabelAndLanguageTagForOriginalTitle() {
         let sut = makeSUTWithFilm()
-        
+
         sut.loadViewIfNeeded()
         sut.setNeedsUpdateContentUnavailableConfiguration()
         sut.updateContentUnavailableConfiguration(using: sut.contentUnavailableConfigurationState)
@@ -160,8 +160,8 @@ struct ExploreDetailVCTests {
         ) as? String
         
         #expect(languageAttribute == "ja", "The Japanese text range must be explicitly tagged with 'ja'.")
-        #expect(range.location == prefixLength)
-        #expect(range.length == (Film.sample[0].originalTitle as NSString).length)
+        #expect(range.location == prefixLength, "Should be equal.")
+        #expect(range.length == (Film.sample[0].originalTitle as NSString).length, "Should be equal.")
     }
     
     //MARK: - Helper Methods
