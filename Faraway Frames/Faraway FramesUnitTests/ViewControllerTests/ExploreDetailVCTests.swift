@@ -128,6 +128,42 @@ struct ExploreDetailVCTests {
         #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil.")
     }
     
+    @Test func exploreDetailVC_createContent_setsCorrectAccessibilityLabelAndLanguageTagForOriginalTitle() {
+        let sut = makeSUTWithFilm()
+        
+        sut.loadViewIfNeeded()
+        sut.setNeedsUpdateContentUnavailableConfiguration()
+        sut.updateContentUnavailableConfiguration(using: sut.contentUnavailableConfigurationState)
+        
+        let targetIdentifier = "ExploreDetailVC_OriginalTitlesLabel"
+        let foundLabel = sut.view.findView(withIdentifier: targetIdentifier) as? UILabel
+        
+        guard let label = foundLabel else {
+            Issue.record("Could not find a UILabel with accessibilityIdentifier: '\(targetIdentifier)'.")
+            return
+        }
+        
+        guard let attributedLabel = label.accessibilityAttributedLabel else {
+            Issue.record("Label found, but its accessibilityAttributedLabel was nil.")
+            return
+        }
+        
+        let expectedPrefix = "Original Title: "
+        #expect(attributedLabel.string == "\(expectedPrefix)\(Film.sample[0].originalTitle)")
+        
+        var range = NSRange()
+        let prefixLength = (expectedPrefix as NSString).length
+        let languageAttribute = attributedLabel.attribute(
+            .accessibilitySpeechLanguage,
+            at: prefixLength,
+            effectiveRange: &range
+        ) as? String
+        
+        #expect(languageAttribute == "ja", "The Japanese text range must be explicitly tagged with 'ja'.")
+        #expect(range.location == prefixLength)
+        #expect(range.length == (Film.sample[0].originalTitle as NSString).length)
+    }
+    
     //MARK: - Helper Methods
     private func makeSUTWhenFilmIsNil() -> ExploreDetailVC {
         let mockImageLoader = MockImageLoader()
@@ -142,5 +178,20 @@ struct ExploreDetailVCTests {
         let filmDetailViewModel = FilmDetailViewModel(film: film, imageLoader: mockImageLoader)
         let sut = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
         return sut
+    }
+}
+
+//MARK: - Extension on UIView
+private extension UIView {
+    func findView(withIdentifier identifier: String) -> UIView? {
+        if accessibilityIdentifier == identifier {
+            return self
+        }
+        for subview in subviews {
+            if let foundView = subview.findView(withIdentifier: identifier) {
+                return foundView
+            }
+        }
+        return nil
     }
 }
