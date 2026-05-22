@@ -55,7 +55,6 @@ final class NetworkErrorReusableView: UICollectionReusableView {
         textStackView.addArrangedSubview(descriptionLabel)
         containerView.translatesAutoresizingMaskIntoConstraints = false
         textStackView.translatesAutoresizingMaskIntoConstraints = false
-        //textStackView.isAccessibilityElement = true
         textStackView.accessibilityIdentifier = "Network_Error_Reusable_View"
         
         NSLayoutConstraint.activate([
