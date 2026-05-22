@@ -31,12 +31,11 @@ final class ExploreDetailVC: UIViewController {
         movieBanner.layer.cornerRadius = 12
         movieBanner.translatesAutoresizingMaskIntoConstraints = false
         movieBanner.accessibilityIdentifier = "ExploreDetailVC_MovieBanner"
-        movieBanner.isAccessibilityElement = true
-        movieBanner.accessibilityTraits = .image
+        movieBanner.isAccessibilityElement = false
         return movieBanner
     }()
     
-    private let titleLabel = FFLabel(font: .preferredFont(forTextStyle: .extraLargeTitle2), textColor: .label, accessibilityIdentifer: "ExploreDetailVC_TitleLabel")
+    private let titleLabel = FFLabel(font: .preferredFont(forTextStyle: .extraLargeTitle2), textColor: .label, accessibilityIdentifer: "ExploreDetailVC_TitleLabel", accessibilityTraits: .header)
 
     private let originalTitlesLabel = FFLabel(font: .preferredFont(forTextStyle: .title2), textColor: .secondaryLabel, accessibilityIdentifer: "ExploreDetailVC_OriginalTitlesLabel")
 
@@ -119,7 +118,6 @@ final class ExploreDetailVC: UIViewController {
     private func createContent(film: Film, image: UIImage?) {
         movieBanner.image = image
         movieBanner.contentMode = (movieBanner.image == SFSymbols.movieClapper) ? .scaleAspectFit : .scaleAspectFill
-        movieBanner.accessibilityLabel = NSLocalizedString("Movie poster", comment: "")
         titleLabel.text = film.title
         originalTitlesLabel.text = "\(film.originalTitle) \n\(film.originalTitleRomanised)"
         releaseDateAndRunningTimeLabel.text = "\(film.releaseDate) • \(film.runningTime) mins"
