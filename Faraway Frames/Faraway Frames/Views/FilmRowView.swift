@@ -33,8 +33,8 @@ struct FilmRowView: View {
             }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Film: \(film.title)")
-        .accessibilityHint("Double tap for film details")
+        .accessibilityLabel("\(film.title)")
+        .accessibilityAddTraits(.isButton)
     }
     
     private var filmTitle: some View {
