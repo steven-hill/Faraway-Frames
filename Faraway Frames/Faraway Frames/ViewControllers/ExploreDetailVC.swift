@@ -51,6 +51,7 @@ final class ExploreDetailVC: UIViewController {
         let creditsContainer = UIStackView()
         creditsContainer.spacing = 20
         creditsContainer.translatesAutoresizingMaskIntoConstraints = false
+        creditsContainer.isAccessibilityElement = true
         creditsContainer.accessibilityIdentifier = "ExploreDetailVC_CreditsContainer"
         return creditsContainer
     }()
@@ -130,6 +131,7 @@ final class ExploreDetailVC: UIViewController {
         let producerView = createCreditView(name: film.producer, role: "Producer")
         creditsContainer.addArrangedSubview(directorView)
         creditsContainer.addArrangedSubview(producerView)
+        creditsContainer.accessibilityLabel = "Credits. Directed by \(film.director). Produced by \(film.producer)."
         buttonsContainer.addArrangedSubview(addToUpNextButton)
         buttonsContainer.addArrangedSubview(markAsWatchedButton)
         buttonsContainer.addArrangedSubview(moreLikeThisButton)
