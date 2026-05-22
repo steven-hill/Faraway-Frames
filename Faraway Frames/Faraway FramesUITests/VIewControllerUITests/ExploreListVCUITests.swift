@@ -237,7 +237,7 @@ final class ExploreListVCUITests: XCTestCase {
         app.launchArguments = ["-UITesting", "-UITestingMockNetworkFailureWithFileManagerData"]
         app.launch()
         NavigationHelper.navigateToExploreTab(app: app)
-        let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
+        let header = app.otherElements["Network_Error_Reusable_View"]
         
         XCTAssertTrue(header.waitForExistence(timeout: 1))
     }
