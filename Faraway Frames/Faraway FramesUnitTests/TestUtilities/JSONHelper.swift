@@ -12,8 +12,7 @@ import Testing
 
 struct JSONHelper {
    static func loadAndDecodeFilmsFromJSON() throws -> [Film] {
-       guard let bundle = Bundle(identifier: "com.StevenHill.Faraway-FramesTests"),
-             let url = bundle.url(forResource: "ghibliFilms", withExtension: "json") else {
+       guard let url = Bundle.main.url(forResource: "ghibliFilms", withExtension: "json") else {
            Issue.record("ghibliFilms JSON file not found")
            return []
        }
