@@ -88,6 +88,7 @@ final class ExploreDetailVC: UIViewController {
         view.backgroundColor = .tertiarySystemBackground
         navigationItem.largeTitleDisplayMode = .never
         filmDetailViewModel.delegate = self
+        setupButtonsContainer()
         setupScrollView()
         addSubviews()
         setupConstraints()
@@ -140,6 +141,9 @@ final class ExploreDetailVC: UIViewController {
         creditsContainer.addArrangedSubview(directorView)
         creditsContainer.addArrangedSubview(producerView)
         creditsContainer.accessibilityLabel = "Credits. Directed by \(film.director). Produced by \(film.producer)."
+    }
+    
+    private func setupButtonsContainer() {
         buttonsContainer.addArrangedSubview(addToUpNextButton)
         buttonsContainer.addArrangedSubview(markAsWatchedButton)
         buttonsContainer.addArrangedSubview(moreLikeThisButton)
