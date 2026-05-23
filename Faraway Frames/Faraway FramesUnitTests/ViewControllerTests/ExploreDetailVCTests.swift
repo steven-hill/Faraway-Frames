@@ -148,7 +148,7 @@ struct ExploreDetailVCTests {
             return
         }
         
-        let expectedPrefix = "Original Title: "
+        let expectedPrefix = "Original title: "
         #expect(attributedLabel.string == "\(expectedPrefix)\(Film.sample[0].originalTitle)")
         
         var range = NSRange()
