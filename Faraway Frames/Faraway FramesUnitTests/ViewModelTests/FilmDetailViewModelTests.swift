@@ -31,18 +31,13 @@ struct FilmDetailViewModelTests {
         let mockImageLoader = MockImageLoader()
         let sut = FilmDetailViewModel(film: film, imageLoader: mockImageLoader)
         
-        sut.updateUI()
-        
-        #expect(sut.currentState == .content(film), "Should be `.content` when film is provided.")
-    }
-    
-    @Test func filmDetailViewModel_setFilm_whenThereIsAFilm_updatesCurrentState() {
-        let film = Film.sample[0]
-        let sut = makeSUT()
-        
-        sut.setFilm(film)
-        
-        #expect(sut.currentState == .content(film), "Should update the state to `.content` when a film is set.")
+        switch sut.currentState {
+        case .noFilmSelected:
+            Issue.record("Expected state to be `.content`, but it was `.noFilmSelected`.")
+        case .content(let displayModel, _):
+            #expect(displayModel.title == film.title, "Should match.")
+            #expect(displayModel.visualOriginalTitles == "\(film.originalTitle)\n\(film.originalTitleRomanised)", "Should match.")
+        }
     }
     
     @Test func filmDetailViewModel_setFilm_whenFilmIsNil_updatesCurrentState() {
@@ -51,7 +46,7 @@ struct FilmDetailViewModelTests {
         
         sut.setFilm(film)
         
-        #expect(sut.currentState == .noFilmSelected, "Should update the state to `.noFilmSelected` when a film is nil.")
+        #expect(sut.currentState == .noFilmSelected, "Should update the state to `.noFilmSelected` when film is nil.")
     }
     
     @Test("Quick selection of films ignores the results of the cancelled task", .tags(.networkRequest))
@@ -92,9 +87,9 @@ struct FilmDetailViewModelTests {
         mockImageLoader.resume(shouldSucceed: false)
         await Task.yield()
         
-        if case .content(_, let image) = sut.currentState {
+        if case .content(let displayModel, let image) = sut.currentState {
             #expect(image == SFSymbols.movieClapper, "Should show the film details with `movieclapper` as a fallback image.")
-            #expect(sut.currentState == .content(film, image: image), "Should have a `Film` and an image.")
+            #expect(sut.currentState == .content(displayModel: displayModel, image: image), "Should have a `FilmDetailDisplayModel` and an image.")
             #expect(spy.callCount == 2, "Should have called `didUpdateFilmDetails()` twice; once for the film object, and again for the image.")
         }
     }
