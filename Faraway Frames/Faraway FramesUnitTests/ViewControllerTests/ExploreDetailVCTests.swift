@@ -128,7 +128,8 @@ struct ExploreDetailVCTests {
         #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil.")
     }
     
-    @Test func exploreDetailVC_createContent_successfullyBindsAccessibilityPropertiesToLabel() {
+    @Test("Integration test to check that the label successfully receives the text from ViewModel.")
+    func exploreDetailVC_createContent_successfullyBindsAccessibilityPropertiesToLabel() {
         let sut = makeSUTWithFilm()
         
         sut.loadViewIfNeeded()
