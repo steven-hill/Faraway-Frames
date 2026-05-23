@@ -114,6 +114,7 @@ final class ExploreDetailVC: UIViewController {
         case .content(let displayModel, let image):
             config = nil
             createContent(displayModel: displayModel, image: image)
+            buttonsContainer.isHidden = false
         }
         self.contentUnavailableConfiguration = config
     }
