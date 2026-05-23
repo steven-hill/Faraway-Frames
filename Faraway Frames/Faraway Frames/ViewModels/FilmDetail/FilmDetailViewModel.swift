@@ -42,8 +42,10 @@ final class FilmDetailViewModel {
             currentState = .noFilmSelected
             return
         }
-        currentState = .content(film)
-        getMovieBanner(for: film)
+        
+        let displayModel = FilmDetailDisplayModel(film: film)
+        currentState = .content(displayModel: displayModel)
+        getMovieBanner(for: film, displayModel: displayModel)
     }
     
     func updateUI() {
@@ -55,21 +57,23 @@ final class FilmDetailViewModel {
         }
     }
     
-    func getMovieBanner(for film: Film) {
+    func getMovieBanner(for film: Film, displayModel: FilmDetailDisplayModel) {
         let fallbackImage = SFSymbols.movieClapper
         guard let url = URL(string: film.movieBanner) else {
-            currentState = .content(film, image: fallbackImage)
+            currentState = .content(displayModel: displayModel, image: fallbackImage)
             return
         }
         
-        imageLoadTask = Task { [weak self] in
+        imageLoadTask = Task { [weak self, displayModel] in
             guard let self, !Task.isCancelled else { return }
             let downloadedImage = await imageLoader.loadImage(from: url)
-            if !Task.isCancelled {
-                currentState = .content(film, image: downloadedImage ?? fallbackImage)
-            } else {
-                currentState = .content(film, image: fallbackImage)
-            }
+            //            if !Task.isCancelled {
+            //                currentState = .content(film, image: downloadedImage ?? fallbackImage)
+            //            } else {
+            //                currentState = .content(film, image: fallbackImage)
+            //            }
+            guard !Task.isCancelled else { return }
+            currentState = .content(displayModel: displayModel, image: downloadedImage ?? fallbackImage)
         }
     }
     
@@ -87,7 +91,7 @@ final class FilmDetailViewModel {
         let producer: String
         let creditsAccessibilityLabel: String
         
-        init(film: Film, scoreFormatter: (String) -> NSAttributedString) {
+        init(film: Film) {
             self.title = film.title
             self.visualOriginalTitles = "\(film.originalTitle)\n\(film.originalTitleRomanised)"
             self.synopsisDescription = film.description
@@ -97,7 +101,14 @@ final class FilmDetailViewModel {
             self.releaseYearAndDurationText = "\(film.releaseDate) • \(film.runningTime) mins"
             self.releaseYearAndDurationAccessibilityLabel = "Released in \(film.releaseDate), running time \(film.runningTime) minutes."
             self.creditsAccessibilityLabel = "Credits. Directed by \(film.director). Produced by \(film.producer)."
-            self.rottenTomatoesScoreText = scoreFormatter(film.rottenTomatoesScore)
+            
+            let fullScoreText = "Rotten Tomatoes \(film.rottenTomatoesScore)%"
+            let scoreAttributedString = NSMutableAttributedString(string: fullScoreText)
+            let rtRange = NSRange(location: 0, length: 16)
+            scoreAttributedString.addAttribute(.foregroundColor, value: UIColor.systemRed, range: rtRange)
+            let scoreRange = NSRange(location: 16, length: (fullScoreText as NSString).length - 16)
+            scoreAttributedString.addAttribute(.foregroundColor, value: UIColor.secondaryLabel, range: scoreRange)
+            self.rottenTomatoesScoreText = scoreAttributedString
             
             let prefix = "Original title: "
             let combinedString = NSMutableAttributedString(string: "\(prefix)\(film.originalTitle)")
@@ -110,5 +121,21 @@ final class FilmDetailViewModel {
             )
             self.spokenJapaneseTitle = combinedString
         }
+    }
+}
+
+extension FilmDetailViewModel.FilmDetailDisplayModel: Equatable {
+    static func == (lhs: FilmDetailViewModel.FilmDetailDisplayModel, rhs: FilmDetailViewModel.FilmDetailDisplayModel) -> Bool {
+        return lhs.title == rhs.title &&
+        lhs.visualOriginalTitles == rhs.visualOriginalTitles &&
+        lhs.releaseYearAndDurationText == rhs.releaseYearAndDurationText &&
+        lhs.releaseYearAndDurationAccessibilityLabel == rhs.releaseYearAndDurationAccessibilityLabel &&
+        lhs.synopsisTitle == rhs.synopsisTitle &&
+        lhs.synopsisDescription == rhs.synopsisDescription &&
+        lhs.director == rhs.director &&
+        lhs.producer == rhs.producer &&
+        lhs.creditsAccessibilityLabel == rhs.creditsAccessibilityLabel &&
+        lhs.spokenJapaneseTitle.string == rhs.spokenJapaneseTitle.string &&
+        lhs.rottenTomatoesScoreText.string == rhs.rottenTomatoesScoreText.string
     }
 }
