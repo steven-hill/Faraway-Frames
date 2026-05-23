@@ -72,4 +72,43 @@ final class FilmDetailViewModel {
             }
         }
     }
+    
+    // MARK: - Presentation data structure
+    struct FilmDetailDisplayModel {
+        let title: String
+        let visualOriginalTitles: String
+        let spokenJapaneseTitle: NSAttributedString
+        let releaseYearAndDurationText: String
+        let releaseYearAndDurationAccessibilityLabel: String
+        let synopsisTitle: String = NSLocalizedString("Synopsis", comment: "")
+        let synopsisDescription: String
+        let rottenTomatoesScoreText: NSAttributedString
+        let director: String
+        let producer: String
+        let creditsAccessibilityLabel: String
+        
+        init(film: Film, scoreFormatter: (String) -> NSAttributedString) {
+            self.title = film.title
+            self.visualOriginalTitles = "\(film.originalTitle)\n\(film.originalTitleRomanised)"
+            self.synopsisDescription = film.description
+            self.director = film.director
+            self.producer = film.producer
+            
+            self.releaseYearAndDurationText = "\(film.releaseDate) • \(film.runningTime) mins"
+            self.releaseYearAndDurationAccessibilityLabel = "Released in \(film.releaseDate), running time \(film.runningTime) minutes."
+            self.creditsAccessibilityLabel = "Credits. Directed by \(film.director). Produced by \(film.producer)."
+            self.rottenTomatoesScoreText = scoreFormatter(film.rottenTomatoesScore)
+            
+            let prefix = "Original title: "
+            let combinedString = NSMutableAttributedString(string: "\(prefix)\(film.originalTitle)")
+            let prefixLength = (prefix as NSString).length
+            let japaneseLength = (film.originalTitle as NSString).length
+            combinedString.addAttribute(
+                .accessibilitySpeechLanguage,
+                value: "ja",
+                range: NSRange(location: prefixLength, length: japaneseLength)
+            )
+            self.spokenJapaneseTitle = combinedString
+        }
+    }
 }
