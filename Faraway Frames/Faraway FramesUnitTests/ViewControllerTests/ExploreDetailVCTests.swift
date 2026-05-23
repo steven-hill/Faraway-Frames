@@ -155,7 +155,6 @@ struct ExploreDetailVCTests {
         
         #expect(sut.view.findView(withIdentifier: "ExploreDetailVC_ButtonsContainer")?.isHidden == true,
                 "Buttons container must be hidden when state is `.noFilmSelected`.")
-        
     }
     
     //MARK: - Helper Methods
