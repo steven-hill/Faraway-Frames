@@ -147,6 +147,7 @@ final class ExploreDetailVC: UIViewController {
         buttonsContainer.addArrangedSubview(addToUpNextButton)
         buttonsContainer.addArrangedSubview(markAsWatchedButton)
         buttonsContainer.addArrangedSubview(moreLikeThisButton)
+        buttonsContainer.isHidden = true
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
