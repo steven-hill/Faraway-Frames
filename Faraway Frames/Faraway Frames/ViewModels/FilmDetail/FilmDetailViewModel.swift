@@ -13,7 +13,7 @@ final class FilmDetailViewModel {
     // MARK: - State Definition
     enum FilmDetailState: Equatable {
         case noFilmSelected
-        case content(Film, image: UIImage? = nil)
+        case content(displayModel: FilmDetailDisplayModel, image: UIImage? = nil)
     }
     
     // MARK: - Properties
