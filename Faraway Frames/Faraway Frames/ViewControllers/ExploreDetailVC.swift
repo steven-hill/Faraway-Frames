@@ -110,9 +110,9 @@ final class ExploreDetailVC: UIViewController {
         switch filmDetailViewModel.currentState {
         case .noFilmSelected:
             config = createEmptyState()
-        case .content(let film, let image):
+        case .content(let displayModel, let image):
             config = nil
-            createContent(film: film, image: image)
+            createContent(film: displayModel, image: image)
         }
         self.contentUnavailableConfiguration = config
     }
