@@ -146,6 +146,18 @@ struct ExploreDetailVCTests {
         #expect(label.accessibilityAttributedLabel?.string == "\(expectedPrefix)\(Film.sample[0].originalTitle)")
     }
     
+    @Test func exploreDetailVC_whenFilmIsNil_buttonsContainerIsHidden() {
+        let sut = makeSUTWhenFilmIsNil()
+        
+        sut.loadViewIfNeeded()
+        sut.setNeedsUpdateContentUnavailableConfiguration()
+        sut.updateContentUnavailableConfiguration(using: sut.contentUnavailableConfigurationState)
+        
+        #expect(sut.view.findView(withIdentifier: "ExploreDetailVC_ButtonsContainer")?.isHidden == true,
+                "Buttons container must be hidden when state is `.noFilmSelected`.")
+        
+    }
+    
     //MARK: - Helper Methods
     private func makeSUTWhenFilmIsNil() -> ExploreDetailVC {
         let mockImageLoader = MockImageLoader()
