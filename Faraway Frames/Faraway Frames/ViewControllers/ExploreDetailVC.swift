@@ -112,41 +112,9 @@ final class ExploreDetailVC: UIViewController {
             config = createEmptyState()
         case .content(let displayModel, let image):
             config = nil
-            createContent(film: displayModel, image: image)
+            createContent(displayModel: displayModel, image: image)
         }
         self.contentUnavailableConfiguration = config
-    }
-    
-    private func createContent(film: Film, image: UIImage?) {
-        movieBanner.image = image
-        movieBanner.contentMode = (movieBanner.image == SFSymbols.movieClapper) ? .scaleAspectFit : .scaleAspectFill
-        titleLabel.text = film.title
-        originalTitlesLabel.text = "\(film.originalTitle)\n\(film.originalTitleRomanised)"
-        let prefix = "Original Title: "
-        let japaneseTitle = film.originalTitle
-        let combinedSpokenString = NSMutableAttributedString(string: "\(prefix)\(japaneseTitle)")
-        let prefixLength = (prefix as NSString).length
-        let japaneseLength = (japaneseTitle as NSString).length
-        let japaneseRange = NSRange(location: prefixLength, length: japaneseLength)
-        combinedSpokenString.addAttribute(.accessibilitySpeechLanguage, value: "ja", range: japaneseRange)
-        originalTitlesLabel.accessibilityAttributedLabel = combinedSpokenString
-        releaseDateAndRunningTimeLabel.text = "\(film.releaseDate) • \(film.runningTime) mins"
-        releaseDateAndRunningTimeLabel.accessibilityLabel = "Released in \(film.releaseDate), running time \(film.runningTime) minutes"
-        synopsisHeaderLabel.text = NSLocalizedString("Synopsis", comment: "")
-        synopsisLabel.text = film.description
-        rottenTomatoesScoreLabel.attributedText = setScoreText(for: film.rottenTomatoesScore)
-        creditsContainer.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        let directorView = createCreditView(name: film.director, role: "Director")
-        let producerView = createCreditView(name: film.producer, role: "Producer")
-        creditsContainer.addArrangedSubview(directorView)
-        creditsContainer.addArrangedSubview(producerView)
-        creditsContainer.accessibilityLabel = "Credits. Directed by \(film.director). Produced by \(film.producer)."
-    }
-    
-    private func setupButtonsContainer() {
-        buttonsContainer.addArrangedSubview(addToUpNextButton)
-        buttonsContainer.addArrangedSubview(markAsWatchedButton)
-        buttonsContainer.addArrangedSubview(moreLikeThisButton)
     }
     
     private func createEmptyState() -> UIContentUnavailableConfiguration {
@@ -155,6 +123,30 @@ final class ExploreDetailVC: UIViewController {
         config.text = "No Film Selected"
         config.secondaryText = "Select a film from the list for more details."
         return config
+    }
+    
+    private func createContent(displayModel: FilmDetailViewModel.FilmDetailDisplayModel, image: UIImage?) {
+        movieBanner.image = image
+        movieBanner.contentMode = (movieBanner.image == SFSymbols.movieClapper) ? .scaleAspectFit : .scaleAspectFill
+        titleLabel.text = displayModel.title
+        originalTitlesLabel.text = displayModel.visualOriginalTitles
+        originalTitlesLabel.accessibilityAttributedLabel = displayModel.spokenJapaneseTitle
+        releaseDateAndRunningTimeLabel.text = displayModel.releaseYearAndDurationText
+        releaseDateAndRunningTimeLabel.accessibilityLabel = displayModel.releaseYearAndDurationAccessibilityLabel
+        synopsisHeaderLabel.text = displayModel.synopsisTitle
+        synopsisLabel.text = displayModel.synopsisDescription
+        rottenTomatoesScoreLabel.attributedText = displayModel.rottenTomatoesScoreText
+        creditsContainer.configure(
+            withDirector: displayModel.director,
+            producer: displayModel.producer,
+            accessibilityLabelText: displayModel.creditsAccessibilityLabel
+        )
+    }
+    
+    private func setupButtonsContainer() {
+        buttonsContainer.addArrangedSubview(addToUpNextButton)
+        buttonsContainer.addArrangedSubview(markAsWatchedButton)
+        buttonsContainer.addArrangedSubview(moreLikeThisButton)
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -194,40 +186,6 @@ final class ExploreDetailVC: UIViewController {
         if movieBannerHeightConstraint == nil || contentViewLeadingConstraint == nil || contentViewTrailingConstraint == nil {
             updateLayoutFor(size: view.bounds.size)
         }
-    }
-    
-    // TODO: - Delete this
-    private func setScoreText(for string: String) -> NSMutableAttributedString {
-        let fullText = "Rotten Tomatoes \(string)%"
-        let attributedString = NSMutableAttributedString(string: fullText)
-        let rtRange = NSRange(location: 0, length: 16)
-        attributedString.addAttribute(.foregroundColor, value: UIColor.systemRed, range: rtRange)
-        let scoreRange = NSRange(location: 16, length: fullText.count - 16)
-        attributedString.addAttribute(.foregroundColor, value: UIColor.secondaryLabel, range: scoreRange)
-        return attributedString
-    }
-    
-    // TODO: - Delete this
-    private func createCreditView(name: String, role: String) -> UIStackView {
-        let nameLabel = UILabel()
-        nameLabel.text = name
-        nameLabel.font = .preferredFont(forTextStyle: .headline)
-        nameLabel.textColor = .label
-        nameLabel.numberOfLines = 0
-        nameLabel.adjustsFontForContentSizeCategory = true
-        
-        let roleLabel = UILabel()
-        roleLabel.text = role
-        roleLabel.font = .preferredFont(forTextStyle: .subheadline)
-        roleLabel.textColor = .secondaryLabel
-        roleLabel.numberOfLines = 0
-        roleLabel.adjustsFontForContentSizeCategory = true
-        
-        let stack = UIStackView(arrangedSubviews: [nameLabel, roleLabel])
-        stack.axis = .vertical
-        stack.spacing = 2
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        return stack
     }
     
     private func setupScrollView() {
