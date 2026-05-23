@@ -23,7 +23,7 @@ final class ExploreDetailVCUITests: XCTestCase {
         app = nil
     }
     
-    func test_exploreDetailVC_whenNoFilmIsSelected_displaysMessage() throws {
+    func test_exploreDetailVC_whenNoFilmIsSelected_displaysMessageAndHidesButtons() throws {
         guard CurrentDevice.isIPad else {
             throw XCTSkip("iPad-only test")
         }
@@ -32,6 +32,9 @@ final class ExploreDetailVCUITests: XCTestCase {
         
         XCTAssertTrue(app.staticTexts["No Film Selected"].isHittable, "Should show a message.")
         XCTAssertTrue(app.staticTexts["Select a film from the list for more details."].isHittable, "Should show a message.")
+        XCTAssertFalse(app.buttons["ExploreDetailVC_AddToUpNextButton"].exists, "Should be hidden.")
+        XCTAssertFalse(app.buttons["ExploreDetailVC_MarkAsWatchedButton"].exists, "Should be hidden.")
+        XCTAssertFalse(app.buttons["ExploreDetailVC_MoreLikeThisButton"].exists, "Should be hidden.")
     }
     
     func test_exploreDetailVC_hasAllUIElements() {

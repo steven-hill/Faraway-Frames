@@ -110,9 +110,11 @@ final class ExploreDetailVC: UIViewController {
         switch filmDetailViewModel.currentState {
         case .noFilmSelected:
             config = createEmptyState()
+            buttonsContainer.isHidden = true
         case .content(let displayModel, let image):
             config = nil
             createContent(displayModel: displayModel, image: image)
+            buttonsContainer.isHidden = false
         }
         self.contentUnavailableConfiguration = config
     }
@@ -147,6 +149,7 @@ final class ExploreDetailVC: UIViewController {
         buttonsContainer.addArrangedSubview(addToUpNextButton)
         buttonsContainer.addArrangedSubview(markAsWatchedButton)
         buttonsContainer.addArrangedSubview(moreLikeThisButton)
+        buttonsContainer.isHidden = true
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
