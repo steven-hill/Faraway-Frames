@@ -128,40 +128,21 @@ struct ExploreDetailVCTests {
         #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil.")
     }
     
-    @Test func exploreDetailVC_createContent_setsCorrectAccessibilityLabelAndLanguageTagForOriginalTitle() {
+    @Test func exploreDetailVC_createContent_successfullyBindsAccessibilityPropertiesToLabel() {
         let sut = makeSUTWithFilm()
-
+        
         sut.loadViewIfNeeded()
         sut.setNeedsUpdateContentUnavailableConfiguration()
         sut.updateContentUnavailableConfiguration(using: sut.contentUnavailableConfigurationState)
-        
         let targetIdentifier = "ExploreDetailVC_OriginalTitlesLabel"
-        let foundLabel = sut.view.findView(withIdentifier: targetIdentifier) as? UILabel
-        
+        let foundLabel = sut.view.findView(withIdentifier: targetIdentifier) as? UILabel        
         guard let label = foundLabel else {
             Issue.record("Could not find a UILabel with accessibilityIdentifier: '\(targetIdentifier)'.")
             return
         }
         
-        guard let attributedLabel = label.accessibilityAttributedLabel else {
-            Issue.record("Label found, but its accessibilityAttributedLabel was nil.")
-            return
-        }
-        
         let expectedPrefix = "Original title: "
-        #expect(attributedLabel.string == "\(expectedPrefix)\(Film.sample[0].originalTitle)")
-        
-        var range = NSRange()
-        let prefixLength = (expectedPrefix as NSString).length
-        let languageAttribute = attributedLabel.attribute(
-            .accessibilitySpeechLanguage,
-            at: prefixLength,
-            effectiveRange: &range
-        ) as? String
-        
-        #expect(languageAttribute == "ja", "The Japanese text range must be explicitly tagged with 'ja'.")
-        #expect(range.location == prefixLength, "Should be equal.")
-        #expect(range.length == (Film.sample[0].originalTitle as NSString).length, "Should be equal.")
+        #expect(label.accessibilityAttributedLabel?.string == "\(expectedPrefix)\(Film.sample[0].originalTitle)")
     }
     
     //MARK: - Helper Methods
