@@ -75,7 +75,8 @@ struct FilmDetailViewModelTests {
         #expect(spy.callCount == 3, "Should be called three times in total; once for filmA's initial content, twice for filmB's initial content and its movie banner.")
     }
 
-    @Test(.tags(.networkRequest)) func filmDetailViewModel_getMovieBanner_whenFailedToDownloadMovieBannerImage_returnsFallbackImage() async {
+    @Test(.tags(.networkRequest))
+    func filmDetailViewModel_getMovieBanner_whenFailedToDownloadMovieBannerImage_returnsFallbackImage() async {
         let film = Film.sample[0]
         let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
         let sut = FilmDetailViewModel(imageLoader: mockImageLoader)
@@ -114,6 +115,69 @@ struct FilmDetailViewModelTests {
         #expect(languageAttribute == "ja", "The Japanese text range must be explicitly tagged with 'ja'.")
         #expect(range.location == prefixLength, "Should be equal.")
         #expect(range.length == (film.originalTitle as NSString).length, "Should be equal.")
+    }
+    
+
+    @Test("Verifies direct property pass-through mapping from `Film`")
+    func filmDetailViewModel_displayModel_mapsBasicPropertiesDirectly() {
+        let displayModel = FilmDetailViewModel.FilmDetailDisplayModel(film: Film.sample[0])
+        
+        #expect(displayModel.title == "Castle in the Sky")
+        #expect(displayModel.producer == "Isao Takahata")
+    }
+    
+    @Test("Verifies localised default headers and composite newline title spacing configurations")
+    func filmDetailViewModel_displayModel_formatsCompositeTitlesAndStaticHeaders() {
+        let displayModel = FilmDetailViewModel.FilmDetailDisplayModel(film: Film.sample[0])
+        
+        #expect(displayModel.synopsisTitle == NSLocalizedString("Synopsis", comment: ""))
+        #expect(displayModel.visualOriginalTitles == "天空の城ラピュタ\nTenkū no shiro Rapyuta")
+    }
+    
+    @Test("Verifies bullet formatting and clean text assembly for release metadata and duration text labels")
+    func filmDetailViewModel_displayModel_formatsReleaseYearAndDurationLabels() {
+        let displayModel = FilmDetailViewModel.FilmDetailDisplayModel(film: Film.sample[0])
+        
+        #expect(displayModel.releaseYearAndDurationText == "1986 • 124 mins")
+        #expect(displayModel.releaseYearAndDurationAccessibilityLabel == "Released in 1986, running time 124 minutes.")
+    }
+    
+    @Test("Verifies speech accessibility labels for credits strings")
+    func filmDetailViewModel_displayModel_formatsCreditsAccessibilityLabel() {
+        let displayModel = FilmDetailViewModel.FilmDetailDisplayModel(film: Film.sample[0])
+        
+        #expect(displayModel.creditsAccessibilityLabel == "Credits. Directed by Hayao Miyazaki. Produced by Isao Takahata.")
+    }
+    
+    @Test("Verifies color coding ranges and string layout rules for the Rotten Tomatoes attributed score label")
+    func filmDetailViewModel_displayModel_formatsRottenTomatoesScoreTextAndColorRanges() {
+        let displayModel = FilmDetailViewModel.FilmDetailDisplayModel(film: Film.sample[0])
+        let scoreAttribute = displayModel.rottenTomatoesScoreText
+        
+        #expect(scoreAttribute.string == "Rotten Tomatoes 95%", "Should be equal.")
+        
+        var prefixRange = NSRange()
+        let prefixColor = scoreAttribute.attribute(
+            .foregroundColor,
+            at: 0,
+            effectiveRange: &prefixRange
+        ) as? UIColor
+        
+        #expect(prefixColor == UIColor.systemRed, "The 'Rotten Tomatoes' text prefix must be systemRed.")
+        #expect(prefixRange.location == 0, "Should be 0.")
+        #expect(prefixRange.length == 16, "Should be 16.")
+        
+        var scoreRange = NSRange()
+        let scoreColor = scoreAttribute.attribute(
+            .foregroundColor,
+            at: 16,
+            effectiveRange: &scoreRange
+        ) as? UIColor
+        
+        let expectedScoreLength = ("Rotten Tomatoes 95%" as NSString).length - 16
+        #expect(scoreColor == UIColor.secondaryLabel, "The numeric percentage value block must be secondaryLabel.")
+        #expect(scoreRange.location == 16, "Should be 16.")
+        #expect(scoreRange.length == expectedScoreLength, "Should be equal.")
     }
     
     //MARK: - Helper method
