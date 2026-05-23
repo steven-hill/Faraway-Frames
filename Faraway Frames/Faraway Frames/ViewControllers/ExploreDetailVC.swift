@@ -47,8 +47,8 @@ final class ExploreDetailVC: UIViewController {
     
     private let synopsisLabel = FFLabel(font: .preferredFont(forTextStyle: .body), textColor: .label, accessibilityIdentifer: "ExploreDetailVC_SynopsisLabel")
     
-    private let creditsContainer: UIStackView = {
-        let creditsContainer = UIStackView()
+    private let creditsContainer: FilmCreditsStackView = {
+        let creditsContainer = FilmCreditsStackView()
         creditsContainer.spacing = 20
         creditsContainer.translatesAutoresizingMaskIntoConstraints = false
         creditsContainer.isAccessibilityElement = true
@@ -192,6 +192,7 @@ final class ExploreDetailVC: UIViewController {
         }
     }
     
+    // TODO: - Delete this
     private func setScoreText(for string: String) -> NSMutableAttributedString {
         let fullText = "Rotten Tomatoes \(string)%"
         let attributedString = NSMutableAttributedString(string: fullText)
@@ -202,6 +203,7 @@ final class ExploreDetailVC: UIViewController {
         return attributedString
     }
     
+    // TODO: - Delete this
     private func createCreditView(name: String, role: String) -> UIStackView {
         let nameLabel = UILabel()
         nameLabel.text = name
