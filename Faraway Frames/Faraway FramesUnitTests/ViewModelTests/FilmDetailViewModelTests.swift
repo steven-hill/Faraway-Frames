@@ -94,6 +94,28 @@ struct FilmDetailViewModelTests {
         }
     }
     
+    @Test("Verifies that the display model formats the Japanese title and range correctly for VoiceOver")
+    func filmDetailViewModel_displayModel_setsCorrectAccessibilityPropertiesForOriginalTitle() {
+        let film = Film.sample[0]
+        
+        let displayModel = FilmDetailViewModel.FilmDetailDisplayModel(film: film)
+        let attributedLabel = displayModel.spokenJapaneseTitle
+        let expectedPrefix = "Original title: "
+        #expect(attributedLabel.string == "\(expectedPrefix)\(film.originalTitle)")
+        
+        var range = NSRange()
+        let prefixLength = (expectedPrefix as NSString).length
+        let languageAttribute = attributedLabel.attribute(
+            .accessibilitySpeechLanguage,
+            at: prefixLength,
+            effectiveRange: &range
+        ) as? String
+        
+        #expect(languageAttribute == "ja", "The Japanese text range must be explicitly tagged with 'ja'.")
+        #expect(range.location == prefixLength, "Should be equal.")
+        #expect(range.length == (film.originalTitle as NSString).length, "Should be equal.")
+    }
+    
     //MARK: - Helper method
     private func makeSUT() -> FilmDetailViewModel {
         let mockImageLoader = MockImageLoader()
