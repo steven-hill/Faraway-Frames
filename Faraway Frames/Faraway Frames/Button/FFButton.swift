@@ -43,6 +43,7 @@ final class FFButton: UIButton {
     private func set(title: String, systemImageName: String, accessibilityIdentifier: String, accessibilityHint: String) {
         configuration?.title = title
         configuration?.image = UIImage(systemName: systemImageName)
+        configuration?.imagePadding = 8
         self.accessibilityIdentifier = accessibilityIdentifier
         self.accessibilityHint = accessibilityHint
     }
