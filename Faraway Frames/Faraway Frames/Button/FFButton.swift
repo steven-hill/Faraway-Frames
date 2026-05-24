@@ -18,9 +18,9 @@ final class FFButton: UIButton {
         fatalError("init(coder:) has not been implemented")
     }
     
-    convenience init(title: String, accessibilityIdentifier: String, accessibilityHint: String) {
+    convenience init(title: String, image: UIImage, accessibilityIdentifier: String, accessibilityHint: String) {
         self.init(frame: .zero)
-        set(title: title, accessibilityIdentifier: accessibilityIdentifier, accessibilityHint: accessibilityHint)
+        set(title: title, image: image, accessibilityIdentifier: accessibilityIdentifier, accessibilityHint: accessibilityHint)
     }
     
     private func configure() {
@@ -40,8 +40,9 @@ final class FFButton: UIButton {
         heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
     }
     
-    private func set(title: String, accessibilityIdentifier: String, accessibilityHint: String) {
+    private func set(title: String, image: UIImage, accessibilityIdentifier: String, accessibilityHint: String) {
         configuration?.title = title
+        configuration?.image = image
         self.accessibilityIdentifier = accessibilityIdentifier
         self.accessibilityHint = accessibilityHint
     }
