@@ -56,11 +56,11 @@ final class ExploreDetailVC: UIViewController {
         return creditsContainer
     }()
     
-    private let addToUpNextButton = FFButton(title: "Add To Up Next", accessibilityIdentifier: "ExploreDetailVC_AddToUpNextButton", accessibilityHint: "Adds film to Up Next list")
+    private let addToUpNextButton = FFButton(title: "Add to Up Next", systemImageName: "plus", accessibilityIdentifier: "ExploreDetailVC_AddToUpNextButton", accessibilityHint: "Adds film to Up Next list")
 
-    private let markAsWatchedButton = FFButton(title: "Mark As Watched", accessibilityIdentifier: "ExploreDetailVC_MarkAsWatchedButton", accessibilityHint: "Adds film to Watched list")
+    private let markAsWatchedButton = FFButton(title: "Mark as Watched", systemImageName: "rectangle.badge.checkmark", accessibilityIdentifier: "ExploreDetailVC_MarkAsWatchedButton", accessibilityHint: "Adds film to Watched list")
 
-    private let moreLikeThisButton = FFButton(title: "More Like This", accessibilityIdentifier: "ExploreDetailVC_MoreLikeThisButton", accessibilityHint: "Discover more films you might like")
+    private let moreLikeThisButton = FFButton(title: "More Like This", systemImageName: "sparkles", accessibilityIdentifier: "ExploreDetailVC_MoreLikeThisButton", accessibilityHint: "Discover more films you might like")
     
     private let buttonsContainer: UIStackView = {
         let buttonsContainer = UIStackView()
