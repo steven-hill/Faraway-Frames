@@ -298,6 +298,13 @@ extension ExploreListVC: UISearchBarDelegate {
         searchBar.resignFirstResponder()
         resetFilmsToAllFilms()
     }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchText.isEmpty {
+            resetFilmsToAllFilms()
+            handleVoiceOverAnnouncement(with: "Search text cleared")
+        }
+    }
 }
 
 // MARK: - Search Results Updating
