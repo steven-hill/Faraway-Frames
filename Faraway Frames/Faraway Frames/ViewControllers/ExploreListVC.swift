@@ -154,10 +154,11 @@ final class ExploreListVC: UIViewController {
             config = nil
             collectionViewIsHidden = false
             searchBarIsEnabled = true
-            handleVoiceOverAnnouncement(for: viewModel.filteredFilms.count)
+            viewModel.filteredFilms.count > 0 ? handleVoiceOverAnnouncement(for: viewModel.filteredFilms.count) : handleVoiceOverAnnouncement(with: "Showing all films")
         case .emptySearchResults:
             config = createEmptySearchResultsConfig()
             searchBarIsEnabled = true
+            handleVoiceOverAnnouncement(with: "No results found")
         case .error(let error):
             config = createErrorConfig(error: error)
         case .retrying:
@@ -167,7 +168,6 @@ final class ExploreListVC: UIViewController {
         self.contentUnavailableConfiguration = config
         self.collectionView.isHidden = collectionViewIsHidden
         self.searchController.searchBar.isEnabled = searchBarIsEnabled
-        UIAccessibility.post(notification: .layoutChanged, argument: config?.text)
     }
     
     private func createLoadingConfig(with text: String) -> UIContentUnavailableConfiguration {
@@ -200,10 +200,19 @@ final class ExploreListVC: UIViewController {
         return config
     }
     
-    //MARK: - Accessibility Helper
+    //MARK: - Accessibility Helpers
     private func handleVoiceOverAnnouncement(for count: Int) {
         guard UIAccessibility.isVoiceOverRunning, count > 0 else { return }
         let message = String(format: NSLocalizedString("%d found", comment: "VoiceOver search results count"), count)
+        Task {
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            guard !Task.isCancelled else { return }
+            UIAccessibility.post(notification: .announcement, argument: message)
+        }
+    }
+    
+    private func handleVoiceOverAnnouncement(with message: String) {
+        guard UIAccessibility.isVoiceOverRunning, viewModel.filteredFilms.count == 0 else { return }
         Task {
             try? await Task.sleep(nanoseconds: 500_000_000)
             guard !Task.isCancelled else { return }
@@ -287,6 +296,13 @@ extension ExploreListVC: UISearchBarDelegate {
         searchBar.text = ""
         searchBar.resignFirstResponder()
         resetFilmsToAllFilms()
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchText.isEmpty {
+            resetFilmsToAllFilms()
+            handleVoiceOverAnnouncement(with: "Search text cleared")
+        }
     }
 }
 
