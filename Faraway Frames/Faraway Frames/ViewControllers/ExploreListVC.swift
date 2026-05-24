@@ -201,10 +201,19 @@ final class ExploreListVC: UIViewController {
         return config
     }
     
-    //MARK: - Accessibility Helper
+    //MARK: - Accessibility Helpers
     private func handleVoiceOverAnnouncement(for count: Int) {
-        guard UIAccessibility.isVoiceOverRunning else { return }
+        guard UIAccessibility.isVoiceOverRunning, count > 0 else { return }
         let message = String(format: NSLocalizedString("%d found", comment: "VoiceOver search results count"), count)
+        Task {
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            guard !Task.isCancelled else { return }
+            UIAccessibility.post(notification: .announcement, argument: message)
+        }
+    }
+    
+    private func handleVoiceOverAnnouncement(with message: String) {
+        guard UIAccessibility.isVoiceOverRunning, viewModel.filteredFilms.count == 0 else { return }
         Task {
             try? await Task.sleep(nanoseconds: 500_000_000)
             guard !Task.isCancelled else { return }
