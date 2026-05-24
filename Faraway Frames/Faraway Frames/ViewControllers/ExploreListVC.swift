@@ -158,6 +158,7 @@ final class ExploreListVC: UIViewController {
         case .emptySearchResults:
             config = createEmptySearchResultsConfig()
             searchBarIsEnabled = true
+            handleVoiceOverAnnouncement(for: viewModel.filteredFilms.count)
         case .error(let error):
             config = createErrorConfig(error: error)
         case .retrying:
@@ -202,7 +203,7 @@ final class ExploreListVC: UIViewController {
     
     //MARK: - Accessibility Helper
     private func handleVoiceOverAnnouncement(for count: Int) {
-        guard UIAccessibility.isVoiceOverRunning, count > 0 else { return }
+        guard UIAccessibility.isVoiceOverRunning else { return }
         let message = String(format: NSLocalizedString("%d found", comment: "VoiceOver search results count"), count)
         Task {
             try? await Task.sleep(nanoseconds: 500_000_000)
