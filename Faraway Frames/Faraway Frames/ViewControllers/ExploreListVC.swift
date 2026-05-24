@@ -158,7 +158,7 @@ final class ExploreListVC: UIViewController {
         case .emptySearchResults:
             config = createEmptySearchResultsConfig()
             searchBarIsEnabled = true
-            handleVoiceOverAnnouncement(for: viewModel.filteredFilms.count)
+            handleVoiceOverAnnouncement(with: "No results found")
         case .error(let error):
             config = createErrorConfig(error: error)
         case .retrying:
