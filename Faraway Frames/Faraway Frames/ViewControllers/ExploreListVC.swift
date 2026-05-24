@@ -154,7 +154,7 @@ final class ExploreListVC: UIViewController {
             config = nil
             collectionViewIsHidden = false
             searchBarIsEnabled = true
-            handleVoiceOverAnnouncement(for: viewModel.filteredFilms.count)
+            viewModel.filteredFilms.count > 0 ? handleVoiceOverAnnouncement(for: viewModel.filteredFilms.count) : handleVoiceOverAnnouncement(with: "Showing all films")
         case .emptySearchResults:
             config = createEmptySearchResultsConfig()
             searchBarIsEnabled = true
