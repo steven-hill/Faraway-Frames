@@ -168,7 +168,6 @@ final class ExploreListVC: UIViewController {
         self.contentUnavailableConfiguration = config
         self.collectionView.isHidden = collectionViewIsHidden
         self.searchController.searchBar.isEnabled = searchBarIsEnabled
-        UIAccessibility.post(notification: .layoutChanged, argument: config?.text)
     }
     
     private func createLoadingConfig(with text: String) -> UIContentUnavailableConfiguration {
