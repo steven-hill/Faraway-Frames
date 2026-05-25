@@ -336,4 +336,20 @@ struct FilmsListViewModelUnitTests {
         let mockImageLoader = MockImageLoader()
         return FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
     }
+    
+    // MARK: - Films List View Model Delegate
+    final class FilmsListViewModelDelegateSpy: FilmsListViewModelDelegate {
+        var didRequestVoiceOverAnnouncement = false
+        var capturedMessage: String?
+
+        func didRequestVoiceOverAnnouncement(with message: String) {
+            didRequestVoiceOverAnnouncement = true
+            capturedMessage = message
+        }
+
+        func didUpdateFilms(_ films: [Film]) {}
+        func didFailToLoadFilms() {}
+        func didRetry() {}
+        func didFailToMatchResults() {}
+    }
 }
