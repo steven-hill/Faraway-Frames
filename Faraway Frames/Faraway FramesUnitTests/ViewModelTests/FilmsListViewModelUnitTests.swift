@@ -323,7 +323,7 @@ struct FilmsListViewModelUnitTests {
         sut.filterFilms(by: "Cas")
         
         #expect(delegateSpy.didRequestVoiceOverAnnouncement, "Should be true.")
-        #expect(delegateSpy.capturedMessage == "1 found", "Should be equal.")
+        #expect(delegateSpy.capturedMessage == "2 found", "Should be equal.")
     }
     
     // MARK: - SUT Helper Methods

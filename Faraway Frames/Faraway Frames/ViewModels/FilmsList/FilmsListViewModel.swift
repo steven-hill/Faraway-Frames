@@ -89,7 +89,8 @@ final class FilmsListViewModel {
         } else {
             currentState = .content(isUsingArchivedData: filmsListService.isUsingFileManagerData)
             delegate?.didUpdateFilms(filteredFilms)
-            delegate?.didRequestVoiceOverAnnouncement(with message: String)
+            let message = String(format: NSLocalizedString("%d found", comment: ""), filteredFilms.count)
+            delegate?.didRequestVoiceOverAnnouncement(with: message)
         }
     }
     
