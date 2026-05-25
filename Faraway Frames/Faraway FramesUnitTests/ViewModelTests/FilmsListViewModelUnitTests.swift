@@ -316,12 +316,14 @@ struct FilmsListViewModelUnitTests {
     
     @Test func filmsListViewModel_whenVoiceOverIsOnAndThereAreSearchResults_voiceOverAnnouncesTheNumberOfResults() async {
         let sut = makeSUTForSuccessCase()
+        let delegateSpy = FilmsListViewModelDelegateSpy()
+        sut.delegate = delegateSpy
         await sut.getAllFilms()
 
         sut.filterFilms(by: "Cas")
         
-        #expect(delegateSpy.didRequestVoiceOverAnnouncement)
-        #expect(delegateSpy.capturedMessage, "1 found")
+        #expect(delegateSpy.didRequestVoiceOverAnnouncement, "Should be true.")
+        #expect(delegateSpy.capturedMessage == "1 found", "Should be equal.")
     }
     
     // MARK: - SUT Helper Methods
