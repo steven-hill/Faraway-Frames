@@ -108,6 +108,7 @@ final class FilmsListViewModel {
         filteredFilms.removeAll()
         currentState = .content(isUsingArchivedData: filmsListService.isUsingFileManagerData)
         delegate?.didUpdateFilms(films)
+        delegate?.didRequestVoiceOverAnnouncement(with: "Showing all films")
     }
     
     func retryLoadingAllFilms() {
