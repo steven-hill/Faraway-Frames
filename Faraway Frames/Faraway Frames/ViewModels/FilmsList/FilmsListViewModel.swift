@@ -86,6 +86,7 @@ final class FilmsListViewModel {
         if filteredFilms.isEmpty {
             currentState = .emptySearchResults
             delegate?.didFailToMatchResults()
+            delegate?.didRequestVoiceOverAnnouncement(with: "No search results. Try another query.")
         } else {
             currentState = .content(isUsingArchivedData: filmsListService.isUsingFileManagerData)
             delegate?.didUpdateFilms(filteredFilms)
