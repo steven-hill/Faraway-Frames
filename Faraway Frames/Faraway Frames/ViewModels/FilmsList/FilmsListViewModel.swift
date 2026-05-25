@@ -28,6 +28,7 @@ final class FilmsListViewModel {
     private(set) var currentState: FilmsListState = .idle
     private(set) var filteredFilms: [Film] = []
     private(set) var refreshTask: Task<Void, Never>?
+    private let allFilmsMessage = "Showing all films"
     
     // MARK: - Initialisation
     init(filmsListService: FilmsListService, imageLoader: ImageLoader) {
@@ -44,7 +45,7 @@ final class FilmsListViewModel {
             try Task.checkCancellation()
             currentState = .content(isUsingArchivedData: filmsListService.isUsingFileManagerData)
             delegate?.didUpdateFilms(films)
-            delegate?.didRequestVoiceOverAnnouncement(with: "Showing all films")
+            delegate?.didRequestVoiceOverAnnouncement(with: allFilmsMessage)
         } catch {
             guard !Task.isCancelled else { return }
             let networkError = handleFailure(error)
@@ -87,7 +88,7 @@ final class FilmsListViewModel {
         if filteredFilms.isEmpty {
             currentState = .emptySearchResults
             delegate?.didFailToMatchResults()
-            delegate?.didRequestVoiceOverAnnouncement(with: "No search results. Try another query.")
+            delegate?.didRequestVoiceOverAnnouncement(with: "No results found. Try another query.")
         } else {
             currentState = .content(isUsingArchivedData: filmsListService.isUsingFileManagerData)
             delegate?.didUpdateFilms(filteredFilms)
@@ -109,7 +110,7 @@ final class FilmsListViewModel {
         filteredFilms.removeAll()
         currentState = .content(isUsingArchivedData: filmsListService.isUsingFileManagerData)
         delegate?.didUpdateFilms(films)
-        delegate?.didRequestVoiceOverAnnouncement(with: "Showing all films")
+        delegate?.didRequestVoiceOverAnnouncement(with: allFilmsMessage)
     }
     
     func retryLoadingAllFilms() {
