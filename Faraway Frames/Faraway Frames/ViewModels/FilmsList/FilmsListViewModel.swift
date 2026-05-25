@@ -44,6 +44,7 @@ final class FilmsListViewModel {
             try Task.checkCancellation()
             currentState = .content(isUsingArchivedData: filmsListService.isUsingFileManagerData)
             delegate?.didUpdateFilms(films)
+            delegate?.didRequestVoiceOverAnnouncement(with: "Showing all films")
         } catch {
             guard !Task.isCancelled else { return }
             let networkError = handleFailure(error)
