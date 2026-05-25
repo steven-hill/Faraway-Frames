@@ -293,7 +293,7 @@ struct FilmsListViewModelUnitTests {
         sut.filterFilms(by: "No results")
         
         #expect(delegateSpy.didRequestVoiceOverAnnouncement, "Should be true.")
-        #expect(delegateSpy.capturedMessage == "No results found", "Should be equal.")
+        #expect(delegateSpy.capturedMessage == "No search results. Try another query.", "Should be equal.")
     }
     
     @Test(.tags(.networkRequest))
