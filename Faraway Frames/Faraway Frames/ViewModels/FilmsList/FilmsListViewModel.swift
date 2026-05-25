@@ -89,6 +89,7 @@ final class FilmsListViewModel {
         } else {
             currentState = .content(isUsingArchivedData: filmsListService.isUsingFileManagerData)
             delegate?.didUpdateFilms(filteredFilms)
+            delegate?.didRequestVoiceOverAnnouncement(with message: String)
         }
     }
     
