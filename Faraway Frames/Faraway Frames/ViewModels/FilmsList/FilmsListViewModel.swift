@@ -44,6 +44,7 @@ final class FilmsListViewModel {
             try Task.checkCancellation()
             currentState = .content(isUsingArchivedData: filmsListService.isUsingFileManagerData)
             delegate?.didUpdateFilms(films)
+            delegate?.didRequestVoiceOverAnnouncement(with: "Showing all films")
         } catch {
             guard !Task.isCancelled else { return }
             let networkError = handleFailure(error)
@@ -86,9 +87,12 @@ final class FilmsListViewModel {
         if filteredFilms.isEmpty {
             currentState = .emptySearchResults
             delegate?.didFailToMatchResults()
+            delegate?.didRequestVoiceOverAnnouncement(with: "No search results. Try another query.")
         } else {
             currentState = .content(isUsingArchivedData: filmsListService.isUsingFileManagerData)
             delegate?.didUpdateFilms(filteredFilms)
+            let message = String(format: NSLocalizedString("%d found", comment: ""), filteredFilms.count)
+            delegate?.didRequestVoiceOverAnnouncement(with: message)
         }
     }
     
@@ -105,6 +109,7 @@ final class FilmsListViewModel {
         filteredFilms.removeAll()
         currentState = .content(isUsingArchivedData: filmsListService.isUsingFileManagerData)
         delegate?.didUpdateFilms(films)
+        delegate?.didRequestVoiceOverAnnouncement(with: "Showing all films")
     }
     
     func retryLoadingAllFilms() {

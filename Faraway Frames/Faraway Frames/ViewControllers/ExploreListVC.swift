@@ -22,6 +22,7 @@ final class ExploreListVC: UIViewController {
     var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
     let searchController = UISearchController(searchResultsController: nil)
     private(set) var loadTask: Task<Void, Never>?
+    private var voiceOverAnnouncementTask: Task<Void, Never>?
     
     // MARK: - Initialisation
     init(viewModel: FilmsListViewModel) {
@@ -154,11 +155,9 @@ final class ExploreListVC: UIViewController {
             config = nil
             collectionViewIsHidden = false
             searchBarIsEnabled = true
-            viewModel.filteredFilms.count > 0 ? handleVoiceOverAnnouncement(for: viewModel.filteredFilms.count) : handleVoiceOverAnnouncement(with: "Showing all films")
         case .emptySearchResults:
             config = createEmptySearchResultsConfig()
             searchBarIsEnabled = true
-            handleVoiceOverAnnouncement(with: "No results found")
         case .error(let error):
             config = createErrorConfig(error: error)
         case .retrying:
@@ -198,26 +197,6 @@ final class ExploreListVC: UIViewController {
             self.setNeedsUpdateContentUnavailableConfiguration()
         }
         return config
-    }
-    
-    //MARK: - Accessibility Helpers
-    private func handleVoiceOverAnnouncement(for count: Int) {
-        guard UIAccessibility.isVoiceOverRunning, count > 0 else { return }
-        let message = String(format: NSLocalizedString("%d found", comment: "VoiceOver search results count"), count)
-        Task {
-            try? await Task.sleep(nanoseconds: 500_000_000)
-            guard !Task.isCancelled else { return }
-            UIAccessibility.post(notification: .announcement, argument: message)
-        }
-    }
-    
-    private func handleVoiceOverAnnouncement(with message: String) {
-        guard UIAccessibility.isVoiceOverRunning, viewModel.filteredFilms.count == 0 else { return }
-        Task {
-            try? await Task.sleep(nanoseconds: 500_000_000)
-            guard !Task.isCancelled else { return }
-            UIAccessibility.post(notification: .announcement, argument: message)
-        }
     }
     
     //MARK: - Search Controller
@@ -288,6 +267,16 @@ extension ExploreListVC: FilmsListViewModelDelegate {
     func didFailToMatchResults() {
         setNeedsUpdateContentUnavailableConfiguration()
     }
+    
+    func didRequestVoiceOverAnnouncement(with message: String) {
+        guard UIAccessibility.isVoiceOverRunning else { return }
+        voiceOverAnnouncementTask?.cancel()
+        voiceOverAnnouncementTask = Task {
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            guard !Task.isCancelled else { return }
+            UIAccessibility.post(notification: .announcement, argument: message)
+        }
+    }
 }
 
 // MARK: - Search Bar Delegate
@@ -301,7 +290,6 @@ extension ExploreListVC: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchText.isEmpty {
             resetFilmsToAllFilms()
-            handleVoiceOverAnnouncement(with: "Search text cleared")
         }
     }
 }

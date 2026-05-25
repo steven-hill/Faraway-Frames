@@ -29,6 +29,17 @@ struct FilmsListViewModelUnitTests {
     }
     
     @Test(.tags(.networkRequest))
+    func filmsListViewModel_whenNetworkRequestIsSuccessful_requestVoiceOverAnnouncement() async {
+        let sut = makeSUTForSuccessCase()
+        let delegateSpy = FilmsListViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        await sut.getAllFilms()
+        
+        #expect(delegateSpy.didRequestVoiceOverAnnouncement == true, "Should be made the request.")
+        #expect(delegateSpy.capturedMessage == "Showing all films", "Should be equal.")
+    }
+    
+    @Test(.tags(.networkRequest))
     func filmsListViewModel_getAllFilms_makesANetworkRequest() async {
         let mockService = MockFilmsListService()
         let mockImageLoader = MockImageLoader()
@@ -270,6 +281,32 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.filteredFilms.isEmpty, "Should be empty.")
     }
     
+    @Test(.tags(.search))
+    func filmsListViewModel_filterFilms_whenThereAreSearchResults_requestsVoiceOverAnnouncement() async {
+        let sut = makeSUTForSuccessCase()
+        let delegateSpy = FilmsListViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        await sut.getAllFilms()
+
+        sut.filterFilms(by: "Cas")
+        
+        #expect(delegateSpy.didRequestVoiceOverAnnouncement, "Should be true.")
+        #expect(delegateSpy.capturedMessage == "2 found", "Should be equal.")
+    }
+    
+    @Test(.tags(.search))
+    func filmsListViewModel_filterFilms_whenSearchResultsAreEmpty_requestsVoiceOverAnnouncement() async {
+        let sut = makeSUTForSuccessCase()
+        let delegateSpy = FilmsListViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        await sut.getAllFilms()
+
+        sut.filterFilms(by: "No results")
+        
+        #expect(delegateSpy.didRequestVoiceOverAnnouncement, "Should be true.")
+        #expect(delegateSpy.capturedMessage == "No search results. Try another query.", "Should be equal.")
+    }
+    
     @Test(.tags(.networkRequest))
     func filmsListViewModel_resetAllFilms_resetsFilmsArrayToAllFilms() async {
         let sut = makeSUTForSuccessCase()
@@ -290,6 +327,21 @@ struct FilmsListViewModelUnitTests {
         sut.resetAllFilms()
         
         #expect(sut.filteredFilms.isEmpty, "Should be empty.")
+    }
+    
+    @Test func filmsListViewModel_resetAllFilms_requestsVoiceOverAnnouncement() async {
+        let sut = makeSUTForSuccessCase()
+        let delegateSpy = FilmsListViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        await sut.getAllFilms()
+        sut.filterFilms(by: "Cas")
+        delegateSpy.didRequestVoiceOverAnnouncement = false
+        delegateSpy.capturedMessage = nil
+        
+        sut.resetAllFilms()
+        
+        #expect(delegateSpy.didRequestVoiceOverAnnouncement == true, "Should be true.")
+        #expect(delegateSpy.capturedMessage == "Showing all films", "Should be equal.")
     }
     
     @Test(.tags(.networkRequest))
@@ -325,5 +377,21 @@ struct FilmsListViewModelUnitTests {
         let mockService = MockFilmsListServiceHelper.setupMockServiceForFailureCase(error: error)
         let mockImageLoader = MockImageLoader()
         return FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
+    }
+    
+    // MARK: - Films List View Model Delegate
+    final class FilmsListViewModelDelegateSpy: FilmsListViewModelDelegate {
+        var didRequestVoiceOverAnnouncement = false
+        var capturedMessage: String?
+
+        func didRequestVoiceOverAnnouncement(with message: String) {
+            didRequestVoiceOverAnnouncement = true
+            capturedMessage = message
+        }
+
+        func didUpdateFilms(_ films: [Film]) {}
+        func didFailToLoadFilms() {}
+        func didRetry() {}
+        func didFailToMatchResults() {}
     }
 }
