@@ -22,6 +22,7 @@ final class ExploreListVC: UIViewController {
     var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
     let searchController = UISearchController(searchResultsController: nil)
     private(set) var loadTask: Task<Void, Never>?
+    private var voiceOverAnnouncementTask: Task<Void, Never>?
     
     // MARK: - Initialisation
     init(viewModel: FilmsListViewModel) {
@@ -290,7 +291,13 @@ extension ExploreListVC: FilmsListViewModelDelegate {
     }
     
     func didRequestVoiceOverAnnouncement(with message: String) {
-        
+        guard UIAccessibility.isVoiceOverRunning else { return }
+        voiceOverAnnouncementTask?.cancel()
+        voiceOverAnnouncementTask = Task {
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            guard !Task.isCancelled else { return }
+            UIAccessibility.post(notification: .announcement, argument: message)
+        }
     }
 }
 
