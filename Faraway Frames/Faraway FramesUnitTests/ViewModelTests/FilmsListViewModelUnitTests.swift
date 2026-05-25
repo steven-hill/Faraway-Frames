@@ -314,6 +314,16 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.filteredFilms.isEmpty, "Should be empty.")
     }
     
+    @Test func filmsListViewModel_whenVoiceOverIsOnAndThereAreSearchResults_voiceOverAnnouncesTheNumberOfResults() async {
+        let sut = makeSUTForSuccessCase()
+        await sut.getAllFilms()
+
+        sut.filterFilms(by: "Cas")
+        
+        #expect(delegateSpy.didRequestVoiceOverAnnouncement)
+        #expect(delegateSpy.capturedMessage, "1 found")
+    }
+    
     // MARK: - SUT Helper Methods
     private func makeSUTForSuccessCase() -> FilmsListViewModel {
         let mockService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
