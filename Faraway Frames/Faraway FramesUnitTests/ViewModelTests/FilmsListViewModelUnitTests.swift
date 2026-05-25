@@ -29,6 +29,17 @@ struct FilmsListViewModelUnitTests {
     }
     
     @Test(.tags(.networkRequest))
+    func filmsListViewModel_whenNetworkRequestIsSuccessful_requestVoiceOverAnnouncement() async {
+        let sut = makeSUTForSuccessCase()
+        let delegateSpy = FilmsListViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        await sut.getAllFilms()
+        
+        #expect(delegateSpy.didRequestVoiceOverAnnouncement == true, "Should be made the request.")
+        #expect(delegateSpy.capturedMessage == "Showing all films", "Should be equal.")
+    }
+    
+    @Test(.tags(.networkRequest))
     func filmsListViewModel_getAllFilms_makesANetworkRequest() async {
         let mockService = MockFilmsListService()
         let mockImageLoader = MockImageLoader()
