@@ -288,6 +288,10 @@ extension ExploreListVC: FilmsListViewModelDelegate {
     func didFailToMatchResults() {
         setNeedsUpdateContentUnavailableConfiguration()
     }
+    
+    func didRequestVoiceOverAnnouncement(with message: String) {
+        
+    }
 }
 
 // MARK: - Search Bar Delegate
