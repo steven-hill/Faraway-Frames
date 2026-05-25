@@ -318,6 +318,21 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.filteredFilms.isEmpty, "Should be empty.")
     }
     
+    @Test func filmsListViewModel_resetAllFilms_requestsVoiceOverAnnouncement() async {
+        let sut = makeSUTForSuccessCase()
+        let delegateSpy = FilmsListViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        await sut.getAllFilms()
+        sut.filterFilms(by: "Cas")
+        delegateSpy.didRequestVoiceOverAnnouncement = false
+        delegateSpy.capturedMessage = nil
+        
+        sut.resetAllFilms()
+        
+        #expect(delegateSpy.didRequestVoiceOverAnnouncement == true, "Should be true.")
+        #expect(delegateSpy.capturedMessage == "Showing all films", "Should be equal.")
+    }
+    
     @Test(.tags(.networkRequest))
     func filmsListViewModel_retryLoadingAllFilms_makesAnotherNetworkCall() async {
         let mockService = MockFilmsListService()
