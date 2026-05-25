@@ -270,6 +270,32 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.filteredFilms.isEmpty, "Should be empty.")
     }
     
+    @Test(.tags(.search))
+    func filmsListViewModel_filterFilms_whenThereAreSearchResults_requestsVoiceOverAnnouncement() async {
+        let sut = makeSUTForSuccessCase()
+        let delegateSpy = FilmsListViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        await sut.getAllFilms()
+
+        sut.filterFilms(by: "Cas")
+        
+        #expect(delegateSpy.didRequestVoiceOverAnnouncement, "Should be true.")
+        #expect(delegateSpy.capturedMessage == "2 found", "Should be equal.")
+    }
+    
+    @Test(.tags(.search))
+    func filmsListViewModel_filterFilms_whenSearchResultsAreEmpty_requestsVoiceOverAnnouncement() async {
+        let sut = makeSUTForSuccessCase()
+        let delegateSpy = FilmsListViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        await sut.getAllFilms()
+
+        sut.filterFilms(by: "No results")
+        
+        #expect(delegateSpy.didRequestVoiceOverAnnouncement, "Should be true.")
+        #expect(delegateSpy.capturedMessage == "No results found", "Should be equal.")
+    }
+    
     @Test(.tags(.networkRequest))
     func filmsListViewModel_resetAllFilms_resetsFilmsArrayToAllFilms() async {
         let sut = makeSUTForSuccessCase()
@@ -312,18 +338,6 @@ struct FilmsListViewModelUnitTests {
         sut.retryLoadingAllFilms()
         
         #expect(sut.filteredFilms.isEmpty, "Should be empty.")
-    }
-    
-    @Test func filmsListViewModel_whenVoiceOverIsOnAndThereAreSearchResults_voiceOverAnnouncesTheNumberOfResults() async {
-        let sut = makeSUTForSuccessCase()
-        let delegateSpy = FilmsListViewModelDelegateSpy()
-        sut.delegate = delegateSpy
-        await sut.getAllFilms()
-
-        sut.filterFilms(by: "Cas")
-        
-        #expect(delegateSpy.didRequestVoiceOverAnnouncement, "Should be true.")
-        #expect(delegateSpy.capturedMessage == "2 found", "Should be equal.")
     }
     
     // MARK: - SUT Helper Methods
