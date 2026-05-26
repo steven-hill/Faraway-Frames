@@ -6,6 +6,7 @@
 //
 
 import Testing
+import CoreData
 
 struct FakeCoreDataStackTests {
 
@@ -14,7 +15,7 @@ struct FakeCoreDataStackTests {
         let container = FakeCoreDataStack.makeInMemoryContainer()
         #expect(container.persistentStoreDescriptions.isEmpty == false, "Should not be empty.")
         
-        let firstStoreURL = container.persistentStoreCoordinator.persistentStores.first?.url?.absoluteURL
+        let firstStoreURL = container.persistentStoreDescriptions.first?.url?.absoluteString
         #expect(firstStoreURL == "file:///dev/null", "Should point to in-memory null directory.")
     }
 }
