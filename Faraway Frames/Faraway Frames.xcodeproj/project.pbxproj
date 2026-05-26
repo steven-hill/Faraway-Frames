@@ -35,6 +35,7 @@
 			membershipExceptions = (
 				Constants/CurrentDevice.swift,
 				Constants/SFSymbols.swift,
+				Persistence/FarawayFramesCDModel.xcdatamodeld,
 				Resources/ghibliFilms.json,
 			);
 			target = 5B565FAC2F0C5F9E00A49426 /* Faraway FramesTests */;

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="24901" systemVersion="25F71" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
+    <entity name="FilmMO" representedClassName=".FilmMO" syncable="YES" codeGenerationType="class">
+        <attribute name="director" attributeType="String"/>
+        <attribute name="filmDescription" attributeType="String"/>
+        <attribute name="id" attributeType="String"/>
+        <attribute name="image" attributeType="String"/>
+        <attribute name="isUpNext" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="isWatched" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="movieBanner" attributeType="String"/>
+        <attribute name="originalTitle" attributeType="String"/>
+        <attribute name="originalTitleRomanised" attributeType="String"/>
+        <attribute name="producer" attributeType="String"/>
+        <attribute name="releaseDate" attributeType="String"/>
+        <attribute name="rottenTomatoesScore" attributeType="String"/>
+        <attribute name="runningTime" attributeType="String"/>
+        <attribute name="title" attributeType="String"/>
+        <attribute name="url" attributeType="String"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="id"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+    </entity>
+</model>
