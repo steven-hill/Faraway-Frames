@@ -11,7 +11,7 @@ final class FakeCoreDataStack {
     static func makeInMemoryContainer() -> NSPersistentContainer {
         let container = NSPersistentContainer(name: "FarawayFramesCDModel")
         container.persistentStoreDescriptions[0].url = URL(fileURLWithPath: "/dev/null")
-        container.loadPersistentStores { (description, error) in
+        container.loadPersistentStores { _, error in
             if let error = error {
                 fatalError("Failed to load in-memory store: \(error)")
             }
