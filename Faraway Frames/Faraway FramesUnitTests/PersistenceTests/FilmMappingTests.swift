@@ -16,7 +16,12 @@ struct FilmMappingTests {
         let container = FakeCoreDataStack.makeInMemoryContainer()
         let context = container.viewContext
         
-        let managedObject = FilmMO(context: context)
+        guard let entity = NSEntityDescription.entity(forEntityName: "FilmMO", in: context) else {
+            let storeEntities = context.persistentStoreCoordinator?.managedObjectModel.entities.map { $0.name ?? "" } ?? []
+            fatalError("Could not find entity `FilmMO` in model. Available entities: \(storeEntities)")
+        }
+        
+        let managedObject = FilmMO(entity: entity, insertInto: context)
         managedObject.id = Film.sample[0].id
         managedObject.title = Film.sample[0].title
         managedObject.originalTitle = Film.sample[0].originalTitle
@@ -33,7 +38,22 @@ struct FilmMappingTests {
         managedObject.isUpNext = true
         managedObject.isWatched = false
         
-        let domainWrapper: FilmWithStatus = managedObject.toDomain()
+        let domainWrapper = Film.from(
+            id: managedObject.id,
+            title: managedObject.title,
+            originalTitle: managedObject.originalTitle,
+            originalTitleRomanised: managedObject.originalTitleRomanised,
+            image: managedObject.image,
+            movieBanner: managedObject.movieBanner,
+            filmDescription: managedObject.filmDescription,
+            director: managedObject.director,
+            producer: managedObject.producer,
+            releaseDate: managedObject.releaseDate,
+            runningTime: managedObject.runningTime,
+            rottenTomatoesScore: managedObject.rottenTomatoesScore,
+            url: managedObject.url,
+            isUpNext: managedObject.isUpNext,
+            isWatched: managedObject.isWatched)
         
         #expect(domainWrapper.id == Film.sample[0].id)
         #expect(domainWrapper.film.title == Film.sample[0].title)
