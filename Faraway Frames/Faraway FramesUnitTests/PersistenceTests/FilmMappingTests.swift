@@ -62,4 +62,3 @@ struct FilmMappingTests {
         #expect(domainWrapper.isWatched == false)
     }
 }
-

@@ -51,4 +51,3 @@ extension Film {
         return FilmWithStatus(film: domainFilm, isUpNext: isUpNext, isWatched: isWatched)
     }
 }
-
