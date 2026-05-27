@@ -12,20 +12,15 @@ import CoreData
 @MainActor
 struct HomeUpNextViewModelUnitTests {
     
-//    @Test func homeUpNextViewModel_currentStateOnInit_isNoFilms() {
-//        let sut = HomeUpNextViewModel()
-//        
-//        #expect(sut.currentState == .noFilms, "Should be `.noFilms` on init.")
-//    }
-//
-//    @Test func homeUpNextViewModel_onInit_hasNoFilms() {
-//        let sut = HomeUpNextViewModel()
-//        
-//        #expect(sut.upNextFilms.isEmpty, "Should be empty.")
-//    }
+    @Test func homeUpNextViewModel_currentStateOnInit_isNoFilms() {
+        let container = FakeCoreDataStack.makeInMemoryContainer()
+        let sut = HomeUpNextViewModel(persistentContainer: container)
+        
+        #expect(sut.currentState == .noFilms, "Should be `.noFilms` on init.")
+    }
     
-    @Test("Verify `HomeUpNextViewModel` fetches and filters only Up Next records")
-    func homeUpNextViewModel_fetchesAndFiltersCorrectly() throws {
+    @Test("Verify `HomeUpNextViewModel` fetches only Up Next records")
+    func homeUpNextViewModel_fetchesCorrectly() throws {
         let container = FakeCoreDataStack.makeInMemoryContainer()
         let context = container.viewContext
         let entity = NSEntityDescription.entity(forEntityName: "FilmMO", in: context)!
@@ -33,14 +28,19 @@ struct HomeUpNextViewModelUnitTests {
         let upNextFilm = FilmMO(entity: entity, insertInto: context)
         upNextFilm.id = Film.sample[0].id
         upNextFilm.title = Film.sample[0].title
+        upNextFilm.originalTitle = Film.sample[0].originalTitle
+        upNextFilm.originalTitleRomanised = Film.sample[0].originalTitleRomanised
+        upNextFilm.image = Film.sample[0].image
+        upNextFilm.movieBanner = Film.sample[0].movieBanner
+        upNextFilm.filmDescription = Film.sample[0].description
+        upNextFilm.director = Film.sample[0].director
+        upNextFilm.producer = Film.sample[0].producer
+        upNextFilm.releaseDate = Film.sample[0].releaseDate
+        upNextFilm.runningTime = Film.sample[0].runningTime
+        upNextFilm.rottenTomatoesScore = Film.sample[0].rottenTomatoesScore
+        upNextFilm.url = Film.sample[0].url
         upNextFilm.isUpNext = true
         upNextFilm.isWatched = false
-        
-        let watchedFilm = FilmMO(entity: entity, insertInto: context)
-        watchedFilm.id = Film.sample[1].id
-        watchedFilm.title = Film.sample[1].title
-        watchedFilm.isUpNext = false
-        watchedFilm.isWatched = true
         
         try context.save()
         

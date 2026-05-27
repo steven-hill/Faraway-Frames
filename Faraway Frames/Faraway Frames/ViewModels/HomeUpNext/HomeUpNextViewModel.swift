@@ -17,7 +17,6 @@ final class HomeUpNextViewModel: NSObject, NSFetchedResultsControllerDelegate {
     
     // MARK: - Properties
     private(set) var currentState: HomeUpNextState = .noFilms
-    //private(set) var upNextFilms: [Film] = []
     weak var delegate: HomeUpNextViewModelDelegate?
     private let fetchedResultsController: NSFetchedResultsController<FilmMO>
     
@@ -47,13 +46,15 @@ final class HomeUpNextViewModel: NSObject, NSFetchedResultsControllerDelegate {
     
     func startFetching() {
         do {
-            try self.fetchedResultsController.performFetch()
+            try fetchedResultsController.performFetch()
+            delegate?.upNextFilmsDidChange(upNextFilms)
         } catch {
+            delegate?.upNextFilmsDidChange([])
             print(error.localizedDescription)
         }
     }
     
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        self.delegate?.upNextFilmsDidChange(upNextFilms)
+        delegate?.upNextFilmsDidChange(upNextFilms)
     }
 }

@@ -59,6 +59,8 @@ final class HomeVC: UIViewController {
 
 // MARK: - Up Next View Model Delegate
 extension HomeVC: HomeUpNextViewModelDelegate {
+    func upNextFilmsDidChange(_ films: [FilmWithStatus]) {
+    }
 }
 
 // MARK: - Watched View Model Delegate
@@ -66,9 +68,9 @@ extension HomeVC: HomeWatchedViewModelDelegate {
 }
 
 // MARK: - Preview
-#Preview("HomeVC") {
-    let upNextViewModel = HomeUpNextViewModel()
-    let watchedViewModel = HomeWatchedViewModel()
-    let vc = HomeVC(upNextViewModel: upNextViewModel, watchedViewModel: watchedViewModel)
-    return vc
-}
+//#Preview("HomeVC") {
+//    let upNextViewModel = HomeUpNextViewModel()
+//    let watchedViewModel = HomeWatchedViewModel()
+//    let vc = HomeVC(upNextViewModel: upNextViewModel, watchedViewModel: watchedViewModel)
+//    vc
+//}
