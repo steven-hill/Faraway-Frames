@@ -7,6 +7,7 @@
 
 import Testing
 @testable import Faraway_Frames
+import CoreData
 
 @MainActor
 struct HomeUpNextViewModelUnitTests {
@@ -21,5 +22,37 @@ struct HomeUpNextViewModelUnitTests {
         let sut = HomeUpNextViewModel()
         
         #expect(sut.upNextFilms.isEmpty, "Should be empty.")
+    }
+    
+    @Test("Verify `HomeUpNextViewModel` fetches and filters only Up Next records")
+    func homeUpNextViewModel_fetchesAndFiltersCorrectly() throws {
+        let container = FakeCoreDataStack.makeInMemoryContainer()
+        let context = container.viewContext
+        let entity = NSEntityDescription.entity(forEntityName: "FilmMO", in: context)!
+        
+        let upNextFilm = FilmMO(entity: entity, insertInto: context)
+        upNextFilm.id = Film.sample[0].id
+        upNextFilm.title = Film.sample[0].title
+        upNextFilm.isUpNext = true
+        upNextFilm.isWatched = false
+        
+        let watchedFilm = FilmMO(entity: entity, insertInto: context)
+        watchedFilm.id = Film.sample[1].id
+        watchedFilm.title = Film.sample[1].title
+        watchedFilm.isUpNext = false
+        watchedFilm.isWatched = true
+        
+        try context.save()
+        
+        let sut = HomeUpNextViewModel(persistentContainer: container)
+        let delegateSpy = HomeUpNextViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        
+        sut.startFetching()
+        
+        #expect(delegateSpy.callCount == 1, "Should make the call once.")
+        #expect(delegateSpy.updatedFilms.count == 1, "Should be one.")
+        #expect(delegateSpy.updatedFilms.first.id == Film.sample[0].id, "Shoulld be equal.")
+        #expect(delegateSpy.updatedFilms.first.film.title == Film.sample[0].title, "Should be equal.")
     }
 }
