@@ -6,8 +6,9 @@
 //
 
 import Foundation
+import CoreData
 
-final class MockDependencies: FilmsListServicing, ImageLoading {
+final class MockDependencies: FilmsListServicing, ImageLoading, PersistentContainerProtocol {
     private let shouldSucceed: Bool = ProcessInfo.processInfo.isUITestingMockNetworkSuccess
     private let isUsingFileManagerData: Bool = ProcessInfo.processInfo.isUITestingMockNetworkFailureWithFileManagerData
     
@@ -17,5 +18,16 @@ final class MockDependencies: FilmsListServicing, ImageLoading {
     
     func makeImageLoader() -> ImageLoader {
         return MockImageLoaderForUITests()
+    }
+    
+    func makePersistentContainer() -> NSPersistentContainer {
+        let container = NSPersistentContainer(name: "FarawayFramesCDModel")
+        container.persistentStoreDescriptions[0].url = URL(fileURLWithPath: "/dev/null")
+        container.loadPersistentStores { _, error in
+            if let error = error {
+                fatalError("Failed to load in-memory store: \(error)")
+            }
+        }
+        return container
     }
 }

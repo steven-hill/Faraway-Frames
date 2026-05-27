@@ -6,9 +6,20 @@
 //
 
 import Foundation
+import CoreData
 
-final class AppDependencyContainer: FilmsListServicing, ImageLoading {
+final class AppDependencyContainer: FilmsListServicing, ImageLoading, PersistentContainerProtocol {
     private let cacheManager = CacheManager()
+    
+    func makePersistentContainer() -> NSPersistentContainer {
+        let persistentContainer = NSPersistentContainer(name: "FarawayFramesCDModel")
+        persistentContainer.loadPersistentStores { _, error in
+            if let error = error as NSError? {
+                fatalError("Core Data failed to load: \(error)")
+            }
+        }
+        return persistentContainer
+    }
     
     func makeFilmsListService() -> FilmsListService {
         return FilmsListAPIClient()

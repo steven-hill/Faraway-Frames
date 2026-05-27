@@ -21,7 +21,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
     
     private func setNetworkDependencies(with window: UIWindow) {
-        typealias Dependencies = FilmsListServicing & ImageLoading
+        typealias Dependencies = FilmsListServicing & ImageLoading & PersistentContainerProtocol
         let dependencies: Dependencies
         
         if ProcessInfo.processInfo.isUITesting {

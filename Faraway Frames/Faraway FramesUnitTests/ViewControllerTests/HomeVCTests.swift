@@ -28,10 +28,10 @@ struct HomeVCTests {
         #expect(sut.upNextViewModel.delegate != nil, "View model's delegate should be set.")
         #expect(sut.watchedViewModel.delegate != nil, "View model's delegate should be set.")
     }
-    
+        
     // MARK: - SUT Helper Method
     private func makeSUT() -> HomeVC {
-        let upNextViewModel = HomeUpNextViewModel()
+        let upNextViewModel = HomeUpNextViewModel(persistentContainer: FakeCoreDataStack.makeInMemoryContainer())
         let watchedViewModel = HomeWatchedViewModel()
         return HomeVC(upNextViewModel: upNextViewModel, watchedViewModel: watchedViewModel)
     }

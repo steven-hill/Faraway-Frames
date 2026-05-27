@@ -6,16 +6,21 @@
 //
 
 import UIKit
+import CoreData
 
 final class HomeCoordinator: Coordinator {
-    let homeVC: UIViewController
-    var navigationController = UINavigationController()
+    var navigationController: UINavigationController
+    private let persistentContainer: NSPersistentContainer
     
-    init(homeVC: UIViewController = HomeVC(upNextViewModel: HomeUpNextViewModel(), watchedViewModel:    HomeWatchedViewModel())) {
-        self.homeVC = homeVC
+    init(navigationController: UINavigationController, persistentContainer: NSPersistentContainer) {
+        self.navigationController = navigationController
+        self.persistentContainer = persistentContainer
     }
     
     func start() {
-        navigationController = UINavigationController(rootViewController: homeVC)
+        let upNextViewModel = HomeUpNextViewModel(persistentContainer: persistentContainer)
+        let watchedViewModel = HomeWatchedViewModel()
+        let homeVC = HomeVC(upNextViewModel: upNextViewModel, watchedViewModel: watchedViewModel)
+        navigationController.setViewControllers([homeVC], animated: false)
     }
 }

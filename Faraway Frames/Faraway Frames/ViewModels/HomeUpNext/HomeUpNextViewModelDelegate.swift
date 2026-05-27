@@ -8,4 +8,5 @@
 import Foundation
 
 protocol HomeUpNextViewModelDelegate: AnyObject {
+    func upNextFilmsDidChange(_ films:[FilmWithStatus])
 }
