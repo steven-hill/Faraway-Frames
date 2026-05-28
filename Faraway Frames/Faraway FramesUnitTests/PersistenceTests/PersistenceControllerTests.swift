@@ -11,7 +11,8 @@ import CoreData
 
 struct PersistenceControllerTests {
     
-    @Test func persistenceController_whenLoadingPersistentStoresFails_throwsCorrectError() throws {
+    @Test("Verify error thrown when loading persistent stores fails")
+    func persistenceController_whenLoadingPersistentStoresFails_throwsCorrectError() throws {
         let mockError = NSError(domain: "TestDomain", code: 42, userInfo: nil)
         
         let thrownError = #expect(throws: PersistenceError.self) {
