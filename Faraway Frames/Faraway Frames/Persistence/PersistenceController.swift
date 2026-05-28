@@ -9,8 +9,16 @@ import Foundation
 import CoreData
 
 final class PersistenceController {
+    // MARK: - Persistence Error
+    enum PersistenceError: Error {
+        case none
+    }
+    
+    // MARK: - Properties
+    private(set) var persistenceError: PersistenceError = .none
+    
     // MARK: - Core Data stack
-    let container: NSPersistentContainer
+    private let container: NSPersistentContainer
     
     // MARK: - Initialisation
     init(inMemory: Bool = false) {

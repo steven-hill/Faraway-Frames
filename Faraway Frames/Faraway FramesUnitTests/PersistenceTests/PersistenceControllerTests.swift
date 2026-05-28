@@ -11,6 +11,6 @@ struct PersistenceControllerTests {
 
     @Test func persistenceController_canInit() {
         let sut = PersistenceController(inMemory: true)
-        #expect(sut.container != nil)
+        #expect(sut.persistenceError == .none)
     }
 }
