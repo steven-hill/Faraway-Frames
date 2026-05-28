@@ -10,7 +10,7 @@ import Testing
 struct PersistenceControllerTests {
 
     @Test func persistenceController_canInit() {
-        let sut = PersistenceController()
-        #expect(sut.persistentContainer != nil)
+        let sut = PersistenceController(inMemory: true)
+        #expect(sut.container != nil)
     }
 }
