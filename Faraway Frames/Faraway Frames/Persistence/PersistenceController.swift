@@ -9,29 +9,29 @@ import Foundation
 import CoreData
 
 final class PersistenceController {
-    // MARK: - Persistence Error
-    enum PersistenceError: Error {
-        case none
-    }
-    
-    // MARK: - Properties
-    private(set) var persistenceError: PersistenceError = .none
-    
     // MARK: - Core Data stack
     private let container: NSPersistentContainer
     
     // MARK: - Initialisation
-    init(inMemory: Bool = false, containerName: String = "FarawayFramesCDModel") throws {
-        container = NSPersistentContainer(name: containerName)
+    init(inMemory: Bool = false,
+         storeLoader: ((NSPersistentContainer, @escaping (NSPersistentStoreDescription, Error?) -> Void) -> Void) = { $0.loadPersistentStores(completionHandler: $1) }
+    ) throws {
+        container = NSPersistentContainer(name: "FarawayFramesCDModel")
+        
         if inMemory {
             let description = NSPersistentStoreDescription()
             description.url = URL(fileURLWithPath: "/dev/null")
             container.persistentStoreDescriptions = [description]
         }
-        container.loadPersistentStores(completionHandler: { (_, error) in
-            if let error = error as NSError? {
-                fatalError("Unresolved error \(error), \(error.userInfo)")
+        
+        var storesLoadingError: Error?
+        storeLoader(container) { _, error in
+            if let error = error {
+                storesLoadingError = error
             }
-        })
+        }
+        if let error = storesLoadingError {
+            throw PersistenceError.loadingStoresFailed(error: error)
+        }
     }
 }

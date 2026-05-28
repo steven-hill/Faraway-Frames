@@ -7,16 +7,19 @@
 
 import Testing
 import CoreData
+@testable import Faraway_Frames
 
 struct PersistenceControllerTests {
-
-    @Test func persistenceController_canInit() throws {
-        let sut = try PersistenceController(inMemory: true)
-        #expect(sut.persistenceError == .none)
-    }
     
-    @Test func persistenceController_whenLoadingPersistentStoresFails_throwsError() throws {
-        let sut = try PersistenceController(inMemory: true, containerName: "ErrorContainer")
-        #expect(sut.persistenceError == .loadingStoreFailed)
+    @Test func persistenceController_whenLoadingPersistentStoresFails_throwsCorrectError() throws {
+        let mockError = NSError(domain: "TestDomain", code: 42, userInfo: nil)
+        
+        let thrownError = #expect(throws: PersistenceError.self) {
+            try PersistenceController(inMemory: true) { container, completion in
+                completion(NSPersistentStoreDescription(), mockError)
+            }
+        }
+        
+        #expect(thrownError == .loadingStoresFailed(error: mockError))
     }
 }
