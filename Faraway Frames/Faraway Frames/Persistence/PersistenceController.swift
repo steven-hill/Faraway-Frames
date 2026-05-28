@@ -21,8 +21,8 @@ final class PersistenceController {
     private let container: NSPersistentContainer
     
     // MARK: - Initialisation
-    init(inMemory: Bool = false) {
-        container = NSPersistentContainer(name: "FarawayFramesCDModel")
+    init(inMemory: Bool = false, containerName: String = "FarawayFramesCDModel") throws {
+        container = NSPersistentContainer(name: containerName)
         if inMemory {
             let description = NSPersistentStoreDescription()
             description.url = URL(fileURLWithPath: "/dev/null")
