@@ -16,7 +16,7 @@ final class PersistenceController {
     init(inMemory: Bool = false,
          storeLoader: ((NSPersistentContainer, @escaping (NSPersistentStoreDescription, Error?) -> Void) -> Void) = { $0.loadPersistentStores(completionHandler: $1) }
     ) throws {
-        container = NSPersistentContainer(name: "FarawayFramesCDModel")
+        container = NSPersistentContainer(name: Persistence.persistentContainerName)
         
         if inMemory {
             let description = NSPersistentStoreDescription()

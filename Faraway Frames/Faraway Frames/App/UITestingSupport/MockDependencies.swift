@@ -21,7 +21,7 @@ final class MockDependencies: FilmsListServicing, ImageLoading, PersistentContai
     }
     
     func makePersistentContainer() -> NSPersistentContainer {
-        let container = NSPersistentContainer(name: "FarawayFramesCDModel")
+        let container = NSPersistentContainer(name: Persistence.persistentContainerName)
         container.persistentStoreDescriptions[0].url = URL(fileURLWithPath: "/dev/null")
         container.loadPersistentStores { _, error in
             if let error = error {

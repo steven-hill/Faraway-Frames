@@ -12,7 +12,7 @@ final class AppDependencyContainer: FilmsListServicing, ImageLoading, Persistent
     private let cacheManager = CacheManager()
     
     func makePersistentContainer() -> NSPersistentContainer {
-        let persistentContainer = NSPersistentContainer(name: "FarawayFramesCDModel")
+        let persistentContainer = NSPersistentContainer(name: Persistence.persistentContainerName)
         persistentContainer.loadPersistentStores { _, error in
             if let error = error as NSError? {
                 fatalError("Core Data failed to load: \(error)")
