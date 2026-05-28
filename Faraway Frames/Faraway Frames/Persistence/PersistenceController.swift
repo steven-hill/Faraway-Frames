@@ -12,6 +12,10 @@ final class PersistenceController {
     // MARK: - Core Data stack
     private let container: NSPersistentContainer
     
+    var viewContext: NSManagedObjectContext {
+        container.viewContext
+    }
+    
     // MARK: - Initialisation
     init(inMemory: Bool = false,
          storeLoader: ((NSPersistentContainer, @escaping (NSPersistentStoreDescription, Error?) -> Void) -> Void) = { $0.loadPersistentStores(completionHandler: $1) }
@@ -32,6 +36,18 @@ final class PersistenceController {
         }
         if let error = storesLoadingError {
             throw PersistenceError.loadingStoresFailed(error: error)
+        }
+    }
+    
+    // MARK: - Core Data Saving support
+    func saveContext() throws {
+        if viewContext.hasChanges {
+            do {
+                try viewContext.save()
+            } catch {
+                let nserror = error as NSError
+                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+            }
         }
     }
 }
