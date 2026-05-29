@@ -27,12 +27,7 @@ struct PersistenceControllerTests {
     
     @Test("Verify Core Data stack can save and fetch films")
     func persistenceController_canFetchSavedFilms() throws {
-        let sut = try PersistenceController(inMemory: true)
-        let context = sut.viewContext
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
+        let (sut, context, entity) = try makeSUTViewContextAndEntity()
         
         let sampleFilm = Film.sample[0]
         let upNextFilm = FilmMO(entity: entity, insertInto: context)
@@ -70,12 +65,7 @@ struct PersistenceControllerTests {
     
     @Test("Verify saving failed due to single nil attribute throws error")
     func persistenceController_whenSavingFailedDueToSingleNilAttribute_throwsError() throws {
-        let sut = try PersistenceController.init(inMemory: true)
-        let context = sut.viewContext
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
+        let (sut, context, entity) = try makeSUTViewContextAndEntity()
         
         let sampleFilm = Film.sample[0]
         let upNextFilm = FilmMO(entity: entity, insertInto: context)
@@ -108,12 +98,7 @@ struct PersistenceControllerTests {
     
     @Test("Verify saving failed due to multiple nil attributes throws error")
     func persistenceController_whenSavingFailedDueToMultipleNilAttributes_throwsError() throws {
-        let sut = try PersistenceController.init(inMemory: true)
-        let context = sut.viewContext
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
+        let (sut, context, entity) = try makeSUTViewContextAndEntity()
         
         let sampleFilm = Film.sample[0]
         let upNextFilm = FilmMO(entity: entity, insertInto: context)
@@ -134,12 +119,7 @@ struct PersistenceControllerTests {
     
     @Test("Verify deleting a film removes it from the store.")
     func persistenceController_whenDeletingFilm_removesItFromTheStore() throws {
-        let sut = try PersistenceController.init(inMemory: true)
-        let context = sut.viewContext
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
+        let (sut, context, entity) = try makeSUTViewContextAndEntity()
         
         let sampleFilm = Film.sample[0]
         let upNextFilm = FilmMO(entity: entity, insertInto: context)
@@ -166,5 +146,15 @@ struct PersistenceControllerTests {
         let results = try context.fetch(fetchRequest)
         #expect(results.count == 0, "The film should have been deleted.")
     }
+    
+    // MARK: - Helper method
+    private func makeSUTViewContextAndEntity() throws -> (sut: PersistenceController, viewContext: NSManagedObjectContext, entity: NSEntityDescription) {
+        let sut = try PersistenceController.init(inMemory: true)
+        let viewContext = sut.viewContext
+        let entity = try #require(
+            NSEntityDescription.entity(forEntityName: "FilmMO", in: viewContext),
+            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
+        return (sut, viewContext, entity)
+    }
 }
-
