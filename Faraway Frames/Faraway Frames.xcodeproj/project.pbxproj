@@ -34,8 +34,11 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Constants/CurrentDevice.swift,
+				Constants/Persistence.swift,
 				Constants/SFSymbols.swift,
 				Persistence/FarawayFramesCDModel.xcdatamodeld,
+				Persistence/PersistenceController.swift,
+				Persistence/PersistenceError.swift,
 				Resources/ghibliFilms.json,
 			);
 			target = 5B565FAC2F0C5F9E00A49426 /* Faraway FramesTests */;
