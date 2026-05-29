@@ -12,7 +12,7 @@ import CoreData
 @MainActor
 struct PersistenceControllerTests {
     
-    @Test("Verify error thrown when loading persistent stores fails")
+    @Test("Verify error is thrown when loading persistent stores fails")
     func persistenceController_whenLoadingPersistentStoresFails_throwsCorrectError() throws {
         let mockError = NSError(domain: "TestDomain", code: 42, userInfo: nil)
         
@@ -28,23 +28,8 @@ struct PersistenceControllerTests {
     @Test("Verify Core Data stack can save and fetch films")
     func persistenceController_canFetchSavedFilms() throws {
         let (sut, context, entity) = try makeSUTViewContextAndEntity()
-        
         let sampleFilm = Film.sample[0]
-        let upNextFilm = FilmMO(entity: entity, insertInto: context)
-        upNextFilm.id = sampleFilm.id
-        upNextFilm.title = sampleFilm.title
-        upNextFilm.originalTitle = sampleFilm.originalTitle
-        upNextFilm.originalTitleRomanised = sampleFilm.originalTitleRomanised
-        upNextFilm.image = sampleFilm.image
-        upNextFilm.movieBanner = sampleFilm.movieBanner
-        upNextFilm.filmDescription = sampleFilm.description
-        upNextFilm.director = sampleFilm.director
-        upNextFilm.producer = sampleFilm.producer
-        upNextFilm.releaseDate = sampleFilm.releaseDate
-        upNextFilm.runningTime = sampleFilm.runningTime
-        upNextFilm.rottenTomatoesScore = sampleFilm.rottenTomatoesScore
-        upNextFilm.url = sampleFilm.url
-        upNextFilm.isUpNext = true
+        _ = makeUpNextFilm(from: sampleFilm, entity: entity, context: context)
         
         #expect(throws: Never.self) { try sut.saveContext() }
 
@@ -52,36 +37,21 @@ struct PersistenceControllerTests {
         fetchRequest.predicate = NSPredicate(format: "isUpNext == YES")
         
         let rawResults = try context.fetch(fetchRequest)
-        #expect(rawResults.count == 1, "The database should contain exactly one saved record.")
+        #expect(rawResults.count == 1, "Should contain exactly one film.")
         
         if let retrievedFilm = rawResults.first as? NSManagedObject {
             let titleValue = retrievedFilm.value(forKey: "title") as? String
-            #expect(titleValue == sampleFilm.title, "The retrieved title should match the sample data.")
+            #expect(titleValue == sampleFilm.title, "The fetched title should match the sample film's title.")
             
             let isUpNextValue = retrievedFilm.value(forKey: "isUpNext") as? Bool
-            #expect(isUpNextValue == true, "The tracking state flag should remain intact.")
+            #expect(isUpNextValue == true, "Should be true.")
         }
     }
     
     @Test("Verify saving failed due to single nil attribute throws error")
     func persistenceController_whenSavingFailedDueToSingleNilAttribute_throwsError() throws {
         let (sut, context, entity) = try makeSUTViewContextAndEntity()
-        
-        let sampleFilm = Film.sample[0]
-        let upNextFilm = FilmMO(entity: entity, insertInto: context)
-        upNextFilm.title = sampleFilm.title
-        upNextFilm.originalTitle = sampleFilm.originalTitle
-        upNextFilm.originalTitleRomanised = sampleFilm.originalTitleRomanised
-        upNextFilm.image = sampleFilm.image
-        upNextFilm.movieBanner = sampleFilm.movieBanner
-        upNextFilm.filmDescription = sampleFilm.description
-        upNextFilm.director = sampleFilm.director
-        upNextFilm.producer = sampleFilm.producer
-        upNextFilm.releaseDate = sampleFilm.releaseDate
-        upNextFilm.runningTime = sampleFilm.runningTime
-        upNextFilm.rottenTomatoesScore = sampleFilm.rottenTomatoesScore
-        upNextFilm.url = sampleFilm.url
-        upNextFilm.isUpNext = true
+        _ = makeUpNextFilmWithMissingIDAttribute(from: Film.sample[0], entity: entity, context: context)
         
         let thrownError = #expect(throws: PersistenceError.self) {
             try sut.saveContext()
@@ -90,7 +60,7 @@ struct PersistenceControllerTests {
         case .savingFailed(let error):
             let nsError = error as NSError
             #expect(nsError.domain == NSCocoaErrorDomain, "Should be Cocoa Error.")
-            #expect(nsError.code == NSValidationMissingMandatoryPropertyError, "Should be NSValidationMissingMandatoryPropertyError because one attribute (.id) is nil.")
+            #expect(nsError.code == NSValidationMissingMandatoryPropertyError, "Should be `NSValidationMissingMandatoryPropertyError` because one attribute (.id) is nil.")
         default:
             Issue.record("Expected a .savingFailed error, but got \(thrownError)")
         }
@@ -100,9 +70,7 @@ struct PersistenceControllerTests {
     func persistenceController_whenSavingFailedDueToMultipleNilAttributes_throwsError() throws {
         let (sut, context, entity) = try makeSUTViewContextAndEntity()
         
-        let sampleFilm = Film.sample[0]
-        let upNextFilm = FilmMO(entity: entity, insertInto: context)
-        upNextFilm.id = sampleFilm.id
+        _ = makeUpNextFilmWithMultipleMissingAttributes(from: Film.sample[0], entity: entity, context: context)
         
         let thrownError = #expect(throws: PersistenceError.self) {
             try sut.saveContext()
@@ -111,32 +79,17 @@ struct PersistenceControllerTests {
         case .savingFailed(let error):
             let nsError = error as NSError
             #expect(nsError.domain == NSCocoaErrorDomain, "Should be Cocoa Error.")
-            #expect(nsError.code == NSValidationMultipleErrorsError, "Should be NSValidationMultipleErrorsError because multiple attributes are nil.")
+            #expect(nsError.code == NSValidationMultipleErrorsError, "Should be `NSValidationMultipleErrorsError` because multiple attributes are nil.")
         default:
             Issue.record("Expected a .savingFailed error, but got \(thrownError)")
         }
     }
     
     @Test("Verify deleting a film removes it from the store.")
-    func persistenceController_whenDeletingFilm_removesItFromTheStore() throws {
+    func persistenceController_delete_removesFilmFromStore() throws {
         let (sut, context, entity) = try makeSUTViewContextAndEntity()
         
-        let sampleFilm = Film.sample[0]
-        let upNextFilm = FilmMO(entity: entity, insertInto: context)
-        upNextFilm.id = sampleFilm.id
-        upNextFilm.title = sampleFilm.title
-        upNextFilm.originalTitle = sampleFilm.originalTitle
-        upNextFilm.originalTitleRomanised = sampleFilm.originalTitleRomanised
-        upNextFilm.image = sampleFilm.image
-        upNextFilm.movieBanner = sampleFilm.movieBanner
-        upNextFilm.filmDescription = sampleFilm.description
-        upNextFilm.director = sampleFilm.director
-        upNextFilm.producer = sampleFilm.producer
-        upNextFilm.releaseDate = sampleFilm.releaseDate
-        upNextFilm.runningTime = sampleFilm.runningTime
-        upNextFilm.rottenTomatoesScore = sampleFilm.rottenTomatoesScore
-        upNextFilm.url = sampleFilm.url
-        upNextFilm.isUpNext = true
+        let upNextFilm = makeUpNextFilm(from: Film.sample[0], entity: entity, context: context)
         try sut.saveContext()
         
         try sut.delete(film: upNextFilm)
@@ -144,10 +97,10 @@ struct PersistenceControllerTests {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "FilmMO")
         fetchRequest.predicate = NSPredicate(format: "isUpNext == YES")
         let results = try context.fetch(fetchRequest)
-        #expect(results.count == 0, "The film should have been deleted.")
+        #expect(results.isEmpty, "The film should have been deleted.")
     }
     
-    // MARK: - Helper method
+    // MARK: - Helper methods
     private func makeSUTViewContextAndEntity() throws -> (sut: PersistenceController, viewContext: NSManagedObjectContext, entity: NSEntityDescription) {
         let sut = try PersistenceController.init(inMemory: true)
         let viewContext = sut.viewContext
@@ -156,5 +109,48 @@ struct PersistenceControllerTests {
             "The Core Data model schema must contain an entity definition named 'FilmMO'."
         )
         return (sut, viewContext, entity)
+    }
+    
+    private func makeUpNextFilm(from film: Film, entity: NSEntityDescription, context: NSManagedObjectContext) -> FilmMO {
+        let upNextFilm = FilmMO(entity: entity, insertInto: context)
+        upNextFilm.id = film.id
+        upNextFilm.title = film.title
+        upNextFilm.originalTitle = film.originalTitle
+        upNextFilm.originalTitleRomanised = film.originalTitleRomanised
+        upNextFilm.image = film.image
+        upNextFilm.movieBanner = film.movieBanner
+        upNextFilm.filmDescription = film.description
+        upNextFilm.director = film.director
+        upNextFilm.producer = film.producer
+        upNextFilm.releaseDate = film.releaseDate
+        upNextFilm.runningTime = film.runningTime
+        upNextFilm.rottenTomatoesScore = film.rottenTomatoesScore
+        upNextFilm.url = film.url
+        upNextFilm.isUpNext = true
+        return upNextFilm
+    }
+    
+    private func makeUpNextFilmWithMissingIDAttribute(from film: Film, entity: NSEntityDescription, context: NSManagedObjectContext) -> FilmMO {
+        let upNextFilm = FilmMO(entity: entity, insertInto: context)
+        upNextFilm.title = film.title
+        upNextFilm.originalTitle = film.originalTitle
+        upNextFilm.originalTitleRomanised = film.originalTitleRomanised
+        upNextFilm.image = film.image
+        upNextFilm.movieBanner = film.movieBanner
+        upNextFilm.filmDescription = film.description
+        upNextFilm.director = film.director
+        upNextFilm.producer = film.producer
+        upNextFilm.releaseDate = film.releaseDate
+        upNextFilm.runningTime = film.runningTime
+        upNextFilm.rottenTomatoesScore = film.rottenTomatoesScore
+        upNextFilm.url = film.url
+        upNextFilm.isUpNext = true
+        return upNextFilm
+    }
+    
+    private func makeUpNextFilmWithMultipleMissingAttributes(from film: Film, entity: NSEntityDescription, context: NSManagedObjectContext) -> FilmMO {
+        let upNextFilm = FilmMO(entity: entity, insertInto: context)
+        upNextFilm.title = film.title
+        return upNextFilm
     }
 }
