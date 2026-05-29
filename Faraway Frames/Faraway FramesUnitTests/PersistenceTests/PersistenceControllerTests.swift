@@ -131,5 +131,40 @@ struct PersistenceControllerTests {
             Issue.record("Expected a .savingFailed error, but got \(thrownError)")
         }
     }
+    
+    @Test("Verify deleting a film removes it from the store.")
+    func persistenceController_whenDeletingFilm_removesItFromTheStore() throws {
+        let sut = try PersistenceController.init(inMemory: true)
+        let context = sut.viewContext
+        let entity = try #require(
+            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
+        
+        let sampleFilm = Film.sample[0]
+        let upNextFilm = FilmMO(entity: entity, insertInto: context)
+        upNextFilm.id = sampleFilm.id
+        upNextFilm.title = sampleFilm.title
+        upNextFilm.originalTitle = sampleFilm.originalTitle
+        upNextFilm.originalTitleRomanised = sampleFilm.originalTitleRomanised
+        upNextFilm.image = sampleFilm.image
+        upNextFilm.movieBanner = sampleFilm.movieBanner
+        upNextFilm.filmDescription = sampleFilm.description
+        upNextFilm.director = sampleFilm.director
+        upNextFilm.producer = sampleFilm.producer
+        upNextFilm.releaseDate = sampleFilm.releaseDate
+        upNextFilm.runningTime = sampleFilm.runningTime
+        upNextFilm.rottenTomatoesScore = sampleFilm.rottenTomatoesScore
+        upNextFilm.url = sampleFilm.url
+        upNextFilm.isUpNext = true
+        try sut.saveContext()
+        
+        try sut.delete(film: upNextFilm)
+        
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "FilmMO")
+        fetchRequest.predicate = NSPredicate(format: "isUpNext == YES")
+        let results = try context.fetch(fetchRequest)
+        #expect(results.count == 0, "The film should have been deleted.")
+    }
 }
 
