@@ -11,7 +11,6 @@ import CoreData
 final class PersistenceController {
     // MARK: - Core Data stack
     private let container: NSPersistentContainer
-    
     var viewContext: NSManagedObjectContext {
         container.viewContext
     }
@@ -39,7 +38,7 @@ final class PersistenceController {
         }
     }
     
-    // MARK: - Core Data Saving support
+    // MARK: - Core Data Saving
     func saveContext() throws {
         if viewContext.hasChanges {
             do {
