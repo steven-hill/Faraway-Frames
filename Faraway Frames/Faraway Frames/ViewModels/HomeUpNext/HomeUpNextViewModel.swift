@@ -30,9 +30,7 @@ final class HomeUpNextViewModel: NSObject, NSFetchedResultsControllerDelegate {
     
     init(persistentContainer: NSPersistentContainer) {
         let context = persistentContainer.viewContext
-        let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
-        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
-        request.predicate = NSPredicate(format: "isUpNext == YES")
+        let request = FilmMO.upNextFetchRequest()
         
         self.fetchedResultsController = NSFetchedResultsController(
             fetchRequest: request,
