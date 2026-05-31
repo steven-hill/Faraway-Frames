@@ -28,39 +28,8 @@ struct HomeUpNextViewModelUnitTests {
             "The Core Data model schema must contain an entity definition named 'FilmMO'."
         )
         
-        let upNextFilm = FilmMO(entity: entity, insertInto: context)
-        upNextFilm.id = Film.sample[0].id
-        upNextFilm.title = Film.sample[0].title
-        upNextFilm.originalTitle = Film.sample[0].originalTitle
-        upNextFilm.originalTitleRomanised = Film.sample[0].originalTitleRomanised
-        upNextFilm.image = Film.sample[0].image
-        upNextFilm.movieBanner = Film.sample[0].movieBanner
-        upNextFilm.filmDescription = Film.sample[0].description
-        upNextFilm.director = Film.sample[0].director
-        upNextFilm.producer = Film.sample[0].producer
-        upNextFilm.releaseDate = Film.sample[0].releaseDate
-        upNextFilm.runningTime = Film.sample[0].runningTime
-        upNextFilm.rottenTomatoesScore = Film.sample[0].rottenTomatoesScore
-        upNextFilm.url = Film.sample[0].url
-        upNextFilm.isUpNext = true
-        upNextFilm.isWatched = false
-        
-        let watchedFilm = FilmMO(entity: entity, insertInto: context)
-        watchedFilm.id = Film.sample[1].id
-        watchedFilm.title = Film.sample[1].title
-        watchedFilm.originalTitle = Film.sample[1].originalTitle
-        watchedFilm.originalTitleRomanised = Film.sample[1].originalTitleRomanised
-        watchedFilm.image = Film.sample[1].image
-        watchedFilm.movieBanner = Film.sample[1].movieBanner
-        watchedFilm.filmDescription = Film.sample[1].description
-        watchedFilm.director = Film.sample[1].director
-        watchedFilm.producer = Film.sample[1].producer
-        watchedFilm.releaseDate = Film.sample[1].releaseDate
-        watchedFilm.runningTime = Film.sample[1].runningTime
-        watchedFilm.rottenTomatoesScore = Film.sample[1].rottenTomatoesScore
-        watchedFilm.url = Film.sample[1].url
-        watchedFilm.isUpNext = false
-        watchedFilm.isWatched = true
+        _ = makeFilmToBeSaved(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
+        _ = makeFilmToBeSaved(with: Film.sample[1], entity: entity, context: context, isUpNext: false, isWatched: true)
         
         try context.save()
         
@@ -76,6 +45,27 @@ struct HomeUpNextViewModelUnitTests {
         let firstFilm = try #require(films.first, "The film array should contain a film.")
         #expect(firstFilm.id == Film.sample[0].id, "Should be equal.")
         #expect(firstFilm.film.title == Film.sample[0].title, "Should be equal.")
+    }
+    
+    // MARK: - Helper method
+    private func makeFilmToBeSaved(with film: Film, entity: NSEntityDescription, context: NSManagedObjectContext, isUpNext: Bool, isWatched: Bool) -> FilmMO {
+        let filmToBeSaved = FilmMO(entity: entity, insertInto: context)
+        filmToBeSaved.id = film.id
+        filmToBeSaved.title = film.title
+        filmToBeSaved.originalTitle = film.originalTitle
+        filmToBeSaved.originalTitleRomanised = film.originalTitleRomanised
+        filmToBeSaved.image = film.image
+        filmToBeSaved.movieBanner = film.movieBanner
+        filmToBeSaved.filmDescription = film.description
+        filmToBeSaved.director = film.director
+        filmToBeSaved.producer = film.producer
+        filmToBeSaved.releaseDate = film.releaseDate
+        filmToBeSaved.runningTime = film.runningTime
+        filmToBeSaved.rottenTomatoesScore = film.rottenTomatoesScore
+        filmToBeSaved.url = film.url
+        filmToBeSaved.isUpNext = isUpNext
+        filmToBeSaved.isWatched = isWatched
+        return filmToBeSaved
     }
     
     //MARK: - Home UpNext ViewModel Delegate Spy
