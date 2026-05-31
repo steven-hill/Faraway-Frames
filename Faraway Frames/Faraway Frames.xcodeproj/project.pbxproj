@@ -37,6 +37,7 @@
 				Constants/Persistence.swift,
 				Constants/SFSymbols.swift,
 				Persistence/FarawayFramesCDModel.xcdatamodeld,
+				"Persistence/FilmMO+Queries.swift",
 				Persistence/PersistenceController.swift,
 				Persistence/PersistenceError.swift,
 				Resources/ghibliFilms.json,
