@@ -10,7 +10,7 @@ import CoreData
 
 final class PersistenceController {
     // MARK: - Core Data stack
-    private let container: NSPersistentContainer
+    let container: NSPersistentContainer
     var viewContext: NSManagedObjectContext {
         container.viewContext
     }
