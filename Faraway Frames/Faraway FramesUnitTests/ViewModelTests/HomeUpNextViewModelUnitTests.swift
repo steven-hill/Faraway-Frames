@@ -12,30 +12,27 @@ import CoreData
 @MainActor
 struct HomeUpNextViewModelUnitTests {
     
-    @Test func homeUpNextViewModel_currentStateOnInit_isNoFilms() {
-        let container = FakeCoreDataStack.makeInMemoryContainer()
-        let sut = HomeUpNextViewModel(persistentContainer: container)
+    @Test func homeUpNextViewModel_currentStateOnInit_isNoFilms() throws {
+        let persistenceController = try PersistenceController(inMemory: true)
+        let sut = HomeUpNextViewModel(persistentContainer: persistenceController.container)
         
         #expect(sut.currentState == .noFilms, "Should be `.noFilms` on init.")
     }
     
     @Test("Verify `HomeUpNextViewModel` fetches only Up Next records")
     func homeUpNextViewModel_fetchesCorrectly() throws {
-        let container = FakeCoreDataStack.makeInMemoryContainer()
-        let context = container.viewContext
+        let persistenceController = try PersistenceController(inMemory: true)
+        let sut = HomeUpNextViewModel(persistentContainer: persistenceController.container)
+        let delegateSpy = HomeUpNextViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        let context = persistenceController.viewContext
         let entity = try #require(
             NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
             "The Core Data model schema must contain an entity definition named 'FilmMO'."
         )
-        
         _ = makeFilmToBeSaved(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
         _ = makeFilmToBeSaved(with: Film.sample[1], entity: entity, context: context, isUpNext: false, isWatched: true)
-        
         try context.save()
-        
-        let sut = HomeUpNextViewModel(persistentContainer: container)
-        let delegateSpy = HomeUpNextViewModelDelegateSpy()
-        sut.delegate = delegateSpy
         
         sut.startFetching()
         
