@@ -25,8 +25,8 @@ struct PersistenceControllerTests {
         #expect(thrownError == .loadingStoresFailed(error: mockError))
     }
     
-    @Test("Verify Core Data stack can save and fetch films")
-    func persistenceController_canFetchSavedFilms() throws {
+    @Test("Verify Core Data stack can save films")
+    func persistenceController_canSaveFilms() throws {
         let (sut, context, entity) = try makeSUTViewContextAndEntity()
         let sampleFilm = Film.sample[0]
         _ = makeUpNextFilm(from: sampleFilm, entity: entity, context: context)
@@ -83,21 +83,6 @@ struct PersistenceControllerTests {
         default:
             Issue.record("Expected a .savingFailed error, but got \(thrownError)")
         }
-    }
-    
-    @Test("Verify deleting a film removes it from the store.")
-    func persistenceController_delete_removesFilmFromStore() throws {
-        let (sut, context, entity) = try makeSUTViewContextAndEntity()
-        
-        let upNextFilm = makeUpNextFilm(from: Film.sample[0], entity: entity, context: context)
-        try sut.saveContext()
-        
-        try sut.delete(film: upNextFilm)
-        
-        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "FilmMO")
-        fetchRequest.predicate = NSPredicate(format: "isUpNext == YES")
-        let results = try context.fetch(fetchRequest)
-        #expect(results.isEmpty, "The film should have been deleted.")
     }
     
     // MARK: - Helper methods

@@ -48,11 +48,4 @@ final class PersistenceController {
             }
         }
     }
-    
-    // MARK: - Core Data Deleting 
-    func delete(film: FilmMO) throws {
-        let filmToBeDeleted = try viewContext.existingObject(with: film.objectID)
-        viewContext.delete(filmToBeDeleted)
-        try saveContext()
-    }
 }
