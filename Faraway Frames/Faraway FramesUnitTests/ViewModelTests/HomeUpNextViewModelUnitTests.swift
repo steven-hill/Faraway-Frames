@@ -23,7 +23,10 @@ struct HomeUpNextViewModelUnitTests {
     func homeUpNextViewModel_fetchesCorrectly() throws {
         let container = FakeCoreDataStack.makeInMemoryContainer()
         let context = container.viewContext
-        let entity = NSEntityDescription.entity(forEntityName: "FilmMO", in: context)!
+        let entity = try #require(
+            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
         
         let upNextFilm = FilmMO(entity: entity, insertInto: context)
         upNextFilm.id = Film.sample[0].id
@@ -41,6 +44,23 @@ struct HomeUpNextViewModelUnitTests {
         upNextFilm.url = Film.sample[0].url
         upNextFilm.isUpNext = true
         upNextFilm.isWatched = false
+        
+        let watchedFilm = FilmMO(entity: entity, insertInto: context)
+        watchedFilm.id = Film.sample[1].id
+        watchedFilm.title = Film.sample[1].title
+        watchedFilm.originalTitle = Film.sample[1].originalTitle
+        watchedFilm.originalTitleRomanised = Film.sample[1].originalTitleRomanised
+        watchedFilm.image = Film.sample[1].image
+        watchedFilm.movieBanner = Film.sample[1].movieBanner
+        watchedFilm.filmDescription = Film.sample[1].description
+        watchedFilm.director = Film.sample[1].director
+        watchedFilm.producer = Film.sample[1].producer
+        watchedFilm.releaseDate = Film.sample[1].releaseDate
+        watchedFilm.runningTime = Film.sample[1].runningTime
+        watchedFilm.rottenTomatoesScore = Film.sample[1].rottenTomatoesScore
+        watchedFilm.url = Film.sample[1].url
+        watchedFilm.isUpNext = false
+        watchedFilm.isWatched = true
         
         try context.save()
         
