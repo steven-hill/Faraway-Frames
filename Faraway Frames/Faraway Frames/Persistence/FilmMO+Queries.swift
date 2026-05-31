@@ -14,4 +14,11 @@ extension FilmMO {
         request.predicate = NSPredicate(format: "isUpNext == YES")
         return request
     }
+    
+    static func watchedFetchRequest() -> NSFetchRequest<FilmMO> {
+        let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
+        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+        request.predicate = NSPredicate(format: "isWatched == YES")
+        return request
+    }
 }
