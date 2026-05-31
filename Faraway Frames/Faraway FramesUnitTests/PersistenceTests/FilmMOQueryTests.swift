@@ -21,7 +21,7 @@ struct FilmMOQueryTests {
     
     @Test("Verify watched fetch request returns the correct filtering configurations")
     func filmMO_watchedFetchRequest_hasCorrectPredicateAndSort() {
-        let request = FilmMO.upNextFetchRequest()
+        let request = FilmMO.watchedFetchRequest()
         
         #expect(request.entityName == "FilmMO", "Should target the FilmMO table.")
         #expect(request.sortDescriptors?.first?.key == "title", "Should sort rows by their title.")
