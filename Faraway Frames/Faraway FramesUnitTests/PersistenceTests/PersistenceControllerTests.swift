@@ -29,7 +29,7 @@ struct PersistenceControllerTests {
     func persistenceController_canSaveFilms() throws {
         let (sut, context, entity) = try makeSUTViewContextAndEntity()
         let sampleFilm = Film.sample[0]
-        _ = makeUpNextFilm(from: sampleFilm, entity: entity, context: context)
+        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
         
         #expect(throws: Never.self) { try sut.saveContext() }
 
@@ -94,25 +94,6 @@ struct PersistenceControllerTests {
             "The Core Data model schema must contain an entity definition named 'FilmMO'."
         )
         return (sut, viewContext, entity)
-    }
-    
-    private func makeUpNextFilm(from film: Film, entity: NSEntityDescription, context: NSManagedObjectContext) -> FilmMO {
-        let upNextFilm = FilmMO(entity: entity, insertInto: context)
-        upNextFilm.id = film.id
-        upNextFilm.title = film.title
-        upNextFilm.originalTitle = film.originalTitle
-        upNextFilm.originalTitleRomanised = film.originalTitleRomanised
-        upNextFilm.image = film.image
-        upNextFilm.movieBanner = film.movieBanner
-        upNextFilm.filmDescription = film.description
-        upNextFilm.director = film.director
-        upNextFilm.producer = film.producer
-        upNextFilm.releaseDate = film.releaseDate
-        upNextFilm.runningTime = film.runningTime
-        upNextFilm.rottenTomatoesScore = film.rottenTomatoesScore
-        upNextFilm.url = film.url
-        upNextFilm.isUpNext = true
-        return upNextFilm
     }
     
     private func makeUpNextFilmWithMissingIDAttribute(from film: Film, entity: NSEntityDescription, context: NSManagedObjectContext) -> FilmMO {
