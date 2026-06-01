@@ -12,13 +12,13 @@ import UIKit
 @MainActor
 struct MainCoordinatorTests {
     
-    @Test func mainCoordinator_childCoordinatorsIsEmpty_onInit() {
-        let (sut, _) = makeSUT()
+    @Test func mainCoordinator_childCoordinatorsIsEmpty_onInit() throws {
+        let (sut, _) = try makeSUT()
         #expect(sut.childCoordinators.isEmpty, "Should be empty on init.")
     }
     
-    @Test func mainCoordinator_start_createsHomeCoordinatorAsChildCoordinator() {
-        let (sut, _) = makeSUT()
+    @Test func mainCoordinator_start_createsHomeCoordinatorAsChildCoordinator() throws {
+        let (sut, _) = try makeSUT()
         
         sut.start()
         
@@ -26,8 +26,8 @@ struct MainCoordinatorTests {
         #expect(childCoordinator != nil, "Should not be nil.")
     }
     
-    @Test func mainCoordinator_start_createsExploreSplitViewCoordinatorAsChildCoordinator() {
-        let (sut, _) = makeSUT()
+    @Test func mainCoordinator_start_createsExploreSplitViewCoordinatorAsChildCoordinator() throws {
+        let (sut, _) = try makeSUT()
         
         sut.start()
         
@@ -35,8 +35,8 @@ struct MainCoordinatorTests {
         #expect(childCoordinator != nil, "Should not be nil.")
     }
     
-    @Test func mainCoordinator_start_createsAssistantCoordinatorAsChildCoordinator() {
-        let (sut, _) = makeSUT()
+    @Test func mainCoordinator_start_createsAssistantCoordinatorAsChildCoordinator() throws {
+        let (sut, _) = try makeSUT()
         
         sut.start()
         
@@ -44,16 +44,16 @@ struct MainCoordinatorTests {
         #expect(childCoordinator != nil, "Should not be nil.")
     }
     
-    @Test func mainCoordinator_start_createsThreeTabs() {
-        let (sut, _) = makeSUT()
+    @Test func mainCoordinator_start_createsThreeTabs() throws {
+        let (sut, _) = try makeSUT()
         
         sut.start()
         
         #expect(sut.tabBarController.tabs.count == 3, "Should be three tabs.")
     }
     
-    @Test func mainCoordinator_start_setsRootViewController() {
-        let (sut, _) = makeSUT()
+    @Test func mainCoordinator_start_setsRootViewController() throws {
+        let (sut, _) = try makeSUT()
         
         sut.start()
         
@@ -61,8 +61,8 @@ struct MainCoordinatorTests {
         #expect(sut.window.rootViewController is UITabBarController, "Should be a UITabBarController.")
     }
     
-    @Test func mainCoordinator_start_callsWindowMakeKeyAndVisible() {
-        let (sut, window) = makeSUT()
+    @Test func mainCoordinator_start_callsWindowMakeKeyAndVisible() throws {
+        let (sut, window) = try makeSUT()
         
         sut.start()
         
@@ -70,10 +70,10 @@ struct MainCoordinatorTests {
     }
     
     // MARK: - Helper Method
-    private func makeSUT() -> (sut: MainCoordinator, window: WindowSpy) {
+    private func makeSUT() throws -> (sut: MainCoordinator, window: WindowSpy) {
         let mockContainer = MockContainer()
         let windowSpy = WindowSpy()
-        let sut = MainCoordinator(window: windowSpy, dependencies: mockContainer)
+        let sut = MainCoordinator(window: windowSpy, dependencies: mockContainer, persistenceController: try mockContainer.makePersistenceController())
         return (sut, windowSpy)
     }
     
