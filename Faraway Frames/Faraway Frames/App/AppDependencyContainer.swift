@@ -8,17 +8,11 @@
 import Foundation
 import CoreData
 
-final class AppDependencyContainer: FilmsListServicing, ImageLoading, PersistentContainerProtocol {
+final class AppDependencyContainer: FilmsListServicing, ImageLoading, PersistentStoring {
     private let cacheManager = CacheManager()
     
-    func makePersistentContainer() -> NSPersistentContainer {
-        let persistentContainer = NSPersistentContainer(name: Persistence.persistentContainerName)
-        persistentContainer.loadPersistentStores { _, error in
-            if let error = error as NSError? {
-                fatalError("Core Data failed to load: \(error)")
-            }
-        }
-        return persistentContainer
+    func makePersistenceController() throws -> PersistenceControlling {
+        return try PersistenceController(inMemory: false)
     }
     
     func makeFilmsListService() -> FilmsListService {
