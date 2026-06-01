@@ -11,17 +11,19 @@ import UIKit
 final class MainCoordinator: Coordinator {
     var childCoordinators = [Coordinator]()
     var window: WindowProtocol
-    typealias Dependencies = FilmsListServicing & ImageLoading & PersistentContainerProtocol
+    typealias Dependencies = FilmsListServicing & ImageLoading
     let dependencies: Dependencies
+    let persistenceController: PersistenceControlling
     let tabBarController = TabBarController()
     
-    init(window: WindowProtocol, dependencies: Dependencies) {
+    init(window: WindowProtocol, dependencies: Dependencies, persistenceController: PersistenceControlling) {
         self.window = window
         self.dependencies = dependencies
+        self.persistenceController = persistenceController
     }
     
     func start() {
-        let homeCoordinator = HomeCoordinator(navigationController: UINavigationController(), persistentContainer: dependencies.makePersistentContainer())
+        let homeCoordinator = HomeCoordinator(navigationController: UINavigationController(), persistentContainer: persistenceController.container)
         homeCoordinator.start()
         childCoordinators.append(homeCoordinator)
         
