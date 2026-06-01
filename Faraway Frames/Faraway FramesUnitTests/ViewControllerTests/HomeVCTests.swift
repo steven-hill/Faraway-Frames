@@ -12,16 +12,16 @@ import UIKit
 @MainActor
 struct HomeVCTests {
 
-    @Test func homeVC_canInitAndLoadView() {
-        let sut = makeSUT()
+    @Test func homeVC_canInitAndLoadView() throws {
+        let sut = try makeSUT()
         
         sut.loadViewIfNeeded()
         
         #expect(sut.view != nil, "VC should load the view.")
     }
     
-    @Test func homeVC_setsViewModelsDelegateToSelf() {
-        let sut = makeSUT()
+    @Test func homeVC_setsViewModelsDelegateToSelf() throws {
+        let sut = try makeSUT()
         
         sut.loadViewIfNeeded()
         
@@ -30,8 +30,9 @@ struct HomeVCTests {
     }
         
     // MARK: - SUT Helper Method
-    private func makeSUT() -> HomeVC {
-        let upNextViewModel = HomeUpNextViewModel(persistentContainer: FakeCoreDataStack.makeInMemoryContainer())
+    private func makeSUT() throws -> HomeVC {
+        let persistenceController = try PersistenceController(inMemory: true)
+        let upNextViewModel = HomeUpNextViewModel(persistentContainer: persistenceController.container)
         let watchedViewModel = HomeWatchedViewModel()
         return HomeVC(upNextViewModel: upNextViewModel, watchedViewModel: watchedViewModel)
     }
