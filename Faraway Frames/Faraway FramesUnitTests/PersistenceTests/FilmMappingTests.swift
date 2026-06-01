@@ -21,22 +21,7 @@ struct FilmMappingTests {
             fatalError("Could not find entity `FilmMO` in model. Available entities: \(storeEntities)")
         }
         
-        let managedObject = FilmMO(entity: entity, insertInto: context)
-        managedObject.id = Film.sample[0].id
-        managedObject.title = Film.sample[0].title
-        managedObject.originalTitle = Film.sample[0].originalTitle
-        managedObject.originalTitleRomanised = Film.sample[0].originalTitleRomanised
-        managedObject.image = Film.sample[0].image
-        managedObject.movieBanner = Film.sample[0].movieBanner
-        managedObject.filmDescription = Film.sample[0].description
-        managedObject.director = Film.sample[0].director
-        managedObject.producer = Film.sample[0].producer
-        managedObject.releaseDate = Film.sample[0].releaseDate
-        managedObject.runningTime = Film.sample[0].runningTime
-        managedObject.rottenTomatoesScore = Film.sample[0].rottenTomatoesScore
-        managedObject.url = Film.sample[0].url
-        managedObject.isUpNext = true
-        managedObject.isWatched = false
+        let managedObject = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
         
         let domainWrapper = Film.from(
             id: managedObject.id,
