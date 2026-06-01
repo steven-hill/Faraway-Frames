@@ -32,7 +32,7 @@ struct PersistenceControllerTests {
         _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
         
         #expect(throws: Never.self) { try sut.saveContext() }
-
+        
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "FilmMO")
         fetchRequest.predicate = NSPredicate(format: "isUpNext == YES")
         
