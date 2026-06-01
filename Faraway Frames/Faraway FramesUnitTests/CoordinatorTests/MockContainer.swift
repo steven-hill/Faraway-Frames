@@ -7,18 +7,17 @@
 
 import Foundation
 @testable import Faraway_Frames
-import CoreData
 
-final class MockContainer: FilmsListServicing, ImageLoading, PersistentContainerProtocol {
+final class MockContainer: FilmsListServicing, ImageLoading, PersistentStoring {
+    func makePersistenceController() throws -> PersistenceControlling {
+        return try PersistenceController(inMemory: true)
+    }
+    
     func makeFilmsListService() -> FilmsListService {
         return MockFilmsListService()
     }
     
     func makeImageLoader() -> ImageLoader {
         return MockImageLoader()
-    }
-    
-    func makePersistentContainer() -> NSPersistentContainer {
-        return FakeCoreDataStack.makeInMemoryContainer()
     }
 }

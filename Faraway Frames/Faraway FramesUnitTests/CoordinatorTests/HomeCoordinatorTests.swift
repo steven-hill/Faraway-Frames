@@ -12,8 +12,9 @@ import UIKit
 @MainActor
 struct HomeCoordinatorTests {
     
-    @Test func homeCoordinator_start_placesViewControllerOnNavigationStack() {
-        let sut = HomeCoordinator(navigationController: UINavigationController(), persistentContainer: FakeCoreDataStack.makeInMemoryContainer())
+    @Test func homeCoordinator_start_placesViewControllerOnNavigationStack() throws {
+        let persistenceController = try PersistenceController(inMemory: true)
+        let sut = HomeCoordinator(navigationController: UINavigationController(), persistentContainer: persistenceController.container)
 
         sut.start()
         

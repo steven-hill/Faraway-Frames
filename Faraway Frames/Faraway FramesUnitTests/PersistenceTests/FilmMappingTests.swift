@@ -13,7 +13,7 @@ struct FilmMappingTests {
     
     @MainActor @Test("Verify FilmMO maps to FilmWithStatus domain wrapper correctly")
     func filmMO_mapsToDomainWrapperCorrectly() throws {
-        let container = FakeCoreDataStack.makeInMemoryContainer()
+        let container = try PersistenceController(inMemory: true)
         let context = container.viewContext
         
         guard let entity = NSEntityDescription.entity(forEntityName: "FilmMO", in: context) else {

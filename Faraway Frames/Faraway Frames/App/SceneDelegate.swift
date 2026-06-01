@@ -15,13 +15,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         let window = UIWindow(windowScene: windowScene)
-        setNetworkDependencies(with: window)
+        setUpDependencies(with: window)
         mainCoordinator?.start()
         self.window = window
     }
     
-    private func setNetworkDependencies(with window: UIWindow) {
-        typealias Dependencies = FilmsListServicing & ImageLoading & PersistentContainerProtocol
+    private func setUpDependencies(with window: UIWindow) {
+        typealias Dependencies = FilmsListServicing & ImageLoading & PersistentStoring
         let dependencies: Dependencies
         
         if ProcessInfo.processInfo.isUITesting {
@@ -29,8 +29,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             dependencies = MockDependencies()
         } else {
             dependencies = AppDependencyContainer()
+            do {
+                let persistenceController = try dependencies.makePersistenceController()
+                mainCoordinator = MainCoordinator(window: window, dependencies: dependencies, persistenceController: persistenceController)
+            } catch {
+                // TODO: - Replace with View Controller showing an error message.
+                fatalError()
+            }
         }
-        mainCoordinator = MainCoordinator(window: window, dependencies: dependencies)
     }
     
     func sceneDidDisconnect(_ scene: UIScene) {
