@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import CoreData
 
 final class AppDependencyContainer: FilmsListServicing, ImageLoading, PersistentStoring {
     private let cacheManager = CacheManager()
