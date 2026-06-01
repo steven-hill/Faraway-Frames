@@ -39,6 +39,7 @@
 				Persistence/FarawayFramesCDModel.xcdatamodeld,
 				"Persistence/FilmMO+Queries.swift",
 				Persistence/PersistenceController.swift,
+				Persistence/PersistenceControlling.swift,
 				Persistence/PersistenceError.swift,
 				Resources/ghibliFilms.json,
 			);

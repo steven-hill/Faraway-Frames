@@ -8,7 +8,7 @@
 import Foundation
 import CoreData
 
-final class PersistenceController {
+final class PersistenceController: PersistenceControlling {
     // MARK: - Core Data stack
     let container: NSPersistentContainer
     var viewContext: NSManagedObjectContext {
