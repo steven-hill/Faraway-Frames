@@ -66,4 +66,26 @@ struct HomeUpNextViewModelUnitTests {
             self.callCount += 1
         }
     }
+    
+    //MARK: - Throwing FetchedResultsController
+    final class ThrowingFetchedResultsController: NSFetchedResultsController<FilmMO> {
+        let errorToThrow: Error
+        
+        init(context: NSManagedObjectContext, errorToThrow: Error) {
+            self.errorToThrow = errorToThrow
+            
+            let validRequest = FilmMO.fetchRequest()
+            validRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+            super.init(
+                fetchRequest: validRequest,
+                managedObjectContext: context,
+                sectionNameKeyPath: nil,
+                cacheName: nil
+            )
+        }
+        
+        override func performFetch() throws {
+            throw errorToThrow
+        }
+    }
 }
