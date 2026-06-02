@@ -46,8 +46,8 @@ final class HomeUpNextViewModel: NSObject, NSFetchedResultsControllerDelegate {
     func fetchUpNextFilms() {
         do {
             try fetchedResultsController.performFetch()
-            delegate?.upNextFilmsDidChange(upNextFilms)
             currentState = .fetchedObjects
+            delegate?.upNextFilmsDidChange(upNextFilms)
         } catch {
             delegate?.upNextFilmsDidChange([])
             print(error.localizedDescription)
