@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CoreData
 
 enum HomeUpNextError: Error, Identifiable, Equatable {
     case databaseAccessError
@@ -35,6 +36,25 @@ enum HomeUpNextError: Error, Identifiable, Equatable {
             return lhsMessage == rhsMessage
         default:
             return false
+        }
+    }
+}
+
+extension HomeUpNextError {
+    init(_ error: Error) {
+        if let cocoaError = error as? CocoaError {
+            switch cocoaError.code {
+            case .fileWriteOutOfSpace:
+                self = .diskFull
+            case .persistentStoreOpen,
+                 .managedObjectReferentialIntegrity,
+                 .persistentStoreTypeMismatch:
+                self = .databaseAccessError
+            default:
+                self = .databaseAccessError
+            }
+        } else {
+            self = .unknown(error.localizedDescription)
         }
     }
 }
