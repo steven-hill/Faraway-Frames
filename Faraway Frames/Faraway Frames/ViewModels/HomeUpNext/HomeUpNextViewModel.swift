@@ -69,15 +69,7 @@ final class HomeUpNextViewModel: NSObject, NSFetchedResultsControllerDelegate {
             delegate?.upNextFilmsDidChange(upNextFilms)
         } catch let error as NSError {
             delegate?.upNextFilmsDidChange([])
-            let customError: HomeUpNextError
-            if error.domain == NSCocoaErrorDomain && error.code == NSFileWriteOutOfSpaceError {
-                customError = .diskFull
-            } else if error.domain == NSCocoaErrorDomain {
-                customError = .databaseAccessError
-            } else {
-                customError = .unknown(error.localizedDescription)
-            }
-            currentState = .failure(customError)
+            currentState = .failure(HomeUpNextError(error))
         }
     }
     
