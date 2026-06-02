@@ -43,7 +43,7 @@ final class HomeUpNextViewModel: NSObject, NSFetchedResultsControllerDelegate {
         self.fetchedResultsController.delegate = self
     }
     
-    func startFetching() {
+    func fetchUpNextFilms() {
         do {
             try fetchedResultsController.performFetch()
             delegate?.upNextFilmsDidChange(upNextFilms)

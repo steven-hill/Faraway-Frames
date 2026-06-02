@@ -23,7 +23,7 @@ struct HomeUpNextViewModelUnitTests {
         let persistenceController = try PersistenceController(inMemory: true)
         let sut = HomeUpNextViewModel(persistentContainer: persistenceController.container)
         
-        sut.startFetching()
+        sut.fetchUpNextFilms()
         
         #expect(sut.currentState == .fetchedObjects, "Should be fetchedObjects.")
     }
@@ -44,7 +44,7 @@ struct HomeUpNextViewModelUnitTests {
         _ = PersistenceHelper.makeFilmMO(with: Film.sample[1], entity: entity, context: context, isUpNext: false, isWatched: true)
         try context.save()
         
-        sut.startFetching()
+        sut.fetchUpNextFilms()
         
         #expect(delegateSpy.callCount == 1, "Should make the call once.")
         let films = try #require(delegateSpy.updatedFilms, "Delegate should have received a films array.")
