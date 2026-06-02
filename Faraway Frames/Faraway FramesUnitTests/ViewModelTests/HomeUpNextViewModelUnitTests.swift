@@ -16,7 +16,7 @@ struct HomeUpNextViewModelUnitTests {
         let persistenceController = try PersistenceController(inMemory: true)
         let sut = HomeUpNextViewModel(persistentContainer: persistenceController.container)
         
-        #expect(sut.currentState == .noFilms, "Should be `.noFilms` on init.")
+        #expect(sut.currentState == .idle, "Should be `.idle` on init.")
     }
     
     @Test("Verify `HomeUpNextViewModel` only fetches Up Next records")

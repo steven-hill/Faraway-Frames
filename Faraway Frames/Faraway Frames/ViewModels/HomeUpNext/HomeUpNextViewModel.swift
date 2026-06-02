@@ -12,11 +12,11 @@ final class HomeUpNextViewModel: NSObject, NSFetchedResultsControllerDelegate {
     
     // MARK: - State Definition
     enum HomeUpNextState {
-        case noFilms
+        case idle
     }
     
     // MARK: - Properties
-    private(set) var currentState: HomeUpNextState = .noFilms
+    private(set) var currentState: HomeUpNextState = .idle
     weak var delegate: HomeUpNextViewModelDelegate?
     private let fetchedResultsController: NSFetchedResultsController<FilmMO>
     
