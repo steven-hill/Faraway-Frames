@@ -40,6 +40,18 @@ struct HomeUpNextViewModelUnitTests {
             expectedState: HomeUpNextViewModel.HomeUpNextState.failure(.databaseAccessError)
         ),
         (
+            error: NSError(domain: NSCocoaErrorDomain, code: CocoaError.managedObjectReferentialIntegrity.rawValue, userInfo: nil) as Error,
+            expectedState: HomeUpNextViewModel.HomeUpNextState.failure(.databaseAccessError)
+        ),
+        (
+            error: NSError(domain: NSCocoaErrorDomain, code: CocoaError.persistentStoreTypeMismatch.rawValue, userInfo: nil) as Error,
+            expectedState: HomeUpNextViewModel.HomeUpNextState.failure(.databaseAccessError)
+        ),
+        (
+            error: NSError(domain: NSCocoaErrorDomain, code: CocoaError.fileNoSuchFile.rawValue, userInfo: nil) as Error,
+            expectedState: HomeUpNextViewModel.HomeUpNextState.failure(.databaseAccessError)
+        ),
+        (
             error: UnknownError() as Error,
             expectedState: HomeUpNextViewModel.HomeUpNextState.failure(.unknown(UnknownError().localizedDescription))
         )
