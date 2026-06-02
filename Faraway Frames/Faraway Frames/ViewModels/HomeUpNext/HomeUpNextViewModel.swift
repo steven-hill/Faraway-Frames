@@ -15,19 +15,6 @@ final class HomeUpNextViewModel: NSObject, NSFetchedResultsControllerDelegate {
         case idle
         case fetchedObjects
         case failure(HomeUpNextError)
-
-        static func == (lhs: HomeUpNextState, rhs: HomeUpNextState) -> Bool {
-            switch (lhs, rhs) {
-            case (.idle, .idle):
-                return true
-            case (.fetchedObjects, .fetchedObjects):
-                return true
-            case (.failure(let lhsError), .failure(let rhsError)):
-                return lhsError == rhsError
-            default:
-                return false
-            }
-        }
     }
     
     // MARK: - Properties
@@ -75,5 +62,20 @@ final class HomeUpNextViewModel: NSObject, NSFetchedResultsControllerDelegate {
     
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         delegate?.upNextFilmsDidChange(upNextFilms)
+    }
+}
+
+extension HomeUpNextViewModel.HomeUpNextState {
+    static func == (lhs: HomeUpNextViewModel.HomeUpNextState, rhs: HomeUpNextViewModel.HomeUpNextState) -> Bool {
+        switch (lhs, rhs) {
+        case (.idle, .idle):
+            return true
+        case (.fetchedObjects, .fetchedObjects):
+            return true
+        case (.failure(let lhsError), .failure(let rhsError)):
+            return lhsError == rhsError
+        default:
+            return false
+        }
     }
 }
