@@ -12,7 +12,7 @@ import CoreData
 @MainActor
 struct PersistenceControllerTests {
     
-    @Test("Verify error is thrown when loading persistent stores fails")
+    @Test("Error is thrown when loading persistent stores fails")
     func persistenceController_whenLoadingPersistentStoresFails_throwsCorrectError() throws {
         let mockError = NSError(domain: "TestDomain", code: 42, userInfo: nil)
         
@@ -25,7 +25,7 @@ struct PersistenceControllerTests {
         #expect(thrownError == .loadingStoresFailed(error: mockError))
     }
     
-    @Test("Verify Core Data stack can save films")
+    @Test("Core Data stack can save films")
     func persistenceController_canSaveFilms() throws {
         let (sut, context, entity) = try makeSUTViewContextAndEntity()
         let sampleFilm = Film.sample[0]
@@ -48,7 +48,7 @@ struct PersistenceControllerTests {
         }
     }
     
-    @Test("Verify saving failed due to single nil attribute throws error")
+    @Test("Saving failed due to single nil attribute throws error")
     func persistenceController_whenSavingFailedDueToSingleNilAttribute_throwsError() throws {
         let (sut, context, entity) = try makeSUTViewContextAndEntity()
         _ = makeUpNextFilmWithMissingIDAttribute(from: Film.sample[0], entity: entity, context: context)
@@ -66,7 +66,7 @@ struct PersistenceControllerTests {
         }
     }
     
-    @Test("Verify saving failed due to multiple nil attributes throws error")
+    @Test("Saving failed due to multiple nil attributes throws error")
     func persistenceController_whenSavingFailedDueToMultipleNilAttributes_throwsError() throws {
         let (sut, context, entity) = try makeSUTViewContextAndEntity()
         

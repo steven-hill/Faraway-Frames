@@ -11,7 +11,7 @@ import CoreData
 
 struct FilmMappingTests {
     
-    @MainActor @Test("Verify FilmMO maps to FilmWithStatus domain wrapper correctly")
+    @MainActor @Test("FilmMO maps to FilmWithStatus domain wrapper correctly")
     func filmMO_mapsToDomainWrapperCorrectly() throws {
         let container = try PersistenceController(inMemory: true)
         let context = container.viewContext

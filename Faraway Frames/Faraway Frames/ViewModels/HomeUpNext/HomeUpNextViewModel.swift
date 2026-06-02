@@ -12,13 +12,15 @@ final class HomeUpNextViewModel: NSObject, NSFetchedResultsControllerDelegate {
     
     // MARK: - State Definition
     enum HomeUpNextState {
-        case noFilms
+        case idle
+        case fetchedObjects
+        case failure(HomeUpNextError)
     }
     
     // MARK: - Properties
-    private(set) var currentState: HomeUpNextState = .noFilms
+    private(set) var currentState: HomeUpNextState = .idle
     weak var delegate: HomeUpNextViewModelDelegate?
-    private let fetchedResultsController: NSFetchedResultsController<FilmMO>
+    private(set) var fetchedResultsController: NSFetchedResultsController<FilmMO>
     
     var upNextFilms: [FilmWithStatus] {
         let managedObjects = fetchedResultsController.fetchedObjects ?? []
@@ -28,31 +30,52 @@ final class HomeUpNextViewModel: NSObject, NSFetchedResultsControllerDelegate {
         }
     }
     
-    init(persistentContainer: NSPersistentContainer) {
+    // MARK: - Initialisation
+    init(persistentContainer: NSPersistentContainer, fetchedResultsController: NSFetchedResultsController<FilmMO>? = nil) {
         let context = persistentContainer.viewContext
         let request = FilmMO.upNextFetchRequest()
-        
-        self.fetchedResultsController = NSFetchedResultsController(
-            fetchRequest: request,
-            managedObjectContext: context,
-            sectionNameKeyPath: nil,
-            cacheName: nil
-        )
+        if let injectedController = fetchedResultsController {
+            self.fetchedResultsController = injectedController
+        } else {
+            self.fetchedResultsController = NSFetchedResultsController(
+                fetchRequest: request,
+                managedObjectContext: context,
+                sectionNameKeyPath: nil,
+                cacheName: nil
+            )
+        }
         super.init()
         self.fetchedResultsController.delegate = self
     }
     
-    func startFetching() {
+    // MARK: - Methods
+    func fetchUpNextFilms() {
         do {
             try fetchedResultsController.performFetch()
+            currentState = .fetchedObjects
             delegate?.upNextFilmsDidChange(upNextFilms)
-        } catch {
+        } catch let error as NSError {
             delegate?.upNextFilmsDidChange([])
-            print(error.localizedDescription)
+            currentState = .failure(HomeUpNextError(error))
         }
     }
     
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         delegate?.upNextFilmsDidChange(upNextFilms)
+    }
+}
+
+extension HomeUpNextViewModel.HomeUpNextState {
+    static func == (lhs: HomeUpNextViewModel.HomeUpNextState, rhs: HomeUpNextViewModel.HomeUpNextState) -> Bool {
+        switch (lhs, rhs) {
+        case (.idle, .idle):
+            return true
+        case (.fetchedObjects, .fetchedObjects):
+            return true
+        case (.failure(let lhsError), .failure(let rhsError)):
+            return lhsError == rhsError
+        default:
+            return false
+        }
     }
 }

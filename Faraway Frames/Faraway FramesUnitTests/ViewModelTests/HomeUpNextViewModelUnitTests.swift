@@ -12,14 +12,66 @@ import CoreData
 @MainActor
 struct HomeUpNextViewModelUnitTests {
     
-    @Test func homeUpNextViewModel_currentStateOnInit_isNoFilms() throws {
+    @Test("`currentState` is correct on init")
+    func homeUpNextViewModel_currentStateOnInit_isIdle() throws {
         let persistenceController = try PersistenceController(inMemory: true)
         let sut = HomeUpNextViewModel(persistentContainer: persistenceController.container)
         
-        #expect(sut.currentState == .noFilms, "Should be `.noFilms` on init.")
+        #expect(sut.currentState == .idle, "Should be `.idle` on init.")
     }
     
-    @Test("Verify `HomeUpNextViewModel` only fetches Up Next records")
+    @Test("`currentState` is correct after fetching Up Next films")
+    func homeUpNextViewModel_currentStateAfterFetch_isFetchedObjects() throws {
+        let persistenceController = try PersistenceController(inMemory: true)
+        let sut = HomeUpNextViewModel(persistentContainer: persistenceController.container)
+        
+        sut.fetchUpNextFilms()
+        
+        #expect(sut.currentState == .fetchedObjects, "Should be fetchedObjects.")
+    }
+    
+    @Test("`currentState` updates correctly across different error domains and codes", arguments: [
+        (
+            error: NSError(domain: NSCocoaErrorDomain, code: NSFileWriteOutOfSpaceError, userInfo: nil) as Error,
+            expectedState: HomeUpNextViewModel.HomeUpNextState.failure(.diskFull)
+        ),
+        (
+            error: NSError(domain: NSCocoaErrorDomain, code: NSPersistentStoreOpenError, userInfo: nil) as Error,
+            expectedState: HomeUpNextViewModel.HomeUpNextState.failure(.databaseAccessError)
+        ),
+        (
+            error: NSError(domain: NSCocoaErrorDomain, code: CocoaError.managedObjectReferentialIntegrity.rawValue, userInfo: nil) as Error,
+            expectedState: HomeUpNextViewModel.HomeUpNextState.failure(.databaseAccessError)
+        ),
+        (
+            error: NSError(domain: NSCocoaErrorDomain, code: CocoaError.persistentStoreTypeMismatch.rawValue, userInfo: nil) as Error,
+            expectedState: HomeUpNextViewModel.HomeUpNextState.failure(.databaseAccessError)
+        ),
+        (
+            error: NSError(domain: NSCocoaErrorDomain, code: CocoaError.fileNoSuchFile.rawValue, userInfo: nil) as Error,
+            expectedState: HomeUpNextViewModel.HomeUpNextState.failure(.databaseAccessError)
+        ),
+        (
+            error: UnknownError() as Error,
+            expectedState: HomeUpNextViewModel.HomeUpNextState.failure(.unknown(UnknownError().localizedDescription))
+        )
+    ]
+    )
+    func homeUpNextViewModel_fetchUpNextFilms_setsCorrectFailureState(for scenario: (error: Error, expectedState: HomeUpNextViewModel.HomeUpNextState)) throws {
+        let persistenceController = try PersistenceController(inMemory: true)
+        let context = persistenceController.container.viewContext
+        let throwingController = ThrowingFetchedResultsController(context: context, errorToThrow: scenario.error)
+        let sut = HomeUpNextViewModel(
+            persistentContainer: persistenceController.container,
+            fetchedResultsController: throwingController
+        )
+        
+        sut.fetchUpNextFilms()
+        
+        #expect(sut.currentState == scenario.expectedState)
+    }
+    
+    @Test("`HomeUpNextViewModel` only fetches Up Next films")
     func homeUpNextViewModel_fetchesCorrectly() throws {
         let persistenceController = try PersistenceController(inMemory: true)
         let sut = HomeUpNextViewModel(persistentContainer: persistenceController.container)
@@ -35,7 +87,7 @@ struct HomeUpNextViewModelUnitTests {
         _ = PersistenceHelper.makeFilmMO(with: Film.sample[1], entity: entity, context: context, isUpNext: false, isWatched: true)
         try context.save()
         
-        sut.startFetching()
+        sut.fetchUpNextFilms()
         
         #expect(delegateSpy.callCount == 1, "Should make the call once.")
         let films = try #require(delegateSpy.updatedFilms, "Delegate should have received a films array.")
@@ -54,5 +106,32 @@ struct HomeUpNextViewModelUnitTests {
             self.updatedFilms = films
             self.callCount += 1
         }
+    }
+    
+    //MARK: - Throwing FetchedResultsController
+    final class ThrowingFetchedResultsController: NSFetchedResultsController<FilmMO> {
+        let errorToThrow: Error
+        
+        init(context: NSManagedObjectContext, errorToThrow: Error) {
+            self.errorToThrow = errorToThrow
+            
+            let validRequest = FilmMO.fetchRequest()
+            validRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+            super.init(
+                fetchRequest: validRequest,
+                managedObjectContext: context,
+                sectionNameKeyPath: nil,
+                cacheName: nil
+            )
+        }
+        
+        override func performFetch() throws {
+            throw errorToThrow
+        }
+    }
+    
+    //MARK: - Custom error helper
+    private struct UnknownError: Error, LocalizedError {
+        var errorDescription: String? { "Unknown error." }
     }
 }
