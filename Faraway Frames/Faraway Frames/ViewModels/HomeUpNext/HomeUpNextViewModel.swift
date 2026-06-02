@@ -14,12 +14,58 @@ final class HomeUpNextViewModel: NSObject, NSFetchedResultsControllerDelegate {
     enum HomeUpNextState {
         case idle
         case fetchedObjects
+        case failure(HomeUpNextError)
+
+        static func == (lhs: HomeUpNextState, rhs: HomeUpNextState) -> Bool {
+            switch (lhs, rhs) {
+            case (.idle, .idle):
+                return true
+            case (.fetchedObjects, .fetchedObjects):
+                return true
+            case (.failure(let lhsError), .failure(let rhsError)):
+                return lhsError == rhsError
+            default:
+                return false
+            }
+        }
+    }
+    
+    enum HomeUpNextError: Error, Identifiable, Equatable {
+        case databaseAccessError
+        case diskFull
+        case unknown(String)
+        
+        var id: String { localizedDescription }
+        
+        var localizedDescription: String {
+            switch self {
+            case .databaseAccessError:
+                return "Unable to access your local library. Please try restarting the app."
+            case .diskFull:
+                return "Your device is out of storage space. Free up some space to load your library."
+            case .unknown(let message):
+                return message
+            }
+        }
+
+        static func == (lhs: HomeUpNextError, rhs: HomeUpNextError) -> Bool {
+            switch (lhs, rhs) {
+            case (.databaseAccessError, .databaseAccessError):
+                return true
+            case (.diskFull, .diskFull):
+                return true
+            case (.unknown(let lhsMessage), .unknown(let rhsMessage)):
+                return lhsMessage == rhsMessage
+            default:
+                return false
+            }
+        }
     }
     
     // MARK: - Properties
     private(set) var currentState: HomeUpNextState = .idle
     weak var delegate: HomeUpNextViewModelDelegate?
-    private let fetchedResultsController: NSFetchedResultsController<FilmMO>
+    private(set) var fetchedResultsController: NSFetchedResultsController<FilmMO>
     
     var upNextFilms: [FilmWithStatus] {
         let managedObjects = fetchedResultsController.fetchedObjects ?? []
@@ -29,16 +75,19 @@ final class HomeUpNextViewModel: NSObject, NSFetchedResultsControllerDelegate {
         }
     }
     
-    init(persistentContainer: NSPersistentContainer) {
+    init(persistentContainer: NSPersistentContainer, fetchedResultsController: NSFetchedResultsController<FilmMO>? = nil) {
         let context = persistentContainer.viewContext
         let request = FilmMO.upNextFetchRequest()
-        
-        self.fetchedResultsController = NSFetchedResultsController(
-            fetchRequest: request,
-            managedObjectContext: context,
-            sectionNameKeyPath: nil,
-            cacheName: nil
-        )
+        if let injectedController = fetchedResultsController {
+            self.fetchedResultsController = injectedController
+        } else {
+            self.fetchedResultsController = NSFetchedResultsController(
+                fetchRequest: request,
+                managedObjectContext: context,
+                sectionNameKeyPath: nil,
+                cacheName: nil
+            )
+        }
         super.init()
         self.fetchedResultsController.delegate = self
     }
@@ -48,9 +97,17 @@ final class HomeUpNextViewModel: NSObject, NSFetchedResultsControllerDelegate {
             try fetchedResultsController.performFetch()
             currentState = .fetchedObjects
             delegate?.upNextFilmsDidChange(upNextFilms)
-        } catch {
+        } catch let error as NSError {
             delegate?.upNextFilmsDidChange([])
-            print(error.localizedDescription)
+            let customError: HomeUpNextError
+            if error.domain == NSCocoaErrorDomain && error.code == NSFileWriteOutOfSpaceError {
+                customError = .diskFull
+            } else if error.domain == NSCocoaErrorDomain {
+                customError = .databaseAccessError
+            } else {
+                customError = .unknown(error.localizedDescription)
+            }
+            currentState = .failure(customError)
         }
     }
     
