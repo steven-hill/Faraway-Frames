@@ -13,6 +13,7 @@ final class HomeUpNextViewModel: NSObject, NSFetchedResultsControllerDelegate {
     // MARK: - State Definition
     enum HomeUpNextState {
         case idle
+        case fetchedObjects
     }
     
     // MARK: - Properties
@@ -46,6 +47,7 @@ final class HomeUpNextViewModel: NSObject, NSFetchedResultsControllerDelegate {
         do {
             try fetchedResultsController.performFetch()
             delegate?.upNextFilmsDidChange(upNextFilms)
+            currentState = .fetchedObjects
         } catch {
             delegate?.upNextFilmsDidChange([])
             print(error.localizedDescription)

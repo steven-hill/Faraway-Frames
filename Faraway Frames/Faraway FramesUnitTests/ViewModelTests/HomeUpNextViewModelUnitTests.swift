@@ -19,6 +19,15 @@ struct HomeUpNextViewModelUnitTests {
         #expect(sut.currentState == .idle, "Should be `.idle` on init.")
     }
     
+    @Test func homeUpNextViewModel_currentStateAfterFetch_isFetchedObjects() throws {
+        let persistenceController = try PersistenceController(inMemory: true)
+        let sut = HomeUpNextViewModel(persistentContainer: persistenceController.container)
+        
+        sut.startFetching()
+        
+        #expect(sut.currentState == .fetchedObjects, "Should be fetchedObjects.")
+    }
+    
     @Test("Verify `HomeUpNextViewModel` only fetches Up Next records")
     func homeUpNextViewModel_fetchesCorrectly() throws {
         let persistenceController = try PersistenceController(inMemory: true)
