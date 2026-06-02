@@ -72,7 +72,7 @@ struct HomeUpNextViewModelUnitTests {
     }
     
     @Test("`currentState` is correct when there is an unknown error")
-    func homeUpNextViewModel_startFetching_onNonCoreDataError_setsUnknownFailureState() throws {
+    func homeUpNextViewModel_fetchUpNextFilms_onNonCoreDataError_setsUnknownFailureState() throws {
         let persistenceController = try PersistenceController(inMemory: true)
         let context = persistenceController.container.viewContext
         struct NonCoreDataError: Error, LocalizedError {
@@ -90,6 +90,35 @@ struct HomeUpNextViewModelUnitTests {
         
         let expectedErrorString = simulatedError.localizedDescription
         #expect(sut.currentState == .failure(.unknown(expectedErrorString)))
+    }
+    
+    @Test("`currentState` updates correctly across different error domains and codes", arguments: [
+        (
+            error: NSError(domain: NSCocoaErrorDomain, code: NSFileWriteOutOfSpaceError, userInfo: nil) as Error,
+            expectedState: HomeUpNextViewModel.HomeUpNextState.failure(.diskFull)
+        ),
+        (
+            error: NSError(domain: NSCocoaErrorDomain, code: NSPersistentStoreOpenError, userInfo: nil) as Error,
+            expectedState: HomeUpNextViewModel.HomeUpNextState.failure(.databaseAccessError)
+        ),
+        (
+            error: UnknownError() as Error,
+            expectedState: HomeUpNextViewModel.HomeUpNextState.failure(.unknown(UnknownError().localizedDescription))
+        )
+    ]
+    )
+    func homeUpNextViewModel_fetchUpNextFilms_setsCorrectFailureState(for scenario: (error: Error, expectedState: HomeUpNextViewModel.HomeUpNextState)) throws {
+        let persistenceController = try PersistenceController(inMemory: true)
+        let context = persistenceController.container.viewContext
+        let throwingController = ThrowingFetchedResultsController(context: context, errorToThrow: scenario.error)
+        let sut = HomeUpNextViewModel(
+            persistentContainer: persistenceController.container,
+            fetchedResultsController: throwingController
+        )
+        
+        sut.fetchUpNextFilms()
+        
+        #expect(sut.currentState == scenario.expectedState)
     }
     
     @Test("`HomeUpNextViewModel` only fetches Up Next films")
@@ -149,5 +178,10 @@ struct HomeUpNextViewModelUnitTests {
         override func performFetch() throws {
             throw errorToThrow
         }
+    }
+    
+    //MARK: - Custom error helper
+    private struct UnknownError: Error, LocalizedError {
+        var errorDescription: String? { "Unknown error." }
     }
 }
