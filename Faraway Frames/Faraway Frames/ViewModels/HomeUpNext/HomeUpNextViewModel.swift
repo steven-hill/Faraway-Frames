@@ -30,6 +30,7 @@ final class HomeUpNextViewModel: NSObject, NSFetchedResultsControllerDelegate {
         }
     }
     
+    // MARK: - Custom Error Definition
     enum HomeUpNextError: Error, Identifiable, Equatable {
         case databaseAccessError
         case diskFull
@@ -40,9 +41,9 @@ final class HomeUpNextViewModel: NSObject, NSFetchedResultsControllerDelegate {
         var localizedDescription: String {
             switch self {
             case .databaseAccessError:
-                return "Unable to access your local library. Please try restarting the app."
+                return "Unable to access database. Try restarting the app."
             case .diskFull:
-                return "Your device is out of storage space. Free up some space to load your library."
+                return "Device storage full. Try freeing up some space."
             case .unknown(let message):
                 return message
             }
@@ -75,6 +76,7 @@ final class HomeUpNextViewModel: NSObject, NSFetchedResultsControllerDelegate {
         }
     }
     
+    // MARK: - Initialisation
     init(persistentContainer: NSPersistentContainer, fetchedResultsController: NSFetchedResultsController<FilmMO>? = nil) {
         let context = persistentContainer.viewContext
         let request = FilmMO.upNextFetchRequest()
@@ -92,6 +94,7 @@ final class HomeUpNextViewModel: NSObject, NSFetchedResultsControllerDelegate {
         self.fetchedResultsController.delegate = self
     }
     
+    // MARK: - Methods
     func fetchUpNextFilms() {
         do {
             try fetchedResultsController.performFetch()
