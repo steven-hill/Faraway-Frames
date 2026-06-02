@@ -30,68 +30,6 @@ struct HomeUpNextViewModelUnitTests {
         #expect(sut.currentState == .fetchedObjects, "Should be fetchedObjects.")
     }
     
-    @Test("`currentState` is correct when there is a disk full error")
-    func homeUpNextViewModel_fetchUpNextFilms_onDiskFull_setsDiskFullState() throws {
-        let persistenceController = try PersistenceController(inMemory: true)
-        let context = persistenceController.container.viewContext
-        let diskFullNSError = NSError(
-            domain: NSCocoaErrorDomain,
-            code: NSFileWriteOutOfSpaceError,
-            userInfo: nil
-        )
-        let throwingController = ThrowingFetchedResultsController(context: context, errorToThrow: diskFullNSError)
-        let sut = HomeUpNextViewModel(
-            persistentContainer: persistenceController.container,
-            fetchedResultsController: throwingController
-        )
-        
-        sut.fetchUpNextFilms()
-        
-        #expect(sut.currentState == .failure(.diskFull))
-    }
-    
-    @Test("`currentState` is correct when there is a general database error")
-    func homeUpNextViewModel_fetchUpNextFilms_onGeneralCoreDataError_setsDatabaseAccessErrorState() throws {
-        let persistenceController = try PersistenceController(inMemory: true)
-        let context = persistenceController.container.viewContext
-        let genericCoreDataError = NSError(
-            domain: NSCocoaErrorDomain,
-            code: NSPersistentStoreOpenError,
-            userInfo: nil
-        )
-        let throwingController = ThrowingFetchedResultsController(context: context, errorToThrow: genericCoreDataError)
-        
-        let sut = HomeUpNextViewModel(
-            persistentContainer: persistenceController.container,
-            fetchedResultsController: throwingController
-        )
-        
-        sut.fetchUpNextFilms()
-        
-        #expect(sut.currentState == .failure(.databaseAccessError))
-    }
-    
-    @Test("`currentState` is correct when there is an unknown error")
-    func homeUpNextViewModel_fetchUpNextFilms_onNonCoreDataError_setsUnknownFailureState() throws {
-        let persistenceController = try PersistenceController(inMemory: true)
-        let context = persistenceController.container.viewContext
-        struct NonCoreDataError: Error, LocalizedError {
-            var errorDescription: String? { "Unknown error." }
-        }
-        let simulatedError = NonCoreDataError()
-        let throwingController = ThrowingFetchedResultsController(context: context, errorToThrow: simulatedError)
-        
-        let sut = HomeUpNextViewModel(
-            persistentContainer: persistenceController.container,
-            fetchedResultsController: throwingController
-        )
-        
-        sut.fetchUpNextFilms()
-        
-        let expectedErrorString = simulatedError.localizedDescription
-        #expect(sut.currentState == .failure(.unknown(expectedErrorString)))
-    }
-    
     @Test("`currentState` updates correctly across different error domains and codes", arguments: [
         (
             error: NSError(domain: NSCocoaErrorDomain, code: NSFileWriteOutOfSpaceError, userInfo: nil) as Error,
