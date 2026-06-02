@@ -6,6 +6,7 @@
 //
 
 import Testing
+@testable import Faraway_Frames
 import CoreData
 
 struct FilmMOQueryTests {
