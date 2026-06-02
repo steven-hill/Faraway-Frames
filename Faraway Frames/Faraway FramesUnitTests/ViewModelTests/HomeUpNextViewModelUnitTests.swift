@@ -12,14 +12,16 @@ import CoreData
 @MainActor
 struct HomeUpNextViewModelUnitTests {
     
-    @Test func homeUpNextViewModel_currentStateOnInit_isNoFilms() throws {
+    @Test("`currentState` is correct on init")
+    func homeUpNextViewModel_currentStateOnInit_isIdle() throws {
         let persistenceController = try PersistenceController(inMemory: true)
         let sut = HomeUpNextViewModel(persistentContainer: persistenceController.container)
         
         #expect(sut.currentState == .idle, "Should be `.idle` on init.")
     }
     
-    @Test func homeUpNextViewModel_currentStateAfterFetch_isFetchedObjects() throws {
+    @Test("`currentState` is correct after fetching Up Next films")
+    func homeUpNextViewModel_currentStateAfterFetch_isFetchedObjects() throws {
         let persistenceController = try PersistenceController(inMemory: true)
         let sut = HomeUpNextViewModel(persistentContainer: persistenceController.container)
         
@@ -28,7 +30,7 @@ struct HomeUpNextViewModelUnitTests {
         #expect(sut.currentState == .fetchedObjects, "Should be fetchedObjects.")
     }
     
-    @Test("Verify `HomeUpNextViewModel` only fetches Up Next records")
+    @Test("`HomeUpNextViewModel` only fetches Up Next films")
     func homeUpNextViewModel_fetchesCorrectly() throws {
         let persistenceController = try PersistenceController(inMemory: true)
         let sut = HomeUpNextViewModel(persistentContainer: persistenceController.container)
