@@ -19,9 +19,10 @@ struct PersistenceControllerTests {
         }
         
         switch thrownError {
-        case .loadingStoresFailed(let underlyingError):
-            let nsError = underlyingError as NSError
-            #expect(nsError.code == 404)
+        case .loadingStoresFailed(let error):
+            let nsError = error as NSError
+            #expect(nsError.domain == NSCocoaErrorDomain, "Should be a Cocoa error")
+            #expect(nsError.code == NSFileReadNoSuchFileError, "Should be a no such file error")
         default:
             Issue.record("Expected .loadingStoresFailed, but got \(thrownError)")
         }
