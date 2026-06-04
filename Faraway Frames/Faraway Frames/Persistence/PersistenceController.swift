@@ -17,9 +17,19 @@ final class PersistenceController: PersistenceControlling {
     
     // MARK: - Initialisation
     init(inMemory: Bool = false,
+         containerName: String = Persistence.persistentContainerName,
          storeLoader: ((NSPersistentContainer, @escaping (NSPersistentStoreDescription, Error?) -> Void) -> Void) = { $0.loadPersistentStores(completionHandler: $1) }
     ) throws {
-        container = NSPersistentContainer(name: Persistence.persistentContainerName)
+        let bundle = Bundle(for: Self.self)
+        guard bundle.url(forResource: containerName, withExtension: "momd") != nil else {
+            let error = NSError(
+                domain: NSCocoaErrorDomain,
+                code: NSFileReadNoSuchFileError,
+                userInfo: [NSLocalizedDescriptionKey: "Failed to locate the .momd file for the container"])
+            throw PersistenceError.loadingStoresFailed(error: error)
+        }
+        
+        container = NSPersistentContainer(name: containerName)
         
         if inMemory {
             let description = NSPersistentStoreDescription()
