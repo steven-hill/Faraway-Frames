@@ -14,7 +14,7 @@ struct DatabaseErrorVCTests {
 
     @Test("DatabaseErrorVC can be initialised and has a view")
     func databaseErrorVC_canInitAndLoadView() {
-        let sut = DatabaseErrorVC(errorMessage: "Database errror")
+        let sut = makeSUT()
         
         sut.loadViewIfNeeded()
         
@@ -23,11 +23,16 @@ struct DatabaseErrorVCTests {
     
     @Test("DatabaseErrorVC shows error configuration")
     func databaseErrorVC_whenThereIsAnError_updatesContentUnavailableConfiguration() {
-        let sut = DatabaseErrorVC(errorMessage: "Database errror")
+        let sut = makeSUT()
         
         sut.loadViewIfNeeded()
         sut.setNeedsUpdateContentUnavailableConfiguration()
         
         #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil.")
+    }
+    
+    //MARK: - Helper method
+    private func makeSUT() -> DatabaseErrorVC {
+        DatabaseErrorVC(errorMessage: "Database error")
     }
 }
