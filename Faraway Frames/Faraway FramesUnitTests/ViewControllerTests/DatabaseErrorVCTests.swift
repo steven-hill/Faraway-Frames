@@ -21,12 +21,11 @@ struct DatabaseErrorVCTests {
         #expect(sut.view != nil, "VC should load the view.")
     }
     
-    @Test("DatabaseErrorVC shows error configuration")
-    func databaseErrorVC_whenThereIsAnError_updatesContentUnavailableConfiguration() {
+    @Test("DatabaseErrorVC updates configuration correctly in viewDidLoad")
+    func databaseErrorVC_viewDidLoad_updatesContentUnavailableConfiguration() {
         let sut = makeSUT()
         
         sut.loadViewIfNeeded()
-        sut.setNeedsUpdateContentUnavailableConfiguration()
         
         #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil.")
     }
