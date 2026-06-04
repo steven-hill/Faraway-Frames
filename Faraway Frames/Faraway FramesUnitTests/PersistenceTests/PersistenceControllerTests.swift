@@ -12,6 +12,21 @@ import CoreData
 @MainActor
 struct PersistenceControllerTests {
     
+    @Test("Invalid persistent container name string throws a loading failure")
+    func persistenceController_withTypoInContainerName_throwsLoadingStoresFailedError() throws {
+        let thrownError = #expect(throws: PersistenceError.self) {
+            try PersistenceController(inMemory: true, containerName: "FarawayFramesCDModelTypo")
+        }
+        
+        switch thrownError {
+        case .loadingStoresFailed(let underlyingError):
+            let nsError = underlyingError as NSError
+            #expect(nsError.code == 404)
+        default:
+            Issue.record("Expected .loadingStoresFailed, but got \(thrownError)")
+        }
+    }
+    
     @Test("Error is thrown when loading persistent stores fails")
     func persistenceController_whenLoadingPersistentStoresFails_throwsCorrectError() throws {
         let mockError = NSError(domain: "TestDomain", code: 42, userInfo: nil)
