@@ -62,6 +62,48 @@ struct HomeViewModelTests {
         #expect(filmWatched.film.title == Film.sample[1].title, "Should be equal.")
     }
     
+    @Test("`currentState` updates correctly across different error domains and codes", arguments: [
+        (
+            error: NSError(domain: NSCocoaErrorDomain, code: NSFileWriteOutOfSpaceError, userInfo: nil) as Error,
+            expectedState: HomeViewModel.HomeState.failure(.diskFull)
+        ),
+        (
+            error: NSError(domain: NSCocoaErrorDomain, code: NSPersistentStoreOpenError, userInfo: nil) as Error,
+            expectedState: HomeViewModel.HomeState.failure(.databaseAccessError)
+        ),
+        (
+            error: NSError(domain: NSCocoaErrorDomain, code: CocoaError.managedObjectReferentialIntegrity.rawValue, userInfo: nil) as Error,
+            expectedState: HomeViewModel.HomeState.failure(.databaseAccessError)
+        ),
+        (
+            error: NSError(domain: NSCocoaErrorDomain, code: CocoaError.persistentStoreTypeMismatch.rawValue, userInfo: nil) as Error,
+            expectedState: HomeViewModel.HomeState.failure(.databaseAccessError)
+        ),
+        (
+            error: NSError(domain: NSCocoaErrorDomain, code: CocoaError.fileNoSuchFile.rawValue, userInfo: nil) as Error,
+            expectedState: HomeViewModel.HomeState.failure(.databaseAccessError)
+        ),
+        (
+            error: UnknownError() as Error,
+            expectedState: HomeViewModel.HomeState.failure(.unknown(UnknownError().localizedDescription))
+        )
+    ]
+    )
+    func homeViewModel_performFetches_setsCorrectFailureState(for scenario: (error: Error, expectedState: HomeViewModel.HomeState)) throws {
+        let persistenceController = try PersistenceController(inMemory: true)
+        let context = persistenceController.container.viewContext
+        let throwingController = ThrowingFetchedResultsController(context: context, errorToThrow: scenario.error)
+        let sut = HomeViewModel(
+            persistentContainer: persistenceController.container,
+            upNextFRC: throwingController,
+            watchedFRC: throwingController
+        )
+        
+        sut.performFetches()
+        
+        #expect(sut.currentState == scenario.expectedState)
+    }
+    
     //MARK: - Home ViewModel Delegate Spy
     final class HomeViewModelDelegateSpy: HomeViewModelDelegate {
         var upNextFilms: [FilmWithStatus]?
@@ -73,5 +115,32 @@ struct HomeViewModelTests {
             self.watchedFilms = watchedFilms
             self.callCount += 1
         }
+    }
+    
+    //MARK: - Throwing FetchedResultsController
+    final class ThrowingFetchedResultsController: NSFetchedResultsController<FilmMO> {
+        let errorToThrow: Error
+        
+        init(context: NSManagedObjectContext, errorToThrow: Error) {
+            self.errorToThrow = errorToThrow
+            
+            let validRequest = FilmMO.fetchRequest()
+            validRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+            super.init(
+                fetchRequest: validRequest,
+                managedObjectContext: context,
+                sectionNameKeyPath: nil,
+                cacheName: nil
+            )
+        }
+        
+        override func performFetch() throws {
+            throw errorToThrow
+        }
+    }
+    
+    //MARK: - Custom error helper
+    private struct UnknownError: Error, LocalizedError {
+        var errorDescription: String? { "Unknown error." }
     }
 }
