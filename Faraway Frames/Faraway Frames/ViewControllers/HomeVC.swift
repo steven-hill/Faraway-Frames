@@ -59,11 +59,3 @@ extension HomeVC: HomeViewModelDelegate {
     func filmsDidChange(_ upNextFilms: [FilmWithStatus], _ watchedFilms: [FilmWithStatus]) {
     }
 }
-
-// MARK: - Preview
-//#Preview("HomeVC") {
-//    let upNextViewModel = HomeUpNextViewModel()
-//    let watchedViewModel = HomeWatchedViewModel()
-//    let vc = HomeVC(upNextViewModel: upNextViewModel, watchedViewModel: watchedViewModel)
-//    vc
-//}
