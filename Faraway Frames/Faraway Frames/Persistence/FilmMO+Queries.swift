@@ -8,17 +8,20 @@
 import CoreData
 
 extension FilmMO {
+    // MARK: - Fetch Requests
     static func upNextFetchRequest() -> NSFetchRequest<FilmMO> {
-        let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
-        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
-        request.predicate = NSPredicate(format: "isUpNext == YES")
-        return request
+        return baseFetchRequest(predicate: NSPredicate(format: "isUpNext == YES"))
     }
     
     static func watchedFetchRequest() -> NSFetchRequest<FilmMO> {
+        return baseFetchRequest(predicate: NSPredicate(format: "isWatched == YES"))
+    }
+    
+    // MARK: - Helper
+    private static func baseFetchRequest(predicate: NSPredicate) -> NSFetchRequest<FilmMO> {
         let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
         request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
-        request.predicate = NSPredicate(format: "isWatched == YES")
+        request.predicate = predicate
         return request
     }
 }
