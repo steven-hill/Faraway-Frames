@@ -20,20 +20,18 @@ struct HomeVCTests {
         #expect(sut.view != nil, "VC should load the view.")
     }
     
-    @Test func homeVC_setsViewModelsDelegateToSelf() throws {
+    @Test func homeVC_setsViewModelDelegateToSelf() throws {
         let sut = try makeSUT()
         
         sut.loadViewIfNeeded()
         
-        #expect(sut.upNextViewModel.delegate != nil, "View model's delegate should be set.")
-        #expect(sut.watchedViewModel.delegate != nil, "View model's delegate should be set.")
+        #expect(sut.homeViewModel.delegate != nil, "View model's delegate should be set.")
     }
         
     // MARK: - SUT Helper Method
     private func makeSUT() throws -> HomeVC {
         let persistenceController = try PersistenceController(inMemory: true)
-        let upNextViewModel = HomeUpNextViewModel(persistentContainer: persistenceController.container)
-        let watchedViewModel = HomeWatchedViewModel()
-        return HomeVC(upNextViewModel: upNextViewModel, watchedViewModel: watchedViewModel)
+        let homeViewModel = HomeViewModel(persistentContainer: persistenceController.container)
+        return HomeVC(homeViewModel: homeViewModel)
     }
 }
