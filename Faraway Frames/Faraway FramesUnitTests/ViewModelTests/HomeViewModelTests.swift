@@ -17,6 +17,16 @@ struct HomeViewModelTests {
         let persistenceController = try PersistenceController(inMemory: true)
         let sut = HomeViewModel(persistentContainer: persistenceController.container)
         
-        #expect(sut.currentState == .idle, "Should be `.idle` on init.")
+        #expect(sut.currentState == .idle, "Should be `.idle`.")
+    }
+    
+    @Test("`currentState` is correct after fetching Up Next films and Watched films")
+    func homeViewModel_currentStateAfterFetches_isFetchedObjects() throws {
+        let persistenceController = try PersistenceController(inMemory: true)
+        let sut = HomeViewModel(persistentContainer: persistenceController.container)
+        
+        sut.performFetches()
+        
+        #expect(sut.currentState == .fetchedObjects, "Should be `.fetchedObjects`.")
     }
 }

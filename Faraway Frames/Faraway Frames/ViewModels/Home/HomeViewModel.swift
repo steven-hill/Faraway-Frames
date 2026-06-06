@@ -11,14 +11,33 @@ import CoreData
 final class HomeViewModel: NSObject, NSFetchedResultsControllerDelegate {
     
     // MARK: - State Definition
-    enum HomeUpNextState {
+    enum HomeState {
         case idle
+        case fetchedObjects
+        case failure(HomeError)
     }
     
     // MARK: - Properties
-    private(set) var currentState: HomeUpNextState = .idle
+    private(set) var currentState: HomeState = .idle
+    weak var delegate: HomeViewModelDelegate?
     private(set) var upNextFRC: NSFetchedResultsController<FilmMO>
     private(set) var watchedFRC: NSFetchedResultsController<FilmMO>
+    
+    var upNextFilms: [FilmWithStatus] {
+        let managedObjects = upNextFRC.fetchedObjects ?? []
+        return managedObjects.map { mo in
+            Film.from(id: mo.id, title: mo.title, originalTitle: mo.originalTitle, originalTitleRomanised: mo.originalTitleRomanised, image: mo.image, movieBanner: mo.movieBanner, filmDescription: mo.filmDescription, director: mo.director, producer: mo.producer, releaseDate: mo.releaseDate, runningTime: mo.runningTime, rottenTomatoesScore: mo.rottenTomatoesScore, url: mo.url, isUpNext: mo.isUpNext, isWatched: mo.isWatched
+            )
+        }
+    }
+    
+    var watchedFilms: [FilmWithStatus] {
+        let managedObjects = watchedFRC.fetchedObjects ?? []
+        return managedObjects.map { mo in
+            Film.from(id: mo.id, title: mo.title, originalTitle: mo.originalTitle, originalTitleRomanised: mo.originalTitleRomanised, image: mo.image, movieBanner: mo.movieBanner, filmDescription: mo.filmDescription, director: mo.director, producer: mo.producer, releaseDate: mo.releaseDate, runningTime: mo.runningTime, rottenTomatoesScore: mo.rottenTomatoesScore, url: mo.url, isUpNext: mo.isUpNext, isWatched: mo.isWatched
+            )
+        }
+    }
     
     // MARK: - Initialisation
     init(persistentContainer: NSPersistentContainer,
@@ -53,5 +72,33 @@ final class HomeViewModel: NSObject, NSFetchedResultsControllerDelegate {
         super.init()
         self.upNextFRC.delegate = self
         self.watchedFRC.delegate = self
+    }
+    
+    // MARK: - Methods
+    func performFetches() {
+        do {
+            try upNextFRC.performFetch()
+            try watchedFRC.performFetch()
+            currentState = .fetchedObjects
+            delegate?.filmsDidChange(upNextFilms, watchedFilms)
+        } catch let error as NSError {
+            currentState = .failure(HomeError(error))
+            delegate?.filmsDidChange([], [])
+        }
+    }
+}
+
+extension HomeViewModel.HomeState {
+    static func == (lhs: HomeViewModel.HomeState, rhs: HomeViewModel.HomeState) -> Bool {
+        switch (lhs, rhs) {
+        case (.idle, .idle):
+            return true
+        case (.fetchedObjects, .fetchedObjects):
+            return true
+        case (.failure(let lhsError), .failure(let rhsError)):
+            return lhsError == rhsError
+        default:
+            return false
+        }
     }
 }
