@@ -20,10 +20,10 @@ final class HomeViewModel: NSObject, NSFetchedResultsControllerDelegate {
     // MARK: - Properties
     private(set) var currentState: HomeState = .idle
     weak var delegate: HomeViewModelDelegate?
-    private(set) var upNextFRC: NSFetchedResultsController<FilmMO>
-    private(set) var watchedFRC: NSFetchedResultsController<FilmMO>
+    private let upNextFRC: NSFetchedResultsController<FilmMO>
+    private let watchedFRC: NSFetchedResultsController<FilmMO>
     
-    var upNextFilms: [FilmWithStatus] {
+    private var upNextFilms: [FilmWithStatus] {
         let managedObjects = upNextFRC.fetchedObjects ?? []
         return managedObjects.map { mo in
             Film.from(id: mo.id, title: mo.title, originalTitle: mo.originalTitle, originalTitleRomanised: mo.originalTitleRomanised, image: mo.image, movieBanner: mo.movieBanner, filmDescription: mo.filmDescription, director: mo.director, producer: mo.producer, releaseDate: mo.releaseDate, runningTime: mo.runningTime, rottenTomatoesScore: mo.rottenTomatoesScore, url: mo.url, isUpNext: mo.isUpNext, isWatched: mo.isWatched
@@ -31,7 +31,7 @@ final class HomeViewModel: NSObject, NSFetchedResultsControllerDelegate {
         }
     }
     
-    var watchedFilms: [FilmWithStatus] {
+    private var watchedFilms: [FilmWithStatus] {
         let managedObjects = watchedFRC.fetchedObjects ?? []
         return managedObjects.map { mo in
             Film.from(id: mo.id, title: mo.title, originalTitle: mo.originalTitle, originalTitleRomanised: mo.originalTitleRomanised, image: mo.image, movieBanner: mo.movieBanner, filmDescription: mo.filmDescription, director: mo.director, producer: mo.producer, releaseDate: mo.releaseDate, runningTime: mo.runningTime, rottenTomatoesScore: mo.rottenTomatoesScore, url: mo.url, isUpNext: mo.isUpNext, isWatched: mo.isWatched
@@ -74,7 +74,7 @@ final class HomeViewModel: NSObject, NSFetchedResultsControllerDelegate {
         self.watchedFRC.delegate = self
     }
     
-    // MARK: - Methods
+    // MARK: - Method
     func performFetches() {
         do {
             try upNextFRC.performFetch()
