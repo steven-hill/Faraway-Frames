@@ -18,9 +18,8 @@ final class HomeCoordinator: Coordinator {
     }
     
     func start() {
-        let upNextViewModel = HomeUpNextViewModel(persistentContainer: persistentContainer)
-        let watchedViewModel = HomeWatchedViewModel()
-        let homeVC = HomeVC(upNextViewModel: upNextViewModel, watchedViewModel: watchedViewModel)
+        let homeViewModel = HomeViewModel(persistentContainer: persistentContainer)
+        let homeVC = HomeVC(homeViewModel: homeViewModel)
         navigationController.setViewControllers([homeVC], animated: false)
     }
 }

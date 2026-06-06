@@ -1,14 +1,14 @@
 //
-//  HomeUpNextError.swift
+//  HomeError.swift
 //  Faraway Frames
 //
-//  Created by Steven Hill on 02/06/2026.
+//  Created by Steven Hill on 06/06/2026.
 //
 
 import Foundation
 import CoreData
 
-enum HomeUpNextError: Error, Identifiable, Equatable {
+enum HomeError: Error, Identifiable, Equatable {
     case databaseAccessError
     case diskFull
     case unknown(String)
@@ -25,8 +25,8 @@ enum HomeUpNextError: Error, Identifiable, Equatable {
             return message
         }
     }
-
-    static func == (lhs: HomeUpNextError, rhs: HomeUpNextError) -> Bool {
+    
+    static func == (lhs: HomeError, rhs: HomeError) -> Bool {
         switch (lhs, rhs) {
         case (.databaseAccessError, .databaseAccessError):
             return true
@@ -40,15 +40,15 @@ enum HomeUpNextError: Error, Identifiable, Equatable {
     }
 }
 
-extension HomeUpNextError {
+extension HomeError {
     init(_ error: Error) {
         if let cocoaError = error as? CocoaError {
             switch cocoaError.code {
             case .fileWriteOutOfSpace:
                 self = .diskFull
             case .persistentStoreOpen,
-                 .managedObjectReferentialIntegrity,
-                 .persistentStoreTypeMismatch:
+                    .managedObjectReferentialIntegrity,
+                    .persistentStoreTypeMismatch:
                 self = .databaseAccessError
             default:
                 self = .databaseAccessError

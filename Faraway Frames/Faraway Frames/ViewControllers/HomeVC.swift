@@ -10,14 +10,12 @@ import UIKit
 final class HomeVC: UIViewController {
     
     // MARK: - Properties
-    let upNextViewModel: HomeUpNextViewModel
-    let watchedViewModel: HomeWatchedViewModel
+    let homeViewModel: HomeViewModel
     lazy var collectionView = UICollectionView()
     
     // MARK: - Initialisation
-    init(upNextViewModel: HomeUpNextViewModel, watchedViewModel: HomeWatchedViewModel) {
-        self.upNextViewModel = upNextViewModel
-        self.watchedViewModel = watchedViewModel
+    init(homeViewModel: HomeViewModel) {
+        self.homeViewModel = homeViewModel
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -30,8 +28,7 @@ final class HomeVC: UIViewController {
         super.viewDidLoad()
         navigationController?.navigationBar.prefersLargeTitles = true
         title = "Home"
-        upNextViewModel.delegate = self
-        watchedViewModel.delegate = self
+        homeViewModel.delegate = self
         configureCollectionView()
     }
     
@@ -57,20 +54,8 @@ final class HomeVC: UIViewController {
     }
 }
 
-// MARK: - Up Next View Model Delegate
-extension HomeVC: HomeUpNextViewModelDelegate {
-    func upNextFilmsDidChange(_ films: [FilmWithStatus]) {
+// MARK: - Home View Model Delegate
+extension HomeVC: HomeViewModelDelegate {
+    func filmsDidChange(_ upNextFilms: [FilmWithStatus], _ watchedFilms: [FilmWithStatus]) {
     }
 }
-
-// MARK: - Watched View Model Delegate
-extension HomeVC: HomeWatchedViewModelDelegate {
-}
-
-// MARK: - Preview
-//#Preview("HomeVC") {
-//    let upNextViewModel = HomeUpNextViewModel()
-//    let watchedViewModel = HomeWatchedViewModel()
-//    let vc = HomeVC(upNextViewModel: upNextViewModel, watchedViewModel: watchedViewModel)
-//    vc
-//}
