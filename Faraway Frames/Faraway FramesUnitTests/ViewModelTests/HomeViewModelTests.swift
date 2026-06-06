@@ -32,7 +32,7 @@ struct HomeViewModelTests {
     }
     
     @Test("`HomeViewModel` can fetch up next films and watched films")
-    func homeUpNextViewModel_performFetches_fetchesCorrectly() throws {
+    func homeViewModel_performFetches_fetchesCorrectly() throws {
         let persistenceController = try PersistenceController(inMemory: true)
         let sut = HomeViewModel(persistentContainer: persistenceController.container)
         let delegateSpy = HomeViewModelDelegateSpy()
