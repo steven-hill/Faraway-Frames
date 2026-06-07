@@ -13,18 +13,15 @@ import CoreData
 struct HomeViewModelTests {
     
     @Test("`currentState` is correct on init")
-    func homeViewModel_currentStateOnInit_isIdle() throws {
-        let persistenceController = try PersistenceController(inMemory: true)
-        
-        let sut = HomeViewModel(persistentContainer: persistenceController.container)
+    func homeViewModel_currentStateOnInit_isIdle() {
+        let sut = makeSUT()
         
         #expect(sut.currentState == .idle, "Should be `.idle`.")
     }
     
     @Test("`currentState` is correct after fetching Up Next films and Watched films")
-    func homeViewModel_currentStateAfterFetches_isFetchedObjects() throws {
-        let persistenceController = try PersistenceController(inMemory: true)
-        let sut = HomeViewModel(persistentContainer: persistenceController.container)
+    func homeViewModel_currentStateAfterFetches_isFetchedObjects() {
+        let sut = makeSUT()
         
         sut.performFetches()
         
@@ -33,11 +30,11 @@ struct HomeViewModelTests {
     
     @Test("`HomeViewModel` can fetch up next films and watched films")
     func homeViewModel_performFetches_fetchesCorrectly() throws {
-        let persistenceController = try PersistenceController(inMemory: true)
-        let sut = HomeViewModel(persistentContainer: persistenceController.container)
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let sut = HomeViewModel(context: context)
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
-        let context = persistenceController.viewContext
         let entity = try #require(
             NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
             "The Core Data model schema must contain an entity definition named 'FilmMO'."
@@ -90,12 +87,12 @@ struct HomeViewModelTests {
         )
     ]
     )
-    func homeViewModel_performFetches_setsCorrectFailureState(for scenario: (error: Error, expectedState: HomeViewModel.HomeState)) throws {
-        let persistenceController = try PersistenceController(inMemory: true)
+    func homeViewModel_performFetches_setsCorrectFailureState(for scenario: (error: Error, expectedState: HomeViewModel.HomeState)) {
+        let persistenceController = try! PersistenceController(inMemory: true)
         let context = persistenceController.container.viewContext
         let throwingController = ThrowingFetchedResultsController(context: context, errorToThrow: scenario.error)
         let sut = HomeViewModel(
-            persistentContainer: persistenceController.container,
+            context: context,
             upNextFRC: throwingController,
             watchedFRC: throwingController
         )
@@ -103,6 +100,13 @@ struct HomeViewModelTests {
         sut.performFetches()
         
         #expect(sut.currentState == scenario.expectedState)
+    }
+    
+    //MARK: - SUT Helper Method
+    private func makeSUT() -> HomeViewModel {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let viewModel = HomeViewModel(context: testPersistenceController.viewContext)
+        return viewModel
     }
     
     //MARK: - Home ViewModel Delegate Spy
