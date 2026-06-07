@@ -8,5 +8,5 @@
 import Foundation
 
 protocol HomeViewModelDelegate: AnyObject {
-    func filmsDidChange(_ upNextFilms: [FilmWithStatus], _ watchedFilms: [FilmWithStatus])
+    func filmsDidChange(_ upNextFilms: [Film], _ watchedFilms: [Film])
 }
