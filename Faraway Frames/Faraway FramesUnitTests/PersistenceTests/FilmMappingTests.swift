@@ -11,10 +11,10 @@ import CoreData
 
 struct FilmMappingTests {
     
-    @MainActor @Test("FilmMO maps to FilmWithStatus domain wrapper correctly")
+    @MainActor @Test("`FilmMO` maps to `FilmWithStatus` domain wrapper correctly")
     func filmMO_mapsToDomainWrapperCorrectly() throws {
-        let container = try PersistenceController(inMemory: true)
-        let context = container.viewContext
+        let testPersistenceController = try PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
         
         guard let entity = NSEntityDescription.entity(forEntityName: "FilmMO", in: context) else {
             let storeEntities = context.persistentStoreCoordinator?.managedObjectModel.entities.map { $0.name ?? "" } ?? []
