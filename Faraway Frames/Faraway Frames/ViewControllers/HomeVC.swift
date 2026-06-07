@@ -30,6 +30,7 @@ final class HomeVC: UIViewController {
         title = "Home"
         homeViewModel.delegate = self
         configureCollectionView()
+        homeViewModel.performFetches()
     }
     
     private func configureCollectionView() {
