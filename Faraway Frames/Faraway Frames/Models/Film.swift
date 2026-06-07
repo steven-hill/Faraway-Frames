@@ -36,6 +36,27 @@ struct Film: Codable, Identifiable, Hashable {
 }
 
 extension Film {
+    /// Maps a Core Data Managed Object into a clean Sendable Struct
+    init(from mo: FilmMO) {
+        self.id = mo.id ?? ""
+        self.title = mo.title ?? "Unknown Title"
+        self.originalTitle = mo.originalTitle ?? ""
+        self.originalTitleRomanised = mo.originalTitleRomanised ?? ""
+        self.image = mo.image ?? ""
+        self.movieBanner = mo.movieBanner ?? ""
+        self.description = mo.filmDescription ?? ""
+        self.director = mo.director ?? ""
+        self.producer = mo.producer ?? ""
+        self.releaseDate = mo.releaseDate ?? ""
+        self.runningTime = mo.runningTime ?? ""
+        self.rottenTomatoesScore = mo.rottenTomatoesScore ?? ""
+        self.url = mo.url ?? ""
+        self.isUpNext = mo.isUpNext
+        self.isWatched = mo.isWatched
+    }
+}
+
+extension Film {
     static let sample = [
         Film(
             id: "2baf70d1-42bb-4437-b551-e5fed5a87abe",
