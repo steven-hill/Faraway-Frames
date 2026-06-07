@@ -57,6 +57,6 @@ final class HomeVC: UIViewController {
 
 // MARK: - Home View Model Delegate
 extension HomeVC: HomeViewModelDelegate {
-    func filmsDidChange(_ upNextFilms: [FilmWithStatus], _ watchedFilms: [FilmWithStatus]) {
+    func filmsDidChange(_ upNextFilms: [Film], _ watchedFilms: [Film]) {
     }
 }
