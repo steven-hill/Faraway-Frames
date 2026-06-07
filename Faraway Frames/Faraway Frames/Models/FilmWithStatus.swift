@@ -6,9 +6,8 @@
 //
 
 import Foundation
-import CoreData
 
-/// A thread-safe, Sendable wrapper that combines a core Film entity with user-specific storage flags.
+/// A wrapper that combines a `Film` entity with user-specific storage flags.
 struct FilmWithStatus: Hashable, Identifiable, Sendable {
     var id: String { film.id }
     
@@ -23,10 +22,8 @@ struct FilmWithStatus: Hashable, Identifiable, Sendable {
     }
 }
 
-// Extension to map raw database variables to your clean domain structure
 extension Film {
-    /// Maps a managed object's fields directly into a thread-safe FilmWithStatus wrapper.
-    /// This decouples the type system from Core Data's background internal files.
+    /// Maps a managed object's fields directly into a `FilmWithStatus` wrapper.
     static func from(
         id: String?, title: String?, originalTitle: String?, originalTitleRomanised: String?,
         image: String?, movieBanner: String?, filmDescription: String?, director: String?,
