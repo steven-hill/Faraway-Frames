@@ -22,6 +22,7 @@ final class HomeViewModel: NSObject {
     weak var delegate: HomeViewModelDelegate?
     private let upNextFRC: NSFetchedResultsController<FilmMO>
     private let watchedFRC: NSFetchedResultsController<FilmMO>
+    private let context: NSManagedObjectContext
     
     private var upNextFilms: [FilmWithStatus] {
         let managedObjects = upNextFRC.fetchedObjects ?? []
@@ -40,11 +41,11 @@ final class HomeViewModel: NSObject {
     }
     
     // MARK: - Initialisation
-    init(persistentContainer: NSPersistentContainer,
+    init(context: NSManagedObjectContext,
          upNextFRC: NSFetchedResultsController<FilmMO>? = nil,
          watchedFRC: NSFetchedResultsController<FilmMO>? = nil
     ) {
-        let context = persistentContainer.viewContext
+        self.context = context
         
         if let injectedUpNextFRC = upNextFRC {
             self.upNextFRC = injectedUpNextFRC
