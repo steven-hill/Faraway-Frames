@@ -11,27 +11,27 @@ import UIKit
 
 @MainActor
 struct HomeVCTests {
-
-    @Test func homeVC_canInitAndLoadView() throws {
-        let sut = try makeSUT()
+    
+    @Test func homeVC_canInitAndLoadView() {
+        let sut = makeSUT()
         
         sut.loadViewIfNeeded()
         
         #expect(sut.view != nil, "VC should load the view.")
     }
     
-    @Test func homeVC_setsViewModelDelegateToSelf() throws {
-        let sut = try makeSUT()
+    @Test func homeVC_setsViewModelDelegateToSelf() {
+        let sut = makeSUT()
         
         sut.loadViewIfNeeded()
         
         #expect(sut.homeViewModel.delegate != nil, "View model's delegate should be set.")
     }
-        
+    
     // MARK: - SUT Helper Method
-    private func makeSUT() throws -> HomeVC {
-        let persistenceController = try PersistenceController(inMemory: true)
-        let homeViewModel = HomeViewModel(persistentContainer: persistenceController.container)
+    private func makeSUT() -> HomeVC {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let homeViewModel = HomeViewModel(context: testPersistenceController.viewContext)
         return HomeVC(homeViewModel: homeViewModel)
     }
 }

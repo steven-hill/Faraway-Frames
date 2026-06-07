@@ -23,7 +23,7 @@ final class MainCoordinator: Coordinator {
     }
     
     func start() {
-        let homeCoordinator = HomeCoordinator(navigationController: UINavigationController(), persistentContainer: persistenceController.container)
+        let homeCoordinator = HomeCoordinator(navigationController: UINavigationController(), context: persistenceController.viewContext)
         homeCoordinator.start()
         childCoordinators.append(homeCoordinator)
         

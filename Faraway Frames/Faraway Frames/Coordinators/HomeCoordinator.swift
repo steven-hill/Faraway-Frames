@@ -10,15 +10,15 @@ import CoreData
 
 final class HomeCoordinator: Coordinator {
     var navigationController: UINavigationController
-    private let persistentContainer: NSPersistentContainer
+    private let context: NSManagedObjectContext
     
-    init(navigationController: UINavigationController, persistentContainer: NSPersistentContainer) {
+    init(navigationController: UINavigationController, context: NSManagedObjectContext) {
         self.navigationController = navigationController
-        self.persistentContainer = persistentContainer
+        self.context = context
     }
     
     func start() {
-        let homeViewModel = HomeViewModel(persistentContainer: persistentContainer)
+        let homeViewModel = HomeViewModel(context: context)
         let homeVC = HomeVC(homeViewModel: homeViewModel)
         navigationController.setViewControllers([homeVC], animated: false)
     }
