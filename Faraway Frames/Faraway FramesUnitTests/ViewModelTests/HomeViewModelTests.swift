@@ -121,7 +121,7 @@ struct HomeViewModelTests {
         }
     }
     
-    //MARK: - Throwing FetchedResultsController
+    //MARK: - Throwing Fetched Results Controller
     final class ThrowingFetchedResultsController: NSFetchedResultsController<FilmMO> {
         let errorToThrow: Error
         
