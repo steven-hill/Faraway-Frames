@@ -49,13 +49,13 @@ struct HomeViewModelTests {
         #expect(upNextFilms.count == 1, "Should be one.")
         let filmUpNext = try #require(upNextFilms.first, "The film array should contain a film.")
         #expect(filmUpNext.id == Film.sample[0].id, "Should be equal.")
-        #expect(filmUpNext.film.title == Film.sample[0].title, "Should be equal.")
+        #expect(filmUpNext.title == Film.sample[0].title, "Should be equal.")
         
         let watchedFilms = try #require(delegateSpy.watchedFilms, "Delegate should have received a films array.")
         #expect(watchedFilms.count == 1, "Should be one.")
         let filmWatched = try #require(watchedFilms.first, "The film array should contain a film.")
         #expect(filmWatched.id == Film.sample[1].id, "Should be equal.")
-        #expect(filmWatched.film.title == Film.sample[1].title, "Should be equal.")
+        #expect(filmWatched.title == Film.sample[1].title, "Should be equal.")
     }
     
     @Test("`currentState` updates correctly across different error domains and codes", arguments: [
@@ -110,11 +110,11 @@ struct HomeViewModelTests {
     
     //MARK: - Home ViewModel Delegate Spy
     final class HomeViewModelDelegateSpy: HomeViewModelDelegate {
-        var upNextFilms: [FilmWithStatus]?
-        var watchedFilms: [FilmWithStatus]?
+        var upNextFilms: [Film]?
+        var watchedFilms: [Film]?
         var callCount: Int = 0
         
-        func filmsDidChange(_ upNextFilms: [Faraway_Frames.FilmWithStatus], _ watchedFilms: [Faraway_Frames.FilmWithStatus]) {
+        func filmsDidChange(_ upNextFilms: [Film], _ watchedFilms: [Film]) {
             self.upNextFilms = upNextFilms
             self.watchedFilms = watchedFilms
             self.callCount += 1
@@ -143,7 +143,7 @@ struct HomeViewModelTests {
         }
     }
     
-    //MARK: - Custom error helper
+    //MARK: - Custom Error Helper
     private struct UnknownError: Error, LocalizedError {
         var errorDescription: String? { "Unknown error." }
     }

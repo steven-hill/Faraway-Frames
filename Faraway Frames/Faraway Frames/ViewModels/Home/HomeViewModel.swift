@@ -24,20 +24,14 @@ final class HomeViewModel: NSObject {
     private let watchedFRC: NSFetchedResultsController<FilmMO>
     private let context: NSManagedObjectContext
     
-    private var upNextFilms: [FilmWithStatus] {
+    private var upNextFilms: [Film] {
         let managedObjects = upNextFRC.fetchedObjects ?? []
-        return managedObjects.map { mo in
-            Film.from(id: mo.id, title: mo.title, originalTitle: mo.originalTitle, originalTitleRomanised: mo.originalTitleRomanised, image: mo.image, movieBanner: mo.movieBanner, filmDescription: mo.filmDescription, director: mo.director, producer: mo.producer, releaseDate: mo.releaseDate, runningTime: mo.runningTime, rottenTomatoesScore: mo.rottenTomatoesScore, url: mo.url, isUpNext: mo.isUpNext, isWatched: mo.isWatched
-            )
-        }
+        return managedObjects.map { Film(from: $0) }
     }
     
-    private var watchedFilms: [FilmWithStatus] {
+    private var watchedFilms: [Film] {
         let managedObjects = watchedFRC.fetchedObjects ?? []
-        return managedObjects.map { mo in
-            Film.from(id: mo.id, title: mo.title, originalTitle: mo.originalTitle, originalTitleRomanised: mo.originalTitleRomanised, image: mo.image, movieBanner: mo.movieBanner, filmDescription: mo.filmDescription, director: mo.director, producer: mo.producer, releaseDate: mo.releaseDate, runningTime: mo.runningTime, rottenTomatoesScore: mo.rottenTomatoesScore, url: mo.url, isUpNext: mo.isUpNext, isWatched: mo.isWatched
-            )
-        }
+        return managedObjects.map { Film(from: $0) }
     }
     
     // MARK: - Initialisation
