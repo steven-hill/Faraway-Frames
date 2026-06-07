@@ -11,7 +11,7 @@ import CoreData
 final class HomeViewModel: NSObject, NSFetchedResultsControllerDelegate {
     
     // MARK: - State Definition
-    enum HomeState {
+    enum HomeState: Equatable {
         case idle
         case fetchedObjects
         case failure(HomeError)
@@ -84,21 +84,6 @@ final class HomeViewModel: NSObject, NSFetchedResultsControllerDelegate {
         } catch let error as NSError {
             currentState = .failure(HomeError(error))
             delegate?.filmsDidChange([], [])
-        }
-    }
-}
-
-extension HomeViewModel.HomeState {
-    static func == (lhs: HomeViewModel.HomeState, rhs: HomeViewModel.HomeState) -> Bool {
-        switch (lhs, rhs) {
-        case (.idle, .idle):
-            return true
-        case (.fetchedObjects, .fetchedObjects):
-            return true
-        case (.failure(let lhsError), .failure(let rhsError)):
-            return lhsError == rhsError
-        default:
-            return false
         }
     }
 }
