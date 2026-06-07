@@ -21,6 +21,8 @@ struct Film: Codable, Identifiable, Hashable {
     let runningTime: String
     let rottenTomatoesScore: String
     let url: String
+    var isUpNext: Bool = false
+    var isWatched: Bool = false
     
     private enum CodingKeys: String, CodingKey {
         case id, title, image, description, director, producer, url
