@@ -8,7 +8,7 @@
 import Foundation
 import CoreData
 
-final class HomeViewModel: NSObject, NSFetchedResultsControllerDelegate {
+final class HomeViewModel: NSObject {
     
     // MARK: - State Definition
     enum HomeState: Equatable {
@@ -85,5 +85,12 @@ final class HomeViewModel: NSObject, NSFetchedResultsControllerDelegate {
             currentState = .failure(HomeError(error))
             delegate?.filmsDidChange([], [])
         }
+    }
+}
+
+// MARK: - Fetched Results Controller Delegate
+extension HomeViewModel: NSFetchedResultsControllerDelegate {
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        delegate?.filmsDidChange(upNextFilms, watchedFilms)
     }
 }
