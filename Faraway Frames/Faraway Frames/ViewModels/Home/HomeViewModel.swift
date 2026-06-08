@@ -78,7 +78,7 @@ final class HomeViewModel: NSObject {
             delegate?.filmsDidChange(upNextFilms, watchedFilms)
         } catch let error as NSError {
             currentState = .failure(HomeError(error))
-            delegate?.filmsDidChange([], [])
+            //delegate?.filmsDidChange([], [])
         }
     }
 }

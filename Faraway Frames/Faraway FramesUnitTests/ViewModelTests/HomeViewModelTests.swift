@@ -58,7 +58,7 @@ struct HomeViewModelTests {
         #expect(filmWatched.title == Film.sample[1].title, "Should be equal.")
     }
     
-    @Test("`currentState` updates correctly across different error domains and codes", arguments: [
+    @Test("`currentState` updates correctly across different error domains and codes, and delegate is called", arguments: [
         (
             error: NSError(domain: NSCocoaErrorDomain, code: NSFileWriteOutOfSpaceError, userInfo: nil) as Error,
             expectedState: HomeViewModel.HomeState.failure(.diskFull)
@@ -94,10 +94,13 @@ struct HomeViewModelTests {
             upNextFRC: throwingController,
             watchedFRC: throwingController
         )
+        let delegateSpy = HomeViewModelDelegateSpy()
+        sut.delegate = delegateSpy
         
         sut.performFetches()
         
         #expect(sut.currentState == scenario.expectedState)
+        #expect(delegateSpy.callCount == 1, "Should call the delegate once.")
     }
     
     //MARK: - SUT Helper Method
