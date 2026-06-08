@@ -28,7 +28,7 @@ struct HomeViewModelTests {
         #expect(sut.currentState == .fetchedObjects, "Should be `.fetchedObjects`.")
     }
     
-    @Test("`HomeViewModel` can fetch up next films and watched films")
+    @Test("`HomeViewModel` can fetch up next films and watched films, and calls delegate")
     func homeViewModel_performFetches_fetchesCorrectly() throws {
         let (sut, context) = makeSUTWithContext()
         let delegateSpy = HomeViewModelDelegateSpy()
@@ -44,7 +44,7 @@ struct HomeViewModelTests {
         
         sut.performFetches()
         
-        #expect(delegateSpy.callCount == 1, "Should make the call once.")
+        #expect(delegateSpy.callCount == 1, "Should call the delegate once.")
         let upNextFilms = try #require(delegateSpy.upNextFilms, "Delegate should have received a films array.")
         #expect(upNextFilms.count == 1, "Should be one.")
         let filmUpNext = try #require(upNextFilms.first, "The film array should contain a film.")
@@ -58,7 +58,7 @@ struct HomeViewModelTests {
         #expect(filmWatched.title == Film.sample[1].title, "Should be equal.")
     }
     
-    @Test("`currentState` updates correctly across different error domains and codes", arguments: [
+    @Test("`currentState` updates correctly across different error domains and codes, and delegate is called", arguments: [
         (
             error: NSError(domain: NSCocoaErrorDomain, code: NSFileWriteOutOfSpaceError, userInfo: nil) as Error,
             expectedState: HomeViewModel.HomeState.failure(.diskFull)
@@ -94,10 +94,13 @@ struct HomeViewModelTests {
             upNextFRC: throwingController,
             watchedFRC: throwingController
         )
+        let delegateSpy = HomeViewModelDelegateSpy()
+        sut.delegate = delegateSpy
         
         sut.performFetches()
         
         #expect(sut.currentState == scenario.expectedState)
+        #expect(delegateSpy.callCount == 1, "Should call the delegate once.")
     }
     
     //MARK: - SUT Helper Method
@@ -117,6 +120,10 @@ struct HomeViewModelTests {
         func filmsDidChange(_ upNextFilms: [Film], _ watchedFilms: [Film]) {
             self.upNextFilms = upNextFilms
             self.watchedFilms = watchedFilms
+            self.callCount += 1
+        }
+        
+        func didReceiveError(_ error: HomeError) {
             self.callCount += 1
         }
     }

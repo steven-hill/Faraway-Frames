@@ -59,4 +59,7 @@ final class HomeVC: UIViewController {
 extension HomeVC: HomeViewModelDelegate {
     func filmsDidChange(_ upNextFilms: [Film], _ watchedFilms: [Film]) {
     }
+    
+    func didReceiveError(_ error: HomeError) {
+    }
 }
