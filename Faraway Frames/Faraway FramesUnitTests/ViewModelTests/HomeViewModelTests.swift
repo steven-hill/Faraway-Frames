@@ -44,7 +44,7 @@ struct HomeViewModelTests {
         
         sut.performFetches()
         
-        #expect(delegateSpy.callCount == 1, "Should make the call once.")
+        #expect(delegateSpy.callCount == 1, "Should call the delegate once.")
         let upNextFilms = try #require(delegateSpy.upNextFilms, "Delegate should have received a films array.")
         #expect(upNextFilms.count == 1, "Should be one.")
         let filmUpNext = try #require(upNextFilms.first, "The film array should contain a film.")
