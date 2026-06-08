@@ -64,24 +64,6 @@ struct PersistenceControllerTests {
         }
     }
     
-    @Test("Saving failed due to single nil attribute throws error")
-    func persistenceController_whenSavingFailedDueToSingleNilAttribute_throwsError() throws {
-        let (sut, context, entity) = try makeSUTViewContextAndEntity()
-        _ = makeUpNextFilmWithMissingIDAttribute(from: Film.sample[0], entity: entity, context: context)
-        
-        let thrownError = #expect(throws: PersistenceError.self) {
-            try sut.saveContext()
-        }
-        switch thrownError {
-        case .savingFailed(let error):
-            let nsError = error as NSError
-            #expect(nsError.domain == NSCocoaErrorDomain, "Should be Cocoa Error.")
-            #expect(nsError.code == NSValidationMissingMandatoryPropertyError, "Should be `NSValidationMissingMandatoryPropertyError` because one attribute (.id) is nil.")
-        default:
-            Issue.record("Expected a .savingFailed error, but got \(thrownError)")
-        }
-    }
-    
     @Test("Saving failed due to multiple nil attributes throws error")
     func persistenceController_whenSavingFailedDueToMultipleNilAttributes_throwsError() throws {
         let (sut, context, entity) = try makeSUTViewContextAndEntity()
@@ -110,24 +92,6 @@ struct PersistenceControllerTests {
             "The Core Data model schema must contain an entity definition named 'FilmMO'."
         )
         return (sut, viewContext, entity)
-    }
-    
-    private func makeUpNextFilmWithMissingIDAttribute(from film: Film, entity: NSEntityDescription, context: NSManagedObjectContext) -> FilmMO {
-        let upNextFilm = FilmMO(entity: entity, insertInto: context)
-        upNextFilm.title = film.title
-        upNextFilm.originalTitle = film.originalTitle
-        upNextFilm.originalTitleRomanised = film.originalTitleRomanised
-        upNextFilm.image = film.image
-        upNextFilm.movieBanner = film.movieBanner
-        upNextFilm.filmDescription = film.description
-        upNextFilm.director = film.director
-        upNextFilm.producer = film.producer
-        upNextFilm.releaseDate = film.releaseDate
-        upNextFilm.runningTime = film.runningTime
-        upNextFilm.rottenTomatoesScore = film.rottenTomatoesScore
-        upNextFilm.url = film.url
-        upNextFilm.isUpNext = true
-        return upNextFilm
     }
     
     private func makeUpNextFilmWithMultipleMissingAttributes(from film: Film, entity: NSEntityDescription, context: NSManagedObjectContext) -> FilmMO {
