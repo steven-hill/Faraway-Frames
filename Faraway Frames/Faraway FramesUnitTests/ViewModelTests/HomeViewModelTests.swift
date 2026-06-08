@@ -122,6 +122,10 @@ struct HomeViewModelTests {
             self.watchedFilms = watchedFilms
             self.callCount += 1
         }
+        
+        func didReceiveError(_ error: HomeError) {
+            self.callCount += 1
+        }
     }
     
     //MARK: - Throwing Fetched Results Controller
