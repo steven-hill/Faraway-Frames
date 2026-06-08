@@ -28,7 +28,7 @@ struct HomeViewModelTests {
         #expect(sut.currentState == .fetchedObjects, "Should be `.fetchedObjects`.")
     }
     
-    @Test("`HomeViewModel` can fetch up next films and watched films")
+    @Test("`HomeViewModel` can fetch up next films and watched films, and calls delegate")
     func homeViewModel_performFetches_fetchesCorrectly() throws {
         let (sut, context) = makeSUTWithContext()
         let delegateSpy = HomeViewModelDelegateSpy()
