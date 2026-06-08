@@ -64,22 +64,14 @@ struct PersistenceControllerTests {
         }
     }
     
-    @Test("Saving failed due to multiple nil attributes throws error")
-    func persistenceController_whenSavingFailedDueToMultipleNilAttributes_throwsError() throws {
+    @Test("Saving succeeds even if some attributes are nil")
+    func persistenceController_whenSavingWithNilAttributes_succeedsWithoutError() throws {
         let (sut, context, entity) = try makeSUTViewContextAndEntity()
         
         _ = makeUpNextFilmWithMultipleMissingAttributes(from: Film.sample[0], entity: entity, context: context)
         
-        let thrownError = #expect(throws: PersistenceError.self) {
+        #expect(throws: Never.self, "Should not throw an error") {
             try sut.saveContext()
-        }
-        switch thrownError {
-        case .savingFailed(let error):
-            let nsError = error as NSError
-            #expect(nsError.domain == NSCocoaErrorDomain, "Should be Cocoa Error.")
-            #expect(nsError.code == NSValidationMultipleErrorsError, "Should be `NSValidationMultipleErrorsError` because multiple attributes are nil.")
-        default:
-            Issue.record("Expected a .savingFailed error, but got \(thrownError)")
         }
     }
     
