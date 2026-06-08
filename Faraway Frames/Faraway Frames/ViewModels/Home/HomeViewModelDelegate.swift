@@ -9,4 +9,5 @@ import Foundation
 
 protocol HomeViewModelDelegate: AnyObject {
     func filmsDidChange(_ upNextFilms: [Film], _ watchedFilms: [Film])
+    func didReceiveError(_ error: HomeError)
 }
