@@ -124,6 +124,29 @@ struct HomeViewModelTests {
         #expect(upNextFilms.isEmpty, "Should be empty.")
     }
     
+    @Test("Deleting film from upNext when it's in watched should only flip upNext flag")
+    func homeViewModel_removeFilmFromQueue_whenFilmIsInUpNextAndInWatched_shouldFlipFlag() async throws {
+        let (sut, context) = makeSUTWithContext()
+        let delegateSpy = HomeViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        let entity = try #require(
+            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
+        let targetFilm = Film.sample[0]
+        _ = PersistenceHelper.makeFilmMO(with: targetFilm, entity: entity, context: context, isUpNext: true, isWatched: true)
+        try context.save()
+        
+        await sut.removeFilmFromQueue(id: targetFilm.id, queue: .upNext)
+        
+        sut.performFetches()
+        
+        let upNextFilms = try #require(delegateSpy.upNextFilms, "Delegate should have received a films array.")
+        let watchedFilms = try #require(delegateSpy.watchedFilms, "Delegate should have received a films array.")
+        #expect(upNextFilms.isEmpty, "Should be empty.")
+        #expect(watchedFilms.count == 1, "Should still be in watched.")
+    }
+    
     //MARK: - SUT Helper Method
     private func makeSUTWithContext() -> (sut: HomeViewModel, context: NSManagedObjectContext) {
         let testPersistenceController = try! PersistenceController(inMemory: true)
