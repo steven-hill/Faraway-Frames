@@ -114,8 +114,23 @@ struct HomeViewModelTests {
         sut.performFetches()
         
         #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
-        let upNextFilms = try #require(delegateSpy.upNextFilms, "Delegate should have received a films array.")
+        let upNextFilms = try #require(delegateSpy.upNextFilms, "Delegate should have received upNext films array.")
         #expect(upNextFilms.count == 1, "Should be one.")
+    }
+    
+    @Test("Adding a film to watched should add it to `watchedFilms`, and call delegate method")
+    func homeViewModel_addFilmToQueue_addsFilmToWatched() throws {
+        let (sut, _) = makeSUTWithContext()
+        let delegateSpy = HomeViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        let targetFilm = Film.sample[0]
+        
+        try sut.addFilmToQueue(film: targetFilm, queue: .watched)
+        sut.performFetches()
+        
+        #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
+        let watchedFilms = try #require(delegateSpy.watchedFilms, "Delegate should have received watched films array.")
+        #expect(watchedFilms.count == 1, "Should be one.")
     }
     
     @Test("Deleting film from upNext when it's not in watched should remove it from database")
