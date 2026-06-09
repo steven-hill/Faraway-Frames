@@ -46,6 +46,8 @@ final class PersistenceController: PersistenceControlling {
         if let error = storesLoadingError {
             throw PersistenceError.loadingStoresFailed(error: error)
         }
+        
+        container.viewContext.automaticallyMergesChangesFromParent = true
     }
     
     // MARK: - Core Data Saving
