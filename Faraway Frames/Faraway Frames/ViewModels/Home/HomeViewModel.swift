@@ -88,7 +88,7 @@ final class HomeViewModel: NSObject {
         }
     }
     
-    func addFilmToQueue(film: Film, queue: FilmQueue) throws {
+    func addFilmToQueue(film: Film, queue: FilmQueue) {
         let filmMO = Film.makeFilmMO(from: film, context: context)
         let isUpNextTarget = (queue == .upNext)
         if isUpNextTarget {
@@ -98,7 +98,13 @@ final class HomeViewModel: NSObject {
         }
         
         if context.hasChanges {
-            try context.save()
+            do {
+                try context.save()
+            } catch {
+                Task { @MainActor in
+                    self.handleError(error)
+                }
+            }
         }
     }
     
