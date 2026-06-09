@@ -44,7 +44,7 @@ struct HomeViewModelTests {
         
         sut.performFetches()
         
-        #expect(delegateSpy.callCount == 1, "Should call the delegate once.")
+        #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
         let upNextFilms = try #require(delegateSpy.upNextFilms, "Delegate should have received a films array.")
         #expect(upNextFilms.count == 1, "Should be one.")
         let filmUpNext = try #require(upNextFilms.first, "The film array should contain a film.")
@@ -100,7 +100,145 @@ struct HomeViewModelTests {
         sut.performFetches()
         
         #expect(sut.currentState == scenario.expectedState)
-        #expect(delegateSpy.callCount == 1, "Should call the delegate once.")
+        #expect(delegateSpy.didReceiveErrorCallCount == 1, "Should call the delegate once.")
+    }
+    
+    @Test("Deleting film from upNext when it's not in watched should remove it from database")
+    func homeViewModel_removeFilmFromQueue_whenFilmIsInUpNextButNotInWatched_deletesItFromDatabase() async throws {
+        let (sut, context) = makeSUTWithContext()
+        let delegateSpy = HomeViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        let entity = try #require(
+            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
+        let targetFilm = Film.sample[0]
+        _ = PersistenceHelper.makeFilmMO(with: targetFilm, entity: entity, context: context, isUpNext: true, isWatched: false)
+        try context.save()
+        
+        await sut.removeFilmFromQueue(id: targetFilm.id, queue: .upNext)
+        
+        sut.performFetches()
+        
+        let upNextFilms = try #require(delegateSpy.upNextFilms, "Delegate should have received a films array.")
+        let watchedFilms = try #require(delegateSpy.watchedFilms, "Delegate should have received a films array.")
+        #expect(upNextFilms.isEmpty, "Should be empty.")
+        #expect(watchedFilms.isEmpty, "Should be empty.")
+        #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
+    }
+    
+    @Test("Deleting film from upNext when it's in watched should only flip upNext flag")
+    func homeViewModel_removeFilmFromQueue_whenFilmIsInUpNextAndInWatched_shouldFlipFlag() async throws {
+        let (sut, context) = makeSUTWithContext()
+        let delegateSpy = HomeViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        let entity = try #require(
+            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
+        let targetFilm = Film.sample[0]
+        _ = PersistenceHelper.makeFilmMO(with: targetFilm, entity: entity, context: context, isUpNext: true, isWatched: true)
+        try context.save()
+        
+        await sut.removeFilmFromQueue(id: targetFilm.id, queue: .upNext)
+        
+        sut.performFetches()
+        
+        let upNextFilms = try #require(delegateSpy.upNextFilms, "Delegate should have received a films array.")
+        let watchedFilms = try #require(delegateSpy.watchedFilms, "Delegate should have received a films array.")
+        #expect(upNextFilms.isEmpty, "Should be empty.")
+        #expect(watchedFilms.count == 1, "Should still have one in watched.")
+        #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
+    }
+    
+    @Test("Deleting film from watched when it's not in upNext removes film from database entirely")
+    func homeViewModel_removeFilmFromQueue_whenFilmInWatchedAndNotInUpNext_deletesFilmFromDatabase() async throws {
+        let (sut, context) = makeSUTWithContext()
+        let delegateSpy = HomeViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        let entity = try #require(
+            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
+        let targetFilm = Film.sample[0]
+        _ = PersistenceHelper.makeFilmMO(with: targetFilm, entity: entity, context: context, isUpNext: false, isWatched: true)
+        try context.save()
+        
+        await sut.removeFilmFromQueue(id: targetFilm.id, queue: .watched)
+        
+        sut.performFetches()
+        
+        let upNextFilms = try #require(delegateSpy.upNextFilms, "Delegate should have received a films array.")
+        let watchedFilms = try #require(delegateSpy.watchedFilms, "Delegate should have received a films array.")
+        #expect(upNextFilms.isEmpty, "Should be empty.")
+        #expect(watchedFilms.isEmpty, "Should be empty.")
+        #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
+    }
+    
+    @Test("Deleting film from watched when it is in upNext removes film from watched only")
+    func homeViewModel_removeFilmFromQueue_whenFilmInBothWatchedAndInUpNext_deletesFilmFromWatched() async throws {
+        let (sut, context) = makeSUTWithContext()
+        let delegateSpy = HomeViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        let entity = try #require(
+            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
+        let targetFilm = Film.sample[0]
+        _ = PersistenceHelper.makeFilmMO(with: targetFilm, entity: entity, context: context, isUpNext: true, isWatched: true)
+        try context.save()
+        
+        await sut.removeFilmFromQueue(id: targetFilm.id, queue: .watched)
+        
+        sut.performFetches()
+        
+        let upNextFilms = try #require(delegateSpy.upNextFilms, "Delegate should have received a films array.")
+        let watchedFilms = try #require(delegateSpy.watchedFilms, "Delegate should have received a films array.")
+        #expect(upNextFilms.count == 1, "Should still have one in upNext.")
+        #expect(watchedFilms.isEmpty, "Should be empty.")
+        #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
+    }
+    
+    @Test("`removeFilmFromQueue` catch block handles both failure cases correctly", arguments: [
+        CatchBlockScenario(shouldFailOnFetch: true, shouldFailOnSave: false, displayName: "Fetch Failure Case"),
+        CatchBlockScenario(shouldFailOnFetch: false, shouldFailOnSave: true, displayName: "Save Failure Case")
+    ])
+    func homeViewModel_removeFilmFromQueue_catchBlockTriggered(for scenario: CatchBlockScenario) async {
+        let mockContext = FailingManagedObjectContext()
+        mockContext.shouldFailOnFetch = scenario.shouldFailOnFetch
+        mockContext.shouldFailOnSave = scenario.shouldFailOnSave
+        
+        let targetID = "test-film-id"
+        if scenario.shouldFailOnSave {
+            mockContext.seedFilm(id: targetID, isUpNext: true, isWatched: false)
+        }
+        
+        let dummyRequest = NSFetchRequest<FilmMO>(entityName: "FilmMO")
+        dummyRequest.sortDescriptors = [NSSortDescriptor(key: "id", ascending: true)]
+        let dummyUpNextFRC = NSFetchedResultsController(
+            fetchRequest: dummyRequest,
+            managedObjectContext: mockContext,
+            sectionNameKeyPath: nil,
+            cacheName: nil)
+        let dummyWatchedFRC = NSFetchedResultsController(
+            fetchRequest: dummyRequest,
+            managedObjectContext: mockContext,
+            sectionNameKeyPath: nil,
+            cacheName: nil)
+        
+        let sut = HomeViewModel(context: mockContext, upNextFRC: dummyUpNextFRC, watchedFRC: dummyWatchedFRC)
+        let delegateSpy = HomeViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        
+        await sut.removeFilmFromQueue(id: targetID, queue: .upNext)
+        await Task.yield()
+        
+        if case .failure = sut.currentState {
+            #expect(true)
+        } else {
+            Issue.record("[\(scenario.displayName)] Expected state to be .failure, but got \(sut.currentState)")
+        }
+        #expect(delegateSpy.didReceiveErrorCallCount == 1, "[\(scenario.displayName)] Delegate should be called exactly once")
     }
     
     //MARK: - SUT Helper Method
@@ -115,27 +253,29 @@ struct HomeViewModelTests {
     final class HomeViewModelDelegateSpy: HomeViewModelDelegate {
         var upNextFilms: [Film]?
         var watchedFilms: [Film]?
-        var callCount: Int = 0
+        var filmsDidChangeCallCount: Int = 0
+        var didReceiveErrorCallCount: Int = 0
         
         func filmsDidChange(_ upNextFilms: [Film], _ watchedFilms: [Film]) {
             self.upNextFilms = upNextFilms
             self.watchedFilms = watchedFilms
-            self.callCount += 1
+            self.filmsDidChangeCallCount += 1
         }
         
         func didReceiveError(_ error: HomeError) {
-            self.callCount += 1
+            self.didReceiveErrorCallCount += 1
         }
     }
     
     //MARK: - Throwing Fetched Results Controller
+    /// Used in test for `performFetches` failure.
     final class ThrowingFetchedResultsController: NSFetchedResultsController<FilmMO> {
         let errorToThrow: Error
         
         init(context: NSManagedObjectContext, errorToThrow: Error) {
             self.errorToThrow = errorToThrow
             
-            let validRequest = FilmMO.fetchRequest()
+            let validRequest = FilmMO.fetchRequest() as! NSFetchRequest<FilmMO>
             validRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
             super.init(
                 fetchRequest: validRequest,
@@ -151,7 +291,79 @@ struct HomeViewModelTests {
     }
     
     //MARK: - Custom Error Helper
+    /// Used in test for `performFetches` failure.
     private struct UnknownError: Error, LocalizedError {
         var errorDescription: String? { "Unknown error." }
+    }
+    
+    //MARK: - Failing Managed Object Context
+    /// Used in test for `removeFilmFromQueue(id:, queue:)` failures.
+    final class FailingManagedObjectContext: NSManagedObjectContext, @unchecked Sendable {
+        var shouldFailOnFetch = false
+        var shouldFailOnSave = false
+        
+        enum MockError: Error {
+            case forcedFetchFailure
+            case forcedSaveFailure
+        }
+        
+        convenience init() {
+            let model = NSManagedObjectModel()
+            let entity = NSEntityDescription()
+            entity.name = "FilmMO"
+            entity.managedObjectClassName = NSStringFromClass(FilmMO.self)
+            
+            let idAttribute = NSAttributeDescription()
+            idAttribute.name = "id"
+            idAttribute.attributeType = .stringAttributeType
+            
+            let upNextAttribute = NSAttributeDescription()
+            upNextAttribute.name = "isUpNext"
+            upNextAttribute.attributeType = .booleanAttributeType
+            
+            let watchedAttribute = NSAttributeDescription()
+            watchedAttribute.name = "isWatched"
+            watchedAttribute.attributeType = .booleanAttributeType
+            
+            entity.properties = [idAttribute, upNextAttribute, watchedAttribute]
+            model.entities = [entity]
+            
+            let coordinator = NSPersistentStoreCoordinator(managedObjectModel: model)
+            try! coordinator.addPersistentStore(ofType: NSInMemoryStoreType, configurationName: nil, at: nil, options: nil)
+            
+            self.init(concurrencyType: .mainQueueConcurrencyType)
+            self.persistentStoreCoordinator = coordinator
+        }
+        
+        func seedFilm(id: String, isUpNext: Bool, isWatched: Bool) {
+            let entity = NSEntityDescription.entity(forEntityName: "FilmMO", in: self)!
+            let managedObject = NSManagedObject(entity: entity, insertInto: self)
+            managedObject.setValue(id, forKey: "id")
+            managedObject.setValue(isUpNext, forKey: "isUpNext")
+            managedObject.setValue(isWatched, forKey: "isWatched")
+            try! super.save()
+        }
+        
+        override func execute(_ request: NSPersistentStoreRequest) throws -> NSPersistentStoreResult {
+            if shouldFailOnFetch && request is NSFetchRequest<NSFetchRequestResult> {
+                throw MockError.forcedFetchFailure
+            }
+            return try super.execute(request)
+        }
+        
+        override func save() throws {
+            if shouldFailOnSave {
+                throw MockError.forcedSaveFailure
+            }
+            try super.save()
+        }
+    }
+    
+    //MARK: - Catch Block Scenario
+    /// Used in test for `removeFilmFromQueue(id:, queue:)` failures.
+    struct CatchBlockScenario: Sendable {
+        let shouldFailOnFetch: Bool
+        let shouldFailOnSave: Bool
+        let displayName: String
     }
 }
