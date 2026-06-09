@@ -88,6 +88,20 @@ final class HomeViewModel: NSObject {
         }
     }
     
+    func addFilmToQueue(film: Film, queue: FilmQueue) throws {
+        let filmMO = Film.makeFilmMO(from: film, context: context)
+        let isUpNextTarget = (queue == .upNext)
+        if isUpNextTarget {
+            filmMO.isUpNext = true
+        } else {
+            filmMO.isWatched = true
+        }
+        
+        if context.hasChanges {
+            try context.save()
+        }
+    }
+    
     func removeFilmFromQueue(id: String, queue: FilmQueue) async {
         let filmID = id
         let isUpNextTarget = (queue == .upNext)

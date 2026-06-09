@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CoreData
 
 struct Film: Codable, Identifiable, Hashable {
     let id: String
@@ -53,6 +54,25 @@ extension Film {
         self.url = mo.url ?? ""
         self.isUpNext = mo.isUpNext
         self.isWatched = mo.isWatched
+    }
+    
+    /// Maps a `Film` Struct to a Core Data Managed Object
+    static func makeFilmMO(from film: Film, context: NSManagedObjectContext) -> FilmMO {
+        let filmToBeSaved = FilmMO(context: context)
+        filmToBeSaved.id = film.id
+        filmToBeSaved.title = film.title
+        filmToBeSaved.originalTitle = film.originalTitle
+        filmToBeSaved.originalTitleRomanised = film.originalTitleRomanised
+        filmToBeSaved.image = film.image
+        filmToBeSaved.movieBanner = film.movieBanner
+        filmToBeSaved.filmDescription = film.description
+        filmToBeSaved.director = film.director
+        filmToBeSaved.producer = film.producer
+        filmToBeSaved.releaseDate = film.releaseDate
+        filmToBeSaved.runningTime = film.runningTime
+        filmToBeSaved.rottenTomatoesScore = film.rottenTomatoesScore
+        filmToBeSaved.url = film.url
+        return filmToBeSaved
     }
 }
 

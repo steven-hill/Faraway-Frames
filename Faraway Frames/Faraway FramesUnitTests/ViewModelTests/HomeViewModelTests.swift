@@ -111,8 +111,8 @@ struct HomeViewModelTests {
         let targetFilm = Film.sample[0]
         
         try sut.addFilmToQueue(film: targetFilm, queue: .upNext)
-        
         sut.performFetches()
+        
         #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
         let upNextFilms = try #require(delegateSpy.upNextFilms, "Delegate should have received a films array.")
         #expect(upNextFilms.count == 1, "Should be one.")
