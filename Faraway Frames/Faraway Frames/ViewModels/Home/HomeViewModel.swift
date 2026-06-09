@@ -17,6 +17,12 @@ final class HomeViewModel: NSObject {
         case failure(HomeError)
     }
     
+    // MARK: - Queue Definition
+    enum FilmQueue {
+        case upNext
+        case watched
+    }
+    
     // MARK: - Properties
     private(set) var currentState: HomeState = .idle
     weak var delegate: HomeViewModelDelegate?
@@ -69,7 +75,7 @@ final class HomeViewModel: NSObject {
         self.watchedFRC.delegate = self
     }
     
-    // MARK: - Method
+    // MARK: - Methods
     func performFetches() {
         do {
             try upNextFRC.performFetch()
@@ -80,6 +86,44 @@ final class HomeViewModel: NSObject {
             currentState = .failure(HomeError(error))
             delegate?.didReceiveError(HomeError(error))
         }
+    }
+    
+    func removeFilmFromQueue(id: String, queue: FilmQueue) async {
+        let filmID = id
+        let isUpNextTarget = (queue == .upNext)
+        
+        await context.perform {
+            let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
+            request.predicate = NSPredicate(format: "id == %@", filmID)
+            
+            do {
+                if let managedObject = try self.context.fetch(request).first {
+                    if isUpNextTarget {
+                        managedObject.isUpNext = false
+                    } else {
+                        managedObject.isWatched = false
+                    }
+                    
+                    if !managedObject.isUpNext && !managedObject.isWatched {
+                        self.context.delete(managedObject)
+                    }
+                    
+                    if self.context.hasChanges {
+                        try self.context.save()
+                    }
+                }
+            } catch {
+                Task { @MainActor in
+                    self.handleError(error)
+                }
+            }
+        }
+    }
+    
+    private func handleError(_ error: Error) {
+        let homeError = HomeError(error as NSError)
+        self.currentState = .failure(homeError)
+        self.delegate?.didReceiveError(homeError)
     }
 }
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="24901" systemVersion="25F71" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
-    <entity name="FilmMO" representedClassName=".FilmMO" syncable="YES" codeGenerationType="class">
+    <entity name="FilmMO" representedClassName=".FilmMO" syncable="YES">
         <attribute name="director" optional="YES" attributeType="String"/>
         <attribute name="filmDescription" optional="YES" attributeType="String"/>
         <attribute name="id" optional="YES" attributeType="String"/>

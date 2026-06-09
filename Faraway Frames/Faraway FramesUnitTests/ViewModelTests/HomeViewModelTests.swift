@@ -103,6 +103,27 @@ struct HomeViewModelTests {
         #expect(delegateSpy.callCount == 1, "Should call the delegate once.")
     }
     
+    @Test("Deleting film from upNext when it's not in watched should remove it from database")
+    func homeViewModel_removeFilmFromQueue_whenFilmIsInUpNextButNotInWatched_deletesItFromDatabase() async throws {
+        let (sut, context) = makeSUTWithContext()
+        let delegateSpy = HomeViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        let entity = try #require(
+            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
+        let targetFilm = Film.sample[0]
+        _ = PersistenceHelper.makeFilmMO(with: targetFilm, entity: entity, context: context, isUpNext: true, isWatched: false)
+        try context.save()
+        
+        await sut.removeFilmFromQueue(id: targetFilm.id, queue: .upNext)
+        
+        sut.performFetches()
+        
+        let upNextFilms = try #require(delegateSpy.upNextFilms, "Delegate should have received a films array.")
+        #expect(upNextFilms.isEmpty, "Should be empty.")
+    }
+    
     //MARK: - SUT Helper Method
     private func makeSUTWithContext() -> (sut: HomeViewModel, context: NSManagedObjectContext) {
         let testPersistenceController = try! PersistenceController(inMemory: true)
@@ -135,7 +156,7 @@ struct HomeViewModelTests {
         init(context: NSManagedObjectContext, errorToThrow: Error) {
             self.errorToThrow = errorToThrow
             
-            let validRequest = FilmMO.fetchRequest()
+            let validRequest = FilmMO.fetchRequest() as! NSFetchRequest<FilmMO>
             validRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
             super.init(
                 fetchRequest: validRequest,
