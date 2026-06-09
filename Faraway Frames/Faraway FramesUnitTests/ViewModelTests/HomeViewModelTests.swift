@@ -44,7 +44,7 @@ struct HomeViewModelTests {
         
         sut.performFetches()
         
-        #expect(delegateSpy.callCount == 1, "Should call the delegate once.")
+        #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
         let upNextFilms = try #require(delegateSpy.upNextFilms, "Delegate should have received a films array.")
         #expect(upNextFilms.count == 1, "Should be one.")
         let filmUpNext = try #require(upNextFilms.first, "The film array should contain a film.")
@@ -100,7 +100,7 @@ struct HomeViewModelTests {
         sut.performFetches()
         
         #expect(sut.currentState == scenario.expectedState)
-        #expect(delegateSpy.callCount == 1, "Should call the delegate once.")
+        #expect(delegateSpy.didReceiveErrorCallCount == 1, "Should call the delegate once.")
     }
     
     @Test("Deleting film from upNext when it's not in watched should remove it from database")
@@ -124,6 +124,7 @@ struct HomeViewModelTests {
         let watchedFilms = try #require(delegateSpy.watchedFilms, "Delegate should have received a films array.")
         #expect(upNextFilms.isEmpty, "Should be empty.")
         #expect(watchedFilms.isEmpty, "Should be empty.")
+        #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
     }
     
     @Test("Deleting film from upNext when it's in watched should only flip upNext flag")
@@ -147,6 +148,7 @@ struct HomeViewModelTests {
         let watchedFilms = try #require(delegateSpy.watchedFilms, "Delegate should have received a films array.")
         #expect(upNextFilms.isEmpty, "Should be empty.")
         #expect(watchedFilms.count == 1, "Should still have one in watched.")
+        #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
     }
     
     @Test("Deleting film from watched when it's not in upNext removes film from database entirely")
@@ -170,6 +172,7 @@ struct HomeViewModelTests {
         let watchedFilms = try #require(delegateSpy.watchedFilms, "Delegate should have received a films array.")
         #expect(upNextFilms.isEmpty, "Should be empty.")
         #expect(watchedFilms.isEmpty, "Should be empty.")
+        #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
     }
     
     @Test("Deleting film from watched when it is in upNext removes film from watched only")
@@ -193,6 +196,7 @@ struct HomeViewModelTests {
         let watchedFilms = try #require(delegateSpy.watchedFilms, "Delegate should have received a films array.")
         #expect(upNextFilms.count == 1, "Should still have one in upNext.")
         #expect(watchedFilms.isEmpty, "Should be empty.")
+        #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
     }
     
     //MARK: - SUT Helper Method
@@ -207,16 +211,17 @@ struct HomeViewModelTests {
     final class HomeViewModelDelegateSpy: HomeViewModelDelegate {
         var upNextFilms: [Film]?
         var watchedFilms: [Film]?
-        var callCount: Int = 0
+        var filmsDidChangeCallCount: Int = 0
+        var didReceiveErrorCallCount: Int = 0
         
         func filmsDidChange(_ upNextFilms: [Film], _ watchedFilms: [Film]) {
             self.upNextFilms = upNextFilms
             self.watchedFilms = watchedFilms
-            self.callCount += 1
+            self.filmsDidChangeCallCount += 1
         }
         
         func didReceiveError(_ error: HomeError) {
-            self.callCount += 1
+            self.didReceiveErrorCallCount += 1
         }
     }
     
