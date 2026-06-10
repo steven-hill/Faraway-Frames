@@ -245,7 +245,7 @@ struct HomeViewModelTests {
     }
     
     @Test("`removeFilmFromQueue` throws error when saving fails, updates `currentState` and calls the delegate")
-    func homeViewModel_removeFilmFromQueue_WhenThereIsASaveError_throwsError() async {
+    func homeViewModel_removeFilmFromQueue_whenThereIsASaveError_throwsError() async {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
         let saver = ThrowingSaver()
@@ -265,6 +265,18 @@ struct HomeViewModelTests {
         
         #expect(delegateSpy.didReceiveErrorCallCount == 1, "Should have called delegate method once.")
         if case .failure = sut.currentState { #expect(true) }
+    }
+    
+    @Test("`removeFilmFromQueue` doesn't throw error, and exits silently via guard when film does not exist in database")
+    func homeViewModel_removeFilmFromQueue_whenFilmDoesNotExistInDatabase_doesNotThrowAndExitsCleanly() async {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let sut = HomeViewModel(context: testPersistenceController.viewContext)
+        let delegateSpy = HomeViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        
+        await sut.removeFilmFromQueue(id: "non-existent-id", queue: .upNext)
+        
+        #expect(delegateSpy.didReceiveErrorCallCount == 0, "Should not call delegate method.")
     }
     
     //MARK: - SUT Helper Method
