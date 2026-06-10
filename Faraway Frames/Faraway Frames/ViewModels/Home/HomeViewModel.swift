@@ -91,61 +91,57 @@ final class HomeViewModel: NSObject {
         }
     }
     
-    func addFilmToQueue(film: Film, queue: FilmQueue) {
-        let filmMO = Film.makeFilmMO(from: film, context: context)
-        switch queue {
-        case .upNext:
-            filmMO.isUpNext = true
-        case .watched:
-            filmMO.isWatched = true
-        }
-        
-        guard context.hasChanges else { return }
-        
+    func addFilmToQueue(film: Film, queue: FilmQueue) async {
         do {
-            try saver.save()
+            try await context.perform {
+                let filmMO = Film.makeFilmMO(from: film, context: self.context)
+                
+                switch queue {
+                case .upNext:
+                    filmMO.isUpNext = true
+                case .watched:
+                    filmMO.isWatched = true
+                }
+                
+                guard self.context.hasChanges else { return }
+                try self.saver.save()
+            }
         } catch {
-            Task { @MainActor in
-                self.handleError(error)
-            }
+            let homeError = HomeError(error as NSError)
+            self.currentState = .failure(homeError)
+            self.delegate?.didReceiveError(homeError)
         }
     }
-    
+
     func removeFilmFromQueue(id: String, queue: FilmQueue) async {
-        let filmID = id        
-        await context.perform {
-            let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
-            request.predicate = NSPredicate(format: "id == %@", filmID)
-            
-            do {
-                if let managedObject = try self.context.fetch(request).first {
-                    switch queue {
-                    case .upNext:
-                        managedObject.isUpNext = false
-                    case .watched:
-                        managedObject.isWatched = false
-                    }
-                    
-                    if !managedObject.isUpNext && !managedObject.isWatched {
-                        self.context.delete(managedObject)
-                    }
-                    
-                    if self.context.hasChanges {
-                        try self.context.save()
-                    }
+        let filmID = id
+        do {
+            try await context.perform {
+                let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
+                request.predicate = NSPredicate(format: "id == %@", filmID)
+                
+                guard let managedObject = try self.context.fetch(request).first else { return }
+                
+                switch queue {
+                case .upNext:
+                    managedObject.isUpNext = false
+                case .watched:
+                    managedObject.isWatched = false
                 }
-            } catch {
-                Task { @MainActor in
-                    self.handleError(error)
+                
+                if !managedObject.isUpNext && !managedObject.isWatched {
+                    self.context.delete(managedObject)
+                }
+                
+                if self.context.hasChanges {
+                    try self.saver.save()
                 }
             }
+        } catch {
+            let homeError = HomeError(error as NSError)
+            self.currentState = .failure(homeError)
+            self.delegate?.didReceiveError(homeError)
         }
-    }
-    
-    private func handleError(_ error: Error) {
-        let homeError = HomeError(error as NSError)
-        self.currentState = .failure(homeError)
-        self.delegate?.didReceiveError(homeError)
     }
 }
 

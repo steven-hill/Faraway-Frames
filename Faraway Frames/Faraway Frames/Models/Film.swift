@@ -8,7 +8,7 @@
 import Foundation
 import CoreData
 
-struct Film: Codable, Identifiable, Hashable {
+struct Film: Codable, Identifiable, Hashable, Sendable {
     let id: String
     let title: String
     let originalTitle: String
@@ -57,7 +57,7 @@ extension Film {
     }
     
     /// Maps a `Film` Struct to a Core Data Managed Object
-    static func makeFilmMO(from film: Film, context: NSManagedObjectContext) -> FilmMO {
+    nonisolated static func makeFilmMO(from film: Film, context: NSManagedObjectContext) -> FilmMO {
         let filmToBeSaved = FilmMO(context: context)
         filmToBeSaved.id = film.id
         filmToBeSaved.title = film.title
