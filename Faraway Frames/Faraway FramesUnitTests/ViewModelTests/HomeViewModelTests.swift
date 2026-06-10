@@ -323,8 +323,8 @@ struct HomeViewModelTests {
     
     //MARK: - Throwing Saver
     /// Used in test for saving Core Data context failure.
-    final class ThrowingSaver: ContextSaving {
-        func save() throws {
+    final class ThrowingSaver: ContextSaving, Sendable {
+        nonisolated func save() throws {
             throw HomeError.diskFull
         }
     }
