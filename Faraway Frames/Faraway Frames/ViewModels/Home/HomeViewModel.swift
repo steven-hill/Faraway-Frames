@@ -91,26 +91,28 @@ final class HomeViewModel: NSObject {
         }
     }
     
-    func addFilmToQueue(film: Film, queue: FilmQueue) {
-        let filmMO = Film.makeFilmMO(from: film, context: context)
-        switch queue {
-        case .upNext:
-            filmMO.isUpNext = true
-        case .watched:
-            filmMO.isWatched = true
-        }
-        
-        guard context.hasChanges else { return }
-        
+    func addFilmToQueue(film: Film, queue: FilmQueue) async {
         do {
-            try saver.save()
-        } catch {
-            Task { @MainActor in
-                self.handleError(error)
+            try await context.perform {
+                let filmMO = Film.makeFilmMO(from: film, context: self.context)
+                
+                switch queue {
+                case .upNext:
+                    filmMO.isUpNext = true
+                case .watched:
+                    filmMO.isWatched = true
+                }
+                
+                guard self.context.hasChanges else { return }
+                try self.saver.save()
             }
+        } catch {
+            let homeError = HomeError(error as NSError)
+            self.currentState = .failure(homeError)
+            self.delegate?.didReceiveError(homeError)
         }
     }
-    
+
     func removeFilmFromQueue(id: String, queue: FilmQueue) async {
         let filmID = id
         do {
@@ -140,12 +142,6 @@ final class HomeViewModel: NSObject {
             self.currentState = .failure(homeError)
             self.delegate?.didReceiveError(homeError)
         }
-    }
-    
-    private func handleError(_ error: Error) {
-        let homeError = HomeError(error as NSError)
-        self.currentState = .failure(homeError)
-        self.delegate?.didReceiveError(homeError)
     }
 }
 

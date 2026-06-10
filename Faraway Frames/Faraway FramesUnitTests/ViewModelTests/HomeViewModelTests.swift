@@ -104,13 +104,13 @@ struct HomeViewModelTests {
     }
     
     @Test("Adding a film to upNext should add it to `upNextFilms`, and call delegate method")
-    func homeViewModel_addFilmToQueue_addsFilmToUpNext() throws {
+    func homeViewModel_addFilmToQueue_addsFilmToUpNext() async throws {
         let (sut, _) = makeSUTWithContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         let targetFilm = Film.sample[0]
         
-        sut.addFilmToQueue(film: targetFilm, queue: .upNext)
+        await sut.addFilmToQueue(film: targetFilm, queue: .upNext)
         sut.performFetches()
         
         #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
@@ -119,13 +119,13 @@ struct HomeViewModelTests {
     }
     
     @Test("Adding a film to watched should add it to `watchedFilms`, and call delegate method")
-    func homeViewModel_addFilmToQueue_addsFilmToWatched() throws {
+    func homeViewModel_addFilmToQueue_addsFilmToWatched() async throws {
         let (sut, _) = makeSUTWithContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         let targetFilm = Film.sample[0]
         
-        sut.addFilmToQueue(film: targetFilm, queue: .watched)
+        await sut.addFilmToQueue(film: targetFilm, queue: .watched)
         sut.performFetches()
         
         #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
@@ -141,8 +141,7 @@ struct HomeViewModelTests {
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         
-        sut.addFilmToQueue(film: Film.sample[0], queue: .upNext)
-        await Task.yield()
+        await sut.addFilmToQueue(film: Film.sample[0], queue: .upNext)
         
         #expect(delegateSpy.didReceiveErrorCallCount == 1, "Should have called delegate method once.")
         if case .failure = sut.currentState { #expect(true) }
