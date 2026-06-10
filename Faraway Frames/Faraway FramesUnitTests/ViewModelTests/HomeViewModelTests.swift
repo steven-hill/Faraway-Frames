@@ -244,7 +244,7 @@ struct HomeViewModelTests {
         #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
     }
     
-    @Test("`removeFilmFromQueue` throws error when saving fails")
+    @Test("`removeFilmFromQueue` throws error when saving fails, updates `currentState` and calls the delegate")
     func homeViewModel_removeFilmFromQueue_WhenThereIsASaveError_throwsError() async {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
