@@ -112,32 +112,32 @@ final class HomeViewModel: NSObject {
     }
     
     func removeFilmFromQueue(id: String, queue: FilmQueue) async {
-        let filmID = id        
-        await context.perform {
-            let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
-            request.predicate = NSPredicate(format: "id == %@", filmID)
-            
-            do {
-                if let managedObject = try self.context.fetch(request).first {
-                    switch queue {
-                    case .upNext:
-                        managedObject.isUpNext = false
-                    case .watched:
-                        managedObject.isWatched = false
-                    }
-                    
-                    if !managedObject.isUpNext && !managedObject.isWatched {
-                        self.context.delete(managedObject)
-                    }
-                    
-                    if self.context.hasChanges {
-                        try self.context.save()
-                    }
+        let filmID = id
+        do {
+            try await context.perform {
+                let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
+                request.predicate = NSPredicate(format: "id == %@", filmID)
+                
+                guard let managedObject = try self.context.fetch(request).first else { return }
+                
+                switch queue {
+                case .upNext:
+                    managedObject.isUpNext = false
+                case .watched:
+                    managedObject.isWatched = false
                 }
-            } catch {
-                Task { @MainActor in
-                    self.handleError(error)
+                
+                if !managedObject.isUpNext && !managedObject.isWatched {
+                    self.context.delete(managedObject)
                 }
+                
+                if self.context.hasChanges {
+                    try self.saver.save()
+                }
+            }
+        } catch {
+            await MainActor.run {
+                self.handleError(error)
             }
         }
     }
