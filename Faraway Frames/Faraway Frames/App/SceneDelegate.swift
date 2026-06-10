@@ -29,13 +29,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             dependencies = MockDependencies()
         } else {
             dependencies = AppDependencyContainer()
-            do {
-                let persistenceController = try dependencies.makePersistenceController()
-                mainCoordinator = MainCoordinator(window: window, dependencies: dependencies, persistenceController: persistenceController)
-            } catch {
-                // TODO: - Replace with View Controller showing an error message.
-                fatalError()
-            }
+        }
+        
+        do {
+            let persistenceController = try dependencies.makePersistenceController()
+            mainCoordinator = MainCoordinator(window: window, dependencies: dependencies, persistenceController: persistenceController)
+        } catch {
+            // TODO: - Replace with View Controller showing an error message.
+            fatalError()
         }
     }
     
