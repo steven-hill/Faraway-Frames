@@ -93,20 +93,20 @@ final class HomeViewModel: NSObject {
     
     func addFilmToQueue(film: Film, queue: FilmQueue) {
         let filmMO = Film.makeFilmMO(from: film, context: context)
-        let isUpNextTarget = (queue == .upNext)
-        if isUpNextTarget {
+        switch queue {
+        case .upNext:
             filmMO.isUpNext = true
-        } else {
+        case .watched:
             filmMO.isWatched = true
         }
         
-        if context.hasChanges {
-            do {
-                try saver.save()
-            } catch {
-                Task { @MainActor in
-                    self.handleError(error)
-                }
+        guard context.hasChanges else { return }
+        
+        do {
+            try saver.save()
+        } catch {
+            Task { @MainActor in
+                self.handleError(error)
             }
         }
     }
