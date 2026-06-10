@@ -136,9 +136,9 @@ final class HomeViewModel: NSObject {
                 }
             }
         } catch {
-            await MainActor.run {
-                self.handleError(error)
-            }
+            let homeError = HomeError(error as NSError)
+            self.currentState = .failure(homeError)
+            self.delegate?.didReceiveError(homeError)
         }
     }
     

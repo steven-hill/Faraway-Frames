@@ -261,7 +261,6 @@ struct HomeViewModelTests {
         }
         
         await sut.removeFilmFromQueue(id: targetID, queue: .upNext)
-        await Task.yield()
         
         #expect(delegateSpy.didReceiveErrorCallCount == 1, "Should have called delegate method once.")
         if case .failure = sut.currentState { #expect(true) }
