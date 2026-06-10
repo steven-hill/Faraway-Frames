@@ -132,6 +132,21 @@ struct HomeViewModelTests {
         let watchedFilms = try #require(delegateSpy.watchedFilms, "Delegate should have received watched films array.")
         #expect(watchedFilms.count == 1, "Should be one.")
     }
+    
+    @Test("`addFilmToQueue` should handle errors by updating `currentState` and calling the delegate")
+    func homeViewModel_addFilmToQueue_onSaveError_handlesError() async {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let saver = ThrowingSaver()
+        let sut = HomeViewModel(context: testPersistenceController.viewContext, saver: saver)
+        let delegateSpy = HomeViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        
+        sut.addFilmToQueue(film: Film.sample[0], queue: .upNext)
+        await Task.yield()
+        
+        #expect(delegateSpy.didReceiveErrorCallCount == 1, "Should have called delegate method once.")
+        if case .failure = sut.currentState { #expect(true) }
+    }
 
     @Test("Deleting film from upNext when it's not in watched should remove it from database")
     func homeViewModel_removeFilmFromQueue_whenFilmIsInUpNextButNotInWatched_deletesItFromDatabase() async throws {
@@ -395,5 +410,12 @@ struct HomeViewModelTests {
         let shouldFailOnFetch: Bool
         let shouldFailOnSave: Bool
         let displayName: String
+    }
+    
+    //MARK: - Throwing Saver
+    final class ThrowingSaver: ContextSaving {
+        func save() throws {
+            throw HomeError.diskFull
+        }
     }
 }
