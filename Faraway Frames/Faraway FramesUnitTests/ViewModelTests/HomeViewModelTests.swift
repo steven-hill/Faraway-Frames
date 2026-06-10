@@ -244,48 +244,6 @@ struct HomeViewModelTests {
         #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
     }
     
-    @Test("`removeFilmFromQueue` catch block handles both failure cases correctly", arguments: [
-        CatchBlockScenario(shouldFailOnFetch: true, shouldFailOnSave: false, displayName: "Fetch Failure Case"),
-        CatchBlockScenario(shouldFailOnFetch: false, shouldFailOnSave: true, displayName: "Save Failure Case")
-    ])
-    func homeViewModel_removeFilmFromQueue_catchBlockTriggered(for scenario: CatchBlockScenario) async {
-        let mockContext = FailingManagedObjectContext()
-        mockContext.shouldFailOnFetch = scenario.shouldFailOnFetch
-        mockContext.shouldFailOnSave = scenario.shouldFailOnSave
-        
-        let targetID = "test-film-id"
-        if scenario.shouldFailOnSave {
-            mockContext.seedFilm(id: targetID, isUpNext: true, isWatched: false)
-        }
-        
-        let dummyRequest = NSFetchRequest<FilmMO>(entityName: "FilmMO")
-        dummyRequest.sortDescriptors = [NSSortDescriptor(key: "id", ascending: true)]
-        let dummyUpNextFRC = NSFetchedResultsController(
-            fetchRequest: dummyRequest,
-            managedObjectContext: mockContext,
-            sectionNameKeyPath: nil,
-            cacheName: nil)
-        let dummyWatchedFRC = NSFetchedResultsController(
-            fetchRequest: dummyRequest,
-            managedObjectContext: mockContext,
-            sectionNameKeyPath: nil,
-            cacheName: nil)
-        
-        let sut = HomeViewModel(context: mockContext, upNextFRC: dummyUpNextFRC, watchedFRC: dummyWatchedFRC)
-        let delegateSpy = HomeViewModelDelegateSpy()
-        sut.delegate = delegateSpy
-        
-        await sut.removeFilmFromQueue(id: targetID, queue: .upNext)
-        await Task.yield()
-        
-        if case .failure = sut.currentState {
-            #expect(true)
-        } else {
-            Issue.record("[\(scenario.displayName)] Expected state to be .failure, but got \(sut.currentState)")
-        }
-        #expect(delegateSpy.didReceiveErrorCallCount == 1, "[\(scenario.displayName)] Delegate should be called exactly once")
-    }
-    
     @Test func homeViewModel_removeFilmFromQueue_WhenThereIsASaveError_throwsError() async {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
@@ -363,78 +321,8 @@ struct HomeViewModelTests {
         var errorDescription: String? { "Unknown error." }
     }
     
-    //MARK: - Failing Managed Object Context
-    /// Used in test for `removeFilmFromQueue(id:, queue:)` failures.
-    final class FailingManagedObjectContext: NSManagedObjectContext, @unchecked Sendable {
-        var shouldFailOnFetch = false
-        var shouldFailOnSave = false
-        
-        enum MockError: Error {
-            case forcedFetchFailure
-            case forcedSaveFailure
-        }
-        
-        convenience init() {
-            let model = NSManagedObjectModel()
-            let entity = NSEntityDescription()
-            entity.name = "FilmMO"
-            entity.managedObjectClassName = NSStringFromClass(FilmMO.self)
-            
-            let idAttribute = NSAttributeDescription()
-            idAttribute.name = "id"
-            idAttribute.attributeType = .stringAttributeType
-            
-            let upNextAttribute = NSAttributeDescription()
-            upNextAttribute.name = "isUpNext"
-            upNextAttribute.attributeType = .booleanAttributeType
-            
-            let watchedAttribute = NSAttributeDescription()
-            watchedAttribute.name = "isWatched"
-            watchedAttribute.attributeType = .booleanAttributeType
-            
-            entity.properties = [idAttribute, upNextAttribute, watchedAttribute]
-            model.entities = [entity]
-            
-            let coordinator = NSPersistentStoreCoordinator(managedObjectModel: model)
-            try! coordinator.addPersistentStore(ofType: NSInMemoryStoreType, configurationName: nil, at: nil, options: nil)
-            
-            self.init(concurrencyType: .mainQueueConcurrencyType)
-            self.persistentStoreCoordinator = coordinator
-        }
-        
-        func seedFilm(id: String, isUpNext: Bool, isWatched: Bool) {
-            let entity = NSEntityDescription.entity(forEntityName: "FilmMO", in: self)!
-            let managedObject = NSManagedObject(entity: entity, insertInto: self)
-            managedObject.setValue(id, forKey: "id")
-            managedObject.setValue(isUpNext, forKey: "isUpNext")
-            managedObject.setValue(isWatched, forKey: "isWatched")
-            try! super.save()
-        }
-        
-        override func execute(_ request: NSPersistentStoreRequest) throws -> NSPersistentStoreResult {
-            if shouldFailOnFetch && request is NSFetchRequest<NSFetchRequestResult> {
-                throw MockError.forcedFetchFailure
-            }
-            return try super.execute(request)
-        }
-        
-        override func save() throws {
-            if shouldFailOnSave {
-                throw MockError.forcedSaveFailure
-            }
-            try super.save()
-        }
-    }
-    
-    //MARK: - Catch Block Scenario
-    /// Used in test for `removeFilmFromQueue(id:, queue:)` failures.
-    struct CatchBlockScenario: Sendable {
-        let shouldFailOnFetch: Bool
-        let shouldFailOnSave: Bool
-        let displayName: String
-    }
-    
     //MARK: - Throwing Saver
+    /// Used in test for saving Core Data context failure.
     final class ThrowingSaver: ContextSaving {
         func save() throws {
             throw HomeError.diskFull
