@@ -112,18 +112,17 @@ final class HomeViewModel: NSObject {
     }
     
     func removeFilmFromQueue(id: String, queue: FilmQueue) async {
-        let filmID = id
-        let isUpNextTarget = (queue == .upNext)
-        
+        let filmID = id        
         await context.perform {
             let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
             request.predicate = NSPredicate(format: "id == %@", filmID)
             
             do {
                 if let managedObject = try self.context.fetch(request).first {
-                    if isUpNextTarget {
+                    switch queue {
+                    case .upNext:
                         managedObject.isUpNext = false
-                    } else {
+                    case .watched:
                         managedObject.isWatched = false
                     }
                     
