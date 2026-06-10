@@ -286,6 +286,28 @@ struct HomeViewModelTests {
         #expect(delegateSpy.didReceiveErrorCallCount == 1, "[\(scenario.displayName)] Delegate should be called exactly once")
     }
     
+    @Test func homeViewModel_removeFilmFromQueue_WhenThereIsASaveError_throwsError() async {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let saver = ThrowingSaver()
+        let sut = HomeViewModel(context: context, saver: saver)
+        let delegateSpy = HomeViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        let targetID = "test-film-id"
+        try? await context.perform {
+                let mockFilm = FilmMO(context: context)
+                mockFilm.id = targetID
+                mockFilm.isUpNext = true
+                try context.save()
+            }
+        
+        await sut.removeFilmFromQueue(id: targetID, queue: .upNext)
+        await Task.yield()
+        
+        #expect(delegateSpy.didReceiveErrorCallCount == 1, "Should have called delegate method once.")
+        if case .failure = sut.currentState { #expect(true) }
+    }
+    
     //MARK: - SUT Helper Method
     private func makeSUTWithContext() -> (sut: HomeViewModel, context: NSManagedObjectContext) {
         let testPersistenceController = try! PersistenceController(inMemory: true)
