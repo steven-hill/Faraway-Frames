@@ -7,8 +7,8 @@
 
 import CoreData
 
-protocol ContextSaving {
-    func save() throws
+protocol ContextSaving: Sendable {
+    nonisolated func save() throws
 }
 
 extension NSManagedObjectContext: ContextSaving {}
