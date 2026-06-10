@@ -29,6 +29,7 @@ final class HomeViewModel: NSObject {
     private let upNextFRC: NSFetchedResultsController<FilmMO>
     private let watchedFRC: NSFetchedResultsController<FilmMO>
     private let context: NSManagedObjectContext
+    private let saver: ContextSaving
     
     private var upNextFilms: [Film] {
         let managedObjects = upNextFRC.fetchedObjects ?? []
@@ -43,9 +44,11 @@ final class HomeViewModel: NSObject {
     // MARK: - Initialisation
     init(context: NSManagedObjectContext,
          upNextFRC: NSFetchedResultsController<FilmMO>? = nil,
-         watchedFRC: NSFetchedResultsController<FilmMO>? = nil
+         watchedFRC: NSFetchedResultsController<FilmMO>? = nil,
+         saver: ContextSaving? = nil
     ) {
         self.context = context
+        self.saver = saver ?? context
         
         if let injectedUpNextFRC = upNextFRC {
             self.upNextFRC = injectedUpNextFRC
@@ -99,7 +102,7 @@ final class HomeViewModel: NSObject {
         
         if context.hasChanges {
             do {
-                try context.save()
+                try saver.save()
             } catch {
                 Task { @MainActor in
                     self.handleError(error)
