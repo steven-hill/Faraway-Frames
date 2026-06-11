@@ -143,7 +143,11 @@ struct HomeViewModelTests {
         await sut.addFilmToQueue(film: Film.sample[0], queue: .upNext)
         
         #expect(delegateSpy.didReceiveErrorCallCount == 1, "Should have called delegate method once.")
-        if case .failure = sut.currentState { #expect(true) }
+        if case .failure(let error) = sut.currentState {
+            #expect(error == .addFailed(.diskFull))
+        } else {
+            Issue.record("Expected state to be .failure(.saveFailed(.diskFull))")
+        }
     }
 
     @Test("Deleting film from upNext when it's not in watched should remove it from database")
@@ -243,7 +247,7 @@ struct HomeViewModelTests {
     }
     
     @Test("`removeFilmFromQueue` throws error when saving fails, updates `currentState` and calls the delegate")
-    func homeViewModel_removeFilmFromQueue_whenThereIsASaveError_throwsError() async {
+    func homeViewModel_removeFilmFromQueue_onSaveError_throwsError() async {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
         let saver = ThrowingSaver()
@@ -261,7 +265,12 @@ struct HomeViewModelTests {
         await sut.removeFilmFromQueue(id: targetID, queue: .upNext)
         
         #expect(delegateSpy.didReceiveErrorCallCount == 1, "Should have called delegate method once.")
-        if case .failure = sut.currentState { #expect(true) }
+        
+        if case .failure(let error) = sut.currentState {
+            #expect(error == .deleteFailed(.diskFull))
+        } else {
+            Issue.record("Expected .failure(.deleteFailed(.diskFull))")
+        }
     }
     
     @Test("`removeFilmFromQueue` doesn't throw error, and exits silently via guard when film does not exist in database")
@@ -343,7 +352,7 @@ struct HomeViewModelTests {
     /// Used in test for saving Core Data context failure.
     final class ThrowingSaver: ContextSaving, Sendable {
         nonisolated func save() throws {
-            throw HomeError.addFailed(.databaseError)
+            throw CocoaError(.fileWriteOutOfSpace)
         }
     }
 }
