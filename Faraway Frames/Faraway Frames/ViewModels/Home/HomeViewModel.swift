@@ -87,8 +87,7 @@ final class HomeViewModel: NSObject {
             delegate?.filmsDidChange(upNextFilms, watchedFilms)
         } catch {
             let homeError = HomeError.fetch(error)
-            currentState = .failure(homeError)
-            delegate?.didReceiveError(homeError)
+            handleError(homeError)
         }
     }
     
@@ -109,11 +108,10 @@ final class HomeViewModel: NSObject {
             }
         } catch {
             let homeError = HomeError.add(error)
-            currentState = .failure(homeError)
-            delegate?.didReceiveError(homeError)
+            handleError(homeError)
         }
     }
-
+    
     func removeFilmFromQueue(id: String, queue: FilmQueue) async {
         let filmID = id
         do {
@@ -140,9 +138,13 @@ final class HomeViewModel: NSObject {
             }
         } catch {
             let homeError = HomeError.delete(error)
-            self.currentState = .failure(homeError)
-            self.delegate?.didReceiveError(homeError)
+            handleError(homeError)
         }
+    }
+    
+    private func handleError(_ homeError: HomeError) {
+        currentState = .failure(homeError)
+        delegate?.didReceiveError(homeError)
     }
 }
 
