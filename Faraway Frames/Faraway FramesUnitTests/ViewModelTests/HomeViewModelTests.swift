@@ -58,35 +58,39 @@ struct HomeViewModelTests {
         #expect(filmWatched.title == Film.sample[1].title, "Should be equal.")
     }
     
-    @Test("`currentState` updates correctly across different error domains and codes, and delegate is called", arguments: [
-        (
-            error: NSError(domain: NSCocoaErrorDomain, code: NSFileWriteOutOfSpaceError, userInfo: nil) as Error,
-            expectedState: HomeViewModel.HomeState.failure(.diskFull)
-        ),
-        (
-            error: NSError(domain: NSCocoaErrorDomain, code: NSPersistentStoreOpenError, userInfo: nil) as Error,
-            expectedState: HomeViewModel.HomeState.failure(.databaseAccessError)
-        ),
-        (
-            error: NSError(domain: NSCocoaErrorDomain, code: CocoaError.managedObjectReferentialIntegrity.rawValue, userInfo: nil) as Error,
-            expectedState: HomeViewModel.HomeState.failure(.databaseAccessError)
-        ),
-        (
-            error: NSError(domain: NSCocoaErrorDomain, code: CocoaError.persistentStoreTypeMismatch.rawValue, userInfo: nil) as Error,
-            expectedState: HomeViewModel.HomeState.failure(.databaseAccessError)
-        ),
-        (
-            error: NSError(domain: NSCocoaErrorDomain, code: CocoaError.fileNoSuchFile.rawValue, userInfo: nil) as Error,
-            expectedState: HomeViewModel.HomeState.failure(.databaseAccessError)
-        ),
-        (
-            error: UnknownError() as Error,
-            expectedState: HomeViewModel.HomeState.failure(.unknown(UnknownError().localizedDescription))
-        )
-    ]
+    @Test(
+        "`currentState` updates correctly across different error domains and codes, and delegate is called",
+        arguments: [
+            (
+                error: CocoaError(.fileWriteOutOfSpace) as Error,
+                expectedState: HomeViewModel.HomeState.failure(.fetchFailed(.diskFull))
+            ),
+            (
+                error: CocoaError(.persistentStoreOpen) as Error,
+                expectedState: HomeViewModel.HomeState.failure(.fetchFailed(.databaseCorrupted))
+            ),
+            (
+                error: CocoaError(.managedObjectReferentialIntegrity) as Error,
+                expectedState: HomeViewModel.HomeState.failure(.fetchFailed(.databaseCorrupted))
+            ),
+            (
+                error: CocoaError(.persistentStoreTypeMismatch) as Error,
+                expectedState: HomeViewModel.HomeState.failure(.fetchFailed(.databaseCorrupted))
+            ),
+            (
+                error: CocoaError(.fileNoSuchFile) as Error,
+                expectedState: HomeViewModel.HomeState.failure(.fetchFailed(.databaseCorrupted))
+            ),
+            (
+                error: UnknownError() as Error,
+                expectedState: HomeViewModel.HomeState.failure(.fetchFailed(.unknown("Unknown error.")))
+            )
+        ]
     )
-    func homeViewModel_performFetches_setsCorrectFailureState(for scenario: (error: Error, expectedState: HomeViewModel.HomeState)) {
-        let testPersistenceController = try! PersistenceController(inMemory: true)
+    func homeViewModel_performFetches_setsCorrectFailureState(
+        for scenario: (error: Error, expectedState: HomeViewModel.HomeState)
+    ) throws {
+        let testPersistenceController = try PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
         let throwingController = ThrowingFetchedResultsController(context: context, errorToThrow: scenario.error)
         let sut = HomeViewModel(
@@ -101,7 +105,8 @@ struct HomeViewModelTests {
         
         #expect(sut.currentState == scenario.expectedState)
         #expect(delegateSpy.didReceiveErrorCallCount == 1, "Should call the delegate once.")
-    }
+        #expect(delegateSpy.receivedError == caseLet(scenario.expectedState), "Passed error should match state.")
+        }
     
     @Test("Adding a film to upNext should add it to `upNextFilms`, and call delegate method")
     func homeViewModel_addFilmToQueue_addsFilmToUpNext() async throws {
@@ -291,6 +296,7 @@ struct HomeViewModelTests {
         var watchedFilms: [Film]?
         var filmsDidChangeCallCount: Int = 0
         var didReceiveErrorCallCount: Int = 0
+        var receivedError: HomeError?
         
         func filmsDidChange(_ upNextFilms: [Film], _ watchedFilms: [Film]) {
             self.upNextFilms = upNextFilms
@@ -300,6 +306,7 @@ struct HomeViewModelTests {
         
         func didReceiveError(_ error: HomeError) {
             self.didReceiveErrorCallCount += 1
+            receivedError = error
         }
     }
     
@@ -312,6 +319,8 @@ struct HomeViewModelTests {
             self.errorToThrow = errorToThrow
             
             let validRequest = FilmMO.fetchRequest() as! NSFetchRequest<FilmMO>
+            // TODO: 
+            //let validRequest = NSFetchRequest<FilmMO>(entityName: "FilmMO")
             validRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
             super.init(
                 fetchRequest: validRequest,
@@ -324,6 +333,12 @@ struct HomeViewModelTests {
         override func performFetch() throws {
             throw errorToThrow
         }
+    }
+    
+    // MARK: - Helper to extract error from state
+    private func caseLet(_ state: HomeViewModel.HomeState) -> HomeError? {
+        if case .failure(let error) = state { return error }
+        return nil
     }
     
     //MARK: - Custom Error Helper
