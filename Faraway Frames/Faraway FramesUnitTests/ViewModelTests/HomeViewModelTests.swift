@@ -61,28 +61,22 @@ struct HomeViewModelTests {
     @Test(
         "`currentState` updates correctly across different error domains and codes, and delegate is called",
         arguments: [
-            (
-                error: CocoaError(.fileWriteOutOfSpace) as Error,
+            (error: CocoaError(.fileWriteOutOfSpace) as Error,
                 expectedState: HomeViewModel.HomeState.failure(.fetchFailed(.diskFull))
             ),
-            (
-                error: CocoaError(.persistentStoreOpen) as Error,
-                expectedState: HomeViewModel.HomeState.failure(.fetchFailed(.databaseCorrupted))
+            (error: CocoaError(.persistentStoreOpen) as Error,
+                expectedState: HomeViewModel.HomeState.failure(.fetchFailed(.databaseError))
             ),
-            (
-                error: CocoaError(.managedObjectReferentialIntegrity) as Error,
-                expectedState: HomeViewModel.HomeState.failure(.fetchFailed(.databaseCorrupted))
+            (error: CocoaError(.managedObjectReferentialIntegrity) as Error,
+                expectedState: HomeViewModel.HomeState.failure(.fetchFailed(.databaseError))
             ),
-            (
-                error: CocoaError(.persistentStoreTypeMismatch) as Error,
-                expectedState: HomeViewModel.HomeState.failure(.fetchFailed(.databaseCorrupted))
+            (error: CocoaError(.persistentStoreTypeMismatch) as Error,
+                expectedState: HomeViewModel.HomeState.failure(.fetchFailed(.databaseError))
             ),
-            (
-                error: CocoaError(.fileNoSuchFile) as Error,
-                expectedState: HomeViewModel.HomeState.failure(.fetchFailed(.databaseCorrupted))
+            (error: CocoaError(.fileNoSuchFile) as Error,
+                expectedState: HomeViewModel.HomeState.failure(.fetchFailed(.databaseError))
             ),
-            (
-                error: UnknownError() as Error,
+            (error: UnknownError() as Error,
                 expectedState: HomeViewModel.HomeState.failure(.fetchFailed(.unknown("Unknown error.")))
             )
         ]
@@ -318,9 +312,7 @@ struct HomeViewModelTests {
         init(context: NSManagedObjectContext, errorToThrow: Error) {
             self.errorToThrow = errorToThrow
             
-            let validRequest = FilmMO.fetchRequest() as! NSFetchRequest<FilmMO>
-            // TODO: 
-            //let validRequest = NSFetchRequest<FilmMO>(entityName: "FilmMO")
+            let validRequest = NSFetchRequest<FilmMO>(entityName: "FilmMO")
             validRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
             super.init(
                 fetchRequest: validRequest,
@@ -351,7 +343,7 @@ struct HomeViewModelTests {
     /// Used in test for saving Core Data context failure.
     final class ThrowingSaver: ContextSaving, Sendable {
         nonisolated func save() throws {
-            throw HomeError.diskFull
+            throw HomeError.addFailed(.databaseError)
         }
     }
 }
