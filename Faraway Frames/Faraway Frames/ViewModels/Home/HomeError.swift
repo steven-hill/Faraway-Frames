@@ -9,16 +9,38 @@ import Foundation
 import CoreData
 
 enum HomeError: Error, Equatable {
-    case databaseAccessError
-    case diskFull
-    case unknown(String)
-        
-    var localizedDescription: String {
+    
+    enum FailureReason: Equatable {
+        case diskFull
+        case databaseError
+        case unknown(String)
+    }
+    
+    case fetchFailed(FailureReason)
+    case addFailed(FailureReason)
+    case deleteFailed(FailureReason)
+}
+
+extension HomeError: LocalizedError {
+    nonisolated var errorDescription: String? {
         switch self {
-        case .databaseAccessError:
-            return "Unable to access database. Try restarting the app."
+        case .fetchFailed(let reason):
+            return "Failed to load films. \(reason.description)"
+        case .addFailed(let reason):
+            return "Failed to add film. \(reason.description)"
+        case .deleteFailed(let reason):
+            return "Failed to delete film. \(reason.description)"
+        }
+    }
+}
+
+extension HomeError.FailureReason {
+    nonisolated var description: String {
+        switch self {
         case .diskFull:
-            return "Device storage full. Try freeing up some space."
+            return "Your device storage is full. Free up space and try again."
+        case .databaseError:
+            return "There was a problem with the database. Please try again."
         case .unknown(let message):
             return message
         }
@@ -26,20 +48,21 @@ enum HomeError: Error, Equatable {
 }
 
 extension HomeError {
-    init(_ error: Error) {
+    private static func mapReason(_ error: Error) -> FailureReason {
         if let cocoaError = error as? CocoaError {
             switch cocoaError.code {
             case .fileWriteOutOfSpace:
-                self = .diskFull
-            case .persistentStoreOpen,
-                    .managedObjectReferentialIntegrity,
-                    .persistentStoreTypeMismatch:
-                self = .databaseAccessError
+                return .diskFull
+            case .persistentStoreOpen, .persistentStoreTypeMismatch, .managedObjectReferentialIntegrity:
+                return .databaseError
             default:
-                self = .databaseAccessError
+                return .databaseError
             }
-        } else {
-            self = .unknown(error.localizedDescription)
         }
+        return .unknown(error.localizedDescription)
     }
+    
+    static func fetch(_ error: Error) -> Self { .fetchFailed(mapReason(error)) }
+    static func add(_ error: Error) -> Self { .addFailed(mapReason(error)) }
+    static func delete(_ error: Error) -> Self { .deleteFailed(mapReason(error)) }
 }

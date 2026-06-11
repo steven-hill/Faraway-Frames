@@ -85,9 +85,9 @@ final class HomeViewModel: NSObject {
             try watchedFRC.performFetch()
             currentState = .fetchedObjects
             delegate?.filmsDidChange(upNextFilms, watchedFilms)
-        } catch let error as NSError {
-            currentState = .failure(HomeError(error))
-            delegate?.didReceiveError(HomeError(error))
+        } catch {
+            let homeError = HomeError.fetch(error)
+            handleError(homeError)
         }
     }
     
@@ -107,18 +107,16 @@ final class HomeViewModel: NSObject {
                 try self.saver.save()
             }
         } catch {
-            let homeError = HomeError(error as NSError)
-            self.currentState = .failure(homeError)
-            self.delegate?.didReceiveError(homeError)
+            let homeError = HomeError.add(error)
+            handleError(homeError)
         }
     }
-
+    
     func removeFilmFromQueue(id: String, queue: FilmQueue) async {
-        let filmID = id
         do {
             try await context.perform {
                 let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
-                request.predicate = NSPredicate(format: "id == %@", filmID)
+                request.predicate = NSPredicate(format: "id == %@", id)
                 
                 guard let managedObject = try self.context.fetch(request).first else { return }
                 
@@ -133,15 +131,18 @@ final class HomeViewModel: NSObject {
                     self.context.delete(managedObject)
                 }
                 
-                if self.context.hasChanges {
-                    try self.saver.save()
-                }
+                guard self.context.hasChanges else { return }
+                try self.saver.save()
             }
         } catch {
-            let homeError = HomeError(error as NSError)
-            self.currentState = .failure(homeError)
-            self.delegate?.didReceiveError(homeError)
+            let homeError = HomeError.delete(error)
+            handleError(homeError)
         }
+    }
+    
+    private func handleError(_ homeError: HomeError) {
+        currentState = .failure(homeError)
+        delegate?.didReceiveError(homeError)
     }
 }
 
