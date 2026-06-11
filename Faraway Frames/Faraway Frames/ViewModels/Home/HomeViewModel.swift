@@ -132,9 +132,8 @@ final class HomeViewModel: NSObject {
                     self.context.delete(managedObject)
                 }
                 
-                if self.context.hasChanges {
-                    try self.saver.save()
-                }
+                guard self.context.hasChanges else { return }
+                try self.saver.save()
             }
         } catch {
             let homeError = HomeError.delete(error)
