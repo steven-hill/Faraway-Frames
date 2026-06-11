@@ -17,6 +17,8 @@ enum HomeError: Error, Equatable {
     }
     
     case fetchFailed(FailureReason)
+    case addFailed(FailureReason)
+    case deleteFailed(FailureReason)
 }
 
 extension HomeError: LocalizedError {
@@ -24,6 +26,10 @@ extension HomeError: LocalizedError {
         switch self {
         case .fetchFailed(let reason):
             return "Failed to load films. \(reason.description)"
+        case .addFailed(let reason):
+            return "Failed to add film. \(reason.description)"
+        case .deleteFailed(let reason):
+            return "Failed to delete film. \(reason.description)"
         }
     }
 }
@@ -57,4 +63,6 @@ extension HomeError {
     }
     
     static func fetch(_ error: Error) -> Self { .fetchFailed(mapReason(error)) }
+    static func add(_ error: Error) -> Self { .addFailed(mapReason(error)) }
+    static func delete(_ error: Error) -> Self { .deleteFailed(mapReason(error)) }
 }
