@@ -8,13 +8,11 @@
 import Foundation
 import CoreData
 
-enum HomeError: Error, Identifiable, Equatable {
+enum HomeError: Error, Equatable {
     case databaseAccessError
     case diskFull
     case unknown(String)
-    
-    var id: String { localizedDescription }
-    
+        
     var localizedDescription: String {
         switch self {
         case .databaseAccessError:
