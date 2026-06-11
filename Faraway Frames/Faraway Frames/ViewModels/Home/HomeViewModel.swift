@@ -108,7 +108,7 @@ final class HomeViewModel: NSObject {
                 try self.saver.save()
             }
         } catch {
-            let homeError = HomeError.save(error)
+            let homeError = HomeError.add(error)
             currentState = .failure(homeError)
             delegate?.didReceiveError(homeError)
         }
@@ -139,7 +139,7 @@ final class HomeViewModel: NSObject {
                 }
             }
         } catch {
-            let homeError = HomeError(error as NSError)
+            let homeError = HomeError.delete(error)
             self.currentState = .failure(homeError)
             self.delegate?.didReceiveError(homeError)
         }
