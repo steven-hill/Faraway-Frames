@@ -8,13 +8,11 @@
 import Foundation
 import CoreData
 
-enum HomeError: Error, Identifiable, Equatable {
+enum HomeError: Error, Equatable {
     case databaseAccessError
     case diskFull
     case unknown(String)
-    
-    var id: String { localizedDescription }
-    
+        
     var localizedDescription: String {
         switch self {
         case .databaseAccessError:
@@ -23,19 +21,6 @@ enum HomeError: Error, Identifiable, Equatable {
             return "Device storage full. Try freeing up some space."
         case .unknown(let message):
             return message
-        }
-    }
-    
-    static func == (lhs: HomeError, rhs: HomeError) -> Bool {
-        switch (lhs, rhs) {
-        case (.databaseAccessError, .databaseAccessError):
-            return true
-        case (.diskFull, .diskFull):
-            return true
-        case (.unknown(let lhsMessage), .unknown(let rhsMessage)):
-            return lhsMessage == rhsMessage
-        default:
-            return false
         }
     }
 }
