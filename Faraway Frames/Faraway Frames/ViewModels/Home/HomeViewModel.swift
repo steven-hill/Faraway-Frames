@@ -85,9 +85,10 @@ final class HomeViewModel: NSObject {
             try watchedFRC.performFetch()
             currentState = .fetchedObjects
             delegate?.filmsDidChange(upNextFilms, watchedFilms)
-        } catch let error as NSError {
-            currentState = .failure(HomeError(error))
-            delegate?.didReceiveError(HomeError(error))
+        } catch {
+            let homeError = HomeError.fetch(error)
+            currentState = .failure(homeError)
+            delegate?.didReceiveError(homeError)
         }
     }
     
