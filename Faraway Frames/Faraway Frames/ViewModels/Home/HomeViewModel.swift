@@ -113,11 +113,10 @@ final class HomeViewModel: NSObject {
     }
     
     func removeFilmFromQueue(id: String, queue: FilmQueue) async {
-        let filmID = id
         do {
             try await context.perform {
                 let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
-                request.predicate = NSPredicate(format: "id == %@", filmID)
+                request.predicate = NSPredicate(format: "id == %@", id)
                 
                 guard let managedObject = try self.context.fetch(request).first else { return }
                 
