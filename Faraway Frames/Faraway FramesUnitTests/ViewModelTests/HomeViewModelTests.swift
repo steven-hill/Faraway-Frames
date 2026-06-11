@@ -349,7 +349,7 @@ struct HomeViewModelTests {
     }
     
     //MARK: - Throwing Saver
-    /// Used in test for saving Core Data context failure.
+    /// Used in tests for failure when saving Core Data context.
     final class ThrowingSaver: ContextSaving, Sendable {
         nonisolated func save() throws {
             throw CocoaError(.fileWriteOutOfSpace)
