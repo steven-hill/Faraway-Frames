@@ -58,35 +58,16 @@ struct HomeViewModelTests {
         #expect(filmWatched.title == Film.sample[1].title, "Should be equal.")
     }
     
-    @Test(
-        "`currentState` updates correctly across different error domains and codes, and delegate is called",
-        arguments: [
-            (error: CocoaError(.fileWriteOutOfSpace) as Error,
-                expectedState: HomeViewModel.HomeState.failure(.fetchFailed(.diskFull))
-            ),
-            (error: CocoaError(.persistentStoreOpen) as Error,
-                expectedState: HomeViewModel.HomeState.failure(.fetchFailed(.databaseError))
-            ),
-            (error: CocoaError(.managedObjectReferentialIntegrity) as Error,
-                expectedState: HomeViewModel.HomeState.failure(.fetchFailed(.databaseError))
-            ),
-            (error: CocoaError(.persistentStoreTypeMismatch) as Error,
-                expectedState: HomeViewModel.HomeState.failure(.fetchFailed(.databaseError))
-            ),
-            (error: CocoaError(.fileNoSuchFile) as Error,
-                expectedState: HomeViewModel.HomeState.failure(.fetchFailed(.databaseError))
-            ),
-            (error: UnknownError() as Error,
-                expectedState: HomeViewModel.HomeState.failure(.fetchFailed(.unknown("Unknown error.")))
-            )
-        ]
+    @Test("`performFetches` should handle errors by updating `currentState` and calling the delegate",
+          arguments: errorScenarios
     )
     func homeViewModel_performFetches_setsCorrectFailureState(
-        for scenario: (error: Error, expectedState: HomeViewModel.HomeState)
+        for scenario: (systemError: Error,
+                       expectedReason: HomeError.FailureReason)
     ) throws {
         let testPersistenceController = try PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
-        let throwingController = ThrowingFetchedResultsController(context: context, errorToThrow: scenario.error)
+        let throwingController = ThrowingFetchedResultsController(context: context, errorToThrow: scenario.systemError)
         let sut = HomeViewModel(
             context: context,
             upNextFRC: throwingController,
@@ -94,13 +75,15 @@ struct HomeViewModelTests {
         )
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
+        let expectedError = HomeError.fetchFailed(scenario.expectedReason)
+        let expectedState = HomeViewModel.HomeState.failure(expectedError)
         
         sut.performFetches()
         
-        #expect(sut.currentState == scenario.expectedState)
+        #expect(sut.currentState == expectedState, "Should match.")
         #expect(delegateSpy.didReceiveErrorCallCount == 1, "Should call the delegate once.")
-        #expect(delegateSpy.receivedError == caseLet(scenario.expectedState), "Passed error should match state.")
-        }
+        #expect(delegateSpy.receivedError == expectedError, "Should match.")
+    }
     
     @Test("Adding a film to upNext should add it to `upNextFilms`, and call delegate method")
     func homeViewModel_addFilmToQueue_addsFilmToUpNext() async throws {
@@ -132,22 +115,25 @@ struct HomeViewModelTests {
         #expect(watchedFilms.count == 1, "Should be one.")
     }
     
-    @Test("`addFilmToQueue` should handle errors by updating `currentState` and calling the delegate")
-    func homeViewModel_addFilmToQueue_onSaveError_handlesError() async {
+    @Test("`addFilmToQueue` should handle errors by updating `currentState` and calling the delegate",
+          arguments: errorScenarios
+    )
+    func homeViewModel_addFilmToQueue_onSaveError_handlesError(
+        scenario: (systemError: Error,
+                   expectedReason: HomeError.FailureReason)
+    ) async {
         let testPersistenceController = try! PersistenceController(inMemory: true)
-        let saver = ThrowingSaver()
+        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
         let sut = HomeViewModel(context: testPersistenceController.viewContext, saver: saver)
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
+        let expectedError = HomeError.addFailed(scenario.expectedReason)
         
         await sut.addFilmToQueue(film: Film.sample[0], queue: .upNext)
         
         #expect(delegateSpy.didReceiveErrorCallCount == 1, "Should have called delegate method once.")
-        if case .failure(let error) = sut.currentState {
-            #expect(error == .addFailed(.diskFull))
-        } else {
-            Issue.record("Expected state to be .failure(.saveFailed(.diskFull))")
-        }
+        #expect(delegateSpy.receivedError == expectedError, "Delegate should receive matching error.")
+        #expect(sut.currentState == .failure(expectedError), "ViewModel state should transition to match failure.")
     }
 
     @Test("Deleting film from upNext when it's not in watched should remove it from database")
@@ -246,11 +232,16 @@ struct HomeViewModelTests {
         #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
     }
     
-    @Test("`removeFilmFromQueue` throws error when saving fails, updates `currentState` and calls the delegate")
-    func homeViewModel_removeFilmFromQueue_onSaveError_throwsError() async {
+    @Test("`removeFilmFromQueue` throws error when saving fails, updates `currentState` and calls the delegate",
+          arguments: errorScenarios
+    )
+    func homeViewModel_removeFilmFromQueue_onSaveError_throwsError(
+        scenario: (systemError: Error,
+                   expectedReason: HomeError.FailureReason)
+    ) async {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
-        let saver = ThrowingSaver()
+        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
         let sut = HomeViewModel(context: context, saver: saver)
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
@@ -261,16 +252,13 @@ struct HomeViewModelTests {
             mockFilm.isUpNext = true
             try context.save()
         }
+        let expectedError = HomeError.deleteFailed(scenario.expectedReason)
         
         await sut.removeFilmFromQueue(id: targetID, queue: .upNext)
         
         #expect(delegateSpy.didReceiveErrorCallCount == 1, "Should have called delegate method once.")
-        
-        if case .failure(let error) = sut.currentState {
-            #expect(error == .deleteFailed(.diskFull))
-        } else {
-            Issue.record("Expected .failure(.deleteFailed(.diskFull))")
-        }
+        #expect(delegateSpy.receivedError == expectedError, "Delegate should receive matching error.")
+        #expect(sut.currentState == .failure(expectedError), "ViewModel state should transition to match failure.")
     }
     
     @Test("`removeFilmFromQueue` doesn't throw error, and exits silently via guard when film does not exist in database")
@@ -336,23 +324,36 @@ struct HomeViewModelTests {
         }
     }
     
-    // MARK: - Helper to extract error from state
-    private func caseLet(_ state: HomeViewModel.HomeState) -> HomeError? {
-        if case .failure(let error) = state { return error }
-        return nil
-    }
-    
-    //MARK: - Custom Error Helper
-    /// Used in test for `performFetches` failure.
-    private struct UnknownError: Error, LocalizedError {
-        var errorDescription: String? { "Unknown error." }
-    }
-    
     //MARK: - Throwing Saver
     /// Used in tests for failure when saving Core Data context.
     final class ThrowingSaver: ContextSaving, Sendable {
-        nonisolated func save() throws {
-            throw CocoaError(.fileWriteOutOfSpace)
+        let errorToThrow: Error
+        
+        init(errorToThrow: Error) {
+            self.errorToThrow = errorToThrow
         }
+        
+        nonisolated func save() throws {
+            throw errorToThrow
+        }
+    }
+    
+    // MARK: - System Errors Helper
+    /// Used in tests involving error handling.
+    nonisolated static var errorScenarios: [(systemError: Error, expectedReason: HomeError.FailureReason)] {
+        [
+            (CocoaError(.fileWriteOutOfSpace), .diskFull),
+            (CocoaError(.persistentStoreOpen), .databaseError),
+            (CocoaError(.managedObjectReferentialIntegrity), .databaseError),
+            (CocoaError(.persistentStoreTypeMismatch), .databaseError),
+            (CocoaError(.fileNoSuchFile), .databaseError),
+            (UnknownError(), .unknown("Unknown error."))
+        ]
+    }
+    
+    //MARK: - Custom Unknown Error Helper
+    /// Used in test for `performFetches` failure.
+    private struct UnknownError: Error, LocalizedError {
+        var errorDescription: String? { "Unknown error." }
     }
 }
