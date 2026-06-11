@@ -25,19 +25,6 @@ enum HomeError: Error, Identifiable, Equatable {
             return message
         }
     }
-    
-    static func == (lhs: HomeError, rhs: HomeError) -> Bool {
-        switch (lhs, rhs) {
-        case (.databaseAccessError, .databaseAccessError):
-            return true
-        case (.diskFull, .diskFull):
-            return true
-        case (.unknown(let lhsMessage), .unknown(let rhsMessage)):
-            return lhsMessage == rhsMessage
-        default:
-            return false
-        }
-    }
 }
 
 extension HomeError {
