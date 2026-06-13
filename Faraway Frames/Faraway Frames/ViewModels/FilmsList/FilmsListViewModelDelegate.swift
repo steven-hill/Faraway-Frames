@@ -13,5 +13,4 @@ protocol FilmsListViewModelDelegate: AnyObject {
     func didRetry()
     func didFailToMatchResults()
     func didRequestVoiceOverAnnouncement(with message: String)
-    func didUpdateUpNextStatus(isUpNext: Bool)
 }
