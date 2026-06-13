@@ -74,7 +74,7 @@ struct FilmDetailViewModelTests {
         mockImageLoader.resume(shouldSucceed: true)
         await Task.yield()
 
-        #expect(spy.callCount == 3, "Should be called three times in total; once for filmA's initial content, twice for filmB's initial content and its movie banner.")
+        #expect(spy.updateFilmDetailsCallCount == 3, "Should be called three times in total; once for filmA's initial content, twice for filmB's initial content and its movie banner.")
     }
 
     @Test(.tags(.networkRequest))
@@ -94,7 +94,7 @@ struct FilmDetailViewModelTests {
         if case .content(let displayModel, let image) = sut.currentState {
             #expect(image == SFSymbols.movieClapper, "Should show the film details with `movieclapper` as a fallback image.")
             #expect(sut.currentState == .content(displayModel: displayModel, image: image), "Should have a `FilmDetailDisplayModel` and an image.")
-            #expect(spy.callCount == 2, "Should have called `didUpdateFilmDetails()` twice; once for the film object, and again for the image.")
+            #expect(spy.updateFilmDetailsCallCount == 2, "Should have called `didUpdateFilmDetails()` twice; once for the film object, and again for the image.")
         }
     }
     
@@ -183,6 +183,22 @@ struct FilmDetailViewModelTests {
         #expect(scoreRange.length == expectedScoreLength, "Should be equal.")
     }
     
+    @Test("Adding a film to upNext should call delegate method only if status changes to true - helps prevent duplicates and unnecessary delegate method calls")
+    func filmDetailViewModel_addFilmToQueue_onlyWhenStatusChangesToTrue_callsDelegateMethod() async {
+        let sut = makeSUT()
+        let spy = FilmDetailViewModelSpy()
+        sut.delegate = spy
+        let targetFilm = Film.sample[0]
+        
+        await sut.addFilmToUpNext(film: targetFilm)
+        
+        #expect(spy.upNextStatusChangeCallCount == 1, "Should call delegate method only when adding a film to upNext.")
+        
+        await sut.addFilmToUpNext(film: targetFilm)
+        
+        #expect(spy.upNextStatusChangeCallCount == 1, "Should not call delegate method because the status did not change.")
+    }
+    
     //MARK: - Helper method
     private func makeSUT() -> FilmDetailViewModel {
         let mockImageLoader = MockImageLoader()
@@ -192,13 +208,17 @@ struct FilmDetailViewModelTests {
     
     //MARK: - Film Detail View Model Spy
     final class FilmDetailViewModelSpy: FilmDetailViewModelDelegate {
-        var callCount = 0
+        var updateFilmDetailsCallCount = 0
+        var upNextStatusChangeCallCount = 0
+        
         func didUpdateFilmDetails() {
-            callCount += 1
+            updateFilmDetailsCallCount += 1
         }
         
         func didUpdateWithEmptyState() {}
+        
+        func didUpdateUpNextStatus(isUpNext: Bool) {
+            upNextStatusChangeCallCount += 1
+        }
     }
 }
-
-

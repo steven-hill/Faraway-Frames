@@ -7,7 +7,6 @@
 
 import Foundation
 
-@MainActor
 protocol FilmsListViewModelDelegate: AnyObject {
     func didUpdateFilms(_ films: [Film])
     func didFailToLoadFilms()

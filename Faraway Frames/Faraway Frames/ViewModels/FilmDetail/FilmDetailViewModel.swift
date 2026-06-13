@@ -120,4 +120,35 @@ final class FilmDetailViewModel {
             self.spokenJapaneseTitle = combinedString
         }
     }
+    
+    // MARK: - Persistence method
+    func addFilmToUpNext(film: Film) async {
+        do {
+            let didStatusChange = try await context.perform { [context] in
+                let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
+                request.predicate = NSPredicate(format: "id == %@", film.id)
+                
+                let filmMO: FilmMO
+                if let existing = try context.fetch(request).first {
+                    filmMO = existing
+                } else {
+                    filmMO = Film.makeFilmMO(from: film, context: context)
+                }
+                
+                let statusChanged = !filmMO.isUpNext
+                filmMO.isUpNext = true
+                
+                if context.hasChanges {
+                    try context.save()
+                }
+                return statusChanged
+            }
+            if didStatusChange {
+                delegate?.didUpdateUpNextStatus(isUpNext: true)
+            }
+        } catch {
+            // TODO: - handle error
+            print("Failed to add film to Up Next: \(error)")
+        }
+    }
 }
