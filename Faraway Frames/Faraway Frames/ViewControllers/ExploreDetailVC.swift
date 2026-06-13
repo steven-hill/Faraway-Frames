@@ -271,6 +271,9 @@ extension ExploreDetailVC: FilmDetailViewModelDelegate {
     func didUpdateWithEmptyState() {
         setNeedsUpdateContentUnavailableConfiguration()
     }
+    
+    func didUpdateUpNextStatus(isUpNext: Bool) {
+    }
 }
 
 // MARK: - Preview
