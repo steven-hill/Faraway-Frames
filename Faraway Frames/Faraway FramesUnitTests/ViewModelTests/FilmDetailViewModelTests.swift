@@ -183,8 +183,8 @@ struct FilmDetailViewModelTests {
         #expect(scoreRange.length == expectedScoreLength, "Should be equal.")
     }
     
-    @Test("Adding a film to upNext should call delegate method")
-    func filmDetailViewModel_addFilmToQueue_callsDelegateMethod() async {
+    @Test("Adding a film to upNext should call delegate method only if status changes to true - helps prevent duplicates and unnecessary delegate method calls")
+    func filmDetailViewModel_addFilmToQueue_onlyWhenStatusChangesToTrue_callsDelegateMethod() async {
         let sut = makeSUT()
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
@@ -192,7 +192,11 @@ struct FilmDetailViewModelTests {
         
         await sut.addFilmToUpNext(film: targetFilm)
         
-        #expect(spy.upNextStatusChangeCallCount == 1, "Should call delegate method when adding a film to upNext.")
+        #expect(spy.upNextStatusChangeCallCount == 1, "Should call delegate method only when adding a film to upNext.")
+        
+        await sut.addFilmToUpNext(film: targetFilm)
+        
+        #expect(spy.upNextStatusChangeCallCount == 1, "Should not call delegate method because the status did not change.")
     }
     
     //MARK: - Helper method
