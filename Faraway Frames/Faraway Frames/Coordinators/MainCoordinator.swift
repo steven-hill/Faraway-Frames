@@ -23,11 +23,12 @@ final class MainCoordinator: Coordinator {
     }
     
     func start() {
-        let homeCoordinator = HomeCoordinator(navigationController: UINavigationController(), context: persistenceController.viewContext)
+        let managedObjectContext = persistenceController.viewContext
+        let homeCoordinator = HomeCoordinator(navigationController: UINavigationController(), context: managedObjectContext)
         homeCoordinator.start()
         childCoordinators.append(homeCoordinator)
         
-        let exploreSplitViewCoordinator = ExploreSplitViewCoordinator(dependencies: dependencies)
+        let exploreSplitViewCoordinator = ExploreSplitViewCoordinator(dependencies: dependencies, context: managedObjectContext)
         exploreSplitViewCoordinator.start()
         childCoordinators.append(exploreSplitViewCoordinator)
         

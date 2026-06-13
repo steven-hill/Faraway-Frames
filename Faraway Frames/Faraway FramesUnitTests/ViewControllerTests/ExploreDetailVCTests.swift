@@ -171,7 +171,8 @@ struct ExploreDetailVCTests {
     //MARK: - Helper Methods
     private func makeSUTWhenFilmIsNil() -> ExploreDetailVC {
         let mockImageLoader = MockImageLoader()
-        let filmDetailViewModel = FilmDetailViewModel(imageLoader: mockImageLoader)
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmDetailViewModel = FilmDetailViewModel(imageLoader: mockImageLoader, context: testPersistenceController.viewContext)
         let sut = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
         return sut
     }
@@ -179,7 +180,8 @@ struct ExploreDetailVCTests {
     private func makeSUTWithFilm() -> ExploreDetailVC {
         let film = Film.sample[0]
         let mockImageLoader = MockImageLoader()
-        let filmDetailViewModel = FilmDetailViewModel(film: film, imageLoader: mockImageLoader)
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmDetailViewModel = FilmDetailViewModel(film: film, imageLoader: mockImageLoader, context: testPersistenceController.viewContext)
         let sut = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
         return sut
     }

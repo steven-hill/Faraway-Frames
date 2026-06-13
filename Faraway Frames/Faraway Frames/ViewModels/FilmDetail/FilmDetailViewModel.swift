@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import CoreData
 
 final class FilmDetailViewModel {
     
@@ -18,6 +19,7 @@ final class FilmDetailViewModel {
     
     // MARK: - Properties
     private let imageLoader: ImageLoader
+    private let context: NSManagedObjectContext
     private(set) var imageLoadTask: Task<Void, Never>?
     private(set) var currentState: FilmDetailState = .noFilmSelected {
         didSet {
@@ -27,8 +29,9 @@ final class FilmDetailViewModel {
     weak var delegate: FilmDetailViewModelDelegate?
     
     // MARK: - Initialisation
-    init(film: Film? = nil, imageLoader: ImageLoader) {
+    init(film: Film? = nil, imageLoader: ImageLoader, context: NSManagedObjectContext) {
         self.imageLoader = imageLoader
+        self.context = context
         if let film {
             setFilm(film)
         }

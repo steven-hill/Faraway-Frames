@@ -7,18 +7,21 @@
 
 import Foundation
 import UIKit
+import CoreData
 
 final class ExploreSplitViewCoordinator: Coordinator {
     
     typealias Dependencies = FilmsListServicing & ImageLoading
     private let dependencies: Dependencies
+    private let context: NSManagedObjectContext
     let exploreSplitVC: UISplitViewController
     private(set) var filmDetailViewModel: FilmDetailViewModel
     
-    init(dependencies: Dependencies, exploreSplitVC: UISplitViewController = ExploreSplitVC(style: .doubleColumn)) {
+    init(dependencies: Dependencies, context: NSManagedObjectContext, exploreSplitVC: UISplitViewController = ExploreSplitVC(style: .doubleColumn)) {
         self.dependencies = dependencies
+        self.context = context
         self.exploreSplitVC = exploreSplitVC
-        filmDetailViewModel = FilmDetailViewModel(film: nil, imageLoader: dependencies.makeImageLoader())
+        filmDetailViewModel = FilmDetailViewModel(film: nil, imageLoader: dependencies.makeImageLoader(), context: context)
     }
     
     func start() {

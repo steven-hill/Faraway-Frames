@@ -29,7 +29,8 @@ struct FilmDetailViewModelTests {
     @Test func filmDetailViewModel_whenFilmIsPassedIn_setsCurrentStateToContent() {
         let film = Film.sample[0]
         let mockImageLoader = MockImageLoader()
-        let sut = FilmDetailViewModel(film: film, imageLoader: mockImageLoader)
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let sut = FilmDetailViewModel(film: film, imageLoader: mockImageLoader, context: testPersistenceController.viewContext)
         
         switch sut.currentState {
         case .noFilmSelected:
@@ -54,7 +55,8 @@ struct FilmDetailViewModelTests {
         let filmA = Film.sample[0]
         let filmB = Film.sample[1]
         let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
-        let sut = FilmDetailViewModel(imageLoader: mockImageLoader)
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let sut = FilmDetailViewModel(imageLoader: mockImageLoader, context: testPersistenceController.viewContext)
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
 
@@ -79,7 +81,8 @@ struct FilmDetailViewModelTests {
     func filmDetailViewModel_getMovieBanner_whenFailedToDownloadMovieBannerImage_returnsFallbackImage() async {
         let film = Film.sample[0]
         let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
-        let sut = FilmDetailViewModel(imageLoader: mockImageLoader)
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let sut = FilmDetailViewModel(imageLoader: mockImageLoader, context: testPersistenceController.viewContext)
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
         
@@ -183,7 +186,8 @@ struct FilmDetailViewModelTests {
     //MARK: - Helper method
     private func makeSUT() -> FilmDetailViewModel {
         let mockImageLoader = MockImageLoader()
-        return FilmDetailViewModel(imageLoader: mockImageLoader)
+        let persistenceController = try! PersistenceController.init(inMemory: true)
+        return FilmDetailViewModel(imageLoader: mockImageLoader, context: persistenceController.viewContext)
     }
     
     //MARK: - Film Detail View Model Spy
