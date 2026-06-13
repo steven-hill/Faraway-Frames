@@ -183,6 +183,18 @@ struct FilmDetailViewModelTests {
         #expect(scoreRange.length == expectedScoreLength, "Should be equal.")
     }
     
+    @Test("Adding a film to upNext should call delegate method")
+    func filmDetailViewModel_addFilmToQueue_callsDelegateMethod() async {
+        let sut = makeSUT()
+        let spy = FilmDetailViewModelSpy()
+        sut.delegate = spy
+        let targetFilm = Film.sample[0]
+        
+        await sut.addFilmToUpNext(film: targetFilm)
+        
+        #expect(spy.addedToUpNextCallCount == 1, "Should call delegate method when adding a film to upNext.")
+    }
+    
     //MARK: - Helper method
     private func makeSUT() -> FilmDetailViewModel {
         let mockImageLoader = MockImageLoader()
@@ -200,5 +212,3 @@ struct FilmDetailViewModelTests {
         func didUpdateWithEmptyState() {}
     }
 }
-
-
