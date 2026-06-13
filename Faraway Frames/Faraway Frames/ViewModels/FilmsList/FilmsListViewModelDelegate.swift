@@ -7,11 +7,11 @@
 
 import Foundation
 
-@MainActor
 protocol FilmsListViewModelDelegate: AnyObject {
     func didUpdateFilms(_ films: [Film])
     func didFailToLoadFilms()
     func didRetry()
     func didFailToMatchResults()
     func didRequestVoiceOverAnnouncement(with message: String)
+    func didUpdateUpNextStatus(isUpNext: Bool)
 }

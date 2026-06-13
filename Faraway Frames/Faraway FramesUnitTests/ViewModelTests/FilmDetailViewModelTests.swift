@@ -205,6 +205,8 @@ struct FilmDetailViewModelTests {
     //MARK: - Film Detail View Model Spy
     final class FilmDetailViewModelSpy: FilmDetailViewModelDelegate {
         var callCount = 0
+        var addedToUpNextCallCount = 0
+        
         func didUpdateFilmDetails() {
             callCount += 1
         }
