@@ -76,7 +76,7 @@ final class FilmDetailViewModel {
     }
     
     // MARK: - Presentation data structure
-    struct FilmDetailDisplayModel {
+    struct FilmDetailDisplayModel: Equatable {
         let title: String
         let visualOriginalTitles: String
         let spokenJapaneseTitle: NSAttributedString
@@ -119,21 +119,5 @@ final class FilmDetailViewModel {
             )
             self.spokenJapaneseTitle = combinedString
         }
-    }
-}
-
-extension FilmDetailViewModel.FilmDetailDisplayModel: Equatable {
-    static func == (lhs: FilmDetailViewModel.FilmDetailDisplayModel, rhs: FilmDetailViewModel.FilmDetailDisplayModel) -> Bool {
-        return lhs.title == rhs.title &&
-        lhs.visualOriginalTitles == rhs.visualOriginalTitles &&
-        lhs.releaseYearAndDurationText == rhs.releaseYearAndDurationText &&
-        lhs.releaseYearAndDurationAccessibilityLabel == rhs.releaseYearAndDurationAccessibilityLabel &&
-        lhs.synopsisTitle == rhs.synopsisTitle &&
-        lhs.synopsisDescription == rhs.synopsisDescription &&
-        lhs.director == rhs.director &&
-        lhs.producer == rhs.producer &&
-        lhs.creditsAccessibilityLabel == rhs.creditsAccessibilityLabel &&
-        lhs.spokenJapaneseTitle.string == rhs.spokenJapaneseTitle.string &&
-        lhs.rottenTomatoesScoreText.string == rhs.rottenTomatoesScoreText.string
     }
 }
