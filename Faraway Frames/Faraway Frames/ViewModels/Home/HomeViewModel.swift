@@ -23,6 +23,11 @@ final class HomeViewModel: NSObject {
         case watched
     }
     
+    enum QueueAction {
+        case add
+        case remove
+    }
+    
     // MARK: - Properties
     private(set) var currentState: HomeState = .idle
     weak var delegate: HomeViewModelDelegate?
@@ -140,7 +145,7 @@ final class HomeViewModel: NSObject {
         }
     }
     
-    func toggleFilmInQueue() {
+    func toggleFilmInQueue(film: Film, queue: FilmQueue, action: QueueAction) {
         
     }
     

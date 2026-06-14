@@ -280,7 +280,7 @@ struct HomeViewModelTests {
         sut.delegate = delegateSpy
         let targetFilm = Film.sample[0]
         
-        sut.toggleFilmInQueue()
+        sut.toggleFilmInQueue(film: targetFilm, queue: .upNext, action: .add)
         sut.performFetches()
         
         #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
