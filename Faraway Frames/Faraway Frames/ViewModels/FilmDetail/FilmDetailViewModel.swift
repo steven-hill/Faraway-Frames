@@ -17,6 +17,12 @@ final class FilmDetailViewModel {
         case content(displayModel: FilmDetailDisplayModel, image: UIImage? = nil)
     }
     
+    // MARK: - Film Status Definition
+    private enum FilmStatusProperty {
+        case upNext
+        case watched
+    }
+    
     // MARK: - Properties
     private let imageLoader: ImageLoader
     private let context: NSManagedObjectContext
@@ -123,36 +129,22 @@ final class FilmDetailViewModel {
     
     // MARK: - Persistence methods
     func addFilmToUpNext(film: Film) async {
-        do {
-            let didStatusChange = try await context.perform { [context] in
-                let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
-                request.predicate = NSPredicate(format: "id == %@", film.id)
-                
-                let filmMO: FilmMO
-                if let existing = try context.fetch(request).first {
-                    filmMO = existing
-                } else {
-                    filmMO = Film.makeFilmMO(from: film, context: context)
-                }
-                
-                let statusChanged = !filmMO.isUpNext
-                filmMO.isUpNext = true
-                
-                if context.hasChanges {
-                    try context.save()
-                }
-                return statusChanged
-            }
-            if didStatusChange {
-                delegate?.didUpdateUpNextStatus(isUpNext: true)
-            }
-        } catch {
-            // TODO: - handle error
-            print("Failed to add film to Up Next: \(error)")
+        await updateFilmStatus(film: film, property: .upNext) { [weak self] in
+            self?.delegate?.didUpdateUpNextStatus(isUpNext: true)
         }
     }
     
     func addFilmToWatched(film: Film) async {
+        await updateFilmStatus(film: film, property: .watched) { [weak self] in
+            self?.delegate?.didUpdateWatchedStatus(isWatched: true)
+        }
+    }
+    
+    private func updateFilmStatus(
+        film: Film,
+        property: FilmStatusProperty,
+        onStatusChanged: @escaping @MainActor () -> Void
+    ) async {
         do {
             let didStatusChange = try await context.perform { [context] in
                 let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
@@ -165,20 +157,29 @@ final class FilmDetailViewModel {
                     filmMO = Film.makeFilmMO(from: film, context: context)
                 }
                 
-                let statusChanged = !filmMO.isWatched
-                filmMO.isWatched = true
+                let statusChanged: Bool
+                
+                switch property {
+                case .upNext:
+                    statusChanged = !filmMO.isUpNext
+                    filmMO.isUpNext = true
+                case .watched:
+                    statusChanged = !filmMO.isWatched
+                    filmMO.isWatched = true
+                }
                 
                 if context.hasChanges {
                     try context.save()
                 }
                 return statusChanged
             }
+            
             if didStatusChange {
-                delegate?.didUpdateWatchedStatus(isWatched: true)
+                onStatusChanged()
             }
         } catch {
             // TODO: - handle error
-            print("Failed to add film to Up Next: \(error)")
+            print("Failed to update film status: \(error)")
         }
     }
 }
