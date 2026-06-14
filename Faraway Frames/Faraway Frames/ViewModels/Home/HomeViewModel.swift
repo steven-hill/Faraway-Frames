@@ -97,55 +97,6 @@ final class HomeViewModel: NSObject {
         }
     }
     
-    func addFilmToQueue(film: Film, queue: FilmQueue) async {
-        do {
-            try await context.perform {
-                let filmMO = Film.makeFilmMO(from: film, context: self.context)
-                
-                switch queue {
-                case .upNext:
-                    filmMO.isUpNext = true
-                case .watched:
-                    filmMO.isWatched = true
-                }
-                
-                guard self.context.hasChanges else { return }
-                try self.saver.save()
-            }
-        } catch {
-            let homeError = HomeError.add(error)
-            handleError(homeError)
-        }
-    }
-    
-    func removeFilmFromQueue(id: String, queue: FilmQueue) async {
-        do {
-            try await context.perform {
-                let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
-                request.predicate = NSPredicate(format: "id == %@", id)
-                
-                guard let managedObject = try self.context.fetch(request).first else { return }
-                
-                switch queue {
-                case .upNext:
-                    managedObject.isUpNext = false
-                case .watched:
-                    managedObject.isWatched = false
-                }
-                
-                if !managedObject.isUpNext && !managedObject.isWatched {
-                    self.context.delete(managedObject)
-                }
-                
-                guard self.context.hasChanges else { return }
-                try self.saver.save()
-            }
-        } catch {
-            let homeError = HomeError.delete(error)
-            handleError(homeError)
-        }
-    }
-    
     func toggleFilmInQueue(film: Film, queue: FilmQueue, action: QueueAction) async {
         do {
             try await context.perform {
