@@ -23,6 +23,12 @@ final class HomeViewModel: NSObject {
         case watched
     }
     
+    // MARK: - Action Definition
+    enum QueueAction {
+        case add
+        case remove
+    }
+    
     // MARK: - Properties
     private(set) var currentState: HomeState = .idle
     weak var delegate: HomeViewModelDelegate?
@@ -91,55 +97,45 @@ final class HomeViewModel: NSObject {
         }
     }
     
-    func addFilmToQueue(film: Film, queue: FilmQueue) async {
-        do {
-            try await context.perform {
-                let filmMO = Film.makeFilmMO(from: film, context: self.context)
-                
-                switch queue {
-                case .upNext:
-                    filmMO.isUpNext = true
-                case .watched:
-                    filmMO.isWatched = true
-                }
-                
-                guard self.context.hasChanges else { return }
-                try self.saver.save()
-            }
-        } catch {
-            let homeError = HomeError.add(error)
-            handleError(homeError)
-        }
-    }
-    
-    func removeFilmFromQueue(id: String, queue: FilmQueue) async {
+    func toggleFilmInQueue(film: Film, queue: FilmQueue, action: QueueAction) async {
         do {
             try await context.perform {
                 let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
-                request.predicate = NSPredicate(format: "id == %@", id)
+                request.predicate = NSPredicate(format: "id == %@", film.id)
                 
-                guard let managedObject = try self.context.fetch(request).first else { return }
+                let filmMO: FilmMO
+                let existing = try self.context.fetch(request).first
                 
-                switch queue {
-                case .upNext:
-                    managedObject.isUpNext = false
-                case .watched:
-                    managedObject.isWatched = false
+                if existing == nil, case .remove = action {
+                    return
                 }
                 
-                if !managedObject.isUpNext && !managedObject.isWatched {
-                    self.context.delete(managedObject)
+                if let existing {
+                    filmMO = existing
+                } else {
+                    filmMO = Film.makeFilmMO(from: film, context: self.context)
+                }
+                
+                switch (queue, action) {
+                case (.upNext, .add):       filmMO.isUpNext = true
+                case (.upNext, .remove):    filmMO.isUpNext = false
+                case (.watched, .add):      filmMO.isWatched = true
+                case (.watched, .remove):   filmMO.isWatched = false
+                }
+                
+                if !filmMO.isUpNext && !filmMO.isWatched {
+                    self.context.delete(filmMO)
                 }
                 
                 guard self.context.hasChanges else { return }
                 try self.saver.save()
             }
         } catch {
-            let homeError = HomeError.delete(error)
+            let homeError = action == .add ? HomeError.add(error) : HomeError.delete(error)
             handleError(homeError)
         }
     }
-    
+
     private func handleError(_ homeError: HomeError) {
         currentState = .failure(homeError)
         delegate?.didReceiveError(homeError)
