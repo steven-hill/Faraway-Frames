@@ -11,5 +11,5 @@ protocol FilmDetailViewModelDelegate: AnyObject {
     func didUpdateFilmDetails()
     func didUpdateWithEmptyState()
     func didUpdateUpNextStatus(isUpNext: Bool)
-    func didUpdateWatchedStatus(isUpNext: Bool)
+    func didUpdateWatchedStatus(isWatched: Bool)
 }

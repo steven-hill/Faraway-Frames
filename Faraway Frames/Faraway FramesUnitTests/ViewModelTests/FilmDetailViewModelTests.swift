@@ -238,7 +238,7 @@ struct FilmDetailViewModelTests {
             upNextStatusChangeCallCount += 1
         }
         
-        func didUpdateWatchedStatus(isUpNext: Bool) {
+        func didUpdateWatchedStatus(isWatched: Bool) {
             watchedStatusChangeCallCount += 1
         }
     }
