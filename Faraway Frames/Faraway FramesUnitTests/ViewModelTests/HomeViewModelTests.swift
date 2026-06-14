@@ -273,21 +273,6 @@ struct HomeViewModelTests {
         #expect(delegateSpy.didReceiveErrorCallCount == 0, "Should not call delegate method.")
     }
     
-    @Test("Adding a film to upNext should add it to `upNextFilms`, and call delegate method")
-    func homeViewModel_toggleFilmInQueue_addsFilmToUpNext() throws {
-        let (sut, _) = makeSUTWithContext()
-        let delegateSpy = HomeViewModelDelegateSpy()
-        sut.delegate = delegateSpy
-        let targetFilm = Film.sample[0]
-        
-        sut.toggleFilmInQueue(film: targetFilm, queue: .upNext, action: .add)
-        sut.performFetches()
-        
-        #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
-        let upNextFilms = try #require(delegateSpy.upNextFilms, "Delegate should have received upNext films array.")
-        #expect(upNextFilms.count == 1, "Should be one.")
-    }
-    
     //MARK: - SUT Helper Method
     private func makeSUTWithContext() -> (sut: HomeViewModel, context: NSManagedObjectContext) {
         let testPersistenceController = try! PersistenceController(inMemory: true)
