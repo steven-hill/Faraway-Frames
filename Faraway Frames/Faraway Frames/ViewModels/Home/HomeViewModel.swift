@@ -140,6 +140,10 @@ final class HomeViewModel: NSObject {
         }
     }
     
+    func toggleFilmInQueue() {
+        
+    }
+    
     private func handleError(_ homeError: HomeError) {
         currentState = .failure(homeError)
         delegate?.didReceiveError(homeError)
