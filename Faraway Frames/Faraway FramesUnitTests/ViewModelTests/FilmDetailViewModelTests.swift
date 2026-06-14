@@ -184,7 +184,7 @@ struct FilmDetailViewModelTests {
     }
     
     @Test("Adding a film to upNext should call delegate method only if status changes to true - helps prevent duplicates and unnecessary delegate method calls")
-    func filmDetailViewModel_addFilmToQueue_onlyWhenStatusChangesToTrue_callsDelegateMethod() async {
+    func filmDetailViewModel_addFilmToQueue_onlyWhenUpNextStatusChangesToTrue_callsDelegateMethod() async {
         let sut = makeSUT()
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
@@ -199,6 +199,22 @@ struct FilmDetailViewModelTests {
         #expect(spy.upNextStatusChangeCallCount == 1, "Should not call delegate method because the status did not change.")
     }
     
+    @Test("Adding a film to watched should call delegate method only if status changes to true - helps prevent duplicates and unnecessary delegate method calls")
+    func filmDetailViewModel_addFilmToQueue_onlyWhenWatchedStatusChangesToTrue_callsDelegateMethod() async {
+        let sut = makeSUT()
+        let spy = FilmDetailViewModelSpy()
+        sut.delegate = spy
+        let targetFilm = Film.sample[0]
+        
+        await sut.addFilmToWatched(film: targetFilm)
+        
+        #expect(spy.watchedStatusChangeCallCount == 1, "Should call delegate method only when adding a film to upNext.")
+        
+        await sut.addFilmToWatched(film: targetFilm)
+        
+        #expect(spy.watchedStatusChangeCallCount == 1, "Should not call delegate method because the status did not change.")
+    }
+    
     //MARK: - Helper method
     private func makeSUT() -> FilmDetailViewModel {
         let mockImageLoader = MockImageLoader()
@@ -210,6 +226,7 @@ struct FilmDetailViewModelTests {
     final class FilmDetailViewModelSpy: FilmDetailViewModelDelegate {
         var updateFilmDetailsCallCount = 0
         var upNextStatusChangeCallCount = 0
+        var watchedStatusChangeCallCount = 0
         
         func didUpdateFilmDetails() {
             updateFilmDetailsCallCount += 1
@@ -219,6 +236,10 @@ struct FilmDetailViewModelTests {
         
         func didUpdateUpNextStatus(isUpNext: Bool) {
             upNextStatusChangeCallCount += 1
+        }
+        
+        func didUpdateWatchedStatus(isWatched: Bool) {
+            watchedStatusChangeCallCount += 1
         }
     }
 }
