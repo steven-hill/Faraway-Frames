@@ -32,8 +32,8 @@ final class ExploreDetailVCUITests: XCTestCase {
         
         XCTAssertTrue(app.staticTexts["No Film Selected"].isHittable, "Should show a message.")
         XCTAssertTrue(app.staticTexts["Select a film from the list for more details."].isHittable, "Should show a message.")
-        XCTAssertFalse(app.buttons["ExploreDetailVC_AddToUpNextButton"].exists, "Should be hidden.")
-        XCTAssertFalse(app.buttons["ExploreDetailVC_MarkAsWatchedButton"].exists, "Should be hidden.")
+        XCTAssertFalse(app.buttons["ExploreDetailVC_UpNextButton"].exists, "Should be hidden.")
+        XCTAssertFalse(app.buttons["ExploreDetailVC_WatchedButton"].exists, "Should be hidden.")
         XCTAssertFalse(app.buttons["ExploreDetailVC_MoreLikeThisButton"].exists, "Should be hidden.")
     }
     
@@ -63,8 +63,8 @@ final class ExploreDetailVCUITests: XCTestCase {
         
         app.swipeUp()
         
-        XCTAssertTrue(app.buttons["ExploreDetailVC_AddToUpNextButton"].isHittable, "Should be hittable.")
-        XCTAssertTrue(app.buttons["ExploreDetailVC_MarkAsWatchedButton"].isHittable, "Should be hittable.")
+        XCTAssertTrue(app.buttons["ExploreDetailVC_UpNextButton"].isHittable, "Should be hittable.")
+        XCTAssertTrue(app.buttons["ExploreDetailVC_WatchedButton"].isHittable, "Should be hittable.")
         XCTAssertTrue(app.buttons["ExploreDetailVC_MoreLikeThisButton"].isHittable, "Should be hittable.")
     }
     
@@ -79,8 +79,8 @@ final class ExploreDetailVCUITests: XCTestCase {
             app.staticTexts["ExploreDetailVC_SynopsisHeaderLabel"],
             app.staticTexts["ExploreDetailVC_SynopsisLabel"],
             app.otherElements["ExploreDetailVC_CreditsContainer"],
-            app.buttons["ExploreDetailVC_AddToUpNextButton"],
-            app.buttons["ExploreDetailVC_MarkAsWatchedButton"],
+            app.buttons["ExploreDetailVC_UpNextButton"],
+            app.buttons["ExploreDetailVC_WatchedButton"],
             app.buttons["ExploreDetailVC_MoreLikeThisButton"]
         ]
         
