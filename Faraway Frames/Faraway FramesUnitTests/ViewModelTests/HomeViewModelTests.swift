@@ -232,35 +232,6 @@ struct HomeViewModelTests {
         #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
     }
     
-//    @Test("`removeFilmFromQueue` throws error when saving fails, updates `currentState` and calls the delegate",
-//          arguments: errorScenarios
-//    )
-//    func homeViewModel_removeFilmFromQueue_onSaveError_throwsError(
-//        scenario: (systemError: Error,
-//                   expectedReason: HomeError.FailureReason)
-//    ) async {
-//        let testPersistenceController = try! PersistenceController(inMemory: true)
-//        let context = testPersistenceController.viewContext
-//        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
-//        let sut = HomeViewModel(context: context, saver: saver)
-//        let delegateSpy = HomeViewModelDelegateSpy()
-//        sut.delegate = delegateSpy
-//        let targetID = "test-film-id"
-//        try? await context.perform {
-//            let mockFilm = FilmMO(context: context)
-//            mockFilm.id = targetID
-//            mockFilm.isUpNext = true
-//            try context.save()
-//        }
-//        let expectedError = HomeError.deleteFailed(scenario.expectedReason)
-//        
-//        await sut.removeFilmFromQueue(id: targetID, queue: .upNext)
-//        
-//        #expect(delegateSpy.didReceiveErrorCallCount == 1, "Should have called delegate method once.")
-//        #expect(delegateSpy.receivedError == expectedError, "Delegate should receive matching error.")
-//        #expect(sut.currentState == .failure(expectedError), "ViewModel state should transition to match failure.")
-//    }
-    
     @Test("`toggleFilmInQueue` doesn't throw error, and exits silently via guard when film does not exist in database")
     func homeViewModel_toggleFilmInQueue_whenFilmDoesNotExistInDatabase_doesNotThrowAndExitsCleanly() async {
         let testPersistenceController = try! PersistenceController(inMemory: true)
