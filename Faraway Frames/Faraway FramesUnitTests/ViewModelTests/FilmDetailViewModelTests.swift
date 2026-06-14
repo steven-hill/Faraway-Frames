@@ -226,6 +226,7 @@ struct FilmDetailViewModelTests {
     final class FilmDetailViewModelSpy: FilmDetailViewModelDelegate {
         var updateFilmDetailsCallCount = 0
         var upNextStatusChangeCallCount = 0
+        var watchedStatusChangeCallCount = 0
         
         func didUpdateFilmDetails() {
             updateFilmDetailsCallCount += 1
@@ -235,6 +236,10 @@ struct FilmDetailViewModelTests {
         
         func didUpdateUpNextStatus(isUpNext: Bool) {
             upNextStatusChangeCallCount += 1
+        }
+        
+        func didUpdateWatchedStatus(isUpNext: Bool) {
+            watchedStatusChangeCallCount += 1
         }
     }
 }
