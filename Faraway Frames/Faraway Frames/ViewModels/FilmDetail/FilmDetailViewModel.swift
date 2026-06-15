@@ -135,19 +135,19 @@ final class FilmDetailViewModel {
     
     // MARK: - Persistence methods
     func addFilmToUpNext(film: Film) async {
-        await updateFilmStatus(film: film, property: .upNext) { [weak self] in
+        await updateFilmStatus(film: film, property: .upNext, action: .add) { [weak self] in
             self?.delegate?.didUpdateUpNextStatus(isUpNext: true)
         }
     }
     
     func removeFilmFromUpNext(film: Film) async {
-        await updateFilmStatus(film: film, property: .upNext) { [weak self] in
+        await updateFilmStatus(film: film, property: .upNext, action: .remove) { [weak self] in
             self?.delegate?.didUpdateUpNextStatus(isUpNext: false)
         }
     }
     
     func addFilmToWatched(film: Film) async {
-        await updateFilmStatus(film: film, property: .watched) { [weak self] in
+        await updateFilmStatus(film: film, property: .watched, action: .add) { [weak self] in
             self?.delegate?.didUpdateWatchedStatus(isWatched: true)
         }
     }
