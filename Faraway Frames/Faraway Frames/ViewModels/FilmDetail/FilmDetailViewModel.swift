@@ -23,6 +23,12 @@ final class FilmDetailViewModel {
         case watched
     }
     
+    // MARK: - Status Action Definition
+    private enum StatusAction {
+        case add
+        case remove
+    }
+    
     // MARK: - Properties
     private let imageLoader: ImageLoader
     private let context: NSManagedObjectContext
@@ -129,20 +135,33 @@ final class FilmDetailViewModel {
     
     // MARK: - Persistence methods
     func addFilmToUpNext(film: Film) async {
-        await updateFilmStatus(film: film, property: .upNext) { [weak self] in
+        await updateFilmStatus(film: film, property: .upNext, action: .add) { [weak self] in
             self?.delegate?.didUpdateUpNextStatus(isUpNext: true)
         }
     }
     
+    func removeFilmFromUpNext(film: Film) async {
+        await updateFilmStatus(film: film, property: .upNext, action: .remove) { [weak self] in
+            self?.delegate?.didUpdateUpNextStatus(isUpNext: false)
+        }
+    }
+    
     func addFilmToWatched(film: Film) async {
-        await updateFilmStatus(film: film, property: .watched) { [weak self] in
+        await updateFilmStatus(film: film, property: .watched, action: .add) { [weak self] in
             self?.delegate?.didUpdateWatchedStatus(isWatched: true)
+        }
+    }
+    
+    func removeFilmFromWatched(film: Film) async {
+        await updateFilmStatus(film: film, property: .watched, action: .remove) { [weak self] in
+            self?.delegate?.didUpdateWatchedStatus(isWatched: false)
         }
     }
     
     private func updateFilmStatus(
         film: Film,
         property: FilmStatusProperty,
+        action: StatusAction,
         onStatusChanged: @escaping @MainActor () -> Void
     ) async {
         do {
@@ -151,7 +170,12 @@ final class FilmDetailViewModel {
                 request.predicate = NSPredicate(format: "id == %@", film.id)
                 
                 let filmMO: FilmMO
-                if let existing = try context.fetch(request).first {
+                let existing = try context.fetch(request).first
+                if existing == nil, case .remove = action {
+                    return false
+                }
+                
+                if let existing {
                     filmMO = existing
                 } else {
                     filmMO = Film.makeFilmMO(from: film, context: context)
@@ -159,13 +183,23 @@ final class FilmDetailViewModel {
                 
                 let statusChanged: Bool
                 
-                switch property {
-                case .upNext:
+                switch (property, action) {
+                case (.upNext, .add):
                     statusChanged = !filmMO.isUpNext
                     filmMO.isUpNext = true
-                case .watched:
+                case (.upNext, .remove):
+                    statusChanged = filmMO.isUpNext
+                    filmMO.isUpNext = false
+                case (.watched, .add):
                     statusChanged = !filmMO.isWatched
                     filmMO.isWatched = true
+                case (.watched, .remove):
+                    statusChanged = filmMO.isWatched
+                    filmMO.isWatched = false
+                }
+                
+                if !filmMO.isUpNext && !filmMO.isWatched {
+                    context.delete(filmMO)
                 }
                 
                 if context.hasChanges {
