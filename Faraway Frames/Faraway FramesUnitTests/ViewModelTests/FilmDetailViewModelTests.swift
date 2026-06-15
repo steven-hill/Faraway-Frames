@@ -236,6 +236,24 @@ struct FilmDetailViewModelTests {
         #expect(spy.upNextStatusChangeCallCount == 2, "Should not call delegate method because the film no longer exists in the database.")
     }
     
+    @Test("Removing a film from watched should call delegate method")
+    func filmDetailViewModel_removeFilmFromWatched_onlyWhenWatchedStatusChangesToFalse_callsDelegateMethod() async {
+        let sut = makeSUT()
+        let spy = FilmDetailViewModelSpy()
+        sut.delegate = spy
+        let targetFilm = Film.sample[0]
+        await sut.addFilmToWatched(film: targetFilm)
+        #expect(spy.watchedStatusChangeCallCount == 1, "Should call delegate method when adding a film to watched.")
+        
+        await sut.removeFilmFromWatched(film: targetFilm)
+        
+        #expect(spy.watchedStatusChangeCallCount == 2, "Should call delegate method again when removing a film from watched.")
+                
+        await sut.removeFilmFromWatched(film: targetFilm)
+        
+        #expect(spy.watchedStatusChangeCallCount == 2, "Should not call delegate method because the film no longer exists in the database.")
+    }
+    
     //MARK: - Helper method
     private func makeSUT() -> FilmDetailViewModel {
         let mockImageLoader = MockImageLoader()
