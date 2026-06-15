@@ -218,6 +218,22 @@ struct FilmDetailViewModelTests {
         #expect(spy.watchedStatusChangeCallCount == 1, "Should not call delegate method because the status did not change.")
     }
     
+    @Test("Removing a film from upNext should call delegate method only if status changes to false")
+    func filmDetailViewModel_removeFilmFromUpNext_onlyWhenUpNextStatusChangesToFalse_callsDelegateMethod() async {
+        let sut = makeSUT()
+        let spy = FilmDetailViewModelSpy()
+        sut.delegate = spy
+        let targetFilm = Film.sample[0]
+        
+        await sut.removeFilmFromUpNext(film: targetFilm)
+        
+        #expect(spy.upNextStatusChangeCallCount == 1, "Should call delegate method only when adding a film to upNext.")
+        
+        await sut.addFilmToUpNext(film: targetFilm)
+        
+        #expect(spy.upNextStatusChangeCallCount == 1, "Should not call delegate method because the status did not change.")
+    }
+    
     //MARK: - Helper method
     private func makeSUT() -> FilmDetailViewModel {
         let mockImageLoader = MockImageLoader()
