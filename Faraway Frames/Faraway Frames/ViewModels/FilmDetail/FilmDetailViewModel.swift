@@ -152,6 +152,12 @@ final class FilmDetailViewModel {
         }
     }
     
+    func removeFilmFromWatched(film: Film) async {
+        await updateFilmStatus(film: film, property: .watched, action: .remove) { [weak self] in
+            self?.delegate?.didUpdateWatchedStatus(isWatched: false)
+        }
+    }
+    
     private func updateFilmStatus(
         film: Film,
         property: FilmStatusProperty,
