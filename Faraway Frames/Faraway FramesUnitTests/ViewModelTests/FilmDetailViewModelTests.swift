@@ -20,10 +20,13 @@ struct FilmDetailViewModelTests {
 
     @Test func filmDetailViewModel_setsCurrentStateToNoFilmSelected_whenFilmIsNil() {
         let sut = makeSUT()
+        let spy = FilmDetailViewModelSpy()
+        sut.delegate = spy
         
         sut.updateUI()
         
         #expect(sut.currentState == .noFilmSelected, "Should be `.noFilmSelected` when film is nil.")
+        #expect(spy.updateWithEmptyStateCallCount == 1, "Should call delegate method once.")
     }
     
     @Test func filmDetailViewModel_whenFilmIsPassedIn_setsCurrentStateToContent() {
@@ -225,6 +228,7 @@ struct FilmDetailViewModelTests {
     //MARK: - Film Detail View Model Spy
     final class FilmDetailViewModelSpy: FilmDetailViewModelDelegate {
         var updateFilmDetailsCallCount = 0
+        var updateWithEmptyStateCallCount = 0
         var upNextStatusChangeCallCount = 0
         var watchedStatusChangeCallCount = 0
         
@@ -232,7 +236,9 @@ struct FilmDetailViewModelTests {
             updateFilmDetailsCallCount += 1
         }
         
-        func didUpdateWithEmptyState() {}
+        func didUpdateWithEmptyState() {
+            updateWithEmptyStateCallCount += 1
+        }
         
         func didUpdateUpNextStatus(isUpNext: Bool) {
             upNextStatusChangeCallCount += 1
