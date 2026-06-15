@@ -23,6 +23,12 @@ final class FilmDetailViewModel {
         case watched
     }
     
+    // MARK: - Status Action Definition
+    private enum StatusAction {
+        case add
+        case remove
+    }
+    
     // MARK: - Properties
     private let imageLoader: ImageLoader
     private let context: NSManagedObjectContext
