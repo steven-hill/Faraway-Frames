@@ -187,7 +187,7 @@ struct FilmDetailViewModelTests {
     }
     
     @Test("Adding a film to upNext should call delegate method only if status changes to true - helps prevent duplicates and unnecessary delegate method calls")
-    func filmDetailViewModel_addFilmToQueue_onlyWhenUpNextStatusChangesToTrue_callsDelegateMethod() async {
+    func filmDetailViewModel_addFilmToUpNext_onlyWhenUpNextStatusChangesToTrue_callsDelegateMethod() async {
         let sut = makeSUT()
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
@@ -203,7 +203,7 @@ struct FilmDetailViewModelTests {
     }
     
     @Test("Adding a film to watched should call delegate method only if status changes to true - helps prevent duplicates and unnecessary delegate method calls")
-    func filmDetailViewModel_addFilmToQueue_onlyWhenWatchedStatusChangesToTrue_callsDelegateMethod() async {
+    func filmDetailViewModel_addFilmToWatched_onlyWhenWatchedStatusChangesToTrue_callsDelegateMethod() async {
         let sut = makeSUT()
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
