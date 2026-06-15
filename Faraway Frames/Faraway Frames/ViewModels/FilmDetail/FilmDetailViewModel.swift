@@ -155,6 +155,7 @@ final class FilmDetailViewModel {
     private func updateFilmStatus(
         film: Film,
         property: FilmStatusProperty,
+        action: StatusAction,
         onStatusChanged: @escaping @MainActor () -> Void
     ) async {
         do {
@@ -163,7 +164,12 @@ final class FilmDetailViewModel {
                 request.predicate = NSPredicate(format: "id == %@", film.id)
                 
                 let filmMO: FilmMO
-                if let existing = try context.fetch(request).first {
+                let existing = try context.fetch(request).first
+                if existing == nil, case .remove = action {
+                    return false
+                }
+                
+                if let existing {
                     filmMO = existing
                 } else {
                     filmMO = Film.makeFilmMO(from: film, context: context)
@@ -171,13 +177,23 @@ final class FilmDetailViewModel {
                 
                 let statusChanged: Bool
                 
-                switch property {
-                case .upNext:
+                switch (property, action) {
+                case (.upNext, .add):
                     statusChanged = !filmMO.isUpNext
                     filmMO.isUpNext = true
-                case .watched:
+                case (.upNext, .remove):
+                    statusChanged = filmMO.isUpNext
+                    filmMO.isUpNext = false
+                case (.watched, .add):
                     statusChanged = !filmMO.isWatched
                     filmMO.isWatched = true
+                case (.watched, .remove):
+                    statusChanged = filmMO.isWatched
+                    filmMO.isWatched = false
+                }
+                
+                if !filmMO.isUpNext && !filmMO.isWatched {
+                    context.delete(filmMO)
                 }
                 
                 if context.hasChanges {
