@@ -31,7 +31,8 @@ struct HomeVCTests {
     // MARK: - SUT Helper Method
     private func makeSUT() -> HomeVC {
         let testPersistenceController = try! PersistenceController(inMemory: true)
-        let homeViewModel = HomeViewModel(context: testPersistenceController.viewContext)
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
+        let homeViewModel = HomeViewModel(context: testPersistenceController.viewContext, filmQueueService: filmQueueService)
         return HomeVC(homeViewModel: homeViewModel)
     }
 }
