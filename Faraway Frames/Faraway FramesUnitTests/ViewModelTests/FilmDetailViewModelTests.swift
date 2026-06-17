@@ -258,7 +258,8 @@ struct FilmDetailViewModelTests {
     private func makeSUT() -> FilmDetailViewModel {
         let mockImageLoader = MockImageLoader()
         let persistenceController = try! PersistenceController.init(inMemory: true)
-        return FilmDetailViewModel(imageLoader: mockImageLoader, context: persistenceController.viewContext)
+        let filmQueueService = FilmQueueService(context: persistenceController.viewContext)
+        return FilmDetailViewModel(imageLoader: mockImageLoader, context: persistenceController.viewContext, filmQueueService: filmQueueService)
     }
     
     //MARK: - Film Detail View Model Spy
