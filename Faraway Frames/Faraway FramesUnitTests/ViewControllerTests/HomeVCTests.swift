@@ -34,18 +34,8 @@ struct HomeVCTests {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
         let filmQueueService = FilmQueueService(context: context)
-        let mockUpNextFRC = NSFetchedResultsController(
-            fetchRequest: FilmMO.upNextFetchRequest(),
-            managedObjectContext: context,
-            sectionNameKeyPath: nil,
-            cacheName: nil
-        )
-        let mockWatchedFRC = NSFetchedResultsController(
-            fetchRequest: FilmMO.watchedFetchRequest(),
-            managedObjectContext: context,
-            sectionNameKeyPath: nil,
-            cacheName: nil
-        )
+        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
+        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
         let homeViewModel = HomeViewModel(context: context, upNextFRC: mockUpNextFRC, watchedFRC: mockWatchedFRC, filmQueueService: filmQueueService)
         return HomeVC(homeViewModel: homeViewModel)
     }
