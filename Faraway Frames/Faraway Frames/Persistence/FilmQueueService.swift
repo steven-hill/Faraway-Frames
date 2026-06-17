@@ -32,7 +32,22 @@ final class FilmQueueService {
                 filmMO = Film.makeFilmMO(from: film, context: context)
             }
             
-            let statusChanged = false
+            let statusChanged: Bool
+            
+            switch (queue, action) {
+            case (.upNext, .add):
+                statusChanged = !filmMO.isUpNext
+                filmMO.isUpNext = true
+            case (.upNext, .remove):
+                statusChanged = filmMO.isUpNext
+                filmMO.isUpNext = false
+            case (.watched, .add):
+                statusChanged = !filmMO.isWatched
+                filmMO.isWatched = true
+            case (.watched, .remove):
+                statusChanged = filmMO.isWatched
+                filmMO.isWatched = false
+            }
             
             guard context.hasChanges else { return statusChanged }
             try context.save()
