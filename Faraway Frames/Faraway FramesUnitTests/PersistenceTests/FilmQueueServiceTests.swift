@@ -16,6 +16,7 @@ struct FilmQueueServiceTests {
     func filmQueueService_updateFilmStatus_existsEarlyIfFilmDoesNotExistInDatabase() async throws {
         let (sut,_) = makeSUT()
         let film = Film.sample[0]
+        
         let result = try await sut.updateFilmStatus(film: film, queue: .upNext, action: .remove)
         
         #expect(result == false, "Should be false when trying to remove a film that doesn't exist in the database.")
@@ -28,26 +29,21 @@ struct FilmQueueServiceTests {
         _ = try await sut.updateFilmStatus(film: film, queue: .upNext, action: .add)
         
         _ = try await sut.updateFilmStatus(film: film, queue: .watched, action: .add)
-        let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
-        request.predicate = NSPredicate(format: "id == %@", film.id)
+        let fetchedFilms = fetchFilmsFromDatabase(film: film, testPersistenceController: testPersistenceController)
         
-        let existing = try testPersistenceController.viewContext.fetch(request).count
-        
-        #expect(existing == 1, "Should only be one film in the database.")
+        #expect(fetchedFilms.count == 1, "Should only be one film in the database.")
     }
     
     @Test("Can add a film to upNext")
     func filmQueueService_updateFilmStatus_addsAFilmToUpNext() async throws {
         let (sut, testPersistenceController) = makeSUT()
         let film = Film.sample[0]
+        
         let result = try await sut.updateFilmStatus(film: film, queue: .upNext, action: .add)
+        let fetchedFilms = fetchFilmsFromDatabase(film: film, testPersistenceController: testPersistenceController)
         
-        let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
-        request.predicate = NSPredicate(format: "id == %@", film.id)
-        let existing = try testPersistenceController.viewContext.fetch(request)
-        
-        #expect(existing[0].isUpNext == true, "Should be true.")
-        #expect(existing[0].id == film.id, "Should match.")
+        #expect(fetchedFilms[0].isUpNext == true, "Should be true.")
+        #expect(fetchedFilms[0].id == film.id, "Should match.")
         #expect(result == true, "Should be true.")
     }
     
@@ -57,13 +53,11 @@ struct FilmQueueServiceTests {
         let film = Film.sample[0]
         _ = try await sut.updateFilmStatus(film: film, queue: .upNext, action: .add)
         _ = try await sut.updateFilmStatus(film: film, queue: .watched, action: .add)
+        
         let result = try await sut.updateFilmStatus(film: film, queue: .upNext, action: .remove)
+        let fetchedFilms = fetchFilmsFromDatabase(film: film, testPersistenceController: testPersistenceController)
         
-        let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
-        request.predicate = NSPredicate(format: "id == %@", film.id)
-        let existing = try testPersistenceController.viewContext.fetch(request)
-        
-        #expect(existing[0].isUpNext == false, "Should be false.")
+        #expect(fetchedFilms[0].isUpNext == false, "Should be false.")
         #expect(result == true, "Should be true.")
     }
     
@@ -71,14 +65,12 @@ struct FilmQueueServiceTests {
     func filmQueueService_updateFilmStatus_addsAFilmToWatched() async throws {
         let (sut, testPersistenceController) = makeSUT()
         let film = Film.sample[0]
+        
         let result = try await sut.updateFilmStatus(film: film, queue: .watched, action: .add)
+        let fetchedFilms = fetchFilmsFromDatabase(film: film, testPersistenceController: testPersistenceController)
         
-        let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
-        request.predicate = NSPredicate(format: "id == %@", film.id)
-        let existing = try testPersistenceController.viewContext.fetch(request)
-        
-        #expect(existing[0].isWatched == true, "Should be true.")
-        #expect(existing[0].id == film.id, "Should match.")
+        #expect(fetchedFilms[0].isWatched == true, "Should be true.")
+        #expect(fetchedFilms[0].id == film.id, "Should match.")
         #expect(result == true, "Should be true.")
     }
     
@@ -88,13 +80,11 @@ struct FilmQueueServiceTests {
         let film = Film.sample[0]
         _ = try await sut.updateFilmStatus(film: film, queue: .upNext, action: .add)
         _ = try await sut.updateFilmStatus(film: film, queue: .watched, action: .add)
+        
         let result = try await sut.updateFilmStatus(film: film, queue: .watched, action: .remove)
+        let fetchedFilms = fetchFilmsFromDatabase(film: film, testPersistenceController: testPersistenceController)
         
-        let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
-        request.predicate = NSPredicate(format: "id == %@", film.id)
-        let existing = try testPersistenceController.viewContext.fetch(request)
-        
-        #expect(existing[0].isWatched == false, "Should be false.")
+        #expect(fetchedFilms[0].isWatched == false, "Should be false.")
         #expect(result == true, "Should be true.")
     }
     
@@ -104,19 +94,15 @@ struct FilmQueueServiceTests {
         let film = Film.sample[0]
         _ = try await sut.updateFilmStatus(film: film, queue: .upNext, action: .add)
         _ = try await sut.updateFilmStatus(film: film, queue: .watched, action: .add)
-        
-        let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
-        request.predicate = NSPredicate(format: "id == %@", film.id)
-        var existing = try testPersistenceController.viewContext.fetch(request).count
-        
-        #expect(existing == 1, "Should be one film in database.")
+
+        var fetchedFilms = fetchFilmsFromDatabase(film: film, testPersistenceController: testPersistenceController)
+        #expect(fetchedFilms.count == 1, "Should be one film in database.")
         
         _ = try await sut.updateFilmStatus(film: film, queue: .upNext, action: .remove)
         let result = try await sut.updateFilmStatus(film: film, queue: .watched, action: .remove)
+        fetchedFilms = fetchFilmsFromDatabase(film: film, testPersistenceController: testPersistenceController)
         
-        existing = try testPersistenceController.viewContext.fetch(request).count
-        
-        #expect(existing == 0, "Film should have been deleted from database.")
+        #expect(fetchedFilms.count == 0, "Film should have been deleted from database.")
         #expect(result == true, "Should be true.")
     }
     
@@ -125,5 +111,12 @@ struct FilmQueueServiceTests {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let sut = FilmQueueService(context: testPersistenceController.viewContext)
         return (sut, testPersistenceController)
+    }
+    
+    // MARK: - Fetch Films Helper Method
+    private func fetchFilmsFromDatabase(film: Film, testPersistenceController: PersistenceController) -> [FilmMO] {
+        let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
+        request.predicate = NSPredicate(format: "id == %@", film.id)
+        return try! testPersistenceController.viewContext.fetch(request)
     }
 }
