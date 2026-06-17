@@ -19,18 +19,11 @@ final class FilmQueueService {
         try await context.perform { [context] in
             let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
             request.predicate = NSPredicate(format: "id == %@", film.id)
-            let filmMO: FilmMO
             let existing = try context.fetch(request).first
-            
             if existing == nil, case .remove = action {
                 return false
             }
-            
-            if let existing {
-                filmMO = existing
-            } else {
-                filmMO = Film.makeFilmMO(from: film, context: context)
-            }
+            let filmMO = existing ?? Film.makeFilmMO(from: film, context: context)
             
             let statusChanged: Bool
             
