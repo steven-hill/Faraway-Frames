@@ -8,6 +8,7 @@
 import Testing
 @testable import Faraway_Frames
 import UIKit
+import CoreData
 
 @MainActor
 struct HomeVCTests {
@@ -31,8 +32,21 @@ struct HomeVCTests {
     // MARK: - SUT Helper Method
     private func makeSUT() -> HomeVC {
         let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let homeViewModel = HomeViewModel(context: testPersistenceController.viewContext, filmQueueService: filmQueueService)
+        let context = testPersistenceController.viewContext
+        let filmQueueService = FilmQueueService(context: context)
+        let mockUpNextFRC = NSFetchedResultsController(
+            fetchRequest: FilmMO.upNextFetchRequest(),
+            managedObjectContext: context,
+            sectionNameKeyPath: nil,
+            cacheName: nil
+        )
+        let mockWatchedFRC = NSFetchedResultsController(
+            fetchRequest: FilmMO.watchedFetchRequest(),
+            managedObjectContext: context,
+            sectionNameKeyPath: nil,
+            cacheName: nil
+        )
+        let homeViewModel = HomeViewModel(context: context, upNextFRC: mockUpNextFRC, watchedFRC: mockWatchedFRC, filmQueueService: filmQueueService)
         return HomeVC(homeViewModel: homeViewModel)
     }
 }

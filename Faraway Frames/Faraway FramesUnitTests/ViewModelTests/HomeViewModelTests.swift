@@ -127,8 +127,20 @@ struct HomeViewModelTests {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let saver = ThrowingSaver(errorToThrow: scenario.systemError)
         let context = testPersistenceController.viewContext
+        let mockUpNextFRC = NSFetchedResultsController(
+            fetchRequest: FilmMO.upNextFetchRequest(),
+            managedObjectContext: context,
+            sectionNameKeyPath: nil,
+            cacheName: nil
+        )
+        let mockWatchedFRC = NSFetchedResultsController(
+            fetchRequest: FilmMO.watchedFetchRequest(),
+            managedObjectContext: context,
+            sectionNameKeyPath: nil,
+            cacheName: nil
+        )
         let filmQueueService = FilmQueueService(context: context)
-        let sut = HomeViewModel(context: testPersistenceController.viewContext, saver: saver, filmQueueService: filmQueueService)
+        let sut = HomeViewModel(context: context, upNextFRC: mockUpNextFRC, watchedFRC: mockWatchedFRC, saver: saver, filmQueueService: filmQueueService)
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         let expectedError = HomeError.addFailed(scenario.expectedReason)
@@ -240,8 +252,20 @@ struct HomeViewModelTests {
     func homeViewModel_toggleFilmInQueue_whenFilmDoesNotExistInDatabase_doesNotThrowAndExitsCleanly() async {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
+        let mockUpNextFRC = NSFetchedResultsController(
+            fetchRequest: FilmMO.upNextFetchRequest(),
+            managedObjectContext: context,
+            sectionNameKeyPath: nil,
+            cacheName: nil
+        )
+        let mockWatchedFRC = NSFetchedResultsController(
+            fetchRequest: FilmMO.watchedFetchRequest(),
+            managedObjectContext: context,
+            sectionNameKeyPath: nil,
+            cacheName: nil
+        )
         let filmQueueService = FilmQueueService(context: context)
-        let sut = HomeViewModel(context: context, filmQueueService: filmQueueService)
+        let sut = HomeViewModel(context: context, upNextFRC: mockUpNextFRC, watchedFRC: mockWatchedFRC, filmQueueService: filmQueueService)
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         
@@ -254,8 +278,20 @@ struct HomeViewModelTests {
     private func makeSUTWithContext() -> (sut: HomeViewModel, context: NSManagedObjectContext) {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
+        let mockUpNextFRC = NSFetchedResultsController(
+            fetchRequest: FilmMO.upNextFetchRequest(),
+            managedObjectContext: context,
+            sectionNameKeyPath: nil,
+            cacheName: nil
+        )
+        let mockWatchedFRC = NSFetchedResultsController(
+            fetchRequest: FilmMO.watchedFetchRequest(),
+            managedObjectContext: context,
+            sectionNameKeyPath: nil,
+            cacheName: nil
+        )
         let filmQueueService = FilmQueueService(context: context)
-        let sut = HomeViewModel(context: context, filmQueueService: filmQueueService)
+        let sut = HomeViewModel(context: context, upNextFRC: mockUpNextFRC, watchedFRC: mockWatchedFRC, filmQueueService: filmQueueService)
         return (sut, context)
     }
     
