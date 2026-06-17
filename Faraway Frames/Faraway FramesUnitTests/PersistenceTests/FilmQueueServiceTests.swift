@@ -12,7 +12,7 @@ import CoreData
 @MainActor
 struct FilmQueueServiceTests {
 
-    @Test("Early exit if trying to remove an entry that doesn't exist in database")
+    @Test("Early exit returning false if trying to remove a film that doesn't exist in database")
     func filmQueueService_updateFilmStatus_existsEarlyIfFilmDoesNotExistInDatabase() async throws {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let sut = FilmQueueService(context: testPersistenceController.viewContext)
