@@ -283,7 +283,8 @@ extension ExploreDetailVC: FilmDetailViewModelDelegate {
 #Preview("Explore Detail") {
     let imageLoader = APIClientImageLoader(cacheManager: CacheManager())
     let testPersistenceController = try! PersistenceController(inMemory: true)
-    let vm = FilmDetailViewModel(film: Film.sample[0], imageLoader: imageLoader, context: testPersistenceController.viewContext)
+    let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
+    let vm = FilmDetailViewModel(film: Film.sample[0], imageLoader: imageLoader, context: testPersistenceController.viewContext, filmQueueService: filmQueueService)
     let vc = ExploreDetailVC(filmDetailViewModel: vm)
     vc
 }

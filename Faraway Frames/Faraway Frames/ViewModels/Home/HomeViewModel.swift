@@ -36,6 +36,7 @@ final class HomeViewModel: NSObject {
     private let watchedFRC: NSFetchedResultsController<FilmMO>
     private let context: NSManagedObjectContext
     private let saver: ContextSaving
+    private let filmQueueService: FilmQueueService
     
     private var upNextFilms: [Film] {
         let managedObjects = upNextFRC.fetchedObjects ?? []
@@ -51,10 +52,12 @@ final class HomeViewModel: NSObject {
     init(context: NSManagedObjectContext,
          upNextFRC: NSFetchedResultsController<FilmMO>? = nil,
          watchedFRC: NSFetchedResultsController<FilmMO>? = nil,
-         saver: ContextSaving? = nil
+         saver: ContextSaving? = nil,
+         filmQueueService: FilmQueueService
     ) {
         self.context = context
         self.saver = saver ?? context
+        self.filmQueueService = filmQueueService
         
         if let injectedUpNextFRC = upNextFRC {
             self.upNextFRC = injectedUpNextFRC
