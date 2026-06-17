@@ -14,8 +14,7 @@ struct FilmQueueServiceTests {
 
     @Test("Early exit returning false if trying to remove a film that doesn't exist in database")
     func filmQueueService_updateFilmStatus_existsEarlyIfFilmDoesNotExistInDatabase() async throws {
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let sut = FilmQueueService(context: testPersistenceController.viewContext)
+        let (sut,_) = makeSUT()
         let film = Film.sample[0]
         let result = try await sut.updateFilmStatus(film: film, queue: .upNext, action: .remove)
         
@@ -24,8 +23,7 @@ struct FilmQueueServiceTests {
     
     @Test("Ensure that duplicates are not created in the database.")
     func filmQueueService_updateFilmStatus_checksFilmExistsInDatabaseBeforeCreatingANewOne() async throws {
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let sut = FilmQueueService(context: testPersistenceController.viewContext)
+        let (sut, testPersistenceController) = makeSUT()
         let film = Film.sample[0]
         _ = try await sut.updateFilmStatus(film: film, queue: .upNext, action: .add)
         
@@ -40,8 +38,7 @@ struct FilmQueueServiceTests {
     
     @Test("Can add a film to upNext")
     func filmQueueService_updateFilmStatus_addsAFilmToUpNext() async throws {
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let sut = FilmQueueService(context: testPersistenceController.viewContext)
+        let (sut, testPersistenceController) = makeSUT()
         let film = Film.sample[0]
         let result = try await sut.updateFilmStatus(film: film, queue: .upNext, action: .add)
         
@@ -56,8 +53,7 @@ struct FilmQueueServiceTests {
     
     @Test("Can remove a film from upNext")
     func filmQueueService_updateFilmStatus_removesAFilmFromUpNext() async throws {
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let sut = FilmQueueService(context: testPersistenceController.viewContext)
+        let (sut, testPersistenceController) = makeSUT()
         let film = Film.sample[0]
         _ = try await sut.updateFilmStatus(film: film, queue: .upNext, action: .add)
         _ = try await sut.updateFilmStatus(film: film, queue: .watched, action: .add)
@@ -73,8 +69,7 @@ struct FilmQueueServiceTests {
     
     @Test("Can add a film to watched")
     func filmQueueService_updateFilmStatus_addsAFilmToWatched() async throws {
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let sut = FilmQueueService(context: testPersistenceController.viewContext)
+        let (sut, testPersistenceController) = makeSUT()
         let film = Film.sample[0]
         let result = try await sut.updateFilmStatus(film: film, queue: .watched, action: .add)
         
@@ -89,8 +84,7 @@ struct FilmQueueServiceTests {
     
     @Test("Can remove a film from watched")
     func filmQueueService_updateFilmStatus_removesAFilmFromWatched() async throws {
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let sut = FilmQueueService(context: testPersistenceController.viewContext)
+        let (sut, testPersistenceController) = makeSUT()
         let film = Film.sample[0]
         _ = try await sut.updateFilmStatus(film: film, queue: .upNext, action: .add)
         _ = try await sut.updateFilmStatus(film: film, queue: .watched, action: .add)
@@ -106,8 +100,7 @@ struct FilmQueueServiceTests {
     
     @Test("A film that is changed to false for both upNext and Watched should be deleted from database")
     func filmQueueService_updateFilmStatus_ifUpNextAndWatchedAreBothFalse_filmIsDeletedFromDatabase() async throws {
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let sut = FilmQueueService(context: testPersistenceController.viewContext)
+        let (sut, testPersistenceController) = makeSUT()
         let film = Film.sample[0]
         _ = try await sut.updateFilmStatus(film: film, queue: .upNext, action: .add)
         _ = try await sut.updateFilmStatus(film: film, queue: .watched, action: .add)
@@ -125,5 +118,12 @@ struct FilmQueueServiceTests {
         
         #expect(existing == 0, "Film should have been deleted from database.")
         #expect(result == true, "Should be true.")
+    }
+    
+    // MARK: - SUT Helper Method
+    private func makeSUT() -> (FilmQueueService, PersistenceController) {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let sut = FilmQueueService(context: testPersistenceController.viewContext)
+        return (sut, testPersistenceController)
     }
 }
