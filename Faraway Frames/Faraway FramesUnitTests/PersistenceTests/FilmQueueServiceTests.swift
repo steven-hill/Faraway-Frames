@@ -102,7 +102,7 @@ struct FilmQueueServiceTests {
         let result = try await sut.updateFilmStatus(film: film, queue: .watched, action: .remove)
         fetchedFilms = fetchFilmsFromDatabase(film: film, testPersistenceController: testPersistenceController)
         
-        #expect(fetchedFilms.count == 0, "Film should have been deleted from database.")
+        #expect(fetchedFilms.isEmpty, "Film should have been deleted from database.")
         #expect(result == true, "Should be true.")
     }
     
