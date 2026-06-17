@@ -49,6 +49,10 @@ final class FilmQueueService {
                 filmMO.isWatched = false
             }
             
+            if !filmMO.isUpNext && !filmMO.isWatched {
+                context.delete(filmMO)
+            }
+            
             guard context.hasChanges else { return statusChanged }
             try context.save()
             
