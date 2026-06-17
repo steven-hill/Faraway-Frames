@@ -33,7 +33,8 @@ struct FilmDetailViewModelTests {
         let film = Film.sample[0]
         let mockImageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
-        let sut = FilmDetailViewModel(film: film, imageLoader: mockImageLoader, context: testPersistenceController.viewContext)
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
+        let sut = FilmDetailViewModel(film: film, imageLoader: mockImageLoader, context: testPersistenceController.viewContext, filmQueueService: filmQueueService)
         
         switch sut.currentState {
         case .noFilmSelected:
@@ -59,7 +60,8 @@ struct FilmDetailViewModelTests {
         let filmB = Film.sample[1]
         let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
-        let sut = FilmDetailViewModel(imageLoader: mockImageLoader, context: testPersistenceController.viewContext)
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
+        let sut = FilmDetailViewModel(imageLoader: mockImageLoader, context: testPersistenceController.viewContext, filmQueueService: filmQueueService)
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
 
@@ -85,7 +87,8 @@ struct FilmDetailViewModelTests {
         let film = Film.sample[0]
         let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
-        let sut = FilmDetailViewModel(imageLoader: mockImageLoader, context: testPersistenceController.viewContext)
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
+        let sut = FilmDetailViewModel(imageLoader: mockImageLoader, context: testPersistenceController.viewContext, filmQueueService: filmQueueService)
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
         
