@@ -50,38 +50,16 @@ final class HomeViewModel: NSObject {
     
     // MARK: - Initialisation
     init(context: NSManagedObjectContext,
-         upNextFRC: NSFetchedResultsController<FilmMO>? = nil,
-         watchedFRC: NSFetchedResultsController<FilmMO>? = nil,
+         upNextFRC: NSFetchedResultsController<FilmMO>,
+         watchedFRC: NSFetchedResultsController<FilmMO>,
          saver: ContextSaving? = nil,
          filmQueueService: FilmQueueService
     ) {
         self.context = context
+        self.upNextFRC = upNextFRC
+        self.watchedFRC = watchedFRC
         self.saver = saver ?? context
         self.filmQueueService = filmQueueService
-        
-        if let injectedUpNextFRC = upNextFRC {
-            self.upNextFRC = injectedUpNextFRC
-        } else {
-            let request = FilmMO.upNextFetchRequest()
-            self.upNextFRC = NSFetchedResultsController(
-                fetchRequest: request,
-                managedObjectContext: context,
-                sectionNameKeyPath: nil,
-                cacheName: nil
-            )
-        }
-        
-        if let injectedWatchedFRC = watchedFRC {
-            self.watchedFRC = injectedWatchedFRC
-        } else {
-            let request = FilmMO.watchedFetchRequest()
-            self.watchedFRC = NSFetchedResultsController(
-                fetchRequest: request,
-                managedObjectContext: context,
-                sectionNameKeyPath: nil, cacheName: nil
-            )
-        }
-        
         super.init()
         self.upNextFRC.delegate = self
         self.watchedFRC.delegate = self
