@@ -67,11 +67,13 @@ struct HomeViewModelTests {
     ) throws {
         let testPersistenceController = try PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
+        let filmQueueService = FilmQueueService(context: context)
         let throwingController = ThrowingFetchedResultsController(context: context, errorToThrow: scenario.systemError)
         let sut = HomeViewModel(
             context: context,
             upNextFRC: throwingController,
-            watchedFRC: throwingController
+            watchedFRC: throwingController,
+            filmQueueService: filmQueueService
         )
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
@@ -124,7 +126,9 @@ struct HomeViewModelTests {
     ) async {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let saver = ThrowingSaver(errorToThrow: scenario.systemError)
-        let sut = HomeViewModel(context: testPersistenceController.viewContext, saver: saver)
+        let context = testPersistenceController.viewContext
+        let filmQueueService = FilmQueueService(context: context)
+        let sut = HomeViewModel(context: testPersistenceController.viewContext, saver: saver, filmQueueService: filmQueueService)
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         let expectedError = HomeError.addFailed(scenario.expectedReason)
@@ -235,7 +239,9 @@ struct HomeViewModelTests {
     @Test("`toggleFilmInQueue` doesn't throw error, and exits silently via guard when film does not exist in database")
     func homeViewModel_toggleFilmInQueue_whenFilmDoesNotExistInDatabase_doesNotThrowAndExitsCleanly() async {
         let testPersistenceController = try! PersistenceController(inMemory: true)
-        let sut = HomeViewModel(context: testPersistenceController.viewContext)
+        let context = testPersistenceController.viewContext
+        let filmQueueService = FilmQueueService(context: context)
+        let sut = HomeViewModel(context: context, filmQueueService: filmQueueService)
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         
@@ -248,7 +254,8 @@ struct HomeViewModelTests {
     private func makeSUTWithContext() -> (sut: HomeViewModel, context: NSManagedObjectContext) {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
-        let sut = HomeViewModel(context: context)
+        let filmQueueService = FilmQueueService(context: context)
+        let sut = HomeViewModel(context: context, filmQueueService: filmQueueService)
         return (sut, context)
     }
     
