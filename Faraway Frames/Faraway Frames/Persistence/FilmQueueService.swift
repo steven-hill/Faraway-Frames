@@ -32,10 +32,12 @@ final class FilmQueueService {
                 filmMO = Film.makeFilmMO(from: film, context: context)
             }
             
-            guard context.hasChanges else { return false }
+            let statusChanged = false
+            
+            guard context.hasChanges else { return statusChanged }
             try context.save()
             
-            return false
+            return statusChanged
         }
     }
 }
