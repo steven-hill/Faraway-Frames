@@ -20,7 +20,29 @@ final class HomeCoordinator: Coordinator {
     }
     
     func start() {
-        let homeViewModel = HomeViewModel(context: context)
+        let upNextRequest = FilmMO.upNextFetchRequest()
+        let upNextFRC = NSFetchedResultsController(
+            fetchRequest: upNextRequest,
+            managedObjectContext: context,
+            sectionNameKeyPath: nil,
+            cacheName: nil
+        )
+        
+        let watchedRequest = FilmMO.watchedFetchRequest()
+        let watchedFRC = NSFetchedResultsController(
+            fetchRequest: watchedRequest,
+            managedObjectContext: context,
+            sectionNameKeyPath: nil,
+            cacheName: nil
+        )
+        
+        let homeViewModel = HomeViewModel(
+            context: context,
+            upNextFRC: upNextFRC,
+            watchedFRC: watchedFRC,
+            filmQueueService: filmQueueService
+        )
+        
         let homeVC = HomeVC(homeViewModel: homeViewModel)
         navigationController.setViewControllers([homeVC], animated: false)
     }
