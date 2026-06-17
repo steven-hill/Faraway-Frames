@@ -11,10 +11,12 @@ import CoreData
 final class HomeCoordinator: Coordinator {
     var navigationController: UINavigationController
     private let context: NSManagedObjectContext
+    private let filmQueueService: FilmQueueService
     
-    init(navigationController: UINavigationController, context: NSManagedObjectContext) {
+    init(navigationController: UINavigationController, context: NSManagedObjectContext, filmQueueService: FilmQueueService) {
         self.navigationController = navigationController
         self.context = context
+        self.filmQueueService = filmQueueService
     }
     
     func start() {
