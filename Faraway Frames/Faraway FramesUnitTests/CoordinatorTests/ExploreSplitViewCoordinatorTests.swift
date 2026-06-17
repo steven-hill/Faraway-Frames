@@ -14,8 +14,9 @@ struct ExploreSplitViewCoordinatorTests {
     
     @Test func exploreSplitViewCoordinator_onInit_setsDelegateCorrectly() {
         let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
         let exploreSplitVCSpy = ExploreSplitVCSpy(style: .doubleColumn)
-        let sut = ExploreSplitViewCoordinator(dependencies: MockContainer(), context: testPersistenceController.viewContext, exploreSplitVC: exploreSplitVCSpy)
+        let sut = ExploreSplitViewCoordinator(dependencies: MockContainer(), context: testPersistenceController.viewContext, filmQueueService: filmQueueService, exploreSplitVC: exploreSplitVCSpy)
         
         sut.start()
         
@@ -24,8 +25,9 @@ struct ExploreSplitViewCoordinatorTests {
     
     @Test func exploreSplitViewCoordinator_setsUpPrimaryVCCorrectly() {
         let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
         let exploreSplitVCSpy = ExploreSplitVCSpy(style: .doubleColumn)
-        let sut = ExploreSplitViewCoordinator(dependencies: MockContainer(), context: testPersistenceController.viewContext, exploreSplitVC: exploreSplitVCSpy)
+        let sut = ExploreSplitViewCoordinator(dependencies: MockContainer(), context: testPersistenceController.viewContext, filmQueueService: filmQueueService, exploreSplitVC: exploreSplitVCSpy)
         
         sut.start()
         
@@ -36,8 +38,9 @@ struct ExploreSplitViewCoordinatorTests {
     
     @Test func exploreSplitViewCoordinator_setsUpSecondaryVCCorrectly() {
         let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
         let exploreSplitVCSpy = ExploreSplitVCSpy(style: .doubleColumn)
-        let sut = ExploreSplitViewCoordinator(dependencies: MockContainer(), context: testPersistenceController.viewContext, exploreSplitVC: exploreSplitVCSpy)
+        let sut = ExploreSplitViewCoordinator(dependencies: MockContainer(), context: testPersistenceController.viewContext, filmQueueService: filmQueueService, exploreSplitVC: exploreSplitVCSpy)
         
         sut.start()
         
@@ -96,7 +99,8 @@ struct ExploreSplitViewCoordinatorTests {
     // MARK: - Helper Method
     private func makeSUT(with spy: UISplitViewController) -> ExploreSplitViewCoordinator {
         let testPersistenceController = try! PersistenceController(inMemory: true)
-        return ExploreSplitViewCoordinator(dependencies: MockContainer(), context: testPersistenceController.viewContext, exploreSplitVC: spy)
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
+        return ExploreSplitViewCoordinator(dependencies: MockContainer(), context: testPersistenceController.viewContext, filmQueueService: filmQueueService, exploreSplitVC: spy)
     }
     
     // MARK: - ExploreSplitVC Spies
