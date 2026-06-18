@@ -10,9 +10,11 @@ import CoreData
 
 final class FilmQueueService {
     private let context: NSManagedObjectContext
+    private let saver: ContextSaving
     
-    init(context: NSManagedObjectContext) {
+    init(context: NSManagedObjectContext, saver: ContextSaving? = nil) {
         self.context = context
+        self.saver = saver ?? context
     }
     
     @discardableResult
@@ -48,7 +50,7 @@ final class FilmQueueService {
             }
             
             guard context.hasChanges else { return statusChanged }
-            try context.save()
+            try self.saver.save()
             
             return statusChanged
         }

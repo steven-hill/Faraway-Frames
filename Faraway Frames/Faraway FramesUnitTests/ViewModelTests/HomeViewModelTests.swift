@@ -129,8 +129,13 @@ struct HomeViewModelTests {
         let context = testPersistenceController.viewContext
         let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
         let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
-        let filmQueueService = FilmQueueService(context: context)
-        let sut = HomeViewModel(context: context, upNextFRC: mockUpNextFRC, watchedFRC: mockWatchedFRC, saver: saver, filmQueueService: filmQueueService)
+        let filmQueueService = FilmQueueService(context: context, saver: saver)
+        let sut = HomeViewModel(
+            context: context,
+            upNextFRC: mockUpNextFRC,
+            watchedFRC: mockWatchedFRC,
+            saver: saver,
+            filmQueueService: filmQueueService)
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         let expectedError = HomeError.addFailed(scenario.expectedReason)
