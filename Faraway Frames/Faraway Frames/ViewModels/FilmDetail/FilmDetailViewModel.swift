@@ -17,18 +17,6 @@ final class FilmDetailViewModel {
         case content(displayModel: FilmDetailDisplayModel, image: UIImage? = nil)
     }
     
-    // MARK: - Film Status Definition
-    private enum FilmStatusProperty {
-        case upNext
-        case watched
-    }
-    
-    // MARK: - Status Action Definition
-    private enum StatusAction {
-        case add
-        case remove
-    }
-    
     // MARK: - Properties
     private let imageLoader: ImageLoader
     private let context: NSManagedObjectContext
@@ -135,14 +123,14 @@ final class FilmDetailViewModel {
         }
     }
     
-    // MARK: - Persistence methods
+    // MARK: - Persistence method
     func updateStatus(for film: Film, queue: FilmQueue, action: QueueAction) async {
         do {
             let didStatusChange = try await filmQueueService.updateFilmStatus(film: film, queue: queue, action: action)
             
             if didStatusChange {
                 switch (queue, action) {
-                    case (.upNext, .add):
+                case (.upNext, .add):
                     delegate?.didUpdateUpNextStatus(isUpNext: true)
                 case (.upNext, .remove):
                     delegate?.didUpdateUpNextStatus(isUpNext: false)
@@ -151,77 +139,6 @@ final class FilmDetailViewModel {
                 case (.watched, .remove):
                     delegate?.didUpdateWatchedStatus(isWatched: false)
                 }
-            }
-        } catch {
-            // TODO: - handle error
-            print("Failed to update film status: \(error)")
-        }
-    }
-
-    func addFilmToWatched(film: Film) async {
-        await updateFilmStatus(film: film, property: .watched, action: .add) { [weak self] in
-            self?.delegate?.didUpdateWatchedStatus(isWatched: true)
-        }
-    }
-    
-    func removeFilmFromWatched(film: Film) async {
-        await updateFilmStatus(film: film, property: .watched, action: .remove) { [weak self] in
-            self?.delegate?.didUpdateWatchedStatus(isWatched: false)
-        }
-    }
-    
-    private func updateFilmStatus(
-        film: Film,
-        property: FilmStatusProperty,
-        action: StatusAction,
-        onStatusChanged: @escaping @MainActor () -> Void
-    ) async {
-        do {
-            let didStatusChange = try await context.perform { [context] in
-                let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
-                request.predicate = NSPredicate(format: "id == %@", film.id)
-                
-                let filmMO: FilmMO
-                let existing = try context.fetch(request).first
-                if existing == nil, case .remove = action {
-                    return false
-                }
-                
-                if let existing {
-                    filmMO = existing
-                } else {
-                    filmMO = Film.makeFilmMO(from: film, context: context)
-                }
-                
-                let statusChanged: Bool
-                
-                switch (property, action) {
-                case (.upNext, .add):
-                    statusChanged = !filmMO.isUpNext
-                    filmMO.isUpNext = true
-                case (.upNext, .remove):
-                    statusChanged = filmMO.isUpNext
-                    filmMO.isUpNext = false
-                case (.watched, .add):
-                    statusChanged = !filmMO.isWatched
-                    filmMO.isWatched = true
-                case (.watched, .remove):
-                    statusChanged = filmMO.isWatched
-                    filmMO.isWatched = false
-                }
-                
-                if !filmMO.isUpNext && !filmMO.isWatched {
-                    context.delete(filmMO)
-                }
-                
-                if context.hasChanges {
-                    try context.save()
-                }
-                return statusChanged
-            }
-            
-            if didStatusChange {
-                onStatusChanged()
             }
         } catch {
             // TODO: - handle error
