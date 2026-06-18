@@ -423,9 +423,4 @@ struct FilmDetailViewModelTests {
             (UnknownError(), .unknown("Unknown error."))
         ]
     }
-    
-    //MARK: - Custom Unknown Error Helper
-    private struct UnknownError: Error, LocalizedError {
-        var errorDescription: String? { "Unknown error." }
-    }
 }

@@ -364,10 +364,4 @@ struct HomeViewModelTests {
             (UnknownError(), .unknown("Unknown error."))
         ]
     }
-    
-    //MARK: - Custom Unknown Error Helper
-    /// Used in test for `performFetches` failure.
-    private struct UnknownError: Error, LocalizedError {
-        var errorDescription: String? { "Unknown error." }
-    }
 }
