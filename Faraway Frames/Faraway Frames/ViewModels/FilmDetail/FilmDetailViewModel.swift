@@ -136,6 +136,29 @@ final class FilmDetailViewModel {
     }
     
     // MARK: - Persistence methods
+    func updateStatus(for film: Film, queue: FilmQueue, action: QueueAction) async {
+        do {
+            let didStatusChange = try await filmQueueService.updateFilmStatus(film: film, queue: queue, action: action)
+            
+            if didStatusChange {
+                switch (queue, action) {
+                    case (.upNext, .add):
+                    delegate?.didUpdateUpNextStatus(isUpNext: true)
+                case (.upNext, .remove):
+                    delegate?.didUpdateUpNextStatus(isUpNext: false)
+                case (.watched, .add):
+                    delegate?.didUpdateWatchedStatus(isWatched: true)
+                case (.watched, .remove):
+                    delegate?.didUpdateWatchedStatus(isWatched: false)
+                }
+            }
+        } catch {
+            // TODO: - handle error
+            print("Failed to update film status: \(error)")
+        }
+    }
+    
+    
     func addFilmToUpNext(film: Film) async {
         await updateFilmStatus(film: film, property: .upNext, action: .add) { [weak self] in
             self?.delegate?.didUpdateUpNextStatus(isUpNext: true)
