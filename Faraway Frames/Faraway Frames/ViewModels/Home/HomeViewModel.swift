@@ -17,25 +17,11 @@ final class HomeViewModel: NSObject {
         case failure(HomeError)
     }
     
-    // MARK: - Queue Definition
-    enum FilmQueue {
-        case upNext
-        case watched
-    }
-    
-    // MARK: - Action Definition
-    enum QueueAction {
-        case add
-        case remove
-    }
-    
     // MARK: - Properties
     private(set) var currentState: HomeState = .idle
     weak var delegate: HomeViewModelDelegate?
     private let upNextFRC: NSFetchedResultsController<FilmMO>
     private let watchedFRC: NSFetchedResultsController<FilmMO>
-    private let context: NSManagedObjectContext
-    private let saver: ContextSaving
     private let filmQueueService: FilmQueueService
     
     private var upNextFilms: [Film] {
@@ -49,16 +35,13 @@ final class HomeViewModel: NSObject {
     }
     
     // MARK: - Initialisation
-    init(context: NSManagedObjectContext,
+    init(
          upNextFRC: NSFetchedResultsController<FilmMO>,
          watchedFRC: NSFetchedResultsController<FilmMO>,
-         saver: ContextSaving? = nil,
          filmQueueService: FilmQueueService
     ) {
-        self.context = context
         self.upNextFRC = upNextFRC
         self.watchedFRC = watchedFRC
-        self.saver = saver ?? context
         self.filmQueueService = filmQueueService
         super.init()
         self.upNextFRC.delegate = self
@@ -80,37 +63,7 @@ final class HomeViewModel: NSObject {
     
     func toggleFilmInQueue(film: Film, queue: FilmQueue, action: QueueAction) async {
         do {
-            try await context.perform {
-                let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
-                request.predicate = NSPredicate(format: "id == %@", film.id)
-                
-                let filmMO: FilmMO
-                let existing = try self.context.fetch(request).first
-                
-                if existing == nil, case .remove = action {
-                    return
-                }
-                
-                if let existing {
-                    filmMO = existing
-                } else {
-                    filmMO = Film.makeFilmMO(from: film, context: self.context)
-                }
-                
-                switch (queue, action) {
-                case (.upNext, .add):       filmMO.isUpNext = true
-                case (.upNext, .remove):    filmMO.isUpNext = false
-                case (.watched, .add):      filmMO.isWatched = true
-                case (.watched, .remove):   filmMO.isWatched = false
-                }
-                
-                if !filmMO.isUpNext && !filmMO.isWatched {
-                    self.context.delete(filmMO)
-                }
-                
-                guard self.context.hasChanges else { return }
-                try self.saver.save()
-            }
+            try await filmQueueService.updateFilmStatus(film: film, queue: queue, action: action)
         } catch {
             let homeError = action == .add ? HomeError.add(error) : HomeError.delete(error)
             handleError(homeError)

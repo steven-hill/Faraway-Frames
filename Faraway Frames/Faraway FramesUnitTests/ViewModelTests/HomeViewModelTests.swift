@@ -70,7 +70,6 @@ struct HomeViewModelTests {
         let filmQueueService = FilmQueueService(context: context)
         let throwingController = ThrowingFetchedResultsController(context: context, errorToThrow: scenario.systemError)
         let sut = HomeViewModel(
-            context: context,
             upNextFRC: throwingController,
             watchedFRC: throwingController,
             filmQueueService: filmQueueService
@@ -117,10 +116,10 @@ struct HomeViewModelTests {
         #expect(watchedFilms.count == 1, "Should be one.")
     }
     
-    @Test("`toggleFilmInQueue` should handle errors by updating `currentState` and calling the delegate",
+    @Test("`toggleFilmInQueue` should handle add film errors by updating `currentState` and calling the delegate",
           arguments: errorScenarios
     )
-    func homeViewModel_toggleFilmInQueue_onSaveError_handlesError(
+    func homeViewModel_toggleFilmInQueue_onSaveError_whenAddingFilm_handlesError(
         scenario: (systemError: Error,
                    expectedReason: HomeError.FailureReason)
     ) async {
@@ -129,17 +128,56 @@ struct HomeViewModelTests {
         let context = testPersistenceController.viewContext
         let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
         let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
-        let filmQueueService = FilmQueueService(context: context)
-        let sut = HomeViewModel(context: context, upNextFRC: mockUpNextFRC, watchedFRC: mockWatchedFRC, saver: saver, filmQueueService: filmQueueService)
+        let filmQueueService = FilmQueueService(context: context, saver: saver)
+        let sut = HomeViewModel(
+            upNextFRC: mockUpNextFRC,
+            watchedFRC: mockWatchedFRC,
+            filmQueueService: filmQueueService)
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         let expectedError = HomeError.addFailed(scenario.expectedReason)
         
         await sut.toggleFilmInQueue(film: Film.sample[0], queue: .upNext, action: .add)
         
-        #expect(delegateSpy.didReceiveErrorCallCount == 1, "Should have called delegate method once.")
-        #expect(delegateSpy.receivedError == expectedError, "Delegate should receive matching error.")
-        #expect(sut.currentState == .failure(expectedError), "ViewModel state should transition to match failure.")
+        #expect(delegateSpy.didReceiveErrorCallCount == 1, "Should have called delegate method once on add failure.")
+        #expect(delegateSpy.receivedError == expectedError, "Delegate should receive matching add error context case.")
+        #expect(sut.currentState == .failure(expectedError), "ViewModel state should transition to match the add failure signature.")
+    }
+    
+    @Test("`toggleFilmInQueue` should handle delete film errors by updating `currentState` and calling the delegate",
+          arguments: errorScenarios
+    )
+    func homeViewModel_toggleFilmInQueue_onSaveError_whenDeletingFilm_handlesError(
+        scenario: (systemError: Error,
+                   expectedReason: HomeError.FailureReason)
+    ) async throws {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
+        let context = testPersistenceController.viewContext
+        let sampleFilm = Film.sample[0]
+        let entity = try #require(
+            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
+        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
+        try? context.save()
+        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
+        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
+        let filmQueueService = FilmQueueService(context: context, saver: saver)
+        let sut = HomeViewModel(
+            upNextFRC: mockUpNextFRC,
+            watchedFRC: mockWatchedFRC,
+            filmQueueService: filmQueueService
+        )
+        let delegateSpy = HomeViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        let expectedError = HomeError.deleteFailed(scenario.expectedReason)
+        
+        await sut.toggleFilmInQueue(film: sampleFilm, queue: .upNext, action: .remove)
+        
+        #expect(delegateSpy.didReceiveErrorCallCount == 1, "Should have called delegate method once on removal failure.")
+        #expect(delegateSpy.receivedError == expectedError, "Delegate should receive matching removal error context case.")
+        #expect(sut.currentState == .failure(expectedError), "ViewModel state should transition to match the delete failure signature.")
     }
 
     @Test("Removing film from upNext when it's not in watched should remove it from database entirely")
@@ -245,7 +283,10 @@ struct HomeViewModelTests {
         let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
         let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
         let filmQueueService = FilmQueueService(context: context)
-        let sut = HomeViewModel(context: context, upNextFRC: mockUpNextFRC, watchedFRC: mockWatchedFRC, filmQueueService: filmQueueService)
+        let sut = HomeViewModel(
+            upNextFRC: mockUpNextFRC,
+            watchedFRC: mockWatchedFRC,
+            filmQueueService: filmQueueService)
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         
@@ -261,7 +302,10 @@ struct HomeViewModelTests {
         let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
         let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
         let filmQueueService = FilmQueueService(context: context)
-        let sut = HomeViewModel(context: context, upNextFRC: mockUpNextFRC, watchedFRC: mockWatchedFRC, filmQueueService: filmQueueService)
+        let sut = HomeViewModel(
+            upNextFRC: mockUpNextFRC,
+            watchedFRC: mockWatchedFRC,
+            filmQueueService: filmQueueService)
         return (sut, context)
     }
     
