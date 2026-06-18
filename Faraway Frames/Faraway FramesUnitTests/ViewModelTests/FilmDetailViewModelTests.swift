@@ -240,19 +240,19 @@ struct FilmDetailViewModelTests {
     }
     
     @Test("Removing a film from watched should call delegate method")
-    func filmDetailViewModel_removeFilmFromWatched_onlyWhenWatchedStatusChangesToFalse_callsDelegateMethod() async {
+    func filmDetailViewModel_updateStatus_removeFilmFromWatched_callsDelegateMethod() async {
         let sut = makeSUT()
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
         let targetFilm = Film.sample[0]
-        await sut.addFilmToWatched(film: targetFilm)
+
+        await sut.updateStatus(for: targetFilm, queue: .watched, action: .add)
         #expect(spy.watchedStatusChangeCallCount == 1, "Should call delegate method when adding a film to watched.")
         
-        await sut.removeFilmFromWatched(film: targetFilm)
-        
+        await sut.updateStatus(for: targetFilm, queue: .watched, action: .remove)
         #expect(spy.watchedStatusChangeCallCount == 2, "Should call delegate method again when removing a film from watched.")
                 
-        await sut.removeFilmFromWatched(film: targetFilm)
+        await sut.updateStatus(for: targetFilm, queue: .watched, action: .remove)
         
         #expect(spy.watchedStatusChangeCallCount == 2, "Should not call delegate method because the film no longer exists in the database.")
     }
