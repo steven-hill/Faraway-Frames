@@ -17,18 +17,6 @@ final class HomeViewModel: NSObject {
         case failure(HomeError)
     }
     
-    // MARK: - Queue Definition
-    enum FilmQueue {
-        case upNext
-        case watched
-    }
-    
-    // MARK: - Action Definition
-    enum QueueAction {
-        case add
-        case remove
-    }
-    
     // MARK: - Properties
     private(set) var currentState: HomeState = .idle
     weak var delegate: HomeViewModelDelegate?
