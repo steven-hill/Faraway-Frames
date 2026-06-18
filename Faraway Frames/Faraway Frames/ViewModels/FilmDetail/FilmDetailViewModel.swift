@@ -17,21 +17,8 @@ final class FilmDetailViewModel {
         case content(displayModel: FilmDetailDisplayModel, image: UIImage? = nil)
     }
     
-    // MARK: - Film Status Definition
-    private enum FilmStatusProperty {
-        case upNext
-        case watched
-    }
-    
-    // MARK: - Status Action Definition
-    private enum StatusAction {
-        case add
-        case remove
-    }
-    
     // MARK: - Properties
     private let imageLoader: ImageLoader
-    private let context: NSManagedObjectContext
     private let filmQueueService: FilmQueueService
     private(set) var imageLoadTask: Task<Void, Never>?
     private(set) var currentState: FilmDetailState = .noFilmSelected {
@@ -42,9 +29,10 @@ final class FilmDetailViewModel {
     weak var delegate: FilmDetailViewModelDelegate?
     
     // MARK: - Initialisation
-    init(film: Film? = nil, imageLoader: ImageLoader, context: NSManagedObjectContext, filmQueueService: FilmQueueService) {
+    init(film: Film? = nil,
+        imageLoader: ImageLoader,
+        filmQueueService: FilmQueueService) {
         self.imageLoader = imageLoader
-        self.context = context
         self.filmQueueService = filmQueueService
         if let film {
             setFilm(film)
@@ -135,83 +123,22 @@ final class FilmDetailViewModel {
         }
     }
     
-    // MARK: - Persistence methods
-    func addFilmToUpNext(film: Film) async {
-        await updateFilmStatus(film: film, property: .upNext, action: .add) { [weak self] in
-            self?.delegate?.didUpdateUpNextStatus(isUpNext: true)
-        }
-    }
-    
-    func removeFilmFromUpNext(film: Film) async {
-        await updateFilmStatus(film: film, property: .upNext, action: .remove) { [weak self] in
-            self?.delegate?.didUpdateUpNextStatus(isUpNext: false)
-        }
-    }
-    
-    func addFilmToWatched(film: Film) async {
-        await updateFilmStatus(film: film, property: .watched, action: .add) { [weak self] in
-            self?.delegate?.didUpdateWatchedStatus(isWatched: true)
-        }
-    }
-    
-    func removeFilmFromWatched(film: Film) async {
-        await updateFilmStatus(film: film, property: .watched, action: .remove) { [weak self] in
-            self?.delegate?.didUpdateWatchedStatus(isWatched: false)
-        }
-    }
-    
-    private func updateFilmStatus(
-        film: Film,
-        property: FilmStatusProperty,
-        action: StatusAction,
-        onStatusChanged: @escaping @MainActor () -> Void
-    ) async {
+    // MARK: - Persistence method
+    func updateStatus(for film: Film, queue: FilmQueue, action: QueueAction) async {
         do {
-            let didStatusChange = try await context.perform { [context] in
-                let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
-                request.predicate = NSPredicate(format: "id == %@", film.id)
-                
-                let filmMO: FilmMO
-                let existing = try context.fetch(request).first
-                if existing == nil, case .remove = action {
-                    return false
-                }
-                
-                if let existing {
-                    filmMO = existing
-                } else {
-                    filmMO = Film.makeFilmMO(from: film, context: context)
-                }
-                
-                let statusChanged: Bool
-                
-                switch (property, action) {
-                case (.upNext, .add):
-                    statusChanged = !filmMO.isUpNext
-                    filmMO.isUpNext = true
-                case (.upNext, .remove):
-                    statusChanged = filmMO.isUpNext
-                    filmMO.isUpNext = false
-                case (.watched, .add):
-                    statusChanged = !filmMO.isWatched
-                    filmMO.isWatched = true
-                case (.watched, .remove):
-                    statusChanged = filmMO.isWatched
-                    filmMO.isWatched = false
-                }
-                
-                if !filmMO.isUpNext && !filmMO.isWatched {
-                    context.delete(filmMO)
-                }
-                
-                if context.hasChanges {
-                    try context.save()
-                }
-                return statusChanged
-            }
+            let didStatusChange = try await filmQueueService.updateFilmStatus(film: film, queue: queue, action: action)
             
             if didStatusChange {
-                onStatusChanged()
+                switch (queue, action) {
+                case (.upNext, .add):
+                    delegate?.didUpdateUpNextStatus(isUpNext: true)
+                case (.upNext, .remove):
+                    delegate?.didUpdateUpNextStatus(isUpNext: false)
+                case (.watched, .add):
+                    delegate?.didUpdateWatchedStatus(isWatched: true)
+                case (.watched, .remove):
+                    delegate?.didUpdateWatchedStatus(isWatched: false)
+                }
             }
         } catch {
             // TODO: - handle error
