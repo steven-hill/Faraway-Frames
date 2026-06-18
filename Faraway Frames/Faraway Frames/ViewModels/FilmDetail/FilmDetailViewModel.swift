@@ -158,13 +158,6 @@ final class FilmDetailViewModel {
         }
     }
     
-    
-    func addFilmToUpNext(film: Film) async {
-        await updateFilmStatus(film: film, property: .upNext, action: .add) { [weak self] in
-            self?.delegate?.didUpdateUpNextStatus(isUpNext: true)
-        }
-    }
-    
     func removeFilmFromUpNext(film: Film) async {
         await updateFilmStatus(film: film, property: .upNext, action: .remove) { [weak self] in
             self?.delegate?.didUpdateUpNextStatus(isUpNext: false)
