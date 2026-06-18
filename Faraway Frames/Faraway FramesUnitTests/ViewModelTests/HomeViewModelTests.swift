@@ -134,7 +134,6 @@ struct HomeViewModelTests {
             context: context,
             upNextFRC: mockUpNextFRC,
             watchedFRC: mockWatchedFRC,
-            saver: saver,
             filmQueueService: filmQueueService)
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy

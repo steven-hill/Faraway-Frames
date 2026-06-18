@@ -23,7 +23,6 @@ final class HomeViewModel: NSObject {
     private let upNextFRC: NSFetchedResultsController<FilmMO>
     private let watchedFRC: NSFetchedResultsController<FilmMO>
     private let context: NSManagedObjectContext
-    private let saver: ContextSaving
     private let filmQueueService: FilmQueueService
     
     private var upNextFilms: [Film] {
@@ -40,13 +39,11 @@ final class HomeViewModel: NSObject {
     init(context: NSManagedObjectContext,
          upNextFRC: NSFetchedResultsController<FilmMO>,
          watchedFRC: NSFetchedResultsController<FilmMO>,
-         saver: ContextSaving? = nil,
          filmQueueService: FilmQueueService
     ) {
         self.context = context
         self.upNextFRC = upNextFRC
         self.watchedFRC = watchedFRC
-        self.saver = saver ?? context
         self.filmQueueService = filmQueueService
         super.init()
         self.upNextFRC.delegate = self
