@@ -8,6 +8,7 @@
 import Testing
 @testable import Faraway_Frames
 import UIKit
+import CoreData
 
 @MainActor
 struct FilmDetailViewModelTests {
@@ -257,6 +258,120 @@ struct FilmDetailViewModelTests {
         #expect(spy.watchedStatusChangeCallCount == 2, "Should not call delegate method because the film no longer exists in the database.")
     }
     
+    @Test("`updateStatus` should handle add film to upNext errors by calling the delegate",
+          arguments: errorScenarios
+    )
+    func filmDetailViewModel_updateStatus_onSaveError_whenAddingFilmToUpNext_handlesError(
+        scenario: (systemError: Error,
+                   expectedReason: FilmDetailError.FailureReason)
+    ) async {
+        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext, saver: saver)
+        let targetFilm = Film.sample[0]
+        let sut = FilmDetailViewModel(film: targetFilm,
+                                      imageLoader: mockImageLoader,
+                                      filmQueueService: filmQueueService)
+        let spy = FilmDetailViewModelSpy()
+        sut.delegate = spy
+        let expectedError = FilmDetailError.addFailed(scenario.expectedReason)
+        
+        await sut.updateStatus(for: targetFilm, queue: .upNext, action: .add)
+        
+        #expect(spy.didReceiveErrorCallCount == 1, "Should have called delegate method once on add failure.")
+        #expect(spy.receivedError == expectedError, "Delegate should receive matching add error context case.")
+    }
+    
+    @Test("`updateStatus` should handle remove film from upNext errors by calling the delegate",
+          arguments: errorScenarios
+    )
+    func filmDetailViewModel_updateStatus_onSaveError_whenRemovingFilmFromUpNext_handlesError(
+        scenario: (systemError: Error,
+                   expectedReason: FilmDetailError.FailureReason)
+    ) async throws {
+        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
+        let filmQueueService = FilmQueueService(context: context, saver: saver)
+        let targetFilm = Film.sample[0]
+        let entity = try #require(
+            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
+        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
+        try? context.save()
+        let sut = FilmDetailViewModel(film: targetFilm,
+                                      imageLoader: mockImageLoader,
+                                      filmQueueService: filmQueueService)
+        let spy = FilmDetailViewModelSpy()
+        sut.delegate = spy
+        let expectedError = FilmDetailError.deleteFailed(scenario.expectedReason)
+        
+        await sut.updateStatus(for: targetFilm, queue: .upNext, action: .remove)
+        
+        #expect(spy.didReceiveErrorCallCount == 1, "Should have called delegate method once on add failure.")
+        #expect(spy.receivedError == expectedError, "Delegate should receive matching remove error context case.")
+    }
+    
+    @Test("`updateStatus` should handle add film to watched errors by calling the delegate",
+          arguments: errorScenarios
+    )
+    func filmDetailViewModel_updateStatus_onSaveError_whenAddingFilmToWatched_handlesError(
+        scenario: (systemError: Error,
+                   expectedReason: FilmDetailError.FailureReason)
+    ) async {
+        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext, saver: saver)
+        let targetFilm = Film.sample[0]
+        let sut = FilmDetailViewModel(film: targetFilm,
+                                      imageLoader: mockImageLoader,
+                                      filmQueueService: filmQueueService)
+        let spy = FilmDetailViewModelSpy()
+        sut.delegate = spy
+        let expectedError = FilmDetailError.addFailed(scenario.expectedReason)
+        
+        await sut.updateStatus(for: targetFilm, queue: .watched, action: .add)
+        
+        #expect(spy.didReceiveErrorCallCount == 1, "Should have called delegate method once on add failure.")
+        #expect(spy.receivedError == expectedError, "Delegate should receive matching add error context case.")
+    }
+    
+    @Test("`updateStatus` should handle remove film from watched errors by calling the delegate",
+          arguments: errorScenarios
+    )
+    func filmDetailViewModel_updateStatus_onSaveError_whenRemovingFilmFromWatched_handlesError(
+        scenario: (systemError: Error,
+                   expectedReason: FilmDetailError.FailureReason)
+    ) async throws {
+        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
+        let filmQueueService = FilmQueueService(context: context, saver: saver)
+        let targetFilm = Film.sample[0]
+        let entity = try #require(
+            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
+        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: false, isWatched: true)
+        try? context.save()
+        let sut = FilmDetailViewModel(film: targetFilm,
+                                      imageLoader: mockImageLoader,
+                                      filmQueueService: filmQueueService)
+        let spy = FilmDetailViewModelSpy()
+        sut.delegate = spy
+        let expectedError = FilmDetailError.deleteFailed(scenario.expectedReason)
+        
+        await sut.updateStatus(for: targetFilm, queue: .watched, action: .remove)
+        
+        #expect(spy.didReceiveErrorCallCount == 1, "Should have called delegate method once on add failure.")
+        #expect(spy.receivedError == expectedError, "Delegate should receive matching remove error context case.")
+    }
+    
     //MARK: - Helper method
     private func makeSUT() -> FilmDetailViewModel {
         let mockImageLoader = MockImageLoader()
@@ -271,6 +386,8 @@ struct FilmDetailViewModelTests {
         var updateWithEmptyStateCallCount = 0
         var upNextStatusChangeCallCount = 0
         var watchedStatusChangeCallCount = 0
+        var didReceiveErrorCallCount: Int = 0
+        var receivedError: FilmDetailError?
         
         func didUpdateFilmDetails() {
             updateFilmDetailsCallCount += 1
@@ -287,5 +404,23 @@ struct FilmDetailViewModelTests {
         func didUpdateWatchedStatus(isWatched: Bool) {
             watchedStatusChangeCallCount += 1
         }
+        
+        func didReceiveError(_ error: FilmDetailError) {
+            didReceiveErrorCallCount += 1
+            receivedError = error
+        }
+    }
+    
+    // MARK: - System Errors Helper
+    /// Used in tests involving Core Data operations error handling.
+    nonisolated static var errorScenarios: [(systemError: Error, expectedReason: FilmDetailError.FailureReason)] {
+        [
+            (CocoaError(.fileWriteOutOfSpace), .diskFull),
+            (CocoaError(.persistentStoreOpen), .databaseError),
+            (CocoaError(.managedObjectReferentialIntegrity), .databaseError),
+            (CocoaError(.persistentStoreTypeMismatch), .databaseError),
+            (CocoaError(.fileNoSuchFile), .databaseError),
+            (UnknownError(), .unknown("Unknown error."))
+        ]
     }
 }

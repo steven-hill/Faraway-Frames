@@ -309,7 +309,7 @@ struct HomeViewModelTests {
         return (sut, context)
     }
     
-    //MARK: - Home ViewModel Delegate Spy
+    //MARK: - Home View Model Delegate Spy
     final class HomeViewModelDelegateSpy: HomeViewModelDelegate {
         var upNextFilms: [Film]?
         var watchedFilms: [Film]?
@@ -352,20 +352,6 @@ struct HomeViewModelTests {
         }
     }
     
-    //MARK: - Throwing Saver
-    /// Used in tests for failure when saving Core Data context.
-    final class ThrowingSaver: ContextSaving, Sendable {
-        let errorToThrow: Error
-        
-        init(errorToThrow: Error) {
-            self.errorToThrow = errorToThrow
-        }
-        
-        nonisolated func save() throws {
-            throw errorToThrow
-        }
-    }
-    
     // MARK: - System Errors Helper
     /// Used in tests involving error handling.
     nonisolated static var errorScenarios: [(systemError: Error, expectedReason: HomeError.FailureReason)] {
@@ -377,11 +363,5 @@ struct HomeViewModelTests {
             (CocoaError(.fileNoSuchFile), .databaseError),
             (UnknownError(), .unknown("Unknown error."))
         ]
-    }
-    
-    //MARK: - Custom Unknown Error Helper
-    /// Used in test for `performFetches` failure.
-    private struct UnknownError: Error, LocalizedError {
-        var errorDescription: String? { "Unknown error." }
     }
 }

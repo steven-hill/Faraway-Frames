@@ -277,6 +277,9 @@ extension ExploreDetailVC: FilmDetailViewModelDelegate {
     
     func didUpdateWatchedStatus(isWatched: Bool) {
     }
+    
+    func didReceiveError(_ error: FilmDetailError) {
+    }
 }
 
 // MARK: - Preview

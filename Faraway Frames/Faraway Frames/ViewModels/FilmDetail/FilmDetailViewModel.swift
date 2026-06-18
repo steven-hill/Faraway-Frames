@@ -141,8 +141,8 @@ final class FilmDetailViewModel {
                 }
             }
         } catch {
-            // TODO: - handle error
-            print("Failed to update film status: \(error)")
+            let filmDetailError = action == .add ? FilmDetailError.add(error) : FilmDetailError.delete(error)
+            delegate?.didReceiveError(filmDetailError)
         }
     }
 }
