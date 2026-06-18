@@ -352,20 +352,6 @@ struct HomeViewModelTests {
         }
     }
     
-    //MARK: - Throwing Saver
-    /// Used in tests for failure when saving Core Data context.
-    final class ThrowingSaver: ContextSaving, Sendable {
-        let errorToThrow: Error
-        
-        init(errorToThrow: Error) {
-            self.errorToThrow = errorToThrow
-        }
-        
-        nonisolated func save() throws {
-            throw errorToThrow
-        }
-    }
-    
     // MARK: - System Errors Helper
     /// Used in tests involving error handling.
     nonisolated static var errorScenarios: [(systemError: Error, expectedReason: HomeError.FailureReason)] {

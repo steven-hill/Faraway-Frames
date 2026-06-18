@@ -411,20 +411,6 @@ struct FilmDetailViewModelTests {
         }
     }
     
-    //MARK: - Throwing Saver
-    /// Used in tests for failure when saving changes in Core Data context.
-    final class ThrowingSaver: ContextSaving, Sendable {
-        let errorToThrow: Error
-        
-        init(errorToThrow: Error) {
-            self.errorToThrow = errorToThrow
-        }
-        
-        nonisolated func save() throws {
-            throw errorToThrow
-        }
-    }
-    
     // MARK: - System Errors Helper
     /// Used in tests involving Core Data operations error handling.
     nonisolated static var errorScenarios: [(systemError: Error, expectedReason: FilmDetailError.FailureReason)] {
