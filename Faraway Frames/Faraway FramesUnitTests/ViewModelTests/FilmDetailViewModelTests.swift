@@ -8,6 +8,7 @@
 import Testing
 @testable import Faraway_Frames
 import UIKit
+import CoreData
 
 @MainActor
 struct FilmDetailViewModelTests {
@@ -257,6 +258,31 @@ struct FilmDetailViewModelTests {
         #expect(spy.watchedStatusChangeCallCount == 2, "Should not call delegate method because the film no longer exists in the database.")
     }
     
+    @Test("`updateStatus` should handle add film errors by calling the delegate",
+          arguments: errorScenarios
+    )
+    func filmDetailViewModel_updateStatus_onSaveError_whenAddingFilm_handlesError(
+        scenario: (systemError: Error,
+                   expectedReason: FilmDetailError.FailureReason)
+    ) async {
+        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext, saver: saver)
+        let targetFilm = Film.sample[0]
+        let sut = FilmDetailViewModel(film: targetFilm,
+                                      imageLoader: mockImageLoader,
+                                      filmQueueService: filmQueueService)
+        let spy = FilmDetailViewModelSpy()
+        sut.delegate = spy
+        let expectedError = FilmDetailError.addFailed(scenario.expectedReason)
+        
+        await sut.updateStatus(for: targetFilm, queue: .upNext, action: .add)
+        
+        #expect(spy.didReceiveErrorCallCount == 1, "Should have called delegate method once on add failure.")
+        #expect(spy.receivedError == expectedError, "Delegate should receive matching add error context case.")
+    }
+    
     //MARK: - Helper method
     private func makeSUT() -> FilmDetailViewModel {
         let mockImageLoader = MockImageLoader()
@@ -271,6 +297,8 @@ struct FilmDetailViewModelTests {
         var updateWithEmptyStateCallCount = 0
         var upNextStatusChangeCallCount = 0
         var watchedStatusChangeCallCount = 0
+        var didReceiveErrorCallCount: Int = 0
+        var receivedError: FilmDetailError?
         
         func didUpdateFilmDetails() {
             updateFilmDetailsCallCount += 1
@@ -287,5 +315,43 @@ struct FilmDetailViewModelTests {
         func didUpdateWatchedStatus(isWatched: Bool) {
             watchedStatusChangeCallCount += 1
         }
+        
+        func didReceiveError(_ error: FilmDetailError) {
+            self.didReceiveErrorCallCount += 1
+            receivedError = error
+        }
+    }
+    
+    //MARK: - Throwing Saver
+    /// Used in tests for failure when saving Core Data context.
+    final class ThrowingSaver: ContextSaving, Sendable {
+        let errorToThrow: Error
+        
+        init(errorToThrow: Error) {
+            self.errorToThrow = errorToThrow
+        }
+        
+        nonisolated func save() throws {
+            throw errorToThrow
+        }
+    }
+    
+    // MARK: - System Errors Helper
+    /// Used in tests involving error handling.
+    nonisolated static var errorScenarios: [(systemError: Error, expectedReason: FilmDetailError.FailureReason)] {
+        [
+            (CocoaError(.fileWriteOutOfSpace), .diskFull),
+            (CocoaError(.persistentStoreOpen), .databaseError),
+            (CocoaError(.managedObjectReferentialIntegrity), .databaseError),
+            (CocoaError(.persistentStoreTypeMismatch), .databaseError),
+            (CocoaError(.fileNoSuchFile), .databaseError),
+            (UnknownError(), .unknown("Unknown error."))
+        ]
+    }
+    
+    //MARK: - Custom Unknown Error Helper
+    /// Used in test for `performFetches` failure.
+    private struct UnknownError: Error, LocalizedError {
+        var errorDescription: String? { "Unknown error." }
     }
 }
