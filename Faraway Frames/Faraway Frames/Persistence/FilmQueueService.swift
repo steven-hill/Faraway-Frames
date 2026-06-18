@@ -15,6 +15,7 @@ final class FilmQueueService {
         self.context = context
     }
     
+    @discardableResult
     func updateFilmStatus(film: Film, queue: FilmQueue, action: QueueAction) async throws -> Bool {
         try await context.perform { [context] in
             let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
