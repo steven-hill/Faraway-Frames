@@ -309,7 +309,7 @@ struct HomeViewModelTests {
         return (sut, context)
     }
     
-    //MARK: - Home ViewModel Delegate Spy
+    //MARK: - Home View Model Delegate Spy
     final class HomeViewModelDelegateSpy: HomeViewModelDelegate {
         var upNextFilms: [Film]?
         var watchedFilms: [Film]?
