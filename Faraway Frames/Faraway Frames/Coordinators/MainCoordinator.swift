@@ -30,7 +30,7 @@ final class MainCoordinator: Coordinator {
         homeCoordinator.start()
         childCoordinators.append(homeCoordinator)
         
-        let exploreSplitViewCoordinator = ExploreSplitViewCoordinator(dependencies: dependencies, context: managedObjectContext, filmQueueService: filmQueueService)
+        let exploreSplitViewCoordinator = ExploreSplitViewCoordinator(dependencies: dependencies, filmQueueService: filmQueueService)
         exploreSplitViewCoordinator.start()
         childCoordinators.append(exploreSplitViewCoordinator)
         

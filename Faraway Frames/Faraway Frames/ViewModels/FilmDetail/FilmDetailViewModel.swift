@@ -31,7 +31,6 @@ final class FilmDetailViewModel {
     // MARK: - Initialisation
     init(film: Film? = nil,
         imageLoader: ImageLoader,
-        context: NSManagedObjectContext,
         filmQueueService: FilmQueueService) {
         self.imageLoader = imageLoader
         self.filmQueueService = filmQueueService

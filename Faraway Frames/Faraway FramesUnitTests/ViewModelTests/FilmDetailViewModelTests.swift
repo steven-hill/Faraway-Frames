@@ -34,7 +34,7 @@ struct FilmDetailViewModelTests {
         let mockImageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let sut = FilmDetailViewModel(film: film, imageLoader: mockImageLoader, context: testPersistenceController.viewContext, filmQueueService: filmQueueService)
+        let sut = FilmDetailViewModel(film: film, imageLoader: mockImageLoader, filmQueueService: filmQueueService)
         
         switch sut.currentState {
         case .noFilmSelected:
@@ -61,7 +61,7 @@ struct FilmDetailViewModelTests {
         let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let sut = FilmDetailViewModel(imageLoader: mockImageLoader, context: testPersistenceController.viewContext, filmQueueService: filmQueueService)
+        let sut = FilmDetailViewModel(imageLoader: mockImageLoader, filmQueueService: filmQueueService)
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
 
@@ -88,7 +88,7 @@ struct FilmDetailViewModelTests {
         let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let sut = FilmDetailViewModel(imageLoader: mockImageLoader, context: testPersistenceController.viewContext, filmQueueService: filmQueueService)
+        let sut = FilmDetailViewModel(imageLoader: mockImageLoader, filmQueueService: filmQueueService)
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
         
@@ -262,7 +262,7 @@ struct FilmDetailViewModelTests {
         let mockImageLoader = MockImageLoader()
         let persistenceController = try! PersistenceController.init(inMemory: true)
         let filmQueueService = FilmQueueService(context: persistenceController.viewContext)
-        return FilmDetailViewModel(imageLoader: mockImageLoader, context: persistenceController.viewContext, filmQueueService: filmQueueService)
+        return FilmDetailViewModel(imageLoader: mockImageLoader, filmQueueService: filmQueueService)
     }
     
     //MARK: - Film Detail View Model Spy
