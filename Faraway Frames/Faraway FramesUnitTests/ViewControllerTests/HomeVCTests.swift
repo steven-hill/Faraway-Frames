@@ -36,7 +36,7 @@ struct HomeVCTests {
         let filmQueueService = FilmQueueService(context: context)
         let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
         let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
-        let homeViewModel = HomeViewModel(context: context, upNextFRC: mockUpNextFRC, watchedFRC: mockWatchedFRC, filmQueueService: filmQueueService)
+        let homeViewModel = HomeViewModel(upNextFRC: mockUpNextFRC, watchedFRC: mockWatchedFRC, filmQueueService: filmQueueService)
         return HomeVC(homeViewModel: homeViewModel)
     }
 }

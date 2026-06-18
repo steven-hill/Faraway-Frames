@@ -37,7 +37,6 @@ final class HomeCoordinator: Coordinator {
         )
         
         let homeViewModel = HomeViewModel(
-            context: context,
             upNextFRC: upNextFRC,
             watchedFRC: watchedFRC,
             filmQueueService: filmQueueService

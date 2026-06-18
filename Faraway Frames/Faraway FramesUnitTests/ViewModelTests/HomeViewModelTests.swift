@@ -70,7 +70,6 @@ struct HomeViewModelTests {
         let filmQueueService = FilmQueueService(context: context)
         let throwingController = ThrowingFetchedResultsController(context: context, errorToThrow: scenario.systemError)
         let sut = HomeViewModel(
-            context: context,
             upNextFRC: throwingController,
             watchedFRC: throwingController,
             filmQueueService: filmQueueService
@@ -131,7 +130,6 @@ struct HomeViewModelTests {
         let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
         let filmQueueService = FilmQueueService(context: context, saver: saver)
         let sut = HomeViewModel(
-            context: context,
             upNextFRC: mockUpNextFRC,
             watchedFRC: mockWatchedFRC,
             filmQueueService: filmQueueService)
@@ -167,7 +165,6 @@ struct HomeViewModelTests {
         let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
         let filmQueueService = FilmQueueService(context: context, saver: saver)
         let sut = HomeViewModel(
-            context: context,
             upNextFRC: mockUpNextFRC,
             watchedFRC: mockWatchedFRC,
             filmQueueService: filmQueueService
@@ -286,7 +283,10 @@ struct HomeViewModelTests {
         let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
         let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
         let filmQueueService = FilmQueueService(context: context)
-        let sut = HomeViewModel(context: context, upNextFRC: mockUpNextFRC, watchedFRC: mockWatchedFRC, filmQueueService: filmQueueService)
+        let sut = HomeViewModel(
+            upNextFRC: mockUpNextFRC,
+            watchedFRC: mockWatchedFRC,
+            filmQueueService: filmQueueService)
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         
@@ -302,7 +302,10 @@ struct HomeViewModelTests {
         let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
         let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
         let filmQueueService = FilmQueueService(context: context)
-        let sut = HomeViewModel(context: context, upNextFRC: mockUpNextFRC, watchedFRC: mockWatchedFRC, filmQueueService: filmQueueService)
+        let sut = HomeViewModel(
+            upNextFRC: mockUpNextFRC,
+            watchedFRC: mockWatchedFRC,
+            filmQueueService: filmQueueService)
         return (sut, context)
     }
     
