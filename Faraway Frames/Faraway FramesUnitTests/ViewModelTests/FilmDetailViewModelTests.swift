@@ -317,7 +317,7 @@ struct FilmDetailViewModelTests {
         }
         
         func didReceiveError(_ error: FilmDetailError) {
-            self.didReceiveErrorCallCount += 1
+            didReceiveErrorCallCount += 1
             receivedError = error
         }
     }
