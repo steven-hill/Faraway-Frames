@@ -19,7 +19,6 @@ final class FilmDetailViewModel {
     
     // MARK: - Properties
     private let imageLoader: ImageLoader
-    private let context: NSManagedObjectContext
     private let filmQueueService: FilmQueueService
     private(set) var imageLoadTask: Task<Void, Never>?
     private(set) var currentState: FilmDetailState = .noFilmSelected {
@@ -30,9 +29,11 @@ final class FilmDetailViewModel {
     weak var delegate: FilmDetailViewModelDelegate?
     
     // MARK: - Initialisation
-    init(film: Film? = nil, imageLoader: ImageLoader, context: NSManagedObjectContext, filmQueueService: FilmQueueService) {
+    init(film: Film? = nil,
+        imageLoader: ImageLoader,
+        context: NSManagedObjectContext,
+        filmQueueService: FilmQueueService) {
         self.imageLoader = imageLoader
-        self.context = context
         self.filmQueueService = filmQueueService
         if let film {
             setFilm(film)
