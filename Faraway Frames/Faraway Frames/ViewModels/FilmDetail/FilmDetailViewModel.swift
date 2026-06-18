@@ -157,13 +157,7 @@ final class FilmDetailViewModel {
             print("Failed to update film status: \(error)")
         }
     }
-    
-    func removeFilmFromUpNext(film: Film) async {
-        await updateFilmStatus(film: film, property: .upNext, action: .remove) { [weak self] in
-            self?.delegate?.didUpdateUpNextStatus(isUpNext: false)
-        }
-    }
-    
+
     func addFilmToWatched(film: Film) async {
         await updateFilmStatus(film: film, property: .watched, action: .add) { [weak self] in
             self?.delegate?.didUpdateWatchedStatus(isWatched: true)
