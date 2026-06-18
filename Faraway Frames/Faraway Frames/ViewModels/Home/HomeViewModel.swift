@@ -68,37 +68,7 @@ final class HomeViewModel: NSObject {
     
     func toggleFilmInQueue(film: Film, queue: FilmQueue, action: QueueAction) async {
         do {
-            try await context.perform {
-                let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
-                request.predicate = NSPredicate(format: "id == %@", film.id)
-                
-                let filmMO: FilmMO
-                let existing = try self.context.fetch(request).first
-                
-                if existing == nil, case .remove = action {
-                    return
-                }
-                
-                if let existing {
-                    filmMO = existing
-                } else {
-                    filmMO = Film.makeFilmMO(from: film, context: self.context)
-                }
-                
-                switch (queue, action) {
-                case (.upNext, .add):       filmMO.isUpNext = true
-                case (.upNext, .remove):    filmMO.isUpNext = false
-                case (.watched, .add):      filmMO.isWatched = true
-                case (.watched, .remove):   filmMO.isWatched = false
-                }
-                
-                if !filmMO.isUpNext && !filmMO.isWatched {
-                    self.context.delete(filmMO)
-                }
-                
-                guard self.context.hasChanges else { return }
-                try self.saver.save()
-            }
+            try await filmQueueService.updateFilmStatus(film: film, queue: queue, action: action)
         } catch {
             let homeError = action == .add ? HomeError.add(error) : HomeError.delete(error)
             handleError(homeError)
