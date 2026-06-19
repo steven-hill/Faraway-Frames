@@ -6,9 +6,12 @@
 //
 
 import Testing
+@testable import Faraway_Frames
 
 struct FilmSyncServiceTests {
 
-    @Test func doNothing() {
+    @Test("Should exit immediately if films array is empty")
+    func filmSyncService_syncFilmsWithLocalStorage_ifFilmsArrayIsEmpty_exitsImmediately() {
+        let sut = FilmSyncService()
     }
 }
