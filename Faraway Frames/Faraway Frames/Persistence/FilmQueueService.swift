@@ -19,7 +19,7 @@ final class FilmQueueService {
     
     @discardableResult
     func updateFilmStatus(film: Film, queue: FilmQueue, action: QueueAction) async throws -> Bool {
-        try await context.perform { [context] in
+        try await context.perform { [context, saver] in
             let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
             request.predicate = NSPredicate(format: "id == %@", film.id)
             let existing = try context.fetch(request).first
@@ -50,7 +50,7 @@ final class FilmQueueService {
             }
             
             guard context.hasChanges else { return statusChanged }
-            try self.saver.save()
+            try saver.save()
             
             return statusChanged
         }
