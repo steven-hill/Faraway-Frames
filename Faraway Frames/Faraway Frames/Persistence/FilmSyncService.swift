@@ -8,5 +8,8 @@
 import Foundation
 
 final class FilmSyncService {
-    
+    func syncFilmsWithLocalStorage(_ films: [Film]) async -> [Film] {
+        guard !films.isEmpty else { return [] }
+        return films
+    }
 }

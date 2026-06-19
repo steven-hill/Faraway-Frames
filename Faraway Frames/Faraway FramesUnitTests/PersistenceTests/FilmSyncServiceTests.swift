@@ -10,8 +10,13 @@ import Testing
 
 struct FilmSyncServiceTests {
 
-    @Test("Should exit immediately if films array is empty")
-    func filmSyncService_syncFilmsWithLocalStorage_ifFilmsArrayIsEmpty_exitsImmediately() {
+    @Test("Should exit immediately if input films array is empty")
+    func filmSyncService_syncFilmsWithLocalStorage_ifFilmsArrayIsEmpty_exitsImmediately() async {
         let sut = FilmSyncService()
+        let films: [Film] = []
+        
+        let result = await sut.syncFilmsWithLocalStorage(films)
+        
+        #expect(result.isEmpty, "Should be empty.")
     }
 }
