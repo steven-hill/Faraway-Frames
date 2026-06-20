@@ -9,9 +9,9 @@ import Foundation
 import CoreData
 
 final class FilmSyncService {
-    private let context: NSManagedObjectContext
+    private let context: DatabaseContext
     
-    init(context: NSManagedObjectContext) {
+    init(context: DatabaseContext) {
         self.context = context
     }
     
