@@ -48,7 +48,7 @@ struct FilmSyncServiceTests {
         #expect(result[0].isWatched == false, "Should be false (unchanged).")
     }
     
-    @Test("If database records match the input, should update films matching database state.")
+    @Test("If database records match all the input, should update input films with the database state.")
     func filmSyncService_syncFilmsWithLocalStorage_ifDatabaseRecordsAndInputMatch_returnsInputWithStatusUpdated() async throws {
         let (sut, context, entity) = try makeSUTViewContextAndEntity()
         _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: true)
