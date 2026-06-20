@@ -11,7 +11,7 @@ import CoreData
 
 @MainActor
 struct FilmSyncServiceTests {
-
+    
     @Test("Should exit immediately if input films array is empty")
     func filmSyncService_syncFilmsWithLocalStorage_ifFilmsArrayIsEmpty_exitsImmediately() async throws {
         let (sut, _, _) = try makeSUTViewContextAndEntity()
@@ -21,7 +21,7 @@ struct FilmSyncServiceTests {
         
         #expect(result.isEmpty, "Should be empty.")
     }
-
+    
     @Test("If database is empty, should return the input films with their default flags unchanged.")
     func filmSyncService_syncFilmsWithLocalStorage_ifDatabaseIsEmpty_returnsFilmsWithStatusUnchanged() async throws {
         let (sut, _, _) = try makeSUTViewContextAndEntity()
@@ -79,6 +79,23 @@ struct FilmSyncServiceTests {
         #expect(result[0].isWatched == true, "Should be updated to true.")
         #expect(result[1].isUpNext == false, "Should be false (unchanged).")
         #expect(result[1].isWatched == false, "Should be false (unchanged).")
+    }
+    
+    @Test("Return input films when database fetch fails")
+    func filmSyncService_syncFilmsWithLocalStorage_whenDatabaseFetchFails_returnsInputFilms() async throws {
+        let mockContext = MockFailingDatabaseContext()
+        let sut = FilmSyncService(context: mockContext)
+        let films = [Film.sample[0], Film.sample[1]]
+        
+        let result = await sut.syncFilmsWithLocalStorage(films)
+        
+        #expect(result == films)
+        #expect(result[0].id == Film.sample[0].id)
+        #expect(result[0].isUpNext == false)
+        #expect(result[0].isWatched == false)
+        #expect(result[1].id == Film.sample[1].id)
+        #expect(result[1].isUpNext == false)
+        #expect(result[1].isWatched == false)
     }
     
     // MARK: - SUT Helper Method
