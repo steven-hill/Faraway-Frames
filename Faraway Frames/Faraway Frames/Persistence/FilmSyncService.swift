@@ -17,13 +17,13 @@ final class FilmSyncService {
     
     func syncFilmsWithLocalStorage(_ films: [Film]) async -> [Film] {
         guard !films.isEmpty else { return [] }
-        return await context.perform {
+        return await context.perform { [context] in
             let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
             let remoteIDs = films.map { $0.id }
             request.predicate = NSPredicate(format: "id IN %@", remoteIDs)
             
             do {
-                let localManagedObjects = try self.context.fetch(request)
+                let localManagedObjects = try context.fetch(request)
                 var localStatusMap: [String: (isUpNext: Bool, isWatched: Bool)] = [:]
                 for mo in localManagedObjects {
                     if let id = mo.id {
