@@ -39,11 +39,11 @@ struct FilmSyncServiceTests {
         let (sut, context, entity) = try makeSUTViewContextAndEntity()
         _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: true)
         try? context.save()
-        let filmB = [Film.sample[1]]
+        let input = [Film.sample[1]]
         
-        let result = await sut.syncFilmsWithLocalStorage(filmB)
+        let result = await sut.syncFilmsWithLocalStorage(input)
         
-        #expect(result == filmB, "Output should match input.")
+        #expect(result == input, "Output should match input.")
         #expect(result[0].isUpNext == false, "Should be false (unchanged).")
         #expect(result[0].isWatched == false, "Should be false (unchanged).")
     }
