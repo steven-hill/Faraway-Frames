@@ -111,4 +111,15 @@ struct FilmSyncServiceTests {
         let sut = FilmSyncService(context: context)
         return (sut, context, entity)
     }
+    
+    // MARK: - Mock Failing Database Context
+    struct MockFailingDatabaseContext: DatabaseContext {
+        func perform<T>(_ block: @escaping @Sendable () throws -> T) async rethrows -> T where T: Sendable {
+            return try block()
+        }
+        
+        nonisolated func fetch<T>(_ request: NSFetchRequest<T>) throws -> [T] where T: NSManagedObject {
+            throw NSError(domain: "MockError", code: -1, userInfo: nil)
+        }
+    }
 }
