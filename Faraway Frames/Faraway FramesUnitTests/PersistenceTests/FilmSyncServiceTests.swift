@@ -48,6 +48,23 @@ struct FilmSyncServiceTests {
         #expect(result[0].isWatched == false, "Should be false (unchanged).")
     }
     
+    @Test("If database records match the input, should update films matching database state.")
+    func filmSyncService_syncFilmsWithLocalStorage_ifDatabaseRecordsAndInputMatch_returnsInputWithStatusUpdated() async throws {
+        let (sut, context, entity) = try makeSUTViewContextAndEntity()
+        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: true)
+        _ = PersistenceHelper.makeFilmMO(with: Film.sample[1], entity: entity, context: context, isUpNext: true, isWatched: true)
+        try? context.save()
+        let films = [Film.sample[0], Film.sample[1]]
+        
+        let result = await sut.syncFilmsWithLocalStorage(films)
+        
+        #expect(result != films, "Output should not match input.")
+        #expect(result[0].isUpNext == true, "Should be updated to true.")
+        #expect(result[0].isWatched == true, "Should be updated to true.")
+        #expect(result[1].isUpNext == true, "Should be updated to true.")
+        #expect(result[1].isWatched == true, "Should be updated to true.")
+    }
+    
     // MARK: - SUT Helper Method
     private func makeSUTViewContextAndEntity() throws -> (sut: FilmSyncService,
                                                           viewContext: NSManagedObjectContext,
