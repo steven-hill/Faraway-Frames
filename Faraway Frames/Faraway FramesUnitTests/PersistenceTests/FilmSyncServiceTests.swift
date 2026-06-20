@@ -49,7 +49,7 @@ struct FilmSyncServiceTests {
     }
     
     @Test("If database records match all the input, should update input films with the database state.")
-    func filmSyncService_syncFilmsWithLocalStorage_ifDatabaseRecordsAndInputMatch_returnsInputWithStatusUpdated() async throws {
+    func filmSyncService_syncFilmsWithLocalStorage_ifDatabaseRecordsAndInputMatchPerfectly_returnsInputWithStatusUpdated() async throws {
         let (sut, context, entity) = try makeSUTViewContextAndEntity()
         _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: true)
         _ = PersistenceHelper.makeFilmMO(with: Film.sample[1], entity: entity, context: context, isUpNext: true, isWatched: true)
