@@ -18,8 +18,8 @@ final class FilmSyncService {
         guard !films.isEmpty else { return [] }
         return await context.perform { [context] in
             let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
-            let remoteIDs = films.map { $0.id }
-            request.predicate = NSPredicate(format: "id IN %@", remoteIDs)
+            let filmsIDs = films.map { $0.id }
+            request.predicate = NSPredicate(format: "id IN %@", filmsIDs)
             
             do {
                 let localManagedObjects = try context.fetch(request)
