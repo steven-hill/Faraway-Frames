@@ -12,14 +12,15 @@ import Testing
 @MainActor
 struct FilmsListViewModelUnitTests {
     
-    @Test func filmsListViewModel_onInit_currentStateIsIdle() {
+    @Test("ViewModel `currentState` is `.idle` on init")
+    func filmsListViewModel_onInit_currentStateIsIdle() {
         let sut = makeSUTForSuccessCase()
         
         #expect(sut.currentState == .idle, "Should be `.idle`.")
     }
     
-    @Test(.tags(.networkRequest))
-    func filmsListViewModel_whenNetworkRequestIsSuccessful_gets22Films() async {
+    @Test("ViewModel fetches 22 films from successful network request", .tags(.networkRequest))
+    func filmsListViewModel_getAllFilms_whenNetworkRequestIsSuccessful_gets22Films() async {
         let sut = makeSUTForSuccessCase()
         
         await sut.getAllFilms()
@@ -28,8 +29,8 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.currentState == .content(isUsingArchivedData: false), "Should be `.content(isUsingArchivedData: false)`.")
     }
     
-    @Test(.tags(.networkRequest))
-    func filmsListViewModel_whenNetworkRequestIsSuccessful_requestVoiceOverAnnouncement() async {
+    @Test("ViewModel requests voice over announcement after fetching films", .tags(.networkRequest))
+    func filmsListViewModel_getAllFilms_whenNetworkRequestIsSuccessful_requestsVoiceOverAnnouncement() async {
         let sut = makeSUTForSuccessCase()
         let delegateSpy = FilmsListViewModelDelegateSpy()
         sut.delegate = delegateSpy
@@ -39,7 +40,7 @@ struct FilmsListViewModelUnitTests {
         #expect(delegateSpy.capturedMessage == "Showing all films", "Should be equal.")
     }
     
-    @Test(.tags(.networkRequest))
+    @Test("ViewModel makes network call to fetch films", .tags(.networkRequest))
     func filmsListViewModel_getAllFilms_makesANetworkRequest() async {
         let mockService = MockFilmsListService()
         let mockImageLoader = MockImageLoader()
@@ -52,7 +53,7 @@ struct FilmsListViewModelUnitTests {
         #expect(mockService.fetchWasCalled == true, "The service should be told to fetch films.")
     }
     
-    @Test(.tags(.networkRequest))
+    @Test("ViewModel has correct `currentState` during network request", .tags(.networkRequest))
     func filmsListViewModel_getAllFilms_duringNetworkRequest_currentStateIsLoadingAllFilms() async {
         let mockService = MockFilmsListService()
         let mockImageLoader = MockImageLoader()
@@ -80,7 +81,7 @@ struct FilmsListViewModelUnitTests {
         APIError.decodingError,
         APIError.unknown
     ])
-    func filmsListViewModel_handlesAPIError(expectedError: APIError) async {
+    func filmsListViewModel_getAllFilms_handlesAPIError(expectedError: APIError) async {
         let sut = makeSUTForFailureCase(error: expectedError)
         
         await sut.getAllFilms()
@@ -90,7 +91,7 @@ struct FilmsListViewModelUnitTests {
     }
     
     @Test("Covers `handleFailure()`",.tags(.networkRequest))
-    func filmsListViewModel_handlesNotConnectedToInternetURLError() async {
+    func filmsListViewModel_getAllFilms_handlesNotConnectedToInternetURLError() async {
         let sut = makeSUTForFailureCase(error: URLError(.notConnectedToInternet))
         
         await sut.getAllFilms()
@@ -99,7 +100,7 @@ struct FilmsListViewModelUnitTests {
     }
     
     @Test("Covers `handleFailure()`",.tags(.networkRequest))
-    func filmsListViewModel_handlesNetworkTimeOutURLError() async {
+    func filmsListViewModel_getAllFilms_handlesNetworkTimeOutURLError() async {
         let sut = makeSUTForFailureCase(error: URLError(.timedOut))
         
         await sut.getAllFilms()
@@ -108,7 +109,7 @@ struct FilmsListViewModelUnitTests {
     }
     
     @Test(.tags(.networkRequest))
-    func filmsListViewModel_handlesGenericError() async {
+    func filmsListViewModel_getAllFilms_handlesGenericError() async {
         let sut = makeSUTForFailureCase(error: NSError(domain: "test", code: -1))
         
         await sut.getAllFilms()
@@ -117,7 +118,7 @@ struct FilmsListViewModelUnitTests {
     }
     
     @Test(.tags(.networkRequest))
-    func filmsListViewModel_downloadsImageForFilm() async {
+    func filmsListViewModel_getAllFilms_downloadsImageForFilm() async {
         let sut = makeSUTForSuccessCase()
         
         await sut.getAllFilms()
@@ -127,7 +128,7 @@ struct FilmsListViewModelUnitTests {
     }
     
     @Test(.tags(.networkRequest))
-    func filmsListViewModel_whenFailsToDownloadFilmImage_returnsNil() async {
+    func filmsListViewModel_getAllFilms_whenFailsToDownloadFilmImage_returnsNil() async {
         let mockService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
         let mockImageLoader = MockImageLoader()
         mockImageLoader.shouldSucceed = false
