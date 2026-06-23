@@ -7,7 +7,6 @@
 
 import UIKit
 
-@MainActor
 final class FilmsListViewModel {
     
     // MARK: - State Definition
@@ -23,6 +22,7 @@ final class FilmsListViewModel {
     // MARK: - Properties
     private let filmsListService: FilmsListService
     private let imageLoader: ImageLoader
+    private let filmSyncService: FilmSyncService
     weak var delegate: FilmsListViewModelDelegate?
     private(set) var films: [Film] = []
     private(set) var currentState: FilmsListState = .idle
@@ -31,9 +31,10 @@ final class FilmsListViewModel {
     private let allFilmsMessage = "Showing all films"
     
     // MARK: - Initialisation
-    init(filmsListService: FilmsListService, imageLoader: ImageLoader) {
+    init(filmsListService: FilmsListService, imageLoader: ImageLoader, filmSyncService: FilmSyncService) {
         self.filmsListService = filmsListService
         self.imageLoader = imageLoader
+        self.filmSyncService = filmSyncService
     }
     
     // MARK: - Methods
