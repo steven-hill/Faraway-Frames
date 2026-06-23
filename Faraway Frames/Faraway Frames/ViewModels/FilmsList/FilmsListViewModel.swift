@@ -42,8 +42,10 @@ final class FilmsListViewModel {
         currentState = .loadingAllFilms
         do {
             try Task.checkCancellation()
-            films = try await filmsListService.fetchAllFilms()
+            let fetchedFilms = try await filmsListService.fetchAllFilms()
             try Task.checkCancellation()
+            let syncedFilms = await filmSyncService.syncFilmsWithLocalStorage(fetchedFilms)
+            self.films = syncedFilms
             currentState = .content(isUsingArchivedData: filmsListService.isUsingFileManagerData)
             delegate?.didUpdateFilms(films)
             delegate?.didRequestVoiceOverAnnouncement(with: allFilmsMessage)
