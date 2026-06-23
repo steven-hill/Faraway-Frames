@@ -12,7 +12,7 @@ import CoreData
 @MainActor
 struct PersistenceControllerTests {
     
-    @Test("Invalid persistent container name string throws a loading failure")
+    @Test("Invalid persistent container name string throws a loading failure", (.tags(.persistence)))
     func persistenceController_withTypoInContainerName_throwsLoadingStoresFailedError() throws {
         let thrownError = #expect(throws: PersistenceError.self) {
             try PersistenceController(inMemory: true, containerName: "FarawayFramesCDModelTypo")
@@ -28,7 +28,7 @@ struct PersistenceControllerTests {
         }
     }
     
-    @Test("Error is thrown when loading persistent stores fails")
+    @Test("Error is thrown when loading persistent stores fails", (.tags(.persistence)))
     func persistenceController_whenLoadingPersistentStoresFails_throwsCorrectError() throws {
         let mockError = NSError(domain: "TestDomain", code: 42, userInfo: nil)
         
@@ -41,7 +41,7 @@ struct PersistenceControllerTests {
         #expect(thrownError == .loadingStoresFailed(error: mockError))
     }
     
-    @Test("Core Data stack can save films")
+    @Test("Core Data stack can save films", (.tags(.persistence)))
     func persistenceController_canSaveFilms() throws {
         let (sut, context, entity) = try makeSUTViewContextAndEntity()
         let sampleFilm = Film.sample[0]
@@ -64,7 +64,7 @@ struct PersistenceControllerTests {
         }
     }
     
-    @Test("Saving succeeds even if some attributes are nil")
+    @Test("Saving succeeds even if some attributes are nil", (.tags(.persistence)))
     func persistenceController_whenSavingWithNilAttributes_succeedsWithoutError() throws {
         let (sut, context, entity) = try makeSUTViewContextAndEntity()
         

@@ -28,7 +28,7 @@ struct HomeViewModelTests {
         #expect(sut.currentState == .fetchedObjects, "Should be `.fetchedObjects`.")
     }
     
-    @Test("`HomeViewModel` can fetch up next films and watched films, and calls delegate")
+    @Test("`HomeViewModel` can fetch up next films and watched films, and calls delegate", (.tags(.persistence)))
     func homeViewModel_performFetches_fetchesCorrectly() throws {
         let (sut, context) = makeSUTWithContext()
         let delegateSpy = HomeViewModelDelegateSpy()
@@ -59,6 +59,7 @@ struct HomeViewModelTests {
     }
     
     @Test("`performFetches` should handle errors by updating `currentState` and calling the delegate",
+          (.tags(.persistence)),
           arguments: errorScenarios
     )
     func homeViewModel_performFetches_setsCorrectFailureState(
@@ -86,7 +87,7 @@ struct HomeViewModelTests {
         #expect(delegateSpy.receivedError == expectedError, "Should match.")
     }
     
-    @Test("Adding a film to upNext should add it to `upNextFilms`, and call delegate method")
+    @Test("Adding a film to upNext should add it to `upNextFilms`, and call delegate method", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_addsFilmToUpNext() async throws {
         let (sut, _) = makeSUTWithContext()
         let delegateSpy = HomeViewModelDelegateSpy()
@@ -101,7 +102,7 @@ struct HomeViewModelTests {
         #expect(upNextFilms.count == 1, "Should be one.")
     }
     
-    @Test("Adding a film to watched should add it to `watchedFilms`, and call delegate method")
+    @Test("Adding a film to watched should add it to `watchedFilms`, and call delegate method", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_addsFilmToWatched() async throws {
         let (sut, _) = makeSUTWithContext()
         let delegateSpy = HomeViewModelDelegateSpy()
@@ -117,6 +118,7 @@ struct HomeViewModelTests {
     }
     
     @Test("`toggleFilmInQueue` should handle add film errors by updating `currentState` and calling the delegate",
+          (.tags(.persistence)),
           arguments: errorScenarios
     )
     func homeViewModel_toggleFilmInQueue_onSaveError_whenAddingFilm_handlesError(
@@ -145,6 +147,7 @@ struct HomeViewModelTests {
     }
     
     @Test("`toggleFilmInQueue` should handle delete film errors by updating `currentState` and calling the delegate",
+          (.tags(.persistence)),
           arguments: errorScenarios
     )
     func homeViewModel_toggleFilmInQueue_onSaveError_whenDeletingFilm_handlesError(
@@ -180,7 +183,7 @@ struct HomeViewModelTests {
         #expect(sut.currentState == .failure(expectedError), "ViewModel state should transition to match the delete failure signature.")
     }
 
-    @Test("Removing film from upNext when it's not in watched should remove it from database entirely")
+    @Test("Removing film from upNext when it's not in watched should remove it from database entirely", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_whenFilmInUpNextButNotInWatchedIsRemoved_deletesItFromDatabase() async throws {
         let (sut, context) = makeSUTWithContext()
         let delegateSpy = HomeViewModelDelegateSpy()
@@ -204,7 +207,7 @@ struct HomeViewModelTests {
         #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
     }
     
-    @Test("Removing film from upNext when it's in watched should only flip upNext flag")
+    @Test("Removing film from upNext when it's in watched should only flip upNext flag", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_whenFilmIsInUpNextAndInWatched_shouldFlipFlag() async throws {
         let (sut, context) = makeSUTWithContext()
         let delegateSpy = HomeViewModelDelegateSpy()
@@ -228,7 +231,7 @@ struct HomeViewModelTests {
         #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
     }
     
-    @Test("Removing film from watched when it's not in upNext removes film from database entirely")
+    @Test("Removing film from watched when it's not in upNext removes film from database entirely", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_whenFilmInWatchedAndNotInUpNext_deletesFilmFromDatabase() async throws {
         let (sut, context) = makeSUTWithContext()
         let delegateSpy = HomeViewModelDelegateSpy()
@@ -252,7 +255,7 @@ struct HomeViewModelTests {
         #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
     }
     
-    @Test("Removing film from watched when it is in upNext removes film from watched only")
+    @Test("Removing film from watched when it is in upNext removes film from watched only", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_whenFilmInBothWatchedAndInUpNext_deletesFilmFromWatched() async throws {
         let (sut, context) = makeSUTWithContext()
         let delegateSpy = HomeViewModelDelegateSpy()
@@ -276,7 +279,7 @@ struct HomeViewModelTests {
         #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
     }
     
-    @Test("`toggleFilmInQueue` doesn't throw error, and exits silently via guard when film does not exist in database")
+    @Test("`toggleFilmInQueue` doesn't throw error, and exits silently via guard when film does not exist in database", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_whenFilmDoesNotExistInDatabase_doesNotThrowAndExitsCleanly() async {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
