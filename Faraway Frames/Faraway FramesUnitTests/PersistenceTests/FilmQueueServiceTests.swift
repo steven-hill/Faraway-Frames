@@ -12,7 +12,7 @@ import CoreData
 @MainActor
 struct FilmQueueServiceTests {
 
-    @Test("Early exit returning false if trying to remove a film that doesn't exist in database")
+    @Test("Early exit returning false if trying to remove a film that doesn't exist in database", (.tags(.persistence)))
     func filmQueueService_updateFilmStatus_existsEarlyIfFilmDoesNotExistInDatabase() async throws {
         let (sut,_) = makeSUT()
         let film = Film.sample[0]
@@ -22,7 +22,7 @@ struct FilmQueueServiceTests {
         #expect(result == false, "Should be false when trying to remove a film that doesn't exist in the database.")
     }
     
-    @Test("Ensure that duplicates are not created in the database.")
+    @Test("Ensure that duplicates are not created in the database", (.tags(.persistence)))
     func filmQueueService_updateFilmStatus_checksFilmExistsInDatabaseBeforeCreatingANewOne() async throws {
         let (sut, testPersistenceController) = makeSUT()
         let film = Film.sample[0]
@@ -34,7 +34,7 @@ struct FilmQueueServiceTests {
         #expect(fetchedFilms.count == 1, "Should only be one film in the database.")
     }
     
-    @Test("Can add a film to upNext")
+    @Test("Can add a film to upNext", (.tags(.persistence)))
     func filmQueueService_updateFilmStatus_addsAFilmToUpNext() async throws {
         let (sut, testPersistenceController) = makeSUT()
         let film = Film.sample[0]
@@ -47,7 +47,7 @@ struct FilmQueueServiceTests {
         #expect(result == true, "Should be true.")
     }
     
-    @Test("Can remove a film from upNext")
+    @Test("Can remove a film from upNext", (.tags(.persistence)))
     func filmQueueService_updateFilmStatus_removesAFilmFromUpNext() async throws {
         let (sut, testPersistenceController) = makeSUT()
         let film = Film.sample[0]
@@ -61,7 +61,7 @@ struct FilmQueueServiceTests {
         #expect(result == true, "Should be true.")
     }
     
-    @Test("Can add a film to watched")
+    @Test("Can add a film to watched", (.tags(.persistence)))
     func filmQueueService_updateFilmStatus_addsAFilmToWatched() async throws {
         let (sut, testPersistenceController) = makeSUT()
         let film = Film.sample[0]
@@ -74,7 +74,7 @@ struct FilmQueueServiceTests {
         #expect(result == true, "Should be true.")
     }
     
-    @Test("Can remove a film from watched")
+    @Test("Can remove a film from watched", (.tags(.persistence)))
     func filmQueueService_updateFilmStatus_removesAFilmFromWatched() async throws {
         let (sut, testPersistenceController) = makeSUT()
         let film = Film.sample[0]
@@ -88,7 +88,7 @@ struct FilmQueueServiceTests {
         #expect(result == true, "Should be true.")
     }
     
-    @Test("A film that is changed to false for both upNext and Watched should be deleted from database")
+    @Test("A film that is changed to false for both upNext and Watched should be deleted from database", (.tags(.persistence)))
     func filmQueueService_updateFilmStatus_ifUpNextAndWatchedAreBothFalse_filmIsDeletedFromDatabase() async throws {
         let (sut, testPersistenceController) = makeSUT()
         let film = Film.sample[0]
