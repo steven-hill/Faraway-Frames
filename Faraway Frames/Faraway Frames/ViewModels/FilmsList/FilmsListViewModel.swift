@@ -7,7 +7,6 @@
 
 import UIKit
 
-@MainActor
 final class FilmsListViewModel {
     
     // MARK: - State Definition
