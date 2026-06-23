@@ -99,7 +99,9 @@ struct ExploreListVCTests {
     func exploreListVC_retry_callsFetchAllFilms() async {
         let mockService = MockFilmsListService()
         let imageLoader = MockImageLoader()
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: imageLoader)
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: imageLoader, filmSyncService: filmSyncService)
         let sut = ExploreListVC(viewModel: filmsListViewModel)
         
         sut.loadViewIfNeeded()
@@ -316,7 +318,9 @@ struct ExploreListVCTests {
     func exploreListVC_whenLoadingAllFilms_searchBarIsNotEnabled() async {
         let mockFilmsListService = MockFilmsListService()
         let imageLoader = MockImageLoader()
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
         let sut = ExploreListVC(viewModel: filmsListViewModel)
         mockFilmsListService.shouldPauseForLoadingStateTest = true
         
@@ -484,7 +488,9 @@ struct ExploreListVCTests {
     func exploreListVC_pullToRefresh_retriesLoadingAllFilms() async {
         let mockService = MockFilmsListService()
         let imageLoader = MockImageLoader()
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: imageLoader)
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: imageLoader, filmSyncService: filmSyncService)
         let sut = ExploreListVC(viewModel: filmsListViewModel)
         
         sut.loadViewIfNeeded()
@@ -532,7 +538,9 @@ struct ExploreListVCTests {
         let mockFilmsListService = MockFilmsListService()
         mockFilmsListService.isUsingFileManagerData = true
         let imageLoader = MockImageLoader()
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
         let sut = ExploreListVC(viewModel: filmsListViewModel)
         sut.loadViewIfNeeded()
         
@@ -554,7 +562,9 @@ struct ExploreListVCTests {
         let mockFilmsListService = MockFilmsListService()
         mockFilmsListService.isUsingFileManagerData = false
         let imageLoader = MockImageLoader()
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
         let sut = ExploreListVC(viewModel: filmsListViewModel)
         sut.loadViewIfNeeded()
         
@@ -574,14 +584,18 @@ struct ExploreListVCTests {
     private func makeSUT() -> ExploreListVC {
         let mockFilmsListService = MockFilmsListService()
         let imageLoader = MockImageLoader()
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
         return ExploreListVC(viewModel: filmsListViewModel)
     }
     
     private func makeSUTForNetworkSuccess() -> ExploreListVC {
         let mockFilmsListService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
         let imageLoader = MockImageLoader()
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
         return ExploreListVC(viewModel: filmsListViewModel)
     }
     
@@ -589,7 +603,9 @@ struct ExploreListVCTests {
         let mockService = MockFilmsListService()
         mockService.result = .failure(error)
         let imageLoader = MockImageLoader()
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: imageLoader)
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: imageLoader, filmSyncService: filmSyncService)
         return ExploreListVC(viewModel: filmsListViewModel)
     }
     
@@ -609,7 +625,9 @@ struct ExploreListVCTests {
         let mockFilmsListService = MockFilmsListService()
         let imageLoader = MockImageLoader()
         imageLoader.shouldSucceed = shouldSucceed
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader)
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
         let sut = ExploreListVC(viewModel: filmsListViewModel)
         let film = Film.sample[0]
         let placeholderImage = SFSymbols.photo

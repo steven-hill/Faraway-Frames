@@ -43,7 +43,9 @@ struct FilmsListViewModelUnitTests {
     func filmsListViewModel_getAllFilms_makesANetworkRequest() async {
         let mockService = MockFilmsListService()
         let mockImageLoader = MockImageLoader()
-        let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader, filmSyncService: filmSyncService)
         
         await sut.getAllFilms()
 
@@ -54,7 +56,9 @@ struct FilmsListViewModelUnitTests {
     func filmsListViewModel_getAllFilms_duringNetworkRequest_currentStateIsLoadingAllFilms() async {
         let mockService = MockFilmsListService()
         let mockImageLoader = MockImageLoader()
-        let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader, filmSyncService: filmSyncService)
         mockService.shouldPauseForLoadingStateTest = true
         
         let task = Task {
@@ -127,7 +131,9 @@ struct FilmsListViewModelUnitTests {
         let mockService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
         let mockImageLoader = MockImageLoader()
         mockImageLoader.shouldSucceed = false
-        let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader, filmSyncService: filmSyncService)
         
         await sut.getAllFilms()
         let filmImage = await sut.getImage(for: sut.films[0])
@@ -139,7 +145,9 @@ struct FilmsListViewModelUnitTests {
     func filmsListViewModel_getAllFilms_whenUsingFileManagerData_currentStateIsCorrect() async {
         let mockService = MockFilmsListService()
         let mockImageLoader = MockImageLoader()
-        let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader, filmSyncService: filmSyncService)
         mockService.isUsingFileManagerData = true
         
         await sut.getAllFilms()
@@ -151,7 +159,9 @@ struct FilmsListViewModelUnitTests {
     func filmsListViewModel_getAllFilms_whenNotUsingFileManagerToReturnFilms_currentStateIsCorrect() async {
         let mockService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
         let mockImageLoader = MockImageLoader()
-        let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader, filmSyncService: filmSyncService)
         
         await sut.getAllFilms()
         
@@ -348,7 +358,9 @@ struct FilmsListViewModelUnitTests {
     func filmsListViewModel_retryLoadingAllFilms_makesAnotherNetworkCall() async {
         let mockService = MockFilmsListService()
         let mockImageLoader = MockImageLoader()
-        let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader, filmSyncService: filmSyncService)
         
         sut.retryLoadingAllFilms()
         await sut.refreshTask?.value
@@ -359,7 +371,9 @@ struct FilmsListViewModelUnitTests {
     @Test func filmsListViewModel_retryLoadingAllFilms_emptiesFilteredFilms() async {
         let mockService = MockFilmsListService()
         let mockImageLoader = MockImageLoader()
-        let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader, filmSyncService: filmSyncService)
         
         sut.retryLoadingAllFilms()
         
@@ -370,13 +384,17 @@ struct FilmsListViewModelUnitTests {
     private func makeSUTForSuccessCase() -> FilmsListViewModel {
         let mockService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
         let mockImageLoader = MockImageLoader()
-        return FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        return FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader, filmSyncService: filmSyncService)
     }
     
     private func makeSUTForFailureCase(error: Error) -> FilmsListViewModel {
         let mockService = MockFilmsListServiceHelper.setupMockServiceForFailureCase(error: error)
         let mockImageLoader = MockImageLoader()
-        return FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader)
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        return FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader, filmSyncService: filmSyncService)
     }
     
     // MARK: - Films List View Model Delegate
