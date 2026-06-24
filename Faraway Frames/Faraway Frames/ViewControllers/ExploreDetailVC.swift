@@ -62,9 +62,9 @@ final class ExploreDetailVC: UIViewController {
         return creditsContainer
     }()
     
-    private let upNextButton = FFButton(title: "Add to Up Next", systemImageName: "plus", accessibilityIdentifier: "ExploreDetailVC_UpNextButton", accessibilityHint: "Adds film to Up Next list")
+    let upNextButton = FFButton(title: "Add to Up Next", systemImageName: "plus", accessibilityIdentifier: "ExploreDetailVC_UpNextButton", accessibilityHint: "Adds film to Up Next list")
 
-    private let watchedButton = FFButton(title: "Mark as Watched", systemImageName: "rectangle.badge.checkmark", accessibilityIdentifier: "ExploreDetailVC_WatchedButton", accessibilityHint: "Adds film to Watched list")
+    let watchedButton = FFButton(title: "Mark as Watched", systemImageName: "rectangle.badge.checkmark", accessibilityIdentifier: "ExploreDetailVC_WatchedButton", accessibilityHint: "Adds film to Watched list")
 
     private let moreLikeThisButton = FFButton(title: "More Like This", systemImageName: "sparkles", accessibilityIdentifier: "ExploreDetailVC_MoreLikeThisButton", accessibilityHint: "Discover more films you might like")
     
@@ -95,6 +95,7 @@ final class ExploreDetailVC: UIViewController {
         navigationItem.largeTitleDisplayMode = .never
         filmDetailViewModel.delegate = self
         setupButtonsContainer()
+        setupButtonActions()
         setupScrollView()
         addSubviews()
         setupConstraints()
@@ -252,6 +253,32 @@ final class ExploreDetailVC: UIViewController {
         }
     }
     
+    // MARK: - Buttons Actions
+    private func setupButtonActions() {
+        upNextButton.addAction(UIAction { [weak self] _ in
+            self?.handleQueueToggle(queue: .upNext)
+        }, for: .touchUpInside)
+        
+        watchedButton.addAction(UIAction { [weak self] _ in
+            self?.handleQueueToggle(queue: .watched)
+        }, for: .touchUpInside)
+    }
+    
+    private func handleQueueToggle(queue: FilmQueue) {
+        guard case .content(let displayModel, _) = filmDetailViewModel.currentState else { return }
+        let isActive = (queue == .upNext) ? isUpNext : isWatched
+        let action: QueueAction = isActive ? .remove : .add
+        setButtonsEnabled(false)
+        Task {
+            await filmDetailViewModel.updateStatus(for: displayModel.film, queue: queue, action: action)
+        }
+    }
+
+    private func setButtonsEnabled(_ enabled: Bool) {
+        upNextButton.isEnabled = enabled
+        watchedButton.isEnabled = enabled
+    }
+    
     // MARK: - Constraints Setup
     private func setupConstraints() {
         let padding: CGFloat = 16
@@ -316,10 +343,12 @@ extension ExploreDetailVC: FilmDetailViewModelDelegate {
     
     func didUpdateUpNextStatus(isUpNext: Bool) {
         self.isUpNext = isUpNext
+        setButtonsEnabled(true)
     }
     
     func didUpdateWatchedStatus(isWatched: Bool) {
         self.isWatched = isWatched
+        setButtonsEnabled(true)
     }
     
     func didReceiveError(_ error: FilmDetailError) {

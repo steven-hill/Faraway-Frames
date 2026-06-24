@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 import CoreData
 
-final class FilmDetailViewModel {
+class FilmDetailViewModel {
     
     // MARK: - State Definition
     enum FilmDetailState: Equatable {
@@ -79,6 +79,7 @@ final class FilmDetailViewModel {
     
     // MARK: - Presentation data structure
     struct FilmDetailDisplayModel: Equatable {
+        var film: Film
         let title: String
         let visualOriginalTitles: String
         let spokenJapaneseTitle: NSAttributedString
@@ -90,17 +91,16 @@ final class FilmDetailViewModel {
         let director: String
         let producer: String
         let creditsAccessibilityLabel: String
-        var isUpNext: Bool
-        var isWatched: Bool
+        var isUpNext: Bool { film.isUpNext }
+        var isWatched: Bool { film.isWatched }
         
         init(film: Film) {
+            self.film = film
             self.title = film.title
             self.visualOriginalTitles = "\(film.originalTitle)\n\(film.originalTitleRomanised)"
             self.synopsisDescription = film.description
             self.director = film.director
             self.producer = film.producer
-            self.isUpNext = film.isUpNext
-            self.isWatched = film.isWatched
             self.releaseYearAndDurationText = "\(film.releaseDate) • \(film.runningTime) mins"
             self.releaseYearAndDurationAccessibilityLabel = "Released in \(film.releaseDate), running time \(film.runningTime) minutes."
             self.creditsAccessibilityLabel = "Credits. Directed by \(film.director). Produced by \(film.producer)."
@@ -135,8 +135,8 @@ final class FilmDetailViewModel {
                 if case .content(let displayModel, let image) = currentState {
                     var updatedDisplayModel = displayModel
                     switch queue {
-                    case .upNext: updatedDisplayModel.isUpNext = (action == .add)
-                    case .watched: updatedDisplayModel.isWatched = (action == .add)
+                    case .upNext: updatedDisplayModel.film.isUpNext = (action == .add)
+                    case .watched: updatedDisplayModel.film.isWatched = (action == .add)
                     }
                     currentState = .content(displayModel: updatedDisplayModel, image: image)
                 }

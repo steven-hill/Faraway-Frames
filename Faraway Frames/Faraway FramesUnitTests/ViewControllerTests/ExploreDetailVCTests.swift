@@ -224,7 +224,33 @@ struct ExploreDetailVCTests {
                 "Buttons container must be visible when state is `.content`.")
     }
     
-    //MARK: - Helper Methods
+    @Test("Tapping upNextButton invokes the view model with the correct parameters")
+    func exploreDetailVC_upNextButtonTap_callsViewModelUpdateStatus() async {
+        let (sut, spyVM) = makeSUTWithFilmAndSpyVM()
+        
+        sut.upNextButton.sendActions(for: .touchUpInside)
+        await Task.yield()
+        
+        #expect(spyVM.updateStatusCalled == true)
+        #expect(spyVM.capturedQueue == .upNext)
+        #expect(spyVM.capturedAction == .add)
+        #expect(sut.upNextButton.isEnabled == false)
+    }
+    
+    @Test("Tapping watchedButton invokes the view model with the correct parameters")
+    func exploreDetailVC_watchedButtonTap_callsViewModelUpdateStatus() async {
+        let (sut, spyVM) = makeSUTWithFilmAndSpyVM()
+        
+        sut.watchedButton.sendActions(for: .touchUpInside)
+        await Task.yield()
+        
+        #expect(spyVM.updateStatusCalled == true)
+        #expect(spyVM.capturedQueue == .watched)
+        #expect(spyVM.capturedAction == .add)
+        #expect(sut.watchedButton.isEnabled == false)
+    }
+    
+    //MARK: - SUT Helper Methods
     private func makeSUTWhenFilmIsNil() -> ExploreDetailVC {
         let mockImageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
@@ -243,6 +269,20 @@ struct ExploreDetailVCTests {
         let sut = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
         return sut
     }
+    
+    private func makeSUTWithFilmAndSpyVM() -> (vc: ExploreDetailVC, vm: FilmDetailViewModelSpy) {
+        let film = Film.sample[0]
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
+        let spyVM = FilmDetailViewModelSpy(
+            film: film,
+            imageLoader: MockImageLoader(),
+            filmQueueService: filmQueueService
+        )
+        let vc = ExploreDetailVC(filmDetailViewModel: spyVM)
+        _ = vc.view
+        return (vc, spyVM)
+    }
 }
 
 //MARK: - Extension on UIView
@@ -257,5 +297,21 @@ private extension UIView {
             }
         }
         return nil
+    }
+}
+
+//MARK: - Film Detail View Model Spy
+@MainActor
+final class FilmDetailViewModelSpy: FilmDetailViewModel {
+    var updateStatusCalled = false
+    var capturedFilm: Film?
+    var capturedQueue: FilmQueue?
+    var capturedAction: QueueAction?
+
+    override func updateStatus(for film: Film, queue: FilmQueue, action: QueueAction) async {
+        updateStatusCalled = true
+        capturedFilm = film
+        capturedQueue = queue
+        capturedAction = action
     }
 }
