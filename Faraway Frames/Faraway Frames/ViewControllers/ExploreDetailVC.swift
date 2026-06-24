@@ -252,6 +252,7 @@ final class ExploreDetailVC: UIViewController {
         }
     }
     
+    // MARK: - Constraints Setup
     private func setupConstraints() {
         let padding: CGFloat = 16
         NSLayoutConstraint.activate([
