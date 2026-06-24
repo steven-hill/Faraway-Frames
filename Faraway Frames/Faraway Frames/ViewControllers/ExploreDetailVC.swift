@@ -280,6 +280,7 @@ extension ExploreDetailVC: FilmDetailViewModelDelegate {
     }
     
     func didUpdateWatchedStatus(isWatched: Bool) {
+        self.isWatched = isWatched
     }
     
     func didReceiveError(_ error: FilmDetailError) {
