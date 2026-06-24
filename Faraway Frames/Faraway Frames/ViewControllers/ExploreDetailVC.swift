@@ -224,14 +224,14 @@ final class ExploreDetailVC: UIViewController {
     private func updateUpNextButtonUI() {
         if isUpNext {
             upNextButton.update(
-                title: "In Up Next",
-                systemImageName: "checkmark",
+                title: "Remove from Up Next",
+                systemImageName: "minus.circle",
                 accessibilityHint: "Removes film from Up Next list"
             )
         } else {
             upNextButton.update(
                 title: "Add to Up Next",
-                systemImageName: "plus",
+                systemImageName: "plus.circle",
                 accessibilityHint: "Adds film to Up Next list"
             )
         }
@@ -240,14 +240,14 @@ final class ExploreDetailVC: UIViewController {
     private func updateWatchedButtonUI() {
         if isWatched {
             watchedButton.update(
-                title: "Watched",
-                systemImageName: "rectangle.badge.checkmark.fill",
+                title: "Remove from Watched",
+                systemImageName: "tv.slash",
                 accessibilityHint: "Removes film from Watched list"
             )
         } else {
             watchedButton.update(
-                title: "Mark as Watched",
-                systemImageName: "rectangle.badge.checkmark",
+                title: "Add to Watched",
+                systemImageName: "tv",
                 accessibilityHint: "Adds film to Watched list"
             )
         }
