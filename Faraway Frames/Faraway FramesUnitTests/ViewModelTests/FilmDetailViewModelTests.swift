@@ -190,6 +190,23 @@ struct FilmDetailViewModelTests {
         #expect(scoreRange.length == expectedScoreLength, "Should be equal.")
     }
     
+    @Test("`updateStatus` updates `currentState` when persistent change completes successfully")
+    func filmDetailViewModel_updateStatus_whenChangeIsSuccessful_updatesCurrentState() async {
+        let targetFilm = Film.sample[0]
+        let mockImageLoader = MockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
+        let sut = FilmDetailViewModel(film: targetFilm, imageLoader: mockImageLoader, filmQueueService: filmQueueService)
+        
+        await sut.updateStatus(for: targetFilm, queue: .upNext, action: .add)
+        
+        if case .content(let displayModel, _) = sut.currentState {
+            #expect(displayModel.isUpNext == true)
+        } else {
+            Issue.record("State should be .content with an isUpNext value updated to true.")
+        }
+    }
+    
     @Test("Adding a film to upNext should call delegate method only if status changes to true - helps prevent duplicates and unnecessary delegate method calls")
     func filmDetailViewModel_updateStatus_addFilmToUpNext_callsDelegateMethod() async {
         let sut = makeSUT()

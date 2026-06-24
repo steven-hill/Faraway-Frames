@@ -90,6 +90,8 @@ final class FilmDetailViewModel {
         let director: String
         let producer: String
         let creditsAccessibilityLabel: String
+        var isUpNext: Bool
+        var isWatched: Bool
         
         init(film: Film) {
             self.title = film.title
@@ -97,7 +99,8 @@ final class FilmDetailViewModel {
             self.synopsisDescription = film.description
             self.director = film.director
             self.producer = film.producer
-            
+            self.isUpNext = film.isUpNext
+            self.isWatched = film.isWatched
             self.releaseYearAndDurationText = "\(film.releaseDate) • \(film.runningTime) mins"
             self.releaseYearAndDurationAccessibilityLabel = "Released in \(film.releaseDate), running time \(film.runningTime) minutes."
             self.creditsAccessibilityLabel = "Credits. Directed by \(film.director). Produced by \(film.producer)."
@@ -129,6 +132,15 @@ final class FilmDetailViewModel {
             let didStatusChange = try await filmQueueService.updateFilmStatus(film: film, queue: queue, action: action)
             
             if didStatusChange {
+                if case .content(let displayModel, let image) = currentState {
+                    var updatedDisplayModel = displayModel
+                    switch queue {
+                    case .upNext: updatedDisplayModel.isUpNext = (action == .add)
+                    case .watched: updatedDisplayModel.isWatched = (action == .add)
+                    }
+                    currentState = .content(displayModel: updatedDisplayModel, image: image)
+                }
+                
                 switch (queue, action) {
                 case (.upNext, .add):
                     delegate?.didUpdateUpNextStatus(isUpNext: true)
