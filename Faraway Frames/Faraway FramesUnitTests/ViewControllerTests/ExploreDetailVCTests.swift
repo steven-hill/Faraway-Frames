@@ -12,6 +12,26 @@ import UIKit
 @MainActor
 struct ExploreDetailVCTests {
     
+    @Test func exploreDetailVC_whenFilmIsNil_localStatePropertiesAreFalse() {
+        let sut = makeSUTWhenFilmIsNil()
+        _ = UINavigationController(rootViewController: sut)
+        
+        sut.loadViewIfNeeded()
+        
+        #expect(sut.isUpNext == false, "Should be false.")
+        #expect(sut.isWatched == false, "Should be false.")
+    }
+    
+    @Test func exploreDetailVC_withFilm_localStatePropertiesAreInitiallyFalse() {
+        let sut = makeSUTWithFilm()
+        _ = UINavigationController(rootViewController: sut)
+        
+        sut.loadViewIfNeeded()
+        
+        #expect(sut.isUpNext == false, "Should be false.")
+        #expect(sut.isWatched == false, "Should be false.")
+    }
+    
     @Test func exploreDetailVC_whenFilmIsNil_isInsideANavigationController() {
         let sut = makeSUTWhenFilmIsNil()
         _ = UINavigationController(rootViewController: sut)

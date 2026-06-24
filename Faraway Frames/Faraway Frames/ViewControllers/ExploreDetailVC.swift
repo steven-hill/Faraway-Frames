@@ -10,6 +10,8 @@ import UIKit
 final class ExploreDetailVC: UIViewController {
     
     // MARK: - Properties
+    private(set) var isUpNext: Bool = false
+    private(set) var isWatched: Bool = false
     let filmDetailViewModel: FilmDetailViewModel
     private var movieBannerHeightConstraint: NSLayoutConstraint?
     private var contentViewLeadingConstraint: NSLayoutConstraint?
