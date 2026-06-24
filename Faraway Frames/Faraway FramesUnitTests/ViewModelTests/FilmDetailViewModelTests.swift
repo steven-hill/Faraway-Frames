@@ -190,8 +190,8 @@ struct FilmDetailViewModelTests {
         #expect(scoreRange.length == expectedScoreLength, "Should be equal.")
     }
     
-    @Test("`updateStatus` updates `currentState` when persistent change completes successfully")
-    func filmDetailViewModel_updateStatus_whenChangeIsSuccessful_updatesCurrentState() async {
+    @Test("`updateStatus` updates `currentState` when `upNext` persistent change completes successfully")
+    func filmDetailViewModel_updateStatus_whenUpNextChangeIsSuccessful_updatesCurrentState() async {
         let targetFilm = Film.sample[0]
         let mockImageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
@@ -204,6 +204,23 @@ struct FilmDetailViewModelTests {
             #expect(displayModel.isUpNext == true)
         } else {
             Issue.record("State should be .content with an isUpNext value updated to true.")
+        }
+    }
+    
+    @Test("`updateStatus` updates `currentState` when `watched` persistent change completes successfully")
+    func filmDetailViewModel_updateStatus_whenWatchedChangeIsSuccessful_updatesCurrentState() async {
+        let targetFilm = Film.sample[0]
+        let mockImageLoader = MockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
+        let sut = FilmDetailViewModel(film: targetFilm, imageLoader: mockImageLoader, filmQueueService: filmQueueService)
+        
+        await sut.updateStatus(for: targetFilm, queue: .watched, action: .add)
+        
+        if case .content(let displayModel, _) = sut.currentState {
+            #expect(displayModel.isWatched == true)
+        } else {
+            Issue.record("State should be .content with an isWatched value updated to true.")
         }
     }
     
