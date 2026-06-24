@@ -117,6 +117,7 @@ final class ExploreDetailVC: UIViewController {
             config = nil
             createContent(displayModel: displayModel, image: image)
             buttonsContainer.isHidden = false
+            self.isUpNext = displayModel.isUpNext
         }
         self.contentUnavailableConfiguration = config
     }
@@ -275,6 +276,7 @@ extension ExploreDetailVC: FilmDetailViewModelDelegate {
     }
     
     func didUpdateUpNextStatus(isUpNext: Bool) {
+        self.isUpNext = isUpNext
     }
     
     func didUpdateWatchedStatus(isWatched: Bool) {

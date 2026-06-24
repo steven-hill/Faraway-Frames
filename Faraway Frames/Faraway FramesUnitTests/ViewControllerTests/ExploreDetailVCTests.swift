@@ -148,6 +148,15 @@ struct ExploreDetailVCTests {
         #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil.")
     }
     
+    @Test("`didUpdateUpNextStatus` flips VC's state property")
+    func exploreDetailVC_didUpdateUpNextStatus_flipsStateProperty() {
+        let sut = makeSUTWithFilm()
+        
+        sut.didUpdateUpNextStatus(isUpNext: true)
+        
+        #expect(sut.isUpNext == true, "Should be true.")
+    }
+    
     @Test("Integration test to check that the label successfully receives the text from ViewModel.")
     func exploreDetailVC_createContent_successfullyBindsAccessibilityPropertiesToLabel() {
         let sut = makeSUTWithFilm()
