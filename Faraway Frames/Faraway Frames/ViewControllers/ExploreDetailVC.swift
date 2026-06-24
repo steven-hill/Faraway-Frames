@@ -10,8 +10,12 @@ import UIKit
 final class ExploreDetailVC: UIViewController {
     
     // MARK: - Properties
-    private(set) var isUpNext: Bool = false
-    private(set) var isWatched: Bool = false
+    private(set) var isUpNext: Bool = false {
+        didSet { updateUpNextButtonUI() }
+    }
+    private(set) var isWatched: Bool = false {
+        didSet { updateWatchedButtonUI() }
+    }
     let filmDetailViewModel: FilmDetailViewModel
     private var movieBannerHeightConstraint: NSLayoutConstraint?
     private var contentViewLeadingConstraint: NSLayoutConstraint?
@@ -147,13 +151,6 @@ final class ExploreDetailVC: UIViewController {
             accessibilityLabelText: displayModel.creditsAccessibilityLabel
         )
     }
-    
-    private func setupButtonsContainer() {
-        buttonsContainer.addArrangedSubview(upNextButton)
-        buttonsContainer.addArrangedSubview(watchedButton)
-        buttonsContainer.addArrangedSubview(moreLikeThisButton)
-        buttonsContainer.isHidden = true
-    }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
@@ -194,10 +191,18 @@ final class ExploreDetailVC: UIViewController {
         }
     }
     
+    // MARK: - UI Components Setup
     private func setupScrollView() {
         scrollView.bouncesVertically = true
         scrollView.contentInsetAdjustmentBehavior = .never
         scrollView.translatesAutoresizingMaskIntoConstraints = false
+    }
+    
+    private func setupButtonsContainer() {
+        buttonsContainer.addArrangedSubview(upNextButton)
+        buttonsContainer.addArrangedSubview(watchedButton)
+        buttonsContainer.addArrangedSubview(moreLikeThisButton)
+        buttonsContainer.isHidden = true
     }
     
     private func addSubviews() {
@@ -212,6 +217,39 @@ final class ExploreDetailVC: UIViewController {
         contentView.addSubview(rottenTomatoesScoreLabel)
         contentView.addSubview(creditsContainer)
         contentView.addSubview(buttonsContainer)
+    }
+    
+    // MARK: - Buttons UI Updates
+    private func updateUpNextButtonUI() {
+        if isUpNext {
+            upNextButton.update(
+                title: "In Up Next",
+                systemImageName: "checkmark",
+                accessibilityHint: "Removes film from Up Next list"
+            )
+        } else {
+            upNextButton.update(
+                title: "Add to Up Next",
+                systemImageName: "plus",
+                accessibilityHint: "Adds film to Up Next list"
+            )
+        }
+    }
+
+    private func updateWatchedButtonUI() {
+        if isWatched {
+            watchedButton.update(
+                title: "Watched",
+                systemImageName: "rectangle.badge.checkmark.fill",
+                accessibilityHint: "Removes film from Watched list"
+            )
+        } else {
+            watchedButton.update(
+                title: "Mark as Watched",
+                systemImageName: "rectangle.badge.checkmark",
+                accessibilityHint: "Adds film to Watched list"
+            )
+        }
     }
     
     private func setupConstraints() {

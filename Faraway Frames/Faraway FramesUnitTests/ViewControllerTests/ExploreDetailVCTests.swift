@@ -148,8 +148,8 @@ struct ExploreDetailVCTests {
         #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil.")
     }
     
-    @Test("`didUpdateUpNextStatus` flips VC's state property")
-    func exploreDetailVC_didUpdateUpNextStatus_flipsStateProperty() {
+    @Test("`didUpdateUpNextStatus` flips VC's isUpNext state property to true")
+    func exploreDetailVC_didUpdateUpNextStatus_flipsUpNextStatePropertyToTrue() {
         let sut = makeSUTWithFilm()
         
         sut.didUpdateUpNextStatus(isUpNext: true)
@@ -157,13 +157,31 @@ struct ExploreDetailVCTests {
         #expect(sut.isUpNext == true, "Should be true.")
     }
     
-    @Test("`didUpdateWatchedStatus` flips VC's state property")
-    func exploreDetailVC_didUpdateWatchedStatus_flipsStateProperty() {
+    @Test("`didUpdateUpNextStatus` flips VC's isUpNext state property to false")
+    func exploreDetailVC_didUpdateUpNextStatus_flipsUpNextStatePropertyToFalse() {
+        let sut = makeSUTWithFilm()
+        
+        sut.didUpdateUpNextStatus(isUpNext: false)
+        
+        #expect(sut.isUpNext == false, "Should be false.")
+    }
+    
+    @Test("`didUpdateWatchedStatus` flips VC's isWatched state property")
+    func exploreDetailVC_didUpdateWatchedStatus_isWatchedStatePropertyChangedToTrue() {
         let sut = makeSUTWithFilm()
         
         sut.didUpdateWatchedStatus(isWatched: true)
         
         #expect(sut.isWatched == true, "Should be true.")
+    }
+    
+    @Test("`didUpdateUpNextStatus` flips VC's isWatched state property to false")
+    func exploreDetailVC_didUpdateUpNextStatus_isWatchedStatePropertyChangedToTrue() {
+        let sut = makeSUTWithFilm()
+        
+        sut.didUpdateWatchedStatus(isWatched: false)
+        
+        #expect(sut.isWatched == false, "Should be false.")
     }
     
     @Test("Integration test to check that the label successfully receives the text from ViewModel.")
