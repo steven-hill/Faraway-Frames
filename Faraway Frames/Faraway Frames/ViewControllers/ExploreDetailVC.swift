@@ -62,9 +62,9 @@ final class ExploreDetailVC: UIViewController {
         return creditsContainer
     }()
     
-    let upNextButton = FFButton(title: "Add to Up Next", systemImageName: "plus", accessibilityIdentifier: "ExploreDetailVC_UpNextButton", accessibilityHint: "Adds film to Up Next list")
+    let upNextButton = FFButton(title: "", systemImageName: "", accessibilityIdentifier: "ExploreDetailVC_UpNextButton", accessibilityHint: "")
 
-    let watchedButton = FFButton(title: "Mark as Watched", systemImageName: "rectangle.badge.checkmark", accessibilityIdentifier: "ExploreDetailVC_WatchedButton", accessibilityHint: "Adds film to Watched list")
+    let watchedButton = FFButton(title: "", systemImageName: "", accessibilityIdentifier: "ExploreDetailVC_WatchedButton", accessibilityHint: "")
 
     private let moreLikeThisButton = FFButton(title: "More Like This", systemImageName: "sparkles", accessibilityIdentifier: "ExploreDetailVC_MoreLikeThisButton", accessibilityHint: "Discover more films you might like")
     
@@ -123,6 +123,7 @@ final class ExploreDetailVC: UIViewController {
             createContent(displayModel: displayModel, image: image)
             buttonsContainer.isHidden = false
             self.isUpNext = displayModel.isUpNext
+            self.isWatched = displayModel.isWatched
         }
         self.contentUnavailableConfiguration = config
     }
