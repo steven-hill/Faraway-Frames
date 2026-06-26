@@ -381,6 +381,16 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.filteredFilms.isEmpty, "Should be empty.")
     }
     
+    @Test("`syncFilmWithDatabase` calls service with film and returns film")
+    func filmsListViewModel_syncFilmWithDatabase_callsServiceWithFilm() async {
+        let sut = makeSUTForSuccessCase()
+        await sut.getAllFilms()
+        
+        let result = await sut.syncFilmWithDatabase(sut.films[0])
+        
+        #expect(result == sut.films[0], "Should return a film.")
+    }
+    
     // MARK: - SUT Helper Methods
     private func makeSUTForSuccessCase() -> FilmsListViewModel {
         let mockService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()

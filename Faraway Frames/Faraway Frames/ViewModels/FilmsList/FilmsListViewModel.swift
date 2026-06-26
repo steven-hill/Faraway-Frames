@@ -125,4 +125,8 @@ final class FilmsListViewModel {
             await getAllFilms()
         }
     }
+    
+    func syncFilmWithDatabase(_ film: Film) async -> Film {
+        return await filmSyncService.syncSingleFilmWithLocalStorage(film)
+    }
 }
