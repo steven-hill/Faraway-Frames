@@ -391,6 +391,51 @@ struct FilmsListViewModelUnitTests {
         #expect(result == sut.films[0], "Should return a film.")
     }
     
+    @Test("`updateFilmState` updates a film's properties in both `films` and `filteredFilms` arrays, updates state, and calls delegate twice.")
+    func filmsListViewModel_updateFilmInArrays_whenFilmExistsInBothArrays_updatesBothAndSetsStateAndCallsDelegateTwice() async {
+        let sut = makeSUTForSuccessCase()
+        let delegateSpy = FilmsListViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        await sut.getAllFilms()
+        sut.filterFilms(by: "Cas")
+        var updatedFilm = sut.films[0]
+        updatedFilm.isUpNext = true
+        updatedFilm.isWatched = true
+        
+        /// Reset to zero because it has been called twice up to this point already.
+        delegateSpy.didUpdateFilmsCallCount = 0
+        
+        sut.updateFilmInArrays(updatedFilm)
+        
+        #expect(sut.films[0].isUpNext == true, "Should have updated to true.")
+        #expect(sut.films[0].isWatched == true, "Should have updated to true.")
+        #expect(sut.filteredFilms[0].isUpNext == true, "Should have updated to true.")
+        #expect(sut.filteredFilms[0].isWatched == true, "Should have updated to true.")
+        #expect(sut.currentState == .content(isUsingArchivedData: false), "Should be `.content(isUsingArchivedData: false)`.")
+        #expect(delegateSpy.didUpdateFilmsCallCount == 2, "Should be two; one for `films`, and the other for `filteredFilms`.")
+    }
+    
+    @Test("`updateFilmState` gracefully does nothing if the film ID does not exist in the arrays")
+       func filmsListViewModel_updateFilmInArrays_whenFilmDoesNotExist_leavesArraysUnchanged() async {
+           let sut = makeSUTForSuccessCase()
+           let delegateSpy = FilmsListViewModelDelegateSpy()
+           sut.delegate = delegateSpy
+           await sut.getAllFilms()
+           sut.filterFilms(by: "Cas")
+           let updatedFilm = Film(id: "non-existent-ID", title: "", originalTitle: "", originalTitleRomanised: "", image: "", movieBanner: "", description: "", director: "", producer: "", releaseDate: "", runningTime: "", rottenTomatoesScore: "", url: "")
+           
+           /// Reset to zero because it has been called twice up to this point already.
+           delegateSpy.didUpdateFilmsCallCount = 0
+           
+           sut.updateFilmInArrays(updatedFilm)
+           
+           #expect(sut.films[0].isUpNext == false, "Should be false and therefore unchanged.")
+           #expect(sut.films[0].isWatched == false, "Should be false and therefore unchanged.")
+           #expect(sut.filteredFilms[0].isUpNext == false, "Should be false and therefore unchanged.")
+           #expect(sut.filteredFilms[0].isWatched == false, "Should be false and therefore unchanged.")
+           #expect(delegateSpy.didUpdateFilmsCallCount == 0, "Should be zero; delegate method should not have been called.")
+       }
+    
     // MARK: - SUT Helper Methods
     private func makeSUTForSuccessCase() -> FilmsListViewModel {
         let mockService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
@@ -412,13 +457,16 @@ struct FilmsListViewModelUnitTests {
     final class FilmsListViewModelDelegateSpy: FilmsListViewModelDelegate {
         var didRequestVoiceOverAnnouncement = false
         var capturedMessage: String?
-
+        var didUpdateFilmsCallCount = 0
+        
         func didRequestVoiceOverAnnouncement(with message: String) {
             didRequestVoiceOverAnnouncement = true
             capturedMessage = message
         }
 
-        func didUpdateFilms(_ films: [Film]) {}
+        func didUpdateFilms(_ films: [Film]) {
+            didUpdateFilmsCallCount += 1
+        }
         func didFailToLoadFilms() {}
         func didRetry() {}
         func didFailToMatchResults() {}
