@@ -12,7 +12,7 @@ import UIKit
 @MainActor
 struct ExploreDetailVCTests {
     
-    @Test func exploreDetailVC_whenFilmIsNil_localStatePropertiesAreFalse() {
+    @Test func exploreDetailVC_whenFilmIsNil_localStatePropertiesAreSetCorrectly() {
         let sut = makeSUTWhenFilmIsNil()
         _ = UINavigationController(rootViewController: sut)
         
@@ -20,9 +20,10 @@ struct ExploreDetailVCTests {
         
         #expect(sut.isUpNext == false, "Should be false.")
         #expect(sut.isWatched == false, "Should be false.")
+        #expect(sut.updatedFilm == nil, "Should be nil.")
     }
     
-    @Test func exploreDetailVC_withFilm_localStatePropertiesAreInitiallyFalse() {
+    @Test func exploreDetailVC_withFilm_localStatePropertiesAreSetCorrectly() {
         let sut = makeSUTWithFilm()
         _ = UINavigationController(rootViewController: sut)
         
@@ -30,6 +31,7 @@ struct ExploreDetailVCTests {
         
         #expect(sut.isUpNext == false, "Should be false.")
         #expect(sut.isWatched == false, "Should be false.")
+        #expect(sut.updatedFilm == nil, "Should be nil.")
     }
     
     @Test func exploreDetailVC_whenFilmIsNil_isInsideANavigationController() {
@@ -127,17 +129,18 @@ struct ExploreDetailVCTests {
         #expect(sut.title == nil, "Should be nil.")
     }
     
-    @Test func exploreDetailVC_didUpdateFilmDetails_notifiesContentUnavailableConfigurationToUpdate() {
+    @Test func exploreDetailVC_didUpdateFilmDetails_notifiesContentUnavailableConfigurationToUpdateAndSetsUpdatedFilm() {
         let sut = makeSUTWithFilm()
-        
         sut.loadViewIfNeeded()
+        
         sut.didUpdateFilmDetails()
         sut.view.layoutIfNeeded()
         
         #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
+        #expect(sut.updatedFilm != nil, "Should not be nil.")
     }
     
-    @Test func exploreDetailVC_didUpdateWithEmptyState_notifiesContentUnavailableConfigurationToUpdate() {
+    @Test func exploreDetailVC_didUpdateWithEmptyState_notifiesContentUnavailableConfigurationToUpdateAndUpdatedFilmIsStillNil() {
         let sut = makeSUTWhenFilmIsNil()
         
         sut.loadViewIfNeeded()
@@ -146,6 +149,7 @@ struct ExploreDetailVCTests {
         
         #expect(sut.filmDetailViewModel.currentState == .noFilmSelected, "Should be `.noFilmSelected`.")
         #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil.")
+        #expect(sut.updatedFilm == nil, "Should be nil.")
     }
     
     @Test("`didUpdateUpNextStatus` flips VC's isUpNext state property to true")
@@ -250,6 +254,34 @@ struct ExploreDetailVCTests {
         #expect(sut.watchedButton.isEnabled == false)
     }
     
+    @Test("`viewWillDisappear` calls delegate with the film when view model has changes")
+    func exploreDetailVC_viewWillDisappear_whenHasChangesIsTrue_notifiesDelegate() async {
+        let sut = makeSUTWithFilm()
+        let delegateSpy = FilmDetailViewControllerDelegateSpy()
+        sut.delegate = delegateSpy
+        await sut.filmDetailViewModel.updateStatus(for: Film.sample[0], queue: .upNext, action: .add)
+        sut.updateContentUnavailableConfiguration(using: sut.contentUnavailableConfigurationState)
+        
+        sut.viewWillDisappear(false)
+        
+        #expect(sut.filmDetailViewModel.hasChanges == true, "Should be true.")
+        #expect(delegateSpy.didUpdateFilmCalled == true, "Delegate should be notified when changes exist.")
+        #expect(delegateSpy.capturedFilm?.id == Film.sample[0].id)
+        #expect(delegateSpy.capturedFilm?.isUpNext == true)
+    }
+    
+    @Test("`viewWillDisappear` silently exits when view model has no changes")
+    func exploreDetailVC_viewWillDisappear_whenHasChangesIsFalse_doesNotNotifyDelegate() {
+        let sut = makeSUTWithFilm()
+        let delegateSpy = FilmDetailViewControllerDelegateSpy()
+        sut.delegate = delegateSpy
+        
+        sut.viewWillDisappear(false)
+        
+        #expect(delegateSpy.didUpdateFilmCalled == false, "Delegate must remain uncalled if no changes occurred.")
+        #expect(delegateSpy.capturedFilm == nil)
+    }
+    
     //MARK: - SUT Helper Methods
     private func makeSUTWhenFilmIsNil() -> ExploreDetailVC {
         let mockImageLoader = MockImageLoader()
@@ -313,5 +345,16 @@ final class FilmDetailViewModelSpy: FilmDetailViewModel {
         capturedFilm = film
         capturedQueue = queue
         capturedAction = action
+    }
+}
+
+//MARK: - Film Detail View Controller Delegate Spy
+final class FilmDetailViewControllerDelegateSpy: FilmDetailViewControllerDelegate {
+    var didUpdateFilmCalled = false
+    var capturedFilm: Film?
+    
+    func filmDetailViewController(_ controller: ExploreDetailVC, didUpdateFilm updatedFilm: Film) {
+        didUpdateFilmCalled = true
+        capturedFilm = updatedFilm
     }
 }

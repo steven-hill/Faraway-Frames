@@ -27,6 +27,7 @@ class FilmDetailViewModel {
         }
     }
     weak var delegate: FilmDetailViewModelDelegate?
+    private(set) var hasChanges = false
     
     // MARK: - Initialisation
     init(film: Film? = nil,
@@ -151,6 +152,7 @@ class FilmDetailViewModel {
                 case (.watched, .remove):
                     delegate?.didUpdateWatchedStatus(isWatched: false)
                 }
+                hasChanges = true
             }
         } catch {
             let filmDetailError = action == .add ? FilmDetailError.add(error) : FilmDetailError.delete(error)

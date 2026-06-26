@@ -18,6 +18,7 @@ final class ExploreDetailVC: UIViewController {
     }
     weak var delegate: FilmDetailViewControllerDelegate?
     let filmDetailViewModel: FilmDetailViewModel
+    private(set) var updatedFilm: Film? = nil
     private var movieBannerHeightConstraint: NSLayoutConstraint?
     private var contentViewLeadingConstraint: NSLayoutConstraint?
     private var contentViewTrailingConstraint: NSLayoutConstraint?
@@ -125,6 +126,7 @@ final class ExploreDetailVC: UIViewController {
             buttonsContainer.isHidden = false
             self.isUpNext = displayModel.isUpNext
             self.isWatched = displayModel.isWatched
+            updatedFilm = displayModel.film
         }
         self.contentUnavailableConfiguration = config
     }
@@ -191,6 +193,14 @@ final class ExploreDetailVC: UIViewController {
         
         if movieBannerHeightConstraint == nil || contentViewLeadingConstraint == nil || contentViewTrailingConstraint == nil {
             updateLayoutFor(size: view.bounds.size)
+        }
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        guard filmDetailViewModel.hasChanges else { return }
+        if let film = updatedFilm {
+            delegate?.filmDetailViewController(self, didUpdateFilm: film)
         }
     }
     
