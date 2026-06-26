@@ -64,7 +64,12 @@ extension ExploreSplitViewCoordinator: ExploreNavigationDelegate {
     
     func didSelectFilm(_ film: Film) {
         filmDetailViewModel.setFilm(film)
-        exploreSplitVC.showDetailViewController(ExploreDetailVC(filmDetailViewModel: filmDetailViewModel), sender: nil)
+        let detailVC = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
+        if let primaryNav = exploreSplitVC.viewController(for: .primary) as? UINavigationController,
+           let exploreListVC = primaryNav.viewControllers.first as? ExploreListVC {
+            detailVC.delegate = exploreListVC
+        }
+        exploreSplitVC.showDetailViewController(detailVC, sender: nil)
         if exploreSplitVC.isCollapsed == false {
             exploreSplitVC.hide(.primary)
         }

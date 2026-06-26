@@ -12,7 +12,7 @@ import UIKit
 @MainActor
 struct ExploreSplitViewCoordinatorTests {
     
-    @Test func exploreSplitViewCoordinator_onInit_setsDelegateCorrectly() {
+    @Test func exploreSplitViewCoordinator_start_setsDelegateCorrectly() {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
@@ -76,15 +76,28 @@ struct ExploreSplitViewCoordinatorTests {
         #expect(sut.shouldDeselectAfterSelection == false, "Should be false.")
     }
     
-    @Test func exploreSplitViewCoordinator_didSelectFilm_withFilm_createsExploreDetailVC() {
-        let sut = makeSUT(with: ExploreSplitVCSpy(style: .doubleColumn))
-        
+    @Test func exploreSplitViewCoordinator_didSelectFilm_withFilm_createsExploreDetailVCAndSetsDelegate() {
+        let spy = ExploreSplitVCSpy(style: .doubleColumn)
+        let sut = makeSUT(with: spy)
         sut.start()
         let film = Film.sample[0]
+        
         sut.didSelectFilm(film)
         
-        #expect(sut.exploreSplitVC.viewControllers.count == 2, "Should be 2.")
-        #expect(sut.exploreSplitVC.viewControllers[1] is ExploreDetailVC, "Should be an `ExploreDetailVC`.")
+        #expect(spy.viewControllers.count == 2, "Should be 2 view controllers.")
+        
+        guard let detailVC = spy.viewController(for: .secondary) as? ExploreDetailVC else {
+            Issue.record("The secondary view controller must be an instance of `ExploreDetailVC`.")
+            return
+        }
+        
+        guard let primaryNav = spy.viewController(for: .primary) as? UINavigationController,
+              let expectedListVC = primaryNav.viewControllers.first as? ExploreListVC else {
+            Issue.record("The primary view controller navigation stack is unconfigured or wrong type.")
+            return
+        }
+        
+        #expect(detailVC.delegate === expectedListVC, "The detail view controller delegate must be set to the ExploreListVC instance.")
     }
     
     @Test("iPad only: collection view cell keeps selection after being selected", .enabled(if: IpadHelper.isPad))

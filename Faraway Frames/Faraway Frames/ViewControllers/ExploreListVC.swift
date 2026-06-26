@@ -305,3 +305,9 @@ extension ExploreListVC: UISearchResultsUpdating {
         viewModel.filterFilms(by: searchText)
     }
 }
+
+extension ExploreListVC: FilmDetailViewControllerDelegate {
+    func filmDetailViewController(_ controller: ExploreDetailVC, didUpdateFilm updatedFilm: Film) {
+        
+    }
+}

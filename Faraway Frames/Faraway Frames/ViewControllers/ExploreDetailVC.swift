@@ -16,6 +16,7 @@ final class ExploreDetailVC: UIViewController {
     private(set) var isWatched: Bool = false {
         didSet { updateWatchedButtonUI() }
     }
+    weak var delegate: FilmDetailViewControllerDelegate?
     let filmDetailViewModel: FilmDetailViewModel
     private var movieBannerHeightConstraint: NSLayoutConstraint?
     private var contentViewLeadingConstraint: NSLayoutConstraint?
