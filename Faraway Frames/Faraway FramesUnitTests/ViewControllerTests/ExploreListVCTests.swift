@@ -391,7 +391,7 @@ struct ExploreListVCTests {
         #expect(sut.searchController.searchBar.isEnabled == false, "Should be false.")
     }
     
-    @Test func exploreListVC_didSelectItemAt_notifiesDelegate_withCorrectFilm() {
+    @Test func exploreListVC_didSelectItemAt_notifiesDelegate_withCorrectFilm() async {
         let sut = makeSUT()
         let spy = ExploreNavigationSpy()
         sut.navigationDelegate = spy
@@ -399,9 +399,14 @@ struct ExploreListVCTests {
         let films = [testFilm]
         sut.loadViewIfNeeded()
         sut.didUpdateFilms(films)
-        
         let indexPath = IndexPath(item: 0, section: 0)
-        sut.collectionView(sut.collectionView, didSelectItemAt: indexPath)
+        
+        await withCheckedContinuation { continuation in
+            spy.onDidSelectFilmCalled = { _ in
+                continuation.resume()
+            }
+            sut.collectionView(sut.collectionView, didSelectItemAt: indexPath)
+        }
         
         #expect(spy.didSelectFilmCalled, "Delegate should be called.")
         #expect(spy.selectedFilm?.id == testFilm.id, "Both ids should match.")
@@ -681,9 +686,12 @@ struct ExploreListVCTests {
         var selectedFilm: Film?
         var didSelectFilmCalled = false
         
+        var onDidSelectFilmCalled: (@Sendable (Film) -> Void)?
+        
         func didSelectFilm(_ film: Film) {
             selectedFilm = film
             didSelectFilmCalled = true
+            onDidSelectFilmCalled?(film)
         }
     }
 }
