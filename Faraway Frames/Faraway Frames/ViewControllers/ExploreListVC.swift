@@ -308,6 +308,6 @@ extension ExploreListVC: UISearchResultsUpdating {
 
 extension ExploreListVC: FilmDetailViewControllerDelegate {
     func filmDetailViewController(_ controller: ExploreDetailVC, didUpdateFilm updatedFilm: Film) {
-        
+        viewModel.updateFilmInArrays(updatedFilm)
     }
 }
