@@ -543,12 +543,11 @@ struct ExploreListVCTests {
         let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
         let sut = ExploreListVC(viewModel: filmsListViewModel)
         sut.loadViewIfNeeded()
-        
         let films: [Film] = [Film.sample[0]]
+
         sut.didUpdateFilms(films)
         await Task.yield()
         sut.collectionView.layoutIfNeeded()
-        
         let indexPath = IndexPath(item: 0, section: 0)
         let kind = UICollectionView.elementKindSectionHeader
         let header = sut.collectionView.supplementaryView(forElementKind: kind, at: indexPath)
