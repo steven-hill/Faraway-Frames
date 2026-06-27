@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 import CoreData
 
-final class FilmDetailViewModel {
+class FilmDetailViewModel {
     
     // MARK: - State Definition
     enum FilmDetailState: Equatable {
@@ -27,6 +27,7 @@ final class FilmDetailViewModel {
         }
     }
     weak var delegate: FilmDetailViewModelDelegate?
+    private(set) var hasChanges = false
     
     // MARK: - Initialisation
     init(film: Film? = nil,
@@ -47,7 +48,7 @@ final class FilmDetailViewModel {
             currentState = .noFilmSelected
             return
         }
-        
+        hasChanges = false
         let displayModel = FilmDetailDisplayModel(film: film)
         currentState = .content(displayModel: displayModel)
         getMovieBanner(for: film, displayModel: displayModel)
@@ -79,6 +80,7 @@ final class FilmDetailViewModel {
     
     // MARK: - Presentation data structure
     struct FilmDetailDisplayModel: Equatable {
+        var film: Film
         let title: String
         let visualOriginalTitles: String
         let spokenJapaneseTitle: NSAttributedString
@@ -90,14 +92,16 @@ final class FilmDetailViewModel {
         let director: String
         let producer: String
         let creditsAccessibilityLabel: String
+        var isUpNext: Bool { film.isUpNext }
+        var isWatched: Bool { film.isWatched }
         
         init(film: Film) {
+            self.film = film
             self.title = film.title
             self.visualOriginalTitles = "\(film.originalTitle)\n\(film.originalTitleRomanised)"
             self.synopsisDescription = film.description
             self.director = film.director
             self.producer = film.producer
-            
             self.releaseYearAndDurationText = "\(film.releaseDate) • \(film.runningTime) mins"
             self.releaseYearAndDurationAccessibilityLabel = "Released in \(film.releaseDate), running time \(film.runningTime) minutes."
             self.creditsAccessibilityLabel = "Credits. Directed by \(film.director). Produced by \(film.producer)."
@@ -129,6 +133,15 @@ final class FilmDetailViewModel {
             let didStatusChange = try await filmQueueService.updateFilmStatus(film: film, queue: queue, action: action)
             
             if didStatusChange {
+                if case .content(let displayModel, let image) = currentState {
+                    var updatedDisplayModel = displayModel
+                    switch queue {
+                    case .upNext: updatedDisplayModel.film.isUpNext = (action == .add)
+                    case .watched: updatedDisplayModel.film.isWatched = (action == .add)
+                    }
+                    currentState = .content(displayModel: updatedDisplayModel, image: image)
+                }
+                
                 switch (queue, action) {
                 case (.upNext, .add):
                     delegate?.didUpdateUpNextStatus(isUpNext: true)
@@ -139,6 +152,7 @@ final class FilmDetailViewModel {
                 case (.watched, .remove):
                     delegate?.didUpdateWatchedStatus(isWatched: false)
                 }
+                hasChanges = true
             }
         } catch {
             let filmDetailError = action == .add ? FilmDetailError.add(error) : FilmDetailError.delete(error)

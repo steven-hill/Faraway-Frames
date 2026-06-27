@@ -30,7 +30,7 @@ struct FilmDetailViewModelTests {
         #expect(spy.updateWithEmptyStateCallCount == 1, "Should call delegate method once.")
     }
     
-    @Test func filmDetailViewModel_whenFilmIsPassedIn_setsCurrentStateToContent() {
+    @Test func filmDetailViewModel_whenFilmIsPassedIn_updatesCurrentStateButNotHasChanges() {
         let film = Film.sample[0]
         let mockImageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
@@ -44,15 +44,17 @@ struct FilmDetailViewModelTests {
             #expect(displayModel.title == film.title, "Should match.")
             #expect(displayModel.visualOriginalTitles == "\(film.originalTitle)\n\(film.originalTitleRomanised)", "Should match.")
         }
+        #expect(sut.hasChanges == false, "Should still be false.")
     }
     
-    @Test func filmDetailViewModel_setFilm_whenFilmIsNil_updatesCurrentState() {
+    @Test func filmDetailViewModel_setFilm_whenFilmIsNil_updatesCurrentStateButNotHasChanges() {
         let film: Film? = nil
         let sut = makeSUT()
         
         sut.setFilm(film)
         
         #expect(sut.currentState == .noFilmSelected, "Should update the state to `.noFilmSelected` when film is nil.")
+        #expect(sut.hasChanges == false, "Should still be false.")
     }
     
     @Test("Quick selection of films ignores the results of the cancelled task", .tags(.networkRequest))
@@ -188,6 +190,42 @@ struct FilmDetailViewModelTests {
         #expect(scoreColor == UIColor.secondaryLabel, "The numeric percentage value block must be secondaryLabel.")
         #expect(scoreRange.location == 16, "Should be 16.")
         #expect(scoreRange.length == expectedScoreLength, "Should be equal.")
+    }
+    
+    @Test("`updateStatus` updates `currentState` and `hasChanges` when `upNext` persistent change completes successfully")
+    func filmDetailViewModel_updateStatus_whenUpNextChangeIsSuccessful_updatesCurrentStateAndHasChanges() async {
+        let targetFilm = Film.sample[0]
+        let mockImageLoader = MockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
+        let sut = FilmDetailViewModel(film: targetFilm, imageLoader: mockImageLoader, filmQueueService: filmQueueService)
+        
+        await sut.updateStatus(for: targetFilm, queue: .upNext, action: .add)
+        
+        if case .content(let displayModel, _) = sut.currentState {
+            #expect(displayModel.isUpNext == true)
+        } else {
+            Issue.record("State should be .content with an isUpNext value updated to true.")
+        }
+        #expect(sut.hasChanges == true, "Should be true.")
+    }
+    
+    @Test("`updateStatus` updates `currentState` and `hasChanges` when `watched` persistent change completes successfully")
+    func filmDetailViewModel_updateStatus_whenWatchedChangeIsSuccessful_updatesCurrentStateAndHasChanges() async {
+        let targetFilm = Film.sample[0]
+        let mockImageLoader = MockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
+        let sut = FilmDetailViewModel(film: targetFilm, imageLoader: mockImageLoader, filmQueueService: filmQueueService)
+        
+        await sut.updateStatus(for: targetFilm, queue: .watched, action: .add)
+        
+        if case .content(let displayModel, _) = sut.currentState {
+            #expect(displayModel.isWatched == true)
+        } else {
+            Issue.record("State should be .content with an isWatched value updated to true.")
+        }
+        #expect(sut.hasChanges == true, "Should be true.")
     }
     
     @Test("Adding a film to upNext should call delegate method only if status changes to true - helps prevent duplicates and unnecessary delegate method calls")

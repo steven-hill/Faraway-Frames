@@ -10,7 +10,15 @@ import UIKit
 final class ExploreDetailVC: UIViewController {
     
     // MARK: - Properties
+    private(set) var isUpNext: Bool = false {
+        didSet { updateUpNextButtonUI() }
+    }
+    private(set) var isWatched: Bool = false {
+        didSet { updateWatchedButtonUI() }
+    }
+    weak var delegate: FilmDetailViewControllerDelegate?
     let filmDetailViewModel: FilmDetailViewModel
+    private(set) var updatedFilm: Film? = nil
     private var movieBannerHeightConstraint: NSLayoutConstraint?
     private var contentViewLeadingConstraint: NSLayoutConstraint?
     private var contentViewTrailingConstraint: NSLayoutConstraint?
@@ -56,9 +64,9 @@ final class ExploreDetailVC: UIViewController {
         return creditsContainer
     }()
     
-    private let upNextButton = FFButton(title: "Add to Up Next", systemImageName: "plus", accessibilityIdentifier: "ExploreDetailVC_UpNextButton", accessibilityHint: "Adds film to Up Next list")
+    let upNextButton = FFButton(title: "", systemImageName: "", accessibilityIdentifier: "ExploreDetailVC_UpNextButton", accessibilityHint: "")
 
-    private let watchedButton = FFButton(title: "Mark as Watched", systemImageName: "rectangle.badge.checkmark", accessibilityIdentifier: "ExploreDetailVC_WatchedButton", accessibilityHint: "Adds film to Watched list")
+    let watchedButton = FFButton(title: "", systemImageName: "", accessibilityIdentifier: "ExploreDetailVC_WatchedButton", accessibilityHint: "")
 
     private let moreLikeThisButton = FFButton(title: "More Like This", systemImageName: "sparkles", accessibilityIdentifier: "ExploreDetailVC_MoreLikeThisButton", accessibilityHint: "Discover more films you might like")
     
@@ -89,6 +97,7 @@ final class ExploreDetailVC: UIViewController {
         navigationItem.largeTitleDisplayMode = .never
         filmDetailViewModel.delegate = self
         setupButtonsContainer()
+        setupButtonActions()
         setupScrollView()
         addSubviews()
         setupConstraints()
@@ -115,6 +124,9 @@ final class ExploreDetailVC: UIViewController {
             config = nil
             createContent(displayModel: displayModel, image: image)
             buttonsContainer.isHidden = false
+            self.isUpNext = displayModel.isUpNext
+            self.isWatched = displayModel.isWatched
+            updatedFilm = displayModel.film
         }
         self.contentUnavailableConfiguration = config
     }
@@ -143,13 +155,6 @@ final class ExploreDetailVC: UIViewController {
             producer: displayModel.producer,
             accessibilityLabelText: displayModel.creditsAccessibilityLabel
         )
-    }
-    
-    private func setupButtonsContainer() {
-        buttonsContainer.addArrangedSubview(upNextButton)
-        buttonsContainer.addArrangedSubview(watchedButton)
-        buttonsContainer.addArrangedSubview(moreLikeThisButton)
-        buttonsContainer.isHidden = true
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -191,10 +196,26 @@ final class ExploreDetailVC: UIViewController {
         }
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        guard filmDetailViewModel.hasChanges else { return }
+        if let film = updatedFilm {
+            delegate?.filmDetailViewController(self, didUpdateFilm: film)
+        }
+    }
+    
+    // MARK: - UI Components Setup
     private func setupScrollView() {
         scrollView.bouncesVertically = true
         scrollView.contentInsetAdjustmentBehavior = .never
         scrollView.translatesAutoresizingMaskIntoConstraints = false
+    }
+    
+    private func setupButtonsContainer() {
+        buttonsContainer.addArrangedSubview(upNextButton)
+        buttonsContainer.addArrangedSubview(watchedButton)
+        buttonsContainer.addArrangedSubview(moreLikeThisButton)
+        buttonsContainer.isHidden = true
     }
     
     private func addSubviews() {
@@ -211,6 +232,66 @@ final class ExploreDetailVC: UIViewController {
         contentView.addSubview(buttonsContainer)
     }
     
+    // MARK: - Buttons UI Updates
+    private func updateUpNextButtonUI() {
+        if isUpNext {
+            upNextButton.update(
+                title: "Remove from Up Next",
+                systemImageName: "minus.circle",
+                accessibilityHint: "Removes film from Up Next list"
+            )
+        } else {
+            upNextButton.update(
+                title: "Add to Up Next",
+                systemImageName: "plus.circle",
+                accessibilityHint: "Adds film to Up Next list"
+            )
+        }
+    }
+
+    private func updateWatchedButtonUI() {
+        if isWatched {
+            watchedButton.update(
+                title: "Remove from Watched",
+                systemImageName: "tv.slash",
+                accessibilityHint: "Removes film from Watched list"
+            )
+        } else {
+            watchedButton.update(
+                title: "Add to Watched",
+                systemImageName: "tv",
+                accessibilityHint: "Adds film to Watched list"
+            )
+        }
+    }
+    
+    // MARK: - Buttons Actions
+    private func setupButtonActions() {
+        upNextButton.addAction(UIAction { [weak self] _ in
+            self?.handleQueueToggle(queue: .upNext)
+        }, for: .touchUpInside)
+        
+        watchedButton.addAction(UIAction { [weak self] _ in
+            self?.handleQueueToggle(queue: .watched)
+        }, for: .touchUpInside)
+    }
+    
+    private func handleQueueToggle(queue: FilmQueue) {
+        guard case .content(let displayModel, _) = filmDetailViewModel.currentState else { return }
+        let isActive = (queue == .upNext) ? isUpNext : isWatched
+        let action: QueueAction = isActive ? .remove : .add
+        setButtonsEnabled(false)
+        Task {
+            await filmDetailViewModel.updateStatus(for: displayModel.film, queue: queue, action: action)
+        }
+    }
+
+    private func setButtonsEnabled(_ enabled: Bool) {
+        upNextButton.isEnabled = enabled
+        watchedButton.isEnabled = enabled
+    }
+    
+    // MARK: - Constraints Setup
     private func setupConstraints() {
         let padding: CGFloat = 16
         NSLayoutConstraint.activate([
@@ -273,9 +354,13 @@ extension ExploreDetailVC: FilmDetailViewModelDelegate {
     }
     
     func didUpdateUpNextStatus(isUpNext: Bool) {
+        self.isUpNext = isUpNext
+        setButtonsEnabled(true)
     }
     
     func didUpdateWatchedStatus(isWatched: Bool) {
+        self.isWatched = isWatched
+        setButtonsEnabled(true)
     }
     
     func didReceiveError(_ error: FilmDetailError) {

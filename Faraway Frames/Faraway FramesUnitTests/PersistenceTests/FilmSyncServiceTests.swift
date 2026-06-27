@@ -98,6 +98,45 @@ struct FilmSyncServiceTests {
         #expect(result[1].isWatched == false)
     }
     
+    @Test("If database contains input film, should update input film with the database state", (.tags(.persistence)))
+    func filmSyncService_syncSingleFilmWithLocalStorage_ifInputFilmIsFoundedInDatabase_returnsInputWithStatusUpdated() async throws {
+        let (sut, context, entity) = try makeSUTViewContextAndEntity()
+        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: true)
+        try? context.save()
+        let film = Film.sample[0]
+        
+        let result = await sut.syncSingleFilmWithLocalStorage(film)
+        
+        #expect(result != film, "Output should not match input - should be updated.")
+        #expect(result.isUpNext == true, "Should be updated to true.")
+        #expect(result.isWatched == true, "Should be updated to true.")
+    }
+    
+    @Test("If database doesn't contain input film, should return input film unaltered")
+    func filmSyncService_syncSingleFilmWithLocalStorage_ifDatabaseDoesNotContainInputFilm_returnsInputFilmUnaltered() async throws {
+        let (sut, _, _) = try makeSUTViewContextAndEntity()
+        let film = Film.sample[0]
+        
+        let result = await sut.syncSingleFilmWithLocalStorage(film)
+        
+        #expect(result == film, "Output should match input.")
+        #expect(result.isUpNext == false, "Should be unchanged.")
+        #expect(result.isWatched == false, "Should be unchanged.")
+    }
+    
+    @Test("If database fetch fails, fall back gracefully to the input film")
+    func filmSyncService_syncSingleFilmWithLocalStorage_ifDatabaseThrowsFetchError_returnsInputFilmUnaltered() async throws {
+        let mockContext = MockFailingDatabaseContext()
+        let sut = FilmSyncService(context: mockContext)
+        let film = Film.sample[0]
+        
+        let result = await sut.syncSingleFilmWithLocalStorage(film)
+        
+        #expect(result == film, "Output should match input.")
+        #expect(result.isUpNext == false, "Should be unchanged.")
+        #expect(result.isWatched == false, "Should be unchanged.")
+    }
+    
     // MARK: - SUT Helper Method
     private func makeSUTViewContextAndEntity() throws -> (sut: FilmSyncService,
                                                           viewContext: NSManagedObjectContext,

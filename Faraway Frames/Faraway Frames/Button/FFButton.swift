@@ -47,4 +47,12 @@ final class FFButton: UIButton {
         self.accessibilityIdentifier = accessibilityIdentifier
         self.accessibilityHint = accessibilityHint
     }
+    
+    func update(title: String, systemImageName: String, accessibilityHint: String) {
+        var updatedConfig = self.configuration ?? .filled()
+        updatedConfig.title = title
+        updatedConfig.image = UIImage(systemName: systemImageName)
+        self.configuration = updatedConfig
+        self.accessibilityHint = accessibilityHint
+    }
 }
