@@ -48,7 +48,7 @@ class FilmDetailViewModel {
             currentState = .noFilmSelected
             return
         }
-        
+        hasChanges = false
         let displayModel = FilmDetailDisplayModel(film: film)
         currentState = .content(displayModel: displayModel)
         getMovieBanner(for: film, displayModel: displayModel)
