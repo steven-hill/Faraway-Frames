@@ -77,12 +77,29 @@ final class ExploreListVC: UIViewController {
         ])
     }
     
+//    private func createLayout() -> UICollectionViewLayout {
+//        var config = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
+//        config.backgroundColor = .systemBackground
+//        config.showsSeparators = true
+//        config.headerMode = viewModel.currentState == .content(isUsingArchivedData: true) ? .supplementary : .none
+//        return UICollectionViewCompositionalLayout.list(using: config)
+//    }
+    
     private func createLayout() -> UICollectionViewLayout {
-        var config = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
-        config.backgroundColor = .systemBackground
-        config.showsSeparators = true
-        config.headerMode = viewModel.currentState == .content(isUsingArchivedData: true) ? .supplementary : .none
-        return UICollectionViewCompositionalLayout.list(using: config)
+        // This provider closure runs dynamically when the layout re-evaluates
+        let sectionProvider = { [weak self] (sectionIndex: Int, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? in
+            guard let self = self else { return nil }
+            
+            var config = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
+            config.backgroundColor = .systemBackground
+            config.showsSeparators = true
+            
+            // Dynamically toggle header mode based on the view model state
+            config.headerMode = self.viewModel.currentState == .content(isUsingArchivedData: true) ? .supplementary : .none
+            
+            return NSCollectionLayoutSection.list(using: config, layoutEnvironment: layoutEnvironment)
+        }
+        return UICollectionViewCompositionalLayout(sectionProvider: sectionProvider)
     }
     
     @MainActor
@@ -242,7 +259,6 @@ extension ExploreListVC: UICollectionViewDelegate {
 // MARK: - Films List View Model Delegate
 extension ExploreListVC: FilmsListViewModelDelegate {
     func didUpdateFilms(_ films: [Film]) {
-        collectionView.setCollectionViewLayout(createLayout(), animated: true)
         self.films = films
         let filmIds = films.map({ $0.id })
         filmLookup = Dictionary(uniqueKeysWithValues: films.map { ($0.id, $0) })
