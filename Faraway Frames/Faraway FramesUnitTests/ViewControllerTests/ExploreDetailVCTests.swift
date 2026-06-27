@@ -235,10 +235,10 @@ struct ExploreDetailVCTests {
         sut.upNextButton.sendActions(for: .touchUpInside)
         await Task.yield()
         
-        #expect(spyVM.updateStatusCalled == true)
-        #expect(spyVM.capturedQueue == .upNext)
-        #expect(spyVM.capturedAction == .add)
-        #expect(sut.upNextButton.isEnabled == false)
+        #expect(spyVM.updateStatusCalled == true, "Should have called the method.")
+        #expect(spyVM.capturedQueue == .upNext, "Should be the upNext queue.")
+        #expect(spyVM.capturedAction == .add, "Action should be add.")
+        #expect(sut.upNextButton.isEnabled == false, "The button should be disabled.")
     }
     
     @Test("Tapping watchedButton invokes the view model with the correct parameters")
@@ -248,10 +248,10 @@ struct ExploreDetailVCTests {
         sut.watchedButton.sendActions(for: .touchUpInside)
         await Task.yield()
         
-        #expect(spyVM.updateStatusCalled == true)
-        #expect(spyVM.capturedQueue == .watched)
-        #expect(spyVM.capturedAction == .add)
-        #expect(sut.watchedButton.isEnabled == false)
+        #expect(spyVM.updateStatusCalled == true, "Should have called the method.")
+        #expect(spyVM.capturedQueue == .watched, "Should be the watched queue.")
+        #expect(spyVM.capturedAction == .add, "Action should be add.")
+        #expect(sut.watchedButton.isEnabled == false, "The button should be disabled.")
     }
     
     @Test("`viewWillDisappear` calls delegate with the film when view model has changes")
@@ -266,8 +266,8 @@ struct ExploreDetailVCTests {
         
         #expect(sut.filmDetailViewModel.hasChanges == true, "Should be true.")
         #expect(delegateSpy.didUpdateFilmCalled == true, "Delegate should be notified when changes exist.")
-        #expect(delegateSpy.capturedFilm?.id == Film.sample[0].id)
-        #expect(delegateSpy.capturedFilm?.isUpNext == true)
+        #expect(delegateSpy.capturedFilm?.id == Film.sample[0].id, "The updated film should match the film being shown in the view controller.")
+        #expect(delegateSpy.capturedFilm?.isUpNext == true, "Should be true.")
     }
     
     @Test("`viewWillDisappear` silently exits when view model has no changes")
@@ -279,7 +279,7 @@ struct ExploreDetailVCTests {
         sut.viewWillDisappear(false)
         
         #expect(delegateSpy.didUpdateFilmCalled == false, "Delegate must remain uncalled if no changes occurred.")
-        #expect(delegateSpy.capturedFilm == nil)
+        #expect(delegateSpy.capturedFilm == nil, "Should be nil.")
     }
     
     //MARK: - SUT Helper Methods
