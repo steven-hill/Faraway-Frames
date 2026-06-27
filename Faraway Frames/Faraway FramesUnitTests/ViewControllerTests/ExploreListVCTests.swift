@@ -391,7 +391,7 @@ struct ExploreListVCTests {
         #expect(sut.searchController.searchBar.isEnabled == false, "Should be false.")
     }
     
-    @Test func exploreListVC_didSelectItemAt_notifiesDelegate_withCorrectFilm() async {
+    @Test func exploreListVC_didSelectItemAt_notifiesDelegate_withCorrectFilm() {
         let sut = makeSUT()
         let spy = ExploreNavigationSpy()
         sut.navigationDelegate = spy
@@ -401,12 +401,7 @@ struct ExploreListVCTests {
         sut.didUpdateFilms(films)
         let indexPath = IndexPath(item: 0, section: 0)
         
-        await withCheckedContinuation { continuation in
-            spy.onDidSelectFilmCalled = { _ in
-                continuation.resume()
-            }
-            sut.collectionView(sut.collectionView, didSelectItemAt: indexPath)
-        }
+        sut.collectionView(sut.collectionView, didSelectItemAt: indexPath)
         
         #expect(spy.didSelectFilmCalled, "Delegate should be called.")
         #expect(spy.selectedFilm?.id == testFilm.id, "Both ids should match.")
@@ -586,30 +581,30 @@ struct ExploreListVCTests {
     }
     
     @Test("`filmDetailViewController` delegate method correctly routes the updated film to FilmsListViewModel")
-        func exploreListVC_filmDetailViewController_routesUpdatedFilmToFilmsListViewModel() async {
-            let initialFilm = Film.sample[0]
-            let mockFilmsListService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
-            let imageLoader = MockImageLoader()
-            let testPersistenceController = try! PersistenceController(inMemory: true)
-            let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-            let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
-            let sut = ExploreListVC(viewModel: filmsListViewModel)
-            sut.loadViewIfNeeded()
-            await sut.loadTask?.value
-            let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-            let mockDetailVM = FilmDetailViewModel(imageLoader: imageLoader, filmQueueService: filmQueueService)
-            let dummyDetailVC = ExploreDetailVC(filmDetailViewModel: mockDetailVM)
-            
-            var mutatedFilm = initialFilm
-            mutatedFilm.isWatched = true
-            sut.filmDetailViewController(dummyDetailVC, didUpdateFilm: mutatedFilm)
-            
-            if let mutatedFilmInFilmsArray = filmsListViewModel.films.first(where: { $0.id == initialFilm.id }) {
-                #expect(mutatedFilmInFilmsArray.isWatched == true, "The delegate function should successfully trigger viewModel.updateFilmInArrays(_:) to change the flag.")
-            } else {
-                Issue.record("The film with ID 'initialFilm.id' was missing entirely from the films array.")
-            }
+    func exploreListVC_filmDetailViewController_routesUpdatedFilmToFilmsListViewModel() async {
+        let initialFilm = Film.sample[0]
+        let mockFilmsListService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
+        let imageLoader = MockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
+        let sut = ExploreListVC(viewModel: filmsListViewModel)
+        sut.loadViewIfNeeded()
+        await sut.loadTask?.value
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
+        let mockDetailVM = FilmDetailViewModel(imageLoader: imageLoader, filmQueueService: filmQueueService)
+        let dummyDetailVC = ExploreDetailVC(filmDetailViewModel: mockDetailVM)
+        
+        var mutatedFilm = initialFilm
+        mutatedFilm.isWatched = true
+        sut.filmDetailViewController(dummyDetailVC, didUpdateFilm: mutatedFilm)
+        
+        if let mutatedFilmInFilmsArray = filmsListViewModel.films.first(where: { $0.id == initialFilm.id }) {
+            #expect(mutatedFilmInFilmsArray.isWatched == true, "The delegate function should successfully trigger viewModel.updateFilmInArrays(_:) to change the flag.")
+        } else {
+            Issue.record("The film with ID 'initialFilm.id' was missing entirely from the films array.")
         }
+    }
     
     // MARK: - SUT Helper Methods
     private func makeSUT() -> ExploreListVC {

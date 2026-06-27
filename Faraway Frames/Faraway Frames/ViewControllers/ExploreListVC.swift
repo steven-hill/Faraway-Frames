@@ -232,10 +232,7 @@ extension ExploreListVC: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard let filmId = dataSource.itemIdentifier(for: indexPath),
               let selectedFilm = filmLookup[filmId] else { return }
-        Task {
-            let film = await viewModel.syncFilmWithDatabase(selectedFilm)
-            navigationDelegate?.didSelectFilm(film)
-        }
+        navigationDelegate?.didSelectFilm(selectedFilm)
         if navigationDelegate?.shouldDeselectAfterSelection == true {
             collectionView.deselectItem(at: indexPath, animated: true)
         }
