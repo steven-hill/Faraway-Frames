@@ -43,7 +43,7 @@ struct FilmDetailViewModelTests {
         case .content(let displayModel, _):
             #expect(displayModel.title == film.title, "Should match.")
             #expect(displayModel.visualOriginalTitles == "\(film.originalTitle)\n\(film.originalTitleRomanised)", "Should match.")
-        case .error(_):
+        case .error(_, _, _):
             Issue.record("Expected state to be `.content`, but it was `.error`.")
         }
         #expect(sut.hasChanges == false, "Should still be false.")
@@ -319,7 +319,7 @@ struct FilmDetailViewModelTests {
         
         await sut.updateStatus(for: targetFilm, queue: .upNext, action: .add)
         
-        #expect(sut.currentState == .error(expectedError), "Should be updated to error.")
+        #expect(sut.currentState == .error(expectedError, targetFilm, .upNext), "Should be updated to error.")
         #expect(spy.didReceiveErrorCallCount == 1, "Should have called delegate method once on add failure.")
     }
     
@@ -351,7 +351,7 @@ struct FilmDetailViewModelTests {
         
         await sut.updateStatus(for: targetFilm, queue: .upNext, action: .remove)
         
-        #expect(sut.currentState == .error(expectedError), "Should be updated to error.")
+        #expect(sut.currentState == .error(expectedError, targetFilm, .upNext), "Should be updated to error.")
         #expect(spy.didReceiveErrorCallCount == 1, "Should have called delegate method once on add failure.")
     }
     
@@ -376,7 +376,7 @@ struct FilmDetailViewModelTests {
         
         await sut.updateStatus(for: targetFilm, queue: .watched, action: .add)
         
-        #expect(sut.currentState == .error(expectedError), "Should be updated to error.")
+        #expect(sut.currentState == .error(expectedError, targetFilm, .watched), "Should be updated to error.")
         #expect(spy.didReceiveErrorCallCount == 1, "Should have called delegate method once on add failure.")
     }
     
@@ -408,8 +408,34 @@ struct FilmDetailViewModelTests {
         
         await sut.updateStatus(for: targetFilm, queue: .watched, action: .remove)
         
-        #expect(sut.currentState == .error(expectedError), "Should be updated to error.")
+        #expect(sut.currentState == .error(expectedError, targetFilm, .watched), "Should be updated to error.")
         #expect(spy.didReceiveErrorCallCount == 1, "Should have called delegate method once on add failure.")
+    }
+    
+    @Test("View model loads film content again")
+    func filmDetailViewModel_returnToFilmContent_loadsFilmContentAgain() {
+        let film = Film.sample[0]
+        let mockImageLoader = MockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
+        let sut = FilmDetailViewModel(film: film, imageLoader: mockImageLoader, filmQueueService: filmQueueService)
+        let spy = FilmDetailViewModelSpy()
+        sut.delegate = spy
+        sut.setFilm(film)
+        
+        sut.returnToFilmContent(film: film)
+        
+        switch sut.currentState {
+        case .noFilmSelected:
+            Issue.record("Expected state to be `.content`, but it was `.noFilmSelected`.")
+        case .content(let displayModel, _):
+            #expect(displayModel.title == film.title, "Should match.")
+            #expect(displayModel.visualOriginalTitles == "\(film.originalTitle)\n\(film.originalTitleRomanised)", "Should match.")
+        case .error(_, _, _):
+            Issue.record("Expected state to be `.content`, but it was `.error`.")
+        }
+        #expect(sut.hasChanges == false, "Should be false.")
+        #expect(spy.updateFilmDetailsCallCount == 2, "Should have been called twice; once for the loading content the first time, twice for loading it again.")
     }
     
     //MARK: - Helper method

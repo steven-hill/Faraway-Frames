@@ -123,12 +123,16 @@ final class ExploreDetailVC: UIViewController {
         case .content(let displayModel, let image):
             config = nil
             createContent(displayModel: displayModel, image: image)
+            contentView.isHidden = false
             buttonsContainer.isHidden = false
             self.isUpNext = displayModel.isUpNext
             self.isWatched = displayModel.isWatched
             updatedFilm = displayModel.film
-        case .error(let error):
-            config = createErrorConfig(error: error)
+        case .error(let error, let film, let queue):
+            config = createErrorConfig(error: error, film: film, queue: queue)
+            navigationItem.hidesBackButton = true
+            contentView.isHidden = true
+            buttonsContainer.isHidden = true
         }
         self.contentUnavailableConfiguration = config
     }
@@ -159,8 +163,28 @@ final class ExploreDetailVC: UIViewController {
         )
     }
     
-    private func createErrorConfig(error: FilmDetailError) -> UIContentUnavailableConfiguration {
+    private func createErrorConfig(error: FilmDetailError, film: Film, queue: FilmQueue) -> UIContentUnavailableConfiguration {
         var config = UIContentUnavailableConfiguration.empty()
+        config.text = "Error"
+        config.secondaryText = "\(error.description)"
+        config.image = SFSymbols.exclamationMarkTriangle
+        config.imageProperties.tintColor = .systemRed
+        
+        config.button = .prominentGlass()
+        config.button.title = "Retry"
+        config.buttonProperties.primaryAction = UIAction { [weak self] _ in
+            guard let self else { return }
+            //TODO: - Retry
+            self.setNeedsUpdateContentUnavailableConfiguration()
+        }
+        
+        config.secondaryButton = .plain()
+        config.secondaryButton.title = "Cancel"
+        config.secondaryButtonProperties.primaryAction = UIAction { [weak self] _ in
+            guard let self else { return }
+            //TODO: - Re-enable the disabled button, and return to film content
+            self.setNeedsUpdateContentUnavailableConfiguration()
+        }
         return config
     }
 

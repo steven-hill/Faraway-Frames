@@ -206,12 +206,43 @@ struct ExploreDetailVCTests {
                                       filmQueueService: filmQueueService)
         let sut = ExploreDetailVC(filmDetailViewModel: vm)
         let expectedError = FilmDetailError.addFailed(scenario.expectedReason)
-        
         await sut.filmDetailViewModel.updateStatus(for: targetFilm, queue: .upNext, action: .add)
+
+        sut.didReceiveError()
+        sut.view.layoutIfNeeded()
+
+        #expect(sut.filmDetailViewModel.currentState == .error(expectedError, targetFilm, .upNext), "Should be in the error state.")
+        #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil.")
+    }
+    
+    @Test("VC creates configuration for the error state",
+          arguments: PersistenceHelper.errorScenarios
+    )
+    func exploreDetailVC_createErrorConfig_createsConfiguration(
+    scenario: (systemError: Error,
+               expectedReason: FilmDetailError.FailureReason)
+    ) async {
+        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext, saver: saver)
+        let targetFilm = Film.sample[0]
+        let vm = FilmDetailViewModel(film: targetFilm,
+                                      imageLoader: mockImageLoader,
+                                      filmQueueService: filmQueueService)
+        let sut = ExploreDetailVC(filmDetailViewModel: vm)
+        await sut.filmDetailViewModel.updateStatus(for: targetFilm, queue: .upNext, action: .add)
+
+        sut.didReceiveError()
         sut.view.layoutIfNeeded()
         
-        #expect(sut.filmDetailViewModel.currentState == .error(expectedError), "Should be in the error state.")
-        #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil.")
+        let state = UIContentUnavailableConfigurationState(traitCollection: sut.traitCollection)
+        sut.updateContentUnavailableConfiguration(using: state)
+        let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
+        
+        #expect(config != nil, "Should not be nil.")
+        #expect(config?.button.title != nil, "Should have a title.")
+        #expect(config?.secondaryButton.title != nil, "Should have a title.")
     }
     
     @Test("Integration test to check that the label successfully receives the text from ViewModel.")
