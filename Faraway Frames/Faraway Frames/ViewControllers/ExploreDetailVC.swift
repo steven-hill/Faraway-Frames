@@ -282,7 +282,6 @@ final class ExploreDetailVC: UIViewController {
         let action: QueueAction = isActive ? .remove : .add
         let tappedButton = (queue == .upNext) ? upNextButton : watchedButton
         setButtonEnabled(false, button: tappedButton)
-        //setButtonsEnabled(false)
         Task {
             await filmDetailViewModel.updateStatus(for: displayModel.film, queue: queue, action: action)
         }
@@ -365,7 +364,7 @@ extension ExploreDetailVC: FilmDetailViewModelDelegate {
     
     func didUpdateWatchedStatus(isWatched: Bool) {
         self.isWatched = isWatched
-        //setButtonsEnabled(true)
+        watchedButton.isEnabled = true
     }
     
     func didReceiveError(_ error: FilmDetailError) {

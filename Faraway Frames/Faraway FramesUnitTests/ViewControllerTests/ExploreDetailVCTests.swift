@@ -269,8 +269,8 @@ struct ExploreDetailVCTests {
         #expect(sut.watchedButton.isEnabled == true, "The button should be enabled.")
     }
     
-    @Test("Tapping watchedButton disables the button")
-    func exploreDetailVC_watchedButtonTap_disablesButton() async {
+    @Test("Tapping watchedButton disables the button while persistence operation is performed")
+    func exploreDetailVC_watchedButtonTap_disablesButtonTemporarily() async {
         let sut = makeSUTWithFilm()
         _ = sut.view
         
@@ -278,6 +278,11 @@ struct ExploreDetailVCTests {
         await Task.yield()
         
         #expect(sut.watchedButton.isEnabled == false, "The button should be disabled.")
+        #expect(sut.upNextButton.isEnabled == true, "The button should be enabled.")
+        
+        sut.didUpdateWatchedStatus(isWatched: true)
+        
+        #expect(sut.watchedButton.isEnabled == true, "The button should be enabled.")
         #expect(sut.upNextButton.isEnabled == true, "The button should be enabled.")
     }
     
