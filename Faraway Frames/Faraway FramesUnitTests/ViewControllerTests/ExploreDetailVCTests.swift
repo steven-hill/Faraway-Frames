@@ -373,6 +373,33 @@ struct ExploreDetailVCTests {
         _ = vc.view
         return (vc, spyVM)
     }
+    
+    //MARK: - Film Detail View Model Spy
+    @MainActor
+    private final class FilmDetailViewModelSpy: FilmDetailViewModel {
+        var updateStatusCalled = false
+        var capturedFilm: Film?
+        var capturedQueue: FilmQueue?
+        var capturedAction: QueueAction?
+
+        override func updateStatus(for film: Film, queue: FilmQueue, action: QueueAction) async {
+            updateStatusCalled = true
+            capturedFilm = film
+            capturedQueue = queue
+            capturedAction = action
+        }
+    }
+    
+    //MARK: - Film Detail View Controller Delegate Spy
+    private final class FilmDetailViewControllerDelegateSpy: FilmDetailViewControllerDelegate {
+        var didUpdateFilmCalled = false
+        var capturedFilm: Film?
+        
+        func filmDetailViewController(_ controller: ExploreDetailVC, didUpdateFilm updatedFilm: Film) {
+            didUpdateFilmCalled = true
+            capturedFilm = updatedFilm
+        }
+    }
 }
 
 //MARK: - Extension on UIView
@@ -387,32 +414,5 @@ private extension UIView {
             }
         }
         return nil
-    }
-}
-
-//MARK: - Film Detail View Model Spy
-@MainActor
-final class FilmDetailViewModelSpy: FilmDetailViewModel {
-    var updateStatusCalled = false
-    var capturedFilm: Film?
-    var capturedQueue: FilmQueue?
-    var capturedAction: QueueAction?
-
-    override func updateStatus(for film: Film, queue: FilmQueue, action: QueueAction) async {
-        updateStatusCalled = true
-        capturedFilm = film
-        capturedQueue = queue
-        capturedAction = action
-    }
-}
-
-//MARK: - Film Detail View Controller Delegate Spy
-final class FilmDetailViewControllerDelegateSpy: FilmDetailViewControllerDelegate {
-    var didUpdateFilmCalled = false
-    var capturedFilm: Film?
-    
-    func filmDetailViewController(_ controller: ExploreDetailVC, didUpdateFilm updatedFilm: Film) {
-        didUpdateFilmCalled = true
-        capturedFilm = updatedFilm
     }
 }
