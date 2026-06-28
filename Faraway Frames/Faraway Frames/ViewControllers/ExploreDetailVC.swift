@@ -128,8 +128,7 @@ final class ExploreDetailVC: UIViewController {
             self.isWatched = displayModel.isWatched
             updatedFilm = displayModel.film
         case .error(let error):
-            // TODO: - add config
-            print("error")
+            config = createErrorConfig(error: error)
         }
         self.contentUnavailableConfiguration = config
     }
@@ -158,6 +157,11 @@ final class ExploreDetailVC: UIViewController {
             producer: displayModel.producer,
             accessibilityLabelText: displayModel.creditsAccessibilityLabel
         )
+    }
+    
+    private func createErrorConfig(error: FilmDetailError) -> UIContentUnavailableConfiguration {
+        var config = UIContentUnavailableConfiguration.empty()
+        return config
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -370,7 +374,8 @@ extension ExploreDetailVC: FilmDetailViewModelDelegate {
         setButtonEnabled(true, button: watchedButton)
     }
     
-    func didReceiveError(_ error: FilmDetailError) {
+    func didReceiveError() {
+        setNeedsUpdateContentUnavailableConfiguration()
     }
 }
 

@@ -319,9 +319,8 @@ struct FilmDetailViewModelTests {
         
         await sut.updateStatus(for: targetFilm, queue: .upNext, action: .add)
         
-        #expect(spy.didReceiveErrorCallCount == 1, "Should have called delegate method once on add failure.")
-        #expect(spy.receivedError == expectedError, "Delegate should receive matching add error context case.")
         #expect(sut.currentState == .error(expectedError), "Should be updated to error.")
+        #expect(spy.didReceiveErrorCallCount == 1, "Should have called delegate method once on add failure.")
     }
     
     @Test("`updateStatus` should handle remove film from upNext errors by updating `currentState` and triggering delegate method call",
@@ -354,7 +353,6 @@ struct FilmDetailViewModelTests {
         
         #expect(sut.currentState == .error(expectedError), "Should be updated to error.")
         #expect(spy.didReceiveErrorCallCount == 1, "Should have called delegate method once on add failure.")
-        #expect(spy.receivedError == expectedError, "Delegate should receive matching remove error context case.")
     }
     
     @Test("`updateStatus` should handle add film to watched errors by updating `currentState` and triggering delegate method call",
@@ -380,7 +378,6 @@ struct FilmDetailViewModelTests {
         
         #expect(sut.currentState == .error(expectedError), "Should be updated to error.")
         #expect(spy.didReceiveErrorCallCount == 1, "Should have called delegate method once on add failure.")
-        #expect(spy.receivedError == expectedError, "Delegate should receive matching add error context case.")
     }
     
     @Test("`updateStatus` should handle remove film from watched errors by updating `currentState` and triggering delegate method call",
@@ -413,7 +410,6 @@ struct FilmDetailViewModelTests {
         
         #expect(sut.currentState == .error(expectedError), "Should be updated to error.")
         #expect(spy.didReceiveErrorCallCount == 1, "Should have called delegate method once on add failure.")
-        #expect(spy.receivedError == expectedError, "Delegate should receive matching remove error context case.")
     }
     
     //MARK: - Helper method
@@ -431,7 +427,6 @@ struct FilmDetailViewModelTests {
         var upNextStatusChangeCallCount = 0
         var watchedStatusChangeCallCount = 0
         var didReceiveErrorCallCount: Int = 0
-        var receivedError: FilmDetailError?
         
         func didUpdateFilmDetails() {
             updateFilmDetailsCallCount += 1
@@ -449,9 +444,8 @@ struct FilmDetailViewModelTests {
             watchedStatusChangeCallCount += 1
         }
         
-        func didReceiveError(_ error: FilmDetailError) {
+        func didReceiveError() {
             didReceiveErrorCallCount += 1
-            receivedError = error
         }
     }
     

@@ -8,6 +8,7 @@
 import Testing
 @testable import Faraway_Frames
 import UIKit
+import CoreData
 
 @MainActor
 struct ExploreDetailVCTests {
@@ -186,6 +187,31 @@ struct ExploreDetailVCTests {
         sut.didUpdateWatchedStatus(isWatched: false)
         
         #expect(sut.isWatched == false, "Should be false.")
+    }
+    
+    @Test("VC requests that the system update the content-unavailable configuration for the error state",
+          arguments: errorScenarios
+    )
+    func exploreDetailVC_didReceiveError_notifiesContentUnavailableConfigurationToUpdate(
+    scenario: (systemError: Error,
+               expectedReason: FilmDetailError.FailureReason)
+    ) async {
+        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext, saver: saver)
+        let targetFilm = Film.sample[0]
+        let vm = FilmDetailViewModel(film: targetFilm,
+                                      imageLoader: mockImageLoader,
+                                      filmQueueService: filmQueueService)
+        let sut = ExploreDetailVC(filmDetailViewModel: vm)
+        let expectedError = FilmDetailError.addFailed(scenario.expectedReason)
+        
+        await sut.filmDetailViewModel.updateStatus(for: targetFilm, queue: .upNext, action: .add)
+        sut.view.layoutIfNeeded()
+        
+        #expect(sut.filmDetailViewModel.currentState == .error(expectedError), "Should be in the error state.")
+        #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil.")
     }
     
     @Test("Integration test to check that the label successfully receives the text from ViewModel.")
@@ -389,4 +415,17 @@ final class FilmDetailViewControllerDelegateSpy: FilmDetailViewControllerDelegat
         didUpdateFilmCalled = true
         capturedFilm = updatedFilm
     }
+}
+
+// MARK: - Persistence Errors Helper
+/// Used in tests involving Core Data operations error handling.
+nonisolated var errorScenarios: [(systemError: Error, expectedReason: FilmDetailError.FailureReason)] {
+    [
+        (CocoaError(.fileWriteOutOfSpace), .diskFull),
+        (CocoaError(.persistentStoreOpen), .databaseError),
+        (CocoaError(.managedObjectReferentialIntegrity), .databaseError),
+        (CocoaError(.persistentStoreTypeMismatch), .databaseError),
+        (CocoaError(.fileNoSuchFile), .databaseError),
+        (UnknownError(), .unknown("Unknown error."))
+    ]
 }

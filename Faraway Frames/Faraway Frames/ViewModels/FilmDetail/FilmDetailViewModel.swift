@@ -61,8 +61,8 @@ class FilmDetailViewModel {
             delegate?.didUpdateWithEmptyState()
         case .content(_,_):
             delegate?.didUpdateFilmDetails()
-        case .error(let error):
-            delegate?.didReceiveError(error)
+        case .error:
+            delegate?.didReceiveError()
         }
     }
     
