@@ -252,8 +252,8 @@ struct ExploreDetailVCTests {
         #expect(spyVM.capturedAction == .add, "Action should be add.")
     }
     
-    @Test("Tapping upNextButton disables the button")
-    func exploreDetailVC_upNextButtonTap_disablesButton() async {
+    @Test("Tapping upNextButton disables the button while persistence operation is performed")
+    func exploreDetailVC_upNextButtonTap_disablesButtonTemporarily() async {
         let sut = makeSUTWithFilm()
         _ = sut.view
         
@@ -261,6 +261,11 @@ struct ExploreDetailVCTests {
         await Task.yield()
         
         #expect(sut.upNextButton.isEnabled == false, "The button should be disabled.")
+        #expect(sut.watchedButton.isEnabled == true, "The button should be enabled.")
+        
+        sut.didUpdateUpNextStatus(isUpNext: true)
+        
+        #expect(sut.upNextButton.isEnabled == true, "The button should be enabled.")
         #expect(sut.watchedButton.isEnabled == true, "The button should be enabled.")
     }
     

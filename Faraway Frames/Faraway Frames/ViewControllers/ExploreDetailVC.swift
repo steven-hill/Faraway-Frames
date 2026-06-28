@@ -360,7 +360,7 @@ extension ExploreDetailVC: FilmDetailViewModelDelegate {
     
     func didUpdateUpNextStatus(isUpNext: Bool) {
         self.isUpNext = isUpNext
-        //setButtonsEnabled(true)
+        upNextButton.isEnabled = true
     }
     
     func didUpdateWatchedStatus(isWatched: Bool) {
