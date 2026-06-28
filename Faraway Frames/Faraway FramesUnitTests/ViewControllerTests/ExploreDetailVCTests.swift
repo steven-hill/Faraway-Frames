@@ -190,7 +190,7 @@ struct ExploreDetailVCTests {
     }
     
     @Test("VC requests that the system update the content-unavailable configuration for the error state",
-          arguments: errorScenarios
+          arguments: PersistenceHelper.errorScenarios
     )
     func exploreDetailVC_didReceiveError_notifiesContentUnavailableConfigurationToUpdate(
     scenario: (systemError: Error,
@@ -415,17 +415,4 @@ final class FilmDetailViewControllerDelegateSpy: FilmDetailViewControllerDelegat
         didUpdateFilmCalled = true
         capturedFilm = updatedFilm
     }
-}
-
-// MARK: - Persistence Errors Helper
-/// Used in tests involving Core Data operations error handling.
-nonisolated var errorScenarios: [(systemError: Error, expectedReason: FilmDetailError.FailureReason)] {
-    [
-        (CocoaError(.fileWriteOutOfSpace), .diskFull),
-        (CocoaError(.persistentStoreOpen), .databaseError),
-        (CocoaError(.managedObjectReferentialIntegrity), .databaseError),
-        (CocoaError(.persistentStoreTypeMismatch), .databaseError),
-        (CocoaError(.fileNoSuchFile), .databaseError),
-        (UnknownError(), .unknown("Unknown error."))
-    ]
 }

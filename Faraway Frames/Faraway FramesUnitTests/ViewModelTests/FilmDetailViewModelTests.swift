@@ -299,7 +299,7 @@ struct FilmDetailViewModelTests {
     }
     
     @Test("`updateStatus` should handle add film to upNext errors by updating `currentState` and triggering delegate method call",
-          arguments: errorScenarios
+          arguments: PersistenceHelper.errorScenarios
     )
     func filmDetailViewModel_updateStatus_onSaveError_whenAddingFilmToUpNext_handlesError(
         scenario: (systemError: Error,
@@ -324,7 +324,7 @@ struct FilmDetailViewModelTests {
     }
     
     @Test("`updateStatus` should handle remove film from upNext errors by updating `currentState` and triggering delegate method call",
-          arguments: errorScenarios
+          arguments: PersistenceHelper.errorScenarios
     )
     func filmDetailViewModel_updateStatus_onSaveError_whenRemovingFilmFromUpNext_handlesError(
         scenario: (systemError: Error,
@@ -356,7 +356,7 @@ struct FilmDetailViewModelTests {
     }
     
     @Test("`updateStatus` should handle add film to watched errors by updating `currentState` and triggering delegate method call",
-          arguments: errorScenarios
+          arguments: PersistenceHelper.errorScenarios
     )
     func filmDetailViewModel_updateStatus_onSaveError_whenAddingFilmToWatched_handlesError(
         scenario: (systemError: Error,
@@ -381,7 +381,7 @@ struct FilmDetailViewModelTests {
     }
     
     @Test("`updateStatus` should handle remove film from watched errors by updating `currentState` and triggering delegate method call",
-          arguments: errorScenarios
+          arguments: PersistenceHelper.errorScenarios
     )
     func filmDetailViewModel_updateStatus_onSaveError_whenRemovingFilmFromWatched_handlesError(
         scenario: (systemError: Error,
@@ -447,18 +447,5 @@ struct FilmDetailViewModelTests {
         func didReceiveError() {
             didReceiveErrorCallCount += 1
         }
-    }
-    
-    // MARK: - System Errors Helper
-    /// Used in tests involving Core Data operations error handling.
-    nonisolated static var errorScenarios: [(systemError: Error, expectedReason: FilmDetailError.FailureReason)] {
-        [
-            (CocoaError(.fileWriteOutOfSpace), .diskFull),
-            (CocoaError(.persistentStoreOpen), .databaseError),
-            (CocoaError(.managedObjectReferentialIntegrity), .databaseError),
-            (CocoaError(.persistentStoreTypeMismatch), .databaseError),
-            (CocoaError(.fileNoSuchFile), .databaseError),
-            (UnknownError(), .unknown("Unknown error."))
-        ]
     }
 }
