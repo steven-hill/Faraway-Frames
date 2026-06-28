@@ -127,6 +127,9 @@ final class ExploreDetailVC: UIViewController {
             self.isUpNext = displayModel.isUpNext
             self.isWatched = displayModel.isWatched
             updatedFilm = displayModel.film
+        case .error(let error):
+            // TODO: - add config
+            print("error")
         }
         self.contentUnavailableConfiguration = config
     }

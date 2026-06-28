@@ -43,6 +43,8 @@ struct FilmDetailViewModelTests {
         case .content(let displayModel, _):
             #expect(displayModel.title == film.title, "Should match.")
             #expect(displayModel.visualOriginalTitles == "\(film.originalTitle)\n\(film.originalTitleRomanised)", "Should match.")
+        case .error(_):
+            Issue.record("Expected state to be `.content`, but it was `.error`.")
         }
         #expect(sut.hasChanges == false, "Should still be false.")
     }
@@ -296,7 +298,7 @@ struct FilmDetailViewModelTests {
         #expect(spy.watchedStatusChangeCallCount == 2, "Should not call delegate method because the film no longer exists in the database.")
     }
     
-    @Test("`updateStatus` should handle add film to upNext errors by calling the delegate",
+    @Test("`updateStatus` should handle add film to upNext errors by updating `currentState` and triggering delegate method call",
           arguments: errorScenarios
     )
     func filmDetailViewModel_updateStatus_onSaveError_whenAddingFilmToUpNext_handlesError(
@@ -319,9 +321,10 @@ struct FilmDetailViewModelTests {
         
         #expect(spy.didReceiveErrorCallCount == 1, "Should have called delegate method once on add failure.")
         #expect(spy.receivedError == expectedError, "Delegate should receive matching add error context case.")
+        #expect(sut.currentState == .error(expectedError), "Should be updated to error.")
     }
     
-    @Test("`updateStatus` should handle remove film from upNext errors by calling the delegate",
+    @Test("`updateStatus` should handle remove film from upNext errors by updating `currentState` and triggering delegate method call",
           arguments: errorScenarios
     )
     func filmDetailViewModel_updateStatus_onSaveError_whenRemovingFilmFromUpNext_handlesError(
@@ -349,11 +352,12 @@ struct FilmDetailViewModelTests {
         
         await sut.updateStatus(for: targetFilm, queue: .upNext, action: .remove)
         
+        #expect(sut.currentState == .error(expectedError), "Should be updated to error.")
         #expect(spy.didReceiveErrorCallCount == 1, "Should have called delegate method once on add failure.")
         #expect(spy.receivedError == expectedError, "Delegate should receive matching remove error context case.")
     }
     
-    @Test("`updateStatus` should handle add film to watched errors by calling the delegate",
+    @Test("`updateStatus` should handle add film to watched errors by updating `currentState` and triggering delegate method call",
           arguments: errorScenarios
     )
     func filmDetailViewModel_updateStatus_onSaveError_whenAddingFilmToWatched_handlesError(
@@ -374,11 +378,12 @@ struct FilmDetailViewModelTests {
         
         await sut.updateStatus(for: targetFilm, queue: .watched, action: .add)
         
+        #expect(sut.currentState == .error(expectedError), "Should be updated to error.")
         #expect(spy.didReceiveErrorCallCount == 1, "Should have called delegate method once on add failure.")
         #expect(spy.receivedError == expectedError, "Delegate should receive matching add error context case.")
     }
     
-    @Test("`updateStatus` should handle remove film from watched errors by calling the delegate",
+    @Test("`updateStatus` should handle remove film from watched errors by updating `currentState` and triggering delegate method call",
           arguments: errorScenarios
     )
     func filmDetailViewModel_updateStatus_onSaveError_whenRemovingFilmFromWatched_handlesError(
@@ -406,6 +411,7 @@ struct FilmDetailViewModelTests {
         
         await sut.updateStatus(for: targetFilm, queue: .watched, action: .remove)
         
+        #expect(sut.currentState == .error(expectedError), "Should be updated to error.")
         #expect(spy.didReceiveErrorCallCount == 1, "Should have called delegate method once on add failure.")
         #expect(spy.receivedError == expectedError, "Delegate should receive matching remove error context case.")
     }

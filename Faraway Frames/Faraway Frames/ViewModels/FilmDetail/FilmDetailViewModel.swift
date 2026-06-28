@@ -15,6 +15,7 @@ class FilmDetailViewModel {
     enum FilmDetailState: Equatable {
         case noFilmSelected
         case content(displayModel: FilmDetailDisplayModel, image: UIImage? = nil)
+        case error(FilmDetailError)
     }
     
     // MARK: - Properties
@@ -60,6 +61,8 @@ class FilmDetailViewModel {
             delegate?.didUpdateWithEmptyState()
         case .content(_,_):
             delegate?.didUpdateFilmDetails()
+        case .error(let error):
+            delegate?.didReceiveError(error)
         }
     }
     
@@ -156,7 +159,7 @@ class FilmDetailViewModel {
             }
         } catch {
             let filmDetailError = action == .add ? FilmDetailError.add(error) : FilmDetailError.delete(error)
-            delegate?.didReceiveError(filmDetailError)
+            currentState = .error(filmDetailError)
         }
     }
 }
