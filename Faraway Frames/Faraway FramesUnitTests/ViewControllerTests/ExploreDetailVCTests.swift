@@ -179,8 +179,8 @@ struct ExploreDetailVCTests {
         #expect(sut.isWatched == true, "Should be true.")
     }
     
-    @Test("`didUpdateUpNextStatus` flips VC's isWatched state property to false")
-    func exploreDetailVC_didUpdateUpNextStatus_isWatchedStatePropertyChangedToTrue() {
+    @Test("`didUpdateWatchedStatus` flips VC's isWatched state property to false")
+    func exploreDetailVC_didUpdateWatchedStatus_isWatchedStatePropertyChangedToFalse() {
         let sut = makeSUTWithFilm()
         
         sut.didUpdateWatchedStatus(isWatched: false)
