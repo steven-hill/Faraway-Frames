@@ -359,12 +359,12 @@ extension ExploreDetailVC: FilmDetailViewModelDelegate {
     
     func didUpdateUpNextStatus(isUpNext: Bool) {
         self.isUpNext = isUpNext
-        upNextButton.isEnabled = true
+        setButtonEnabled(true, button: upNextButton)
     }
     
     func didUpdateWatchedStatus(isWatched: Bool) {
         self.isWatched = isWatched
-        watchedButton.isEnabled = true
+        setButtonEnabled(true, button: watchedButton)
     }
     
     func didReceiveError(_ error: FilmDetailError) {
