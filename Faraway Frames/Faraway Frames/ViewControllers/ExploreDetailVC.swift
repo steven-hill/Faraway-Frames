@@ -280,15 +280,19 @@ final class ExploreDetailVC: UIViewController {
         guard case .content(let displayModel, _) = filmDetailViewModel.currentState else { return }
         let isActive = (queue == .upNext) ? isUpNext : isWatched
         let action: QueueAction = isActive ? .remove : .add
-        setButtonsEnabled(false)
+        let tappedButton = (queue == .upNext) ? upNextButton : watchedButton
+        setButtonEnabled(false, button: tappedButton)
         Task {
             await filmDetailViewModel.updateStatus(for: displayModel.film, queue: queue, action: action)
         }
     }
 
-    private func setButtonsEnabled(_ enabled: Bool) {
-        upNextButton.isEnabled = enabled
-        watchedButton.isEnabled = enabled
+    private func setButtonEnabled(_ enabled: Bool, button: FFButton) {
+        if button == upNextButton {
+            upNextButton.isEnabled = enabled
+        } else {
+            watchedButton.isEnabled = enabled
+        }
     }
     
     // MARK: - Constraints Setup
@@ -355,12 +359,12 @@ extension ExploreDetailVC: FilmDetailViewModelDelegate {
     
     func didUpdateUpNextStatus(isUpNext: Bool) {
         self.isUpNext = isUpNext
-        setButtonsEnabled(true)
+        setButtonEnabled(true, button: upNextButton)
     }
     
     func didUpdateWatchedStatus(isWatched: Bool) {
         self.isWatched = isWatched
-        setButtonsEnabled(true)
+        setButtonEnabled(true, button: watchedButton)
     }
     
     func didReceiveError(_ error: FilmDetailError) {

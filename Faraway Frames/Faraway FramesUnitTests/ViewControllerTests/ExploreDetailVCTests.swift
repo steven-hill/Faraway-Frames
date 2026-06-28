@@ -179,8 +179,8 @@ struct ExploreDetailVCTests {
         #expect(sut.isWatched == true, "Should be true.")
     }
     
-    @Test("`didUpdateUpNextStatus` flips VC's isWatched state property to false")
-    func exploreDetailVC_didUpdateUpNextStatus_isWatchedStatePropertyChangedToTrue() {
+    @Test("`didUpdateWatchedStatus` flips VC's isWatched state property to false")
+    func exploreDetailVC_didUpdateWatchedStatus_isWatchedStatePropertyChangedToFalse() {
         let sut = makeSUTWithFilm()
         
         sut.didUpdateWatchedStatus(isWatched: false)
@@ -238,7 +238,6 @@ struct ExploreDetailVCTests {
         #expect(spyVM.updateStatusCalled == true, "Should have called the method.")
         #expect(spyVM.capturedQueue == .upNext, "Should be the upNext queue.")
         #expect(spyVM.capturedAction == .add, "Action should be add.")
-        #expect(sut.upNextButton.isEnabled == false, "The button should be disabled.")
     }
     
     @Test("Tapping watchedButton invokes the view model with the correct parameters")
@@ -251,7 +250,40 @@ struct ExploreDetailVCTests {
         #expect(spyVM.updateStatusCalled == true, "Should have called the method.")
         #expect(spyVM.capturedQueue == .watched, "Should be the watched queue.")
         #expect(spyVM.capturedAction == .add, "Action should be add.")
+    }
+    
+    @Test("Tapping upNextButton disables the button while persistence operation is performed")
+    func exploreDetailVC_upNextButtonTap_disablesButtonTemporarily() async {
+        let sut = makeSUTWithFilm()
+        _ = sut.view
+        
+        sut.upNextButton.sendActions(for: .touchUpInside)
+        await Task.yield()
+        
+        #expect(sut.upNextButton.isEnabled == false, "The button should be disabled.")
+        #expect(sut.watchedButton.isEnabled == true, "The button should be enabled.")
+        
+        sut.didUpdateUpNextStatus(isUpNext: true)
+        
+        #expect(sut.upNextButton.isEnabled == true, "The button should be enabled.")
+        #expect(sut.watchedButton.isEnabled == true, "The button should be enabled.")
+    }
+    
+    @Test("Tapping watchedButton disables the button while persistence operation is performed")
+    func exploreDetailVC_watchedButtonTap_disablesButtonTemporarily() async {
+        let sut = makeSUTWithFilm()
+        _ = sut.view
+        
+        sut.watchedButton.sendActions(for: .touchUpInside)
+        await Task.yield()
+        
         #expect(sut.watchedButton.isEnabled == false, "The button should be disabled.")
+        #expect(sut.upNextButton.isEnabled == true, "The button should be enabled.")
+        
+        sut.didUpdateWatchedStatus(isWatched: true)
+        
+        #expect(sut.watchedButton.isEnabled == true, "The button should be enabled.")
+        #expect(sut.upNextButton.isEnabled == true, "The button should be enabled.")
     }
     
     @Test("`viewWillDisappear` calls delegate with the film when view model has changes")
