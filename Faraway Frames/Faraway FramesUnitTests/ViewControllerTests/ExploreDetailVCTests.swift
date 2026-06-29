@@ -8,6 +8,7 @@
 import Testing
 @testable import Faraway_Frames
 import UIKit
+import CoreData
 
 @MainActor
 struct ExploreDetailVCTests {
@@ -188,6 +189,125 @@ struct ExploreDetailVCTests {
         #expect(sut.isWatched == false, "Should be false.")
     }
     
+    @Test("VC requests that the system update the content-unavailable configuration for the error state",
+          arguments: PersistenceHelper.errorScenarios
+    )
+    func exploreDetailVC_didReceiveError_notifiesContentUnavailableConfigurationToUpdate(
+    scenario: (systemError: Error,
+               expectedReason: FilmDetailError.FailureReason)
+    ) async {
+        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext, saver: saver)
+        let targetFilm = Film.sample[0]
+        let vm = FilmDetailViewModel(film: targetFilm,
+                                      imageLoader: mockImageLoader,
+                                      filmQueueService: filmQueueService)
+        let sut = ExploreDetailVC(filmDetailViewModel: vm)
+        let expectedError = FilmDetailError.addFailed(scenario.expectedReason)
+        await sut.filmDetailViewModel.updateStatus(for: targetFilm, queue: .upNext, action: .add)
+
+        sut.didReceiveError()
+        sut.view.layoutIfNeeded()
+
+        #expect(sut.filmDetailViewModel.currentState == .error(expectedError, targetFilm, .upNext), "Should be in the error state.")
+        #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil.")
+    }
+    
+    @Test("VC creates configuration for the error state",
+          arguments: PersistenceHelper.errorScenarios
+    )
+    func exploreDetailVC_createErrorConfig_createsConfiguration(
+    scenario: (systemError: Error,
+               expectedReason: FilmDetailError.FailureReason)
+    ) async {
+        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext, saver: saver)
+        let targetFilm = Film.sample[0]
+        let vm = FilmDetailViewModel(film: targetFilm,
+                                      imageLoader: mockImageLoader,
+                                      filmQueueService: filmQueueService)
+        let sut = ExploreDetailVC(filmDetailViewModel: vm)
+        await sut.filmDetailViewModel.updateStatus(for: targetFilm, queue: .upNext, action: .add)
+
+        sut.didReceiveError()
+        sut.view.layoutIfNeeded()
+        
+        let state = UIContentUnavailableConfigurationState(traitCollection: sut.traitCollection)
+        sut.updateContentUnavailableConfiguration(using: state)
+        let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
+        
+        #expect(config != nil, "Should not be nil.")
+        #expect(config?.button.title != nil, "Should have a title.")
+        #expect(config?.secondaryButton.title != nil, "Should have a title.")
+    }
+    
+    @Test("Tapping `Retry` button on error config calls VM's updateStatus method again and sets `attemptingUpdate` flag to true",
+          arguments: PersistenceHelper.errorScenarios
+    )
+    func exploreDetailVC_tapRetryButtonOnErrorConfig_callsVMUpdateStatusAgain(
+    scenario: (systemError: Error,
+               expectedReason: FilmDetailError.FailureReason)
+    ) async {
+        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext, saver: saver)
+        let targetFilm = Film.sample[0]
+        let vm = FilmDetailViewModel(film: targetFilm,
+                                      imageLoader: mockImageLoader,
+                                      filmQueueService: filmQueueService)
+        let sut = ExploreDetailVC(filmDetailViewModel: vm)
+        sut.filmDetailViewModel.setFilm(targetFilm)
+        await sut.filmDetailViewModel.updateStatus(for: targetFilm, queue: .upNext, action: .add)
+        sut.didReceiveError()
+        sut.view.layoutIfNeeded()
+        let state = UIContentUnavailableConfigurationState(traitCollection: sut.traitCollection)
+        sut.updateContentUnavailableConfiguration(using: state)
+        let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
+        
+        config?.buttonProperties.primaryAction?.performWithSender(nil, target: nil)
+
+        #expect(vm.attemptingToUpdateFilm == true, "Should be true because `updateStatus` was called from the retry button.")
+    }
+    
+    @Test("Tapping `cancel` button on error config reloads film content and updates VM's `currentState`",
+          arguments: PersistenceHelper.errorScenarios
+    )
+    func exploreDetailVC_tapCancelButtonOnErrorConfig_reloadsFilmContentAndUpdatesState(
+    scenario: (systemError: Error,
+               expectedReason: FilmDetailError.FailureReason)
+    ) async {
+        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext, saver: saver)
+        let targetFilm = Film.sample[0]
+        let vm = FilmDetailViewModel(film: targetFilm,
+                                      imageLoader: mockImageLoader,
+                                      filmQueueService: filmQueueService)
+        let displayModel = FilmDetailViewModel.FilmDetailDisplayModel(film: targetFilm)
+        let sut = ExploreDetailVC(filmDetailViewModel: vm)
+        sut.filmDetailViewModel.setFilm(targetFilm)
+        await sut.filmDetailViewModel.updateStatus(for: targetFilm, queue: .upNext, action: .add)
+        sut.didReceiveError()
+        sut.view.layoutIfNeeded()        
+        let state = UIContentUnavailableConfigurationState(traitCollection: sut.traitCollection)
+        sut.updateContentUnavailableConfiguration(using: state)
+        let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
+        
+        config?.secondaryButtonProperties.primaryAction?.performWithSender(nil, target: nil)
+        sut.view.layoutIfNeeded()
+        
+        #expect(sut.upNextButton.isEnabled == true, "Button should be enabled again.")
+        #expect(vm.currentState == .content(displayModel: displayModel, image: nil), "Should have returned to content state (note: image is nil because mockImageLoader didn't load image in test setup).")
+        #expect(sut.contentUnavailableConfiguration == nil, "Should be nil because VC is displaying film content again.")
+        #expect(sut.filmDetailViewModel.filmWasUpdated == false, "Should be false because update status failed.")
+    }
+    
     @Test("Integration test to check that the label successfully receives the text from ViewModel.")
     func exploreDetailVC_createContent_successfullyBindsAccessibilityPropertiesToLabel() {
         let sut = makeSUTWithFilm()
@@ -235,7 +355,7 @@ struct ExploreDetailVCTests {
         sut.upNextButton.sendActions(for: .touchUpInside)
         await Task.yield()
         
-        #expect(spyVM.updateStatusCalled == true, "Should have called the method.")
+        #expect(spyVM.updateStatusCallCount == 1, "Should have called the method once.")
         #expect(spyVM.capturedQueue == .upNext, "Should be the upNext queue.")
         #expect(spyVM.capturedAction == .add, "Action should be add.")
     }
@@ -247,7 +367,7 @@ struct ExploreDetailVCTests {
         sut.watchedButton.sendActions(for: .touchUpInside)
         await Task.yield()
         
-        #expect(spyVM.updateStatusCalled == true, "Should have called the method.")
+        #expect(spyVM.updateStatusCallCount == 1, "Should have called the method once.")
         #expect(spyVM.capturedQueue == .watched, "Should be the watched queue.")
         #expect(spyVM.capturedAction == .add, "Action should be add.")
     }
@@ -296,8 +416,8 @@ struct ExploreDetailVCTests {
         
         sut.viewWillDisappear(false)
         
-        #expect(sut.filmDetailViewModel.hasChanges == true, "Should be true.")
-        #expect(delegateSpy.didUpdateFilmCalled == true, "Delegate should be notified when changes exist.")
+        #expect(sut.filmDetailViewModel.filmWasUpdated == true, "Should be true.")
+        #expect(delegateSpy.didUpdateFilmCallCount == 1, "Delegate should be notified once when changes exist.")
         #expect(delegateSpy.capturedFilm?.id == Film.sample[0].id, "The updated film should match the film being shown in the view controller.")
         #expect(delegateSpy.capturedFilm?.isUpNext == true, "Should be true.")
     }
@@ -310,7 +430,7 @@ struct ExploreDetailVCTests {
         
         sut.viewWillDisappear(false)
         
-        #expect(delegateSpy.didUpdateFilmCalled == false, "Delegate must remain uncalled if no changes occurred.")
+        #expect(delegateSpy.didUpdateFilmCallCount == 0, "Delegate must remain uncalled if no changes occurred.")
         #expect(delegateSpy.capturedFilm == nil, "Should be nil.")
     }
     
@@ -347,6 +467,33 @@ struct ExploreDetailVCTests {
         _ = vc.view
         return (vc, spyVM)
     }
+    
+    //MARK: - Film Detail View Model Spy
+    @MainActor
+    private final class FilmDetailViewModelSpy: FilmDetailViewModel {
+        var updateStatusCallCount = 0
+        var capturedFilm: Film?
+        var capturedQueue: FilmQueue?
+        var capturedAction: QueueAction?
+
+        override func updateStatus(for film: Film, queue: FilmQueue, action: QueueAction) async {
+            updateStatusCallCount += 1
+            capturedFilm = film
+            capturedQueue = queue
+            capturedAction = action
+        }
+    }
+    
+    //MARK: - Film Detail View Controller Delegate Spy
+    private final class FilmDetailViewControllerDelegateSpy: FilmDetailViewControllerDelegate {
+        var didUpdateFilmCallCount = 0
+        var capturedFilm: Film?
+        
+        func filmDetailViewController(_ controller: ExploreDetailVC, didUpdateFilm updatedFilm: Film) {
+            didUpdateFilmCallCount += 1
+            capturedFilm = updatedFilm
+        }
+    }
 }
 
 //MARK: - Extension on UIView
@@ -361,32 +508,5 @@ private extension UIView {
             }
         }
         return nil
-    }
-}
-
-//MARK: - Film Detail View Model Spy
-@MainActor
-final class FilmDetailViewModelSpy: FilmDetailViewModel {
-    var updateStatusCalled = false
-    var capturedFilm: Film?
-    var capturedQueue: FilmQueue?
-    var capturedAction: QueueAction?
-
-    override func updateStatus(for film: Film, queue: FilmQueue, action: QueueAction) async {
-        updateStatusCalled = true
-        capturedFilm = film
-        capturedQueue = queue
-        capturedAction = action
-    }
-}
-
-//MARK: - Film Detail View Controller Delegate Spy
-final class FilmDetailViewControllerDelegateSpy: FilmDetailViewControllerDelegate {
-    var didUpdateFilmCalled = false
-    var capturedFilm: Film?
-    
-    func filmDetailViewController(_ controller: ExploreDetailVC, didUpdateFilm updatedFilm: Film) {
-        didUpdateFilmCalled = true
-        capturedFilm = updatedFilm
     }
 }

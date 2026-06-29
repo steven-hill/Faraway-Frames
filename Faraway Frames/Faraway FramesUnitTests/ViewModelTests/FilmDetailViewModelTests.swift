@@ -43,8 +43,10 @@ struct FilmDetailViewModelTests {
         case .content(let displayModel, _):
             #expect(displayModel.title == film.title, "Should match.")
             #expect(displayModel.visualOriginalTitles == "\(film.originalTitle)\n\(film.originalTitleRomanised)", "Should match.")
+        case .error(_, _, _):
+            Issue.record("Expected state to be `.content`, but it was `.error`.")
         }
-        #expect(sut.hasChanges == false, "Should still be false.")
+        #expect(sut.filmWasUpdated == false, "Should still be false.")
     }
     
     @Test func filmDetailViewModel_setFilm_whenFilmIsNil_updatesCurrentStateButNotHasChanges() {
@@ -54,7 +56,7 @@ struct FilmDetailViewModelTests {
         sut.setFilm(film)
         
         #expect(sut.currentState == .noFilmSelected, "Should update the state to `.noFilmSelected` when film is nil.")
-        #expect(sut.hasChanges == false, "Should still be false.")
+        #expect(sut.filmWasUpdated == false, "Should still be false.")
     }
     
     @Test("Quick selection of films ignores the results of the cancelled task", .tags(.networkRequest))
@@ -192,8 +194,8 @@ struct FilmDetailViewModelTests {
         #expect(scoreRange.length == expectedScoreLength, "Should be equal.")
     }
     
-    @Test("`updateStatus` updates `currentState` and `hasChanges` when `upNext` persistent change completes successfully")
-    func filmDetailViewModel_updateStatus_whenUpNextChangeIsSuccessful_updatesCurrentStateAndHasChanges() async {
+    @Test("`updateStatus` updates `currentState` and `filmWasUpdated` when `upNext` persistent change completes successfully")
+    func filmDetailViewModel_updateStatus_whenUpNextChangeIsSuccessful_updatesCurrentStateAndFilmWasUpdatedFlag() async {
         let targetFilm = Film.sample[0]
         let mockImageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
@@ -207,11 +209,11 @@ struct FilmDetailViewModelTests {
         } else {
             Issue.record("State should be .content with an isUpNext value updated to true.")
         }
-        #expect(sut.hasChanges == true, "Should be true.")
+        #expect(sut.filmWasUpdated == true, "Should be true.")
     }
     
-    @Test("`updateStatus` updates `currentState` and `hasChanges` when `watched` persistent change completes successfully")
-    func filmDetailViewModel_updateStatus_whenWatchedChangeIsSuccessful_updatesCurrentStateAndHasChanges() async {
+    @Test("`updateStatus` updates `currentState` and `filmWasUpdated` when `watched` persistent change completes successfully")
+    func filmDetailViewModel_updateStatus_whenWatchedChangeIsSuccessful_updatesCurrentStateAndFilmWasUpdatedFlag() async {
         let targetFilm = Film.sample[0]
         let mockImageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
@@ -225,7 +227,7 @@ struct FilmDetailViewModelTests {
         } else {
             Issue.record("State should be .content with an isWatched value updated to true.")
         }
-        #expect(sut.hasChanges == true, "Should be true.")
+        #expect(sut.filmWasUpdated == true, "Should be true.")
     }
     
     @Test("Adding a film to upNext should call delegate method only if status changes to true - helps prevent duplicates and unnecessary delegate method calls")
@@ -296,8 +298,8 @@ struct FilmDetailViewModelTests {
         #expect(spy.watchedStatusChangeCallCount == 2, "Should not call delegate method because the film no longer exists in the database.")
     }
     
-    @Test("`updateStatus` should handle add film to upNext errors by calling the delegate",
-          arguments: errorScenarios
+    @Test("`updateStatus` should handle add film to upNext errors by updating `currentState` and triggering delegate method call",
+          arguments: PersistenceHelper.errorScenarios
     )
     func filmDetailViewModel_updateStatus_onSaveError_whenAddingFilmToUpNext_handlesError(
         scenario: (systemError: Error,
@@ -317,12 +319,12 @@ struct FilmDetailViewModelTests {
         
         await sut.updateStatus(for: targetFilm, queue: .upNext, action: .add)
         
+        #expect(sut.currentState == .error(expectedError, targetFilm, .upNext), "Should be updated to error.")
         #expect(spy.didReceiveErrorCallCount == 1, "Should have called delegate method once on add failure.")
-        #expect(spy.receivedError == expectedError, "Delegate should receive matching add error context case.")
     }
     
-    @Test("`updateStatus` should handle remove film from upNext errors by calling the delegate",
-          arguments: errorScenarios
+    @Test("`updateStatus` should handle remove film from upNext errors by updating `currentState` and triggering delegate method call",
+          arguments: PersistenceHelper.errorScenarios
     )
     func filmDetailViewModel_updateStatus_onSaveError_whenRemovingFilmFromUpNext_handlesError(
         scenario: (systemError: Error,
@@ -349,12 +351,12 @@ struct FilmDetailViewModelTests {
         
         await sut.updateStatus(for: targetFilm, queue: .upNext, action: .remove)
         
+        #expect(sut.currentState == .error(expectedError, targetFilm, .upNext), "Should be updated to error.")
         #expect(spy.didReceiveErrorCallCount == 1, "Should have called delegate method once on add failure.")
-        #expect(spy.receivedError == expectedError, "Delegate should receive matching remove error context case.")
     }
     
-    @Test("`updateStatus` should handle add film to watched errors by calling the delegate",
-          arguments: errorScenarios
+    @Test("`updateStatus` should handle add film to watched errors by updating `currentState` and triggering delegate method call",
+          arguments: PersistenceHelper.errorScenarios
     )
     func filmDetailViewModel_updateStatus_onSaveError_whenAddingFilmToWatched_handlesError(
         scenario: (systemError: Error,
@@ -374,12 +376,12 @@ struct FilmDetailViewModelTests {
         
         await sut.updateStatus(for: targetFilm, queue: .watched, action: .add)
         
+        #expect(sut.currentState == .error(expectedError, targetFilm, .watched), "Should be updated to error.")
         #expect(spy.didReceiveErrorCallCount == 1, "Should have called delegate method once on add failure.")
-        #expect(spy.receivedError == expectedError, "Delegate should receive matching add error context case.")
     }
     
-    @Test("`updateStatus` should handle remove film from watched errors by calling the delegate",
-          arguments: errorScenarios
+    @Test("`updateStatus` should handle remove film from watched errors by updating `currentState` and triggering delegate method call",
+          arguments: PersistenceHelper.errorScenarios
     )
     func filmDetailViewModel_updateStatus_onSaveError_whenRemovingFilmFromWatched_handlesError(
         scenario: (systemError: Error,
@@ -406,8 +408,34 @@ struct FilmDetailViewModelTests {
         
         await sut.updateStatus(for: targetFilm, queue: .watched, action: .remove)
         
+        #expect(sut.currentState == .error(expectedError, targetFilm, .watched), "Should be updated to error.")
         #expect(spy.didReceiveErrorCallCount == 1, "Should have called delegate method once on add failure.")
-        #expect(spy.receivedError == expectedError, "Delegate should receive matching remove error context case.")
+    }
+    
+    @Test("View model loads film content again")
+    func filmDetailViewModel_returnToFilmContent_loadsFilmContentAgain() {
+        let film = Film.sample[0]
+        let mockImageLoader = MockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
+        let sut = FilmDetailViewModel(film: film, imageLoader: mockImageLoader, filmQueueService: filmQueueService)
+        let spy = FilmDetailViewModelSpy()
+        sut.delegate = spy
+        sut.setFilm(film)
+        
+        sut.returnToFilmContent(film: film)
+        
+        switch sut.currentState {
+        case .noFilmSelected:
+            Issue.record("Expected state to be `.content`, but it was `.noFilmSelected`.")
+        case .content(let displayModel, _):
+            #expect(displayModel.title == film.title, "Should match.")
+            #expect(displayModel.visualOriginalTitles == "\(film.originalTitle)\n\(film.originalTitleRomanised)", "Should match.")
+        case .error(_, _, _):
+            Issue.record("Expected state to be `.content`, but it was `.error`.")
+        }
+        #expect(sut.filmWasUpdated == false, "Should be false.")
+        #expect(spy.updateFilmDetailsCallCount == 2, "Should have been called twice; once for the loading content the first time, twice for loading it again.")
     }
     
     //MARK: - Helper method
@@ -425,7 +453,6 @@ struct FilmDetailViewModelTests {
         var upNextStatusChangeCallCount = 0
         var watchedStatusChangeCallCount = 0
         var didReceiveErrorCallCount: Int = 0
-        var receivedError: FilmDetailError?
         
         func didUpdateFilmDetails() {
             updateFilmDetailsCallCount += 1
@@ -443,22 +470,8 @@ struct FilmDetailViewModelTests {
             watchedStatusChangeCallCount += 1
         }
         
-        func didReceiveError(_ error: FilmDetailError) {
+        func didReceiveError() {
             didReceiveErrorCallCount += 1
-            receivedError = error
         }
-    }
-    
-    // MARK: - System Errors Helper
-    /// Used in tests involving Core Data operations error handling.
-    nonisolated static var errorScenarios: [(systemError: Error, expectedReason: FilmDetailError.FailureReason)] {
-        [
-            (CocoaError(.fileWriteOutOfSpace), .diskFull),
-            (CocoaError(.persistentStoreOpen), .databaseError),
-            (CocoaError(.managedObjectReferentialIntegrity), .databaseError),
-            (CocoaError(.persistentStoreTypeMismatch), .databaseError),
-            (CocoaError(.fileNoSuchFile), .databaseError),
-            (UnknownError(), .unknown("Unknown error."))
-        ]
     }
 }

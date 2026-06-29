@@ -123,10 +123,16 @@ final class ExploreDetailVC: UIViewController {
         case .content(let displayModel, let image):
             config = nil
             createContent(displayModel: displayModel, image: image)
+            contentView.isHidden = false
             buttonsContainer.isHidden = false
             self.isUpNext = displayModel.isUpNext
             self.isWatched = displayModel.isWatched
             updatedFilm = displayModel.film
+        case .error(let error, let film, let queue):
+            config = createErrorConfig(error: error, film: film, queue: queue)
+            navigationItem.hidesBackButton = true
+            contentView.isHidden = true
+            buttonsContainer.isHidden = true
         }
         self.contentUnavailableConfiguration = config
     }
@@ -155,6 +161,36 @@ final class ExploreDetailVC: UIViewController {
             producer: displayModel.producer,
             accessibilityLabelText: displayModel.creditsAccessibilityLabel
         )
+    }
+    
+    private func createErrorConfig(error: FilmDetailError, film: Film, queue: FilmQueue) -> UIContentUnavailableConfiguration {
+        var config = UIContentUnavailableConfiguration.empty()
+        config.text = "Error"
+        config.secondaryText = "\(error.description)"
+        config.image = SFSymbols.exclamationMarkTriangle
+        config.imageProperties.tintColor = .systemRed
+        
+        config.button = .prominentGlass()
+        config.button.title = "Retry"
+        config.buttonProperties.primaryAction = UIAction { [weak self] _ in
+            guard let self else { return }
+            let action: QueueAction = error == .add(error) ? .add : .remove
+            Task {
+                await filmDetailViewModel.updateStatus(for: film, queue: queue, action: action)
+            }
+            self.setNeedsUpdateContentUnavailableConfiguration()
+        }
+        
+        config.secondaryButton = .plain()
+        config.secondaryButton.title = "Cancel"
+        config.secondaryButtonProperties.primaryAction = UIAction { [weak self] _ in
+            guard let self else { return }
+            let button = queue == .upNext ? upNextButton : watchedButton
+            setButtonEnabled(true, button: button)
+            filmDetailViewModel.returnToFilmContent(film: film)
+            self.setNeedsUpdateContentUnavailableConfiguration()
+        }
+        return config
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -198,7 +234,7 @@ final class ExploreDetailVC: UIViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        guard filmDetailViewModel.hasChanges else { return }
+        guard filmDetailViewModel.filmWasUpdated else { return }
         if let film = updatedFilm {
             delegate?.filmDetailViewController(self, didUpdateFilm: film)
         }
@@ -367,7 +403,8 @@ extension ExploreDetailVC: FilmDetailViewModelDelegate {
         setButtonEnabled(true, button: watchedButton)
     }
     
-    func didReceiveError(_ error: FilmDetailError) {
+    func didReceiveError() {
+        setNeedsUpdateContentUnavailableConfiguration()
     }
 }
 

@@ -48,4 +48,16 @@ struct PersistenceHelper {
         )
         return mockWatchedFRC
     }
+    
+    /// Used in tests involving Core Data operations error handling.
+    nonisolated static var errorScenarios: [(systemError: Error, expectedReason: FilmDetailError.FailureReason)] {
+        [
+            (CocoaError(.fileWriteOutOfSpace), .diskFull),
+            (CocoaError(.persistentStoreOpen), .databaseError),
+            (CocoaError(.managedObjectReferentialIntegrity), .databaseError),
+            (CocoaError(.persistentStoreTypeMismatch), .databaseError),
+            (CocoaError(.fileNoSuchFile), .databaseError),
+            (UnknownError(), .unknown("Unknown error."))
+        ]
+    }
 }

@@ -15,6 +15,7 @@ class FilmDetailViewModel {
     enum FilmDetailState: Equatable {
         case noFilmSelected
         case content(displayModel: FilmDetailDisplayModel, image: UIImage? = nil)
+        case error(FilmDetailError, Film, FilmQueue)
     }
     
     // MARK: - Properties
@@ -27,7 +28,8 @@ class FilmDetailViewModel {
         }
     }
     weak var delegate: FilmDetailViewModelDelegate?
-    private(set) var hasChanges = false
+    private(set) var attemptingToUpdateFilm = false
+    private(set) var filmWasUpdated = false
     
     // MARK: - Initialisation
     init(film: Film? = nil,
@@ -48,7 +50,7 @@ class FilmDetailViewModel {
             currentState = .noFilmSelected
             return
         }
-        hasChanges = false
+        filmWasUpdated = false
         let displayModel = FilmDetailDisplayModel(film: film)
         currentState = .content(displayModel: displayModel)
         getMovieBanner(for: film, displayModel: displayModel)
@@ -60,6 +62,8 @@ class FilmDetailViewModel {
             delegate?.didUpdateWithEmptyState()
         case .content(_,_):
             delegate?.didUpdateFilmDetails()
+        case .error:
+            delegate?.didReceiveError()
         }
     }
     
@@ -130,8 +134,9 @@ class FilmDetailViewModel {
     // MARK: - Persistence method
     func updateStatus(for film: Film, queue: FilmQueue, action: QueueAction) async {
         do {
+            attemptingToUpdateFilm = true
             let didStatusChange = try await filmQueueService.updateFilmStatus(film: film, queue: queue, action: action)
-            
+            attemptingToUpdateFilm = false
             if didStatusChange {
                 if case .content(let displayModel, let image) = currentState {
                     var updatedDisplayModel = displayModel
@@ -141,7 +146,7 @@ class FilmDetailViewModel {
                     }
                     currentState = .content(displayModel: updatedDisplayModel, image: image)
                 }
-                
+                filmWasUpdated = true
                 switch (queue, action) {
                 case (.upNext, .add):
                     delegate?.didUpdateUpNextStatus(isUpNext: true)
@@ -152,11 +157,14 @@ class FilmDetailViewModel {
                 case (.watched, .remove):
                     delegate?.didUpdateWatchedStatus(isWatched: false)
                 }
-                hasChanges = true
             }
         } catch {
             let filmDetailError = action == .add ? FilmDetailError.add(error) : FilmDetailError.delete(error)
-            delegate?.didReceiveError(filmDetailError)
+            currentState = .error(filmDetailError, film, queue)
         }
+    }
+    
+    func returnToFilmContent(film: Film) {
+        setFilm(film)
     }
 }
