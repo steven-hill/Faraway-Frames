@@ -29,7 +29,7 @@ class FilmDetailViewModel {
     }
     weak var delegate: FilmDetailViewModelDelegate?
     private(set) var attemptingToUpdateFilm = false
-    private(set) var hasChanges = false
+    private(set) var filmWasUpdated = false
     
     // MARK: - Initialisation
     init(film: Film? = nil,
@@ -50,7 +50,7 @@ class FilmDetailViewModel {
             currentState = .noFilmSelected
             return
         }
-        hasChanges = false
+        filmWasUpdated = false
         let displayModel = FilmDetailDisplayModel(film: film)
         currentState = .content(displayModel: displayModel)
         getMovieBanner(for: film, displayModel: displayModel)
@@ -146,7 +146,7 @@ class FilmDetailViewModel {
                     }
                     currentState = .content(displayModel: updatedDisplayModel, image: image)
                 }
-                
+                filmWasUpdated = true
                 switch (queue, action) {
                 case (.upNext, .add):
                     delegate?.didUpdateUpNextStatus(isUpNext: true)
@@ -157,7 +157,6 @@ class FilmDetailViewModel {
                 case (.watched, .remove):
                     delegate?.didUpdateWatchedStatus(isWatched: false)
                 }
-                hasChanges = true
             }
         } catch {
             let filmDetailError = action == .add ? FilmDetailError.add(error) : FilmDetailError.delete(error)

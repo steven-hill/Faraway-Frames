@@ -234,7 +234,7 @@ final class ExploreDetailVC: UIViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        guard filmDetailViewModel.hasChanges else { return }
+        guard filmDetailViewModel.filmWasUpdated else { return }
         if let film = updatedFilm {
             delegate?.filmDetailViewController(self, didUpdateFilm: film)
         }

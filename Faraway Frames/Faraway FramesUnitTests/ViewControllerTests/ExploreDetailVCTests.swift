@@ -305,7 +305,7 @@ struct ExploreDetailVCTests {
         #expect(sut.upNextButton.isEnabled == true, "Button should be enabled again.")
         #expect(vm.currentState == .content(displayModel: displayModel, image: nil), "Should have returned to content state (note: image is nil because mockImageLoader didn't load image in test setup).")
         #expect(sut.contentUnavailableConfiguration == nil, "Should be nil because VC is displaying film content again.")
-        #expect(sut.filmDetailViewModel.hasChanges == false, "Should be false because update status failed.")
+        #expect(sut.filmDetailViewModel.filmWasUpdated == false, "Should be false because update status failed.")
     }
     
     @Test("Integration test to check that the label successfully receives the text from ViewModel.")
@@ -416,7 +416,7 @@ struct ExploreDetailVCTests {
         
         sut.viewWillDisappear(false)
         
-        #expect(sut.filmDetailViewModel.hasChanges == true, "Should be true.")
+        #expect(sut.filmDetailViewModel.filmWasUpdated == true, "Should be true.")
         #expect(delegateSpy.didUpdateFilmCalled == true, "Delegate should be notified when changes exist.")
         #expect(delegateSpy.capturedFilm?.id == Film.sample[0].id, "The updated film should match the film being shown in the view controller.")
         #expect(delegateSpy.capturedFilm?.isUpNext == true, "Should be true.")
