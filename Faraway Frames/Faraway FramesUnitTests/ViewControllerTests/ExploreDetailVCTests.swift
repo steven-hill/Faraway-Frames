@@ -245,6 +245,40 @@ struct ExploreDetailVCTests {
         #expect(config?.secondaryButton.title != nil, "Should have a title.")
     }
     
+    @Test("Tapping `cancel` button on error config reloads film content and updates VM's state",
+          arguments: PersistenceHelper.errorScenarios
+    )
+    func exploreDetailVC_tapCancelButtonOnErrorConfig_reloadsFilmContentAndUpdatesState(
+    scenario: (systemError: Error,
+               expectedReason: FilmDetailError.FailureReason)
+    ) async {
+        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext, saver: saver)
+        let targetFilm = Film.sample[0]
+        let vm = FilmDetailViewModel(film: targetFilm,
+                                      imageLoader: mockImageLoader,
+                                      filmQueueService: filmQueueService)
+        let displayModel = FilmDetailViewModel.FilmDetailDisplayModel(film: targetFilm)
+        let sut = ExploreDetailVC(filmDetailViewModel: vm)
+        sut.filmDetailViewModel.setFilm(targetFilm)
+        await sut.filmDetailViewModel.updateStatus(for: targetFilm, queue: .upNext, action: .add)
+        sut.didReceiveError()
+        sut.view.layoutIfNeeded()        
+        let state = UIContentUnavailableConfigurationState(traitCollection: sut.traitCollection)
+        sut.updateContentUnavailableConfiguration(using: state)
+        let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
+        
+        config?.secondaryButtonProperties.primaryAction?.performWithSender(nil, target: nil)
+        sut.view.layoutIfNeeded()
+        
+        #expect(sut.upNextButton.isEnabled == true, "Button should be enabled again.")
+        #expect(vm.currentState == .content(displayModel: displayModel, image: nil), "Should have returned to content state (note: image is nil because mockImageLoader didn't load image in test setup).")
+        #expect(sut.contentUnavailableConfiguration == nil, "Should be nil because VC is displaying film content again.")
+        #expect(sut.filmDetailViewModel.hasChanges == false, "Should be false because update status failed.")
+    }
+    
     @Test("Integration test to check that the label successfully receives the text from ViewModel.")
     func exploreDetailVC_createContent_successfullyBindsAccessibilityPropertiesToLabel() {
         let sut = makeSUTWithFilm()

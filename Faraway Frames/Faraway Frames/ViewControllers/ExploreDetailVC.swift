@@ -182,7 +182,9 @@ final class ExploreDetailVC: UIViewController {
         config.secondaryButton.title = "Cancel"
         config.secondaryButtonProperties.primaryAction = UIAction { [weak self] _ in
             guard let self else { return }
-            //TODO: - Re-enable the disabled button, and return to film content
+            let button = queue == .upNext ? upNextButton : watchedButton
+            setButtonEnabled(true, button: button)
+            filmDetailViewModel.returnToFilmContent(film: film)
             self.setNeedsUpdateContentUnavailableConfiguration()
         }
         return config
