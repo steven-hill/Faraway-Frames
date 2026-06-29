@@ -245,7 +245,7 @@ struct ExploreDetailVCTests {
         #expect(config?.secondaryButton.title != nil, "Should have a title.")
     }
     
-    @Test("Tapping `Retry` button on error config calls VM's updateStatus method again and sets `currentState` to `.attemptingUpdate`",
+    @Test("Tapping `Retry` button on error config calls VM's updateStatus method again and sets `attemptingUpdate` flag to true",
           arguments: PersistenceHelper.errorScenarios
     )
     func exploreDetailVC_tapRetryButtonOnErrorConfig_callsVMUpdateStatusAgain(
@@ -274,7 +274,7 @@ struct ExploreDetailVCTests {
         #expect(vm.attemptingToUpdateFilm == true, "Should be true because `updateStatus` was called from the retry button.")
     }
     
-    @Test("Tapping `cancel` button on error config reloads film content and updates VM's state",
+    @Test("Tapping `cancel` button on error config reloads film content and updates VM's `currentState`",
           arguments: PersistenceHelper.errorScenarios
     )
     func exploreDetailVC_tapCancelButtonOnErrorConfig_reloadsFilmContentAndUpdatesState(
