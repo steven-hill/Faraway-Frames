@@ -355,7 +355,7 @@ struct ExploreDetailVCTests {
         sut.upNextButton.sendActions(for: .touchUpInside)
         await Task.yield()
         
-        #expect(spyVM.updateStatusCalled == true, "Should have called the method.")
+        #expect(spyVM.updateStatusCallCount == 1, "Should have called the method once.")
         #expect(spyVM.capturedQueue == .upNext, "Should be the upNext queue.")
         #expect(spyVM.capturedAction == .add, "Action should be add.")
     }
@@ -367,7 +367,7 @@ struct ExploreDetailVCTests {
         sut.watchedButton.sendActions(for: .touchUpInside)
         await Task.yield()
         
-        #expect(spyVM.updateStatusCalled == true, "Should have called the method.")
+        #expect(spyVM.updateStatusCallCount == 1, "Should have called the method once.")
         #expect(spyVM.capturedQueue == .watched, "Should be the watched queue.")
         #expect(spyVM.capturedAction == .add, "Action should be add.")
     }
@@ -471,13 +471,13 @@ struct ExploreDetailVCTests {
     //MARK: - Film Detail View Model Spy
     @MainActor
     private final class FilmDetailViewModelSpy: FilmDetailViewModel {
-        var updateStatusCalled = false
+        var updateStatusCallCount = 0
         var capturedFilm: Film?
         var capturedQueue: FilmQueue?
         var capturedAction: QueueAction?
 
         override func updateStatus(for film: Film, queue: FilmQueue, action: QueueAction) async {
-            updateStatusCalled = true
+            updateStatusCallCount += 1
             capturedFilm = film
             capturedQueue = queue
             capturedAction = action
