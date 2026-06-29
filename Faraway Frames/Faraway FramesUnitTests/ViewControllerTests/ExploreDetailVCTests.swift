@@ -417,7 +417,7 @@ struct ExploreDetailVCTests {
         sut.viewWillDisappear(false)
         
         #expect(sut.filmDetailViewModel.filmWasUpdated == true, "Should be true.")
-        #expect(delegateSpy.didUpdateFilmCalled == true, "Delegate should be notified when changes exist.")
+        #expect(delegateSpy.didUpdateFilmCallCount == 1, "Delegate should be notified once when changes exist.")
         #expect(delegateSpy.capturedFilm?.id == Film.sample[0].id, "The updated film should match the film being shown in the view controller.")
         #expect(delegateSpy.capturedFilm?.isUpNext == true, "Should be true.")
     }
@@ -430,7 +430,7 @@ struct ExploreDetailVCTests {
         
         sut.viewWillDisappear(false)
         
-        #expect(delegateSpy.didUpdateFilmCalled == false, "Delegate must remain uncalled if no changes occurred.")
+        #expect(delegateSpy.didUpdateFilmCallCount == 0, "Delegate must remain uncalled if no changes occurred.")
         #expect(delegateSpy.capturedFilm == nil, "Should be nil.")
     }
     
@@ -486,11 +486,11 @@ struct ExploreDetailVCTests {
     
     //MARK: - Film Detail View Controller Delegate Spy
     private final class FilmDetailViewControllerDelegateSpy: FilmDetailViewControllerDelegate {
-        var didUpdateFilmCalled = false
+        var didUpdateFilmCallCount = 0
         var capturedFilm: Film?
         
         func filmDetailViewController(_ controller: ExploreDetailVC, didUpdateFilm updatedFilm: Film) {
-            didUpdateFilmCalled = true
+            didUpdateFilmCallCount += 1
             capturedFilm = updatedFilm
         }
     }
