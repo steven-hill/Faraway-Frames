@@ -28,6 +28,7 @@ class FilmDetailViewModel {
         }
     }
     weak var delegate: FilmDetailViewModelDelegate?
+    private(set) var attemptingToUpdateFilm = false
     private(set) var hasChanges = false
     
     // MARK: - Initialisation
@@ -133,8 +134,9 @@ class FilmDetailViewModel {
     // MARK: - Persistence method
     func updateStatus(for film: Film, queue: FilmQueue, action: QueueAction) async {
         do {
+            attemptingToUpdateFilm = true
             let didStatusChange = try await filmQueueService.updateFilmStatus(film: film, queue: queue, action: action)
-            
+            attemptingToUpdateFilm = false
             if didStatusChange {
                 if case .content(let displayModel, let image) = currentState {
                     var updatedDisplayModel = displayModel
