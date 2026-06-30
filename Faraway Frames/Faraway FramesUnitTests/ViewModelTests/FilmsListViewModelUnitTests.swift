@@ -179,7 +179,9 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.filteredFilms == [], "Should be empty at init.")
     }
     
-    @Test("ViewModel handles attempted search after network failure", .tags(.search), arguments: [
+    @Test("ViewModel handles attempted search after network failure by exiting early via guard",
+        .tags(.networkRequest, .search),
+          arguments: [
         APIError.noInternetConnection,
         APIError.networkConnectionLost,
         APIError.networkTimeout,
@@ -189,7 +191,7 @@ struct FilmsListViewModelUnitTests {
         APIError.decodingError,
         APIError.unknown
     ])
-    func filmsListViewModel_filter_whenThereAreNoFilmsToSearchThrough_doesNotUpdateFilteredFilmsArray(expectedError: APIError) async {
+    func filmsListViewModel_filterFilms_whenThereAreNoFilmsToSearchThrough_doesNotUpdateFilteredFilmsArray(expectedError: APIError) async {
         let sut = makeSUTForFailureCase(error: expectedError)
         let delegateSpy = FilmsListViewModelDelegateSpy()
         sut.delegate = delegateSpy
@@ -199,7 +201,7 @@ struct FilmsListViewModelUnitTests {
         
         #expect(sut.films.isEmpty, "Films array should be empty on failure.")
         #expect(sut.filteredFilms.isEmpty, "Filtered films array should be empty.")
-        #expect(delegateSpy.didFailToMatchResultsCallCount == 1, "Should have called delegate method once.")
+        #expect(delegateSpy.didFailToMatchResultsCallCount == 0, "Should not have been called because function exits early at guard statement.")
     }
     
     @Test(.tags(.search))
@@ -469,6 +471,7 @@ struct FilmsListViewModelUnitTests {
         var didUpdateFilmsCallCount = 0
         var didFailToLoadFilmsCallCount = 0
         var didRetryCallCount = 0
+        var didFailToMatchResultsCallCount = 0
         
         func didRequestVoiceOverAnnouncement(with message: String) {
             didRequestVoiceOverAnnouncement = true
@@ -487,6 +490,8 @@ struct FilmsListViewModelUnitTests {
             didRetryCallCount += 1
         }
         
-        func didFailToMatchResults() {}
+        func didFailToMatchResults() {
+            didFailToMatchResultsCallCount += 1
+        }
     }
 }
