@@ -111,7 +111,9 @@ struct ExploreListVCTests {
         #expect(mockService.fetchWasCalled == true, "Should call fetchAllFilms once.")
     }
     
-    @Test("ExploreListVC shows retry button title for all API errors", arguments: [
+    @Test("ExploreListVC shows retry button title for all API errors",
+        .tags(.networkRequest),
+          arguments: [
         APIError.noInternetConnection,
         APIError.networkConnectionLost,
         APIError.networkTimeout,

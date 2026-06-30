@@ -381,7 +381,7 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.filteredFilms.isEmpty, "Should be empty.")
     }
     
-    @Test("`syncFilmWithDatabase` calls service with film and returns film")
+    @Test("`syncFilmWithDatabase` calls service with film and returns film", .tags(.persistence))
     func filmsListViewModel_syncFilmWithDatabase_callsServiceWithFilm() async {
         let sut = makeSUTForSuccessCase()
         await sut.getAllFilms()
