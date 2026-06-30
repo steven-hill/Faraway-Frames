@@ -83,11 +83,14 @@ struct FilmsListViewModelUnitTests {
     ])
     func filmsListViewModel_getAllFilms_handlesAPIError(expectedError: APIError) async {
         let sut = makeSUTForFailureCase(error: expectedError)
+        let delegateSpy = FilmsListViewModelDelegateSpy()
+        sut.delegate = delegateSpy
         
         await sut.getAllFilms()
         
         #expect(sut.films.isEmpty, "Films array should be empty on failure.")
         #expect(sut.currentState == .error(expectedError), "Should be `.error(APIError)`.")
+        #expect(delegateSpy.didFailToLoadFilmsCallCount == 1, "Should have called delegate method once.")
     }
     
     @Test("Covers `handleFailure()`",.tags(.networkRequest))
@@ -176,7 +179,9 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.filteredFilms == [], "Should be empty at init.")
     }
     
-    @Test("ViewModel handles attempted search after network failure", .tags(.search), arguments: [
+    @Test("ViewModel handles attempted search after network failure by exiting early via guard",
+        .tags(.networkRequest, .search),
+          arguments: [
         APIError.noInternetConnection,
         APIError.networkConnectionLost,
         APIError.networkTimeout,
@@ -186,40 +191,50 @@ struct FilmsListViewModelUnitTests {
         APIError.decodingError,
         APIError.unknown
     ])
-    func filmsListViewModel_filter_whenThereAreNoFilmsToSearchThrough_doesNotUpdateFilteredFilmsArray(expectedError: APIError) async {
+    func filmsListViewModel_filterFilms_whenThereAreNoFilmsToSearchThrough_doesNotUpdateFilteredFilmsArray(expectedError: APIError) async {
         let sut = makeSUTForFailureCase(error: expectedError)
+        let delegateSpy = FilmsListViewModelDelegateSpy()
+        sut.delegate = delegateSpy
         
         await sut.getAllFilms()
         sut.filterFilms(by: "query")
         
         #expect(sut.films.isEmpty, "Films array should be empty on failure.")
         #expect(sut.filteredFilms.isEmpty, "Filtered films array should be empty.")
+        #expect(delegateSpy.didFailToMatchResultsCallCount == 0, "Should not have been called because function exits early at guard statement.")
     }
     
-    @Test(.tags(.search))
-    func filmsListViewModel_filter_withEmptyQuery_returnsAllFilmsAndAnEmptyFilteredFilmsArray() async {
+    @Test("ViewModel handles attempted search with empty search query by exiting early via guard",
+          .tags(.search))
+    func filmsListViewModel_filterFilms_withEmptyQuery_returnsAllFilmsAndAnEmptyFilteredFilmsArray() async {
         let sut = makeSUTForSuccessCase()
         await sut.getAllFilms()
- 
+        let delegateSpy = FilmsListViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        
         sut.filterFilms(by: "")
         
         #expect(sut.films.count == 22, "Films array should have all 22 films.")
         #expect(sut.filteredFilms.isEmpty, "Filtered films should be empty.")
+        #expect(delegateSpy.didFailToMatchResultsCallCount == 0, "Should not have been called because function exits early at guard statement.")
     }
     
     @Test(.tags(.search))
-    func filmsListViewModel_filter_withPartialQueryMatch_returnsFilmsWithPartialMatches() async {
+    func filmsListViewModel_filterFilms_withPartialQueryMatch_returnsFilmsWithPartialMatches() async {
         let sut = makeSUTForSuccessCase()
         await sut.getAllFilms()
-
+        let delegateSpy = FilmsListViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        
         sut.filterFilms(by: "Cas")
         
         #expect(sut.filteredFilms.isEmpty == false, "Filtered films should not be empty.")
         #expect(sut.filteredFilms.count == 2, "Should have two films that have `cas` in the title.")
+        #expect(delegateSpy.didUpdateFilmsCallCount == 1, "Should have called delegate method once.")
     }
     
     @Test(.tags(.search))
-    func filmsListViewModel_filter_isNotCaseSensitive() async {
+    func filmsListViewModel_filterFilms_isNotCaseSensitive() async {
         let sut = makeSUTForSuccessCase()
         await sut.getAllFilms()
 
@@ -230,18 +245,21 @@ struct FilmsListViewModelUnitTests {
     }
     
     @Test(.tags(.search))
-    func filmsListViewModel_filter_whenThereAreNoMatches_returnsEmptyArray() async {
+    func filmsListViewModel_filterFilms_whenThereAreNoMatches_returnsEmptyArray() async {
         let sut = makeSUTForSuccessCase()
         await sut.getAllFilms()
+        let delegateSpy = FilmsListViewModelDelegateSpy()
+        sut.delegate = delegateSpy
 
         sut.filterFilms(by: "No matching titles")
         
         #expect(sut.filteredFilms.isEmpty, "No matches should return an empty array.")
         #expect(sut.currentState == .emptySearchResults, "Should be `.emptySearchResults` state.")
+        #expect(delegateSpy.didFailToMatchResultsCallCount == 1, "Should have called delegate method once.")
     }
     
     @Test(.tags(.search))
-    func filmsListViewModel_filter_removesLeadingAndTrailingWhiteSpaces() async {
+    func filmsListViewModel_filterFilms_removesLeadingAndTrailingWhiteSpaces() async {
         let sut = makeSUTForSuccessCase()
         await sut.getAllFilms()
         
@@ -251,7 +269,7 @@ struct FilmsListViewModelUnitTests {
     }
     
     @Test(.tags(.search))
-    func filmsListViewModel_filter_removesMultipleSpacesInBetweenWords() async {
+    func filmsListViewModel_filterFilms_removesMultipleSpacesInBetweenWords() async {
         let sut = makeSUTForSuccessCase()
         await sut.getAllFilms()
         
@@ -261,7 +279,7 @@ struct FilmsListViewModelUnitTests {
     }
     
     @Test(.tags(.search))
-    func filmsListViewModel_filter_removesPunctuation() async {
+    func filmsListViewModel_filterFilms_removesPunctuation() async {
         let sut = makeSUTForSuccessCase()
         await sut.getAllFilms()
         
@@ -271,7 +289,7 @@ struct FilmsListViewModelUnitTests {
     }
     
     @Test(.tags(.search))
-    func filmsListViewModel_filter_handlesEmoji() async {
+    func filmsListViewModel_filterFilms_handlesEmoji() async {
         let sut = makeSUTForSuccessCase()
         await sut.getAllFilms()
         
@@ -281,7 +299,7 @@ struct FilmsListViewModelUnitTests {
     }
     
     @Test(.tags(.search))
-    func filmsListViewModel_filter_handlesTextAndEmoji() async {
+    func filmsListViewModel_filterFilms_handlesTextAndEmoji() async {
         let sut = makeSUTForSuccessCase()
         await sut.getAllFilms()
         
@@ -362,14 +380,22 @@ struct FilmsListViewModelUnitTests {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
         let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader, filmSyncService: filmSyncService)
+        let delegateSpy = FilmsListViewModelDelegateSpy()
+        sut.delegate = delegateSpy
         
         sut.retryLoadingAllFilms()
-        await sut.refreshTask?.value
         
+        #expect(sut.refreshTask != nil, "A new task should be created")
+        #expect(sut.filteredFilms.isEmpty, "Should be empty.")
+        #expect(sut.currentState == .retrying, "State should change to retrying")
+        #expect(delegateSpy.didRetryCallCount == 1, "Should have called delegate method once.")
+        
+        await sut.refreshTask?.value
         #expect(mockService.fetchWasCalled == true)
     }
     
-    @Test func filmsListViewModel_retryLoadingAllFilms_emptiesFilteredFilms() async {
+    @Test("Back-to-back network retries cancel the previous task")
+    func filmsListViewModel_retryLoadingAllFilms_cancelsPreviousTask() async throws {
         let mockService = MockFilmsListService()
         let mockImageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
@@ -377,8 +403,14 @@ struct FilmsListViewModelUnitTests {
         let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader, filmSyncService: filmSyncService)
         
         sut.retryLoadingAllFilms()
+        let firstTask = try #require(sut.refreshTask, "Should have created first task.")
         
-        #expect(sut.filteredFilms.isEmpty, "Should be empty.")
+        sut.retryLoadingAllFilms()
+        let secondTask = try #require(sut.refreshTask, "Should have created second task.")
+        
+        #expect(firstTask.isCancelled, "Should have cancelled the first task when a new retry starts.")
+        #expect(!secondTask.isCancelled, "The second task should actively run.")
+        _ = await secondTask.result
     }
     
     @Test("`syncFilmWithDatabase` calls service with film and returns film", .tags(.persistence))
@@ -391,7 +423,7 @@ struct FilmsListViewModelUnitTests {
         #expect(result == sut.films[0], "Should return a film.")
     }
     
-    @Test("`updateFilmState` updates a film's properties in both `films` and `filteredFilms` arrays, updates state, and calls delegate twice.")
+    @Test("`updateFilmInArrays` updates a film's properties in both `films` and `filteredFilms` arrays, updates state, and calls delegate twice.")
     func filmsListViewModel_updateFilmInArrays_whenFilmExistsInBothArrays_updatesBothAndSetsStateAndCallsDelegateTwice() async {
         let sut = makeSUTForSuccessCase()
         let delegateSpy = FilmsListViewModelDelegateSpy()
@@ -415,7 +447,7 @@ struct FilmsListViewModelUnitTests {
         #expect(delegateSpy.didUpdateFilmsCallCount == 2, "Should be two; one for `films`, and the other for `filteredFilms`.")
     }
     
-    @Test("`updateFilmState` gracefully does nothing if the film ID does not exist in the arrays")
+    @Test("`updateFilmInArrays` gracefully does nothing if the film ID does not exist in the arrays")
        func filmsListViewModel_updateFilmInArrays_whenFilmDoesNotExist_leavesArraysUnchanged() async {
            let sut = makeSUTForSuccessCase()
            let delegateSpy = FilmsListViewModelDelegateSpy()
@@ -458,6 +490,9 @@ struct FilmsListViewModelUnitTests {
         var didRequestVoiceOverAnnouncement = false
         var capturedMessage: String?
         var didUpdateFilmsCallCount = 0
+        var didFailToLoadFilmsCallCount = 0
+        var didRetryCallCount = 0
+        var didFailToMatchResultsCallCount = 0
         
         func didRequestVoiceOverAnnouncement(with message: String) {
             didRequestVoiceOverAnnouncement = true
@@ -467,8 +502,17 @@ struct FilmsListViewModelUnitTests {
         func didUpdateFilms(_ films: [Film]) {
             didUpdateFilmsCallCount += 1
         }
-        func didFailToLoadFilms() {}
-        func didRetry() {}
-        func didFailToMatchResults() {}
+        
+        func didFailToLoadFilms() {
+            didFailToLoadFilmsCallCount += 1
+        }
+        
+        func didRetry() {
+            didRetryCallCount += 1
+        }
+        
+        func didFailToMatchResults() {
+            didFailToMatchResultsCallCount += 1
+        }
     }
 }
