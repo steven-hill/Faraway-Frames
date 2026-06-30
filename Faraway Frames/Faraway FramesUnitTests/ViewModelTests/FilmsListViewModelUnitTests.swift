@@ -394,6 +394,25 @@ struct FilmsListViewModelUnitTests {
         #expect(mockService.fetchWasCalled == true)
     }
     
+    @Test("Back-to-back network retries cancel the previous task")
+    func filmsListViewModel_retryLoadingAllFilms_cancelsPreviousTask() async throws {
+        let mockService = MockFilmsListService()
+        let mockImageLoader = MockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader, filmSyncService: filmSyncService)
+        
+        sut.retryLoadingAllFilms()
+        let firstTask = try #require(sut.refreshTask, "Should have created first task.")
+        
+        sut.retryLoadingAllFilms()
+        let secondTask = try #require(sut.refreshTask, "Should have created second task.")
+        
+        #expect(firstTask.isCancelled, "Should have cancelled the first task when a new retry starts.")
+        #expect(!secondTask.isCancelled, "The second task should actively run.")
+        _ = await secondTask.result
+    }
+    
     @Test("`syncFilmWithDatabase` calls service with film and returns film", .tags(.persistence))
     func filmsListViewModel_syncFilmWithDatabase_callsServiceWithFilm() async {
         let sut = makeSUTForSuccessCase()
