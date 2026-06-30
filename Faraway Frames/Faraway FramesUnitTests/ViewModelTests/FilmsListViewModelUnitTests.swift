@@ -204,30 +204,37 @@ struct FilmsListViewModelUnitTests {
         #expect(delegateSpy.didFailToMatchResultsCallCount == 0, "Should not have been called because function exits early at guard statement.")
     }
     
-    @Test(.tags(.search))
-    func filmsListViewModel_filter_withEmptyQuery_returnsAllFilmsAndAnEmptyFilteredFilmsArray() async {
+    @Test("ViewModel handles attempted search with empty search query by exiting early via guard",
+          .tags(.search))
+    func filmsListViewModel_filterFilms_withEmptyQuery_returnsAllFilmsAndAnEmptyFilteredFilmsArray() async {
         let sut = makeSUTForSuccessCase()
         await sut.getAllFilms()
- 
+        let delegateSpy = FilmsListViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        
         sut.filterFilms(by: "")
         
         #expect(sut.films.count == 22, "Films array should have all 22 films.")
         #expect(sut.filteredFilms.isEmpty, "Filtered films should be empty.")
+        #expect(delegateSpy.didFailToMatchResultsCallCount == 0, "Should not have been called because function exits early at guard statement.")
     }
     
     @Test(.tags(.search))
-    func filmsListViewModel_filter_withPartialQueryMatch_returnsFilmsWithPartialMatches() async {
+    func filmsListViewModel_filterFilms_withPartialQueryMatch_returnsFilmsWithPartialMatches() async {
         let sut = makeSUTForSuccessCase()
         await sut.getAllFilms()
-
+        let delegateSpy = FilmsListViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        
         sut.filterFilms(by: "Cas")
         
         #expect(sut.filteredFilms.isEmpty == false, "Filtered films should not be empty.")
         #expect(sut.filteredFilms.count == 2, "Should have two films that have `cas` in the title.")
+        #expect(delegateSpy.didUpdateFilmsCallCount == 1, "Should have called delegate method once.")
     }
     
     @Test(.tags(.search))
-    func filmsListViewModel_filter_isNotCaseSensitive() async {
+    func filmsListViewModel_filterFilms_isNotCaseSensitive() async {
         let sut = makeSUTForSuccessCase()
         await sut.getAllFilms()
 
@@ -238,18 +245,21 @@ struct FilmsListViewModelUnitTests {
     }
     
     @Test(.tags(.search))
-    func filmsListViewModel_filter_whenThereAreNoMatches_returnsEmptyArray() async {
+    func filmsListViewModel_filterFilms_whenThereAreNoMatches_returnsEmptyArray() async {
         let sut = makeSUTForSuccessCase()
         await sut.getAllFilms()
+        let delegateSpy = FilmsListViewModelDelegateSpy()
+        sut.delegate = delegateSpy
 
         sut.filterFilms(by: "No matching titles")
         
         #expect(sut.filteredFilms.isEmpty, "No matches should return an empty array.")
         #expect(sut.currentState == .emptySearchResults, "Should be `.emptySearchResults` state.")
+        #expect(delegateSpy.didFailToMatchResultsCallCount == 1, "Should have called delegate method once.")
     }
     
     @Test(.tags(.search))
-    func filmsListViewModel_filter_removesLeadingAndTrailingWhiteSpaces() async {
+    func filmsListViewModel_filterFilms_removesLeadingAndTrailingWhiteSpaces() async {
         let sut = makeSUTForSuccessCase()
         await sut.getAllFilms()
         
@@ -259,7 +269,7 @@ struct FilmsListViewModelUnitTests {
     }
     
     @Test(.tags(.search))
-    func filmsListViewModel_filter_removesMultipleSpacesInBetweenWords() async {
+    func filmsListViewModel_filterFilms_removesMultipleSpacesInBetweenWords() async {
         let sut = makeSUTForSuccessCase()
         await sut.getAllFilms()
         
@@ -269,7 +279,7 @@ struct FilmsListViewModelUnitTests {
     }
     
     @Test(.tags(.search))
-    func filmsListViewModel_filter_removesPunctuation() async {
+    func filmsListViewModel_filterFilms_removesPunctuation() async {
         let sut = makeSUTForSuccessCase()
         await sut.getAllFilms()
         
@@ -279,7 +289,7 @@ struct FilmsListViewModelUnitTests {
     }
     
     @Test(.tags(.search))
-    func filmsListViewModel_filter_handlesEmoji() async {
+    func filmsListViewModel_filterFilms_handlesEmoji() async {
         let sut = makeSUTForSuccessCase()
         await sut.getAllFilms()
         
@@ -289,7 +299,7 @@ struct FilmsListViewModelUnitTests {
     }
     
     @Test(.tags(.search))
-    func filmsListViewModel_filter_handlesTextAndEmoji() async {
+    func filmsListViewModel_filterFilms_handlesTextAndEmoji() async {
         let sut = makeSUTForSuccessCase()
         await sut.getAllFilms()
         
@@ -402,7 +412,7 @@ struct FilmsListViewModelUnitTests {
         #expect(result == sut.films[0], "Should return a film.")
     }
     
-    @Test("`updateFilmState` updates a film's properties in both `films` and `filteredFilms` arrays, updates state, and calls delegate twice.")
+    @Test("`updateFilmInArrays` updates a film's properties in both `films` and `filteredFilms` arrays, updates state, and calls delegate twice.")
     func filmsListViewModel_updateFilmInArrays_whenFilmExistsInBothArrays_updatesBothAndSetsStateAndCallsDelegateTwice() async {
         let sut = makeSUTForSuccessCase()
         let delegateSpy = FilmsListViewModelDelegateSpy()
@@ -426,7 +436,7 @@ struct FilmsListViewModelUnitTests {
         #expect(delegateSpy.didUpdateFilmsCallCount == 2, "Should be two; one for `films`, and the other for `filteredFilms`.")
     }
     
-    @Test("`updateFilmState` gracefully does nothing if the film ID does not exist in the arrays")
+    @Test("`updateFilmInArrays` gracefully does nothing if the film ID does not exist in the arrays")
        func filmsListViewModel_updateFilmInArrays_whenFilmDoesNotExist_leavesArraysUnchanged() async {
            let sut = makeSUTForSuccessCase()
            let delegateSpy = FilmsListViewModelDelegateSpy()
