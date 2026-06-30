@@ -384,22 +384,14 @@ struct FilmsListViewModelUnitTests {
         sut.delegate = delegateSpy
         
         sut.retryLoadingAllFilms()
-        await sut.refreshTask?.value
         
-        #expect(mockService.fetchWasCalled == true)
-        #expect(delegateSpy.didRetryCallCount == 1, "Should have called delegate method once.")
-    }
-    
-    @Test func filmsListViewModel_retryLoadingAllFilms_emptiesFilteredFilms() async {
-        let mockService = MockFilmsListService()
-        let mockImageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader, filmSyncService: filmSyncService)
-        
-        sut.retryLoadingAllFilms()
-        
+        #expect(sut.refreshTask != nil, "A new task should be created")
         #expect(sut.filteredFilms.isEmpty, "Should be empty.")
+        #expect(sut.currentState == .retrying, "State should change to retrying")
+        #expect(delegateSpy.didRetryCallCount == 1, "Should have called delegate method once.")
+        
+        await sut.refreshTask?.value
+        #expect(mockService.fetchWasCalled == true)
     }
     
     @Test("`syncFilmWithDatabase` calls service with film and returns film", .tags(.persistence))

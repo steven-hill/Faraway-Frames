@@ -118,10 +118,10 @@ final class FilmsListViewModel {
     
     func retryLoadingAllFilms() {
         refreshTask?.cancel()
+        filteredFilms.removeAll()
+        currentState = .retrying
+        delegate?.didRetry()
         refreshTask = Task {
-            filteredFilms.removeAll()
-            currentState = .retrying
-            delegate?.didRetry()
             await getAllFilms()
         }
     }
