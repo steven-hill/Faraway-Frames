@@ -461,6 +461,7 @@ struct FilmsListViewModelUnitTests {
         var didRequestVoiceOverAnnouncement = false
         var capturedMessage: String?
         var didUpdateFilmsCallCount = 0
+        var didFailToLoadFilmsCallCount = 0
         
         func didRequestVoiceOverAnnouncement(with message: String) {
             didRequestVoiceOverAnnouncement = true
@@ -470,8 +471,13 @@ struct FilmsListViewModelUnitTests {
         func didUpdateFilms(_ films: [Film]) {
             didUpdateFilmsCallCount += 1
         }
-        func didFailToLoadFilms() {}
+        
+        func didFailToLoadFilms() {
+            didFailToLoadFilmsCallCount += 1
+        }
+        
         func didRetry() {}
+        
         func didFailToMatchResults() {}
     }
 }
