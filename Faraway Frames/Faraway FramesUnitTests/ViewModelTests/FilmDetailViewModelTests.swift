@@ -194,7 +194,7 @@ struct FilmDetailViewModelTests {
         #expect(scoreRange.length == expectedScoreLength, "Should be equal.")
     }
     
-    @Test("`updateStatus` updates `currentState` and `filmWasUpdated` when `upNext` persistent change completes successfully")
+    @Test("`updateStatus` updates `currentState` and `filmWasUpdated` when `upNext` persistent change completes successfully", .tags(.persistence))
     func filmDetailViewModel_updateStatus_whenUpNextChangeIsSuccessful_updatesCurrentStateAndFilmWasUpdatedFlag() async {
         let targetFilm = Film.sample[0]
         let mockImageLoader = MockImageLoader()
@@ -212,7 +212,7 @@ struct FilmDetailViewModelTests {
         #expect(sut.filmWasUpdated == true, "Should be true.")
     }
     
-    @Test("`updateStatus` updates `currentState` and `filmWasUpdated` when `watched` persistent change completes successfully")
+    @Test("`updateStatus` updates `currentState` and `filmWasUpdated` when `watched` persistent change completes successfully", .tags(.persistence))
     func filmDetailViewModel_updateStatus_whenWatchedChangeIsSuccessful_updatesCurrentStateAndFilmWasUpdatedFlag() async {
         let targetFilm = Film.sample[0]
         let mockImageLoader = MockImageLoader()
@@ -230,7 +230,7 @@ struct FilmDetailViewModelTests {
         #expect(sut.filmWasUpdated == true, "Should be true.")
     }
     
-    @Test("Adding a film to upNext should call delegate method only if status changes to true - helps prevent duplicates and unnecessary delegate method calls")
+    @Test("Adding a film to upNext should call delegate method only if status changes to true - helps prevent duplicates and unnecessary delegate method calls", .tags(.persistence))
     func filmDetailViewModel_updateStatus_addFilmToUpNext_callsDelegateMethod() async {
         let sut = makeSUT()
         let spy = FilmDetailViewModelSpy()
@@ -246,7 +246,7 @@ struct FilmDetailViewModelTests {
         #expect(spy.upNextStatusChangeCallCount == 1, "Should not call delegate method because the status did not change.")
     }
     
-    @Test("Adding a film to watched should call delegate method only if status changes to true - helps prevent duplicates and unnecessary delegate method calls")
+    @Test("Adding a film to watched should call delegate method only if status changes to true - helps prevent duplicates and unnecessary delegate method calls", .tags(.persistence))
     func filmDetailViewModel_updateStatus_addFilmToWatched_callsDelegateMethod() async {
         let sut = makeSUT()
         let spy = FilmDetailViewModelSpy()
@@ -262,7 +262,7 @@ struct FilmDetailViewModelTests {
         #expect(spy.watchedStatusChangeCallCount == 1, "Should not call delegate method because the status did not change.")
     }
     
-    @Test("Removing a film from upNext should call delegate method only if film exists in database")
+    @Test("Removing a film from upNext should call delegate method only if film exists in database", .tags(.persistence))
     func filmDetailViewModel_updateStatus_removeFilmFromUpNext_callsDelegateMethod() async {
         let sut = makeSUT()
         let spy = FilmDetailViewModelSpy()
@@ -280,7 +280,7 @@ struct FilmDetailViewModelTests {
         #expect(spy.upNextStatusChangeCallCount == 2, "Should not call delegate method because the film no longer exists in the database.")
     }
     
-    @Test("Removing a film from watched should call delegate method")
+    @Test("Removing a film from watched should call delegate method", .tags(.persistence))
     func filmDetailViewModel_updateStatus_removeFilmFromWatched_callsDelegateMethod() async {
         let sut = makeSUT()
         let spy = FilmDetailViewModelSpy()
@@ -299,6 +299,7 @@ struct FilmDetailViewModelTests {
     }
     
     @Test("`updateStatus` should handle add film to upNext errors by updating `currentState` and triggering delegate method call",
+          .tags(.persistence),
           arguments: PersistenceHelper.errorScenarios
     )
     func filmDetailViewModel_updateStatus_onSaveError_whenAddingFilmToUpNext_handlesError(
@@ -324,6 +325,7 @@ struct FilmDetailViewModelTests {
     }
     
     @Test("`updateStatus` should handle remove film from upNext errors by updating `currentState` and triggering delegate method call",
+          .tags(.persistence),
           arguments: PersistenceHelper.errorScenarios
     )
     func filmDetailViewModel_updateStatus_onSaveError_whenRemovingFilmFromUpNext_handlesError(
@@ -356,6 +358,7 @@ struct FilmDetailViewModelTests {
     }
     
     @Test("`updateStatus` should handle add film to watched errors by updating `currentState` and triggering delegate method call",
+          .tags(.persistence),
           arguments: PersistenceHelper.errorScenarios
     )
     func filmDetailViewModel_updateStatus_onSaveError_whenAddingFilmToWatched_handlesError(
@@ -381,6 +384,7 @@ struct FilmDetailViewModelTests {
     }
     
     @Test("`updateStatus` should handle remove film from watched errors by updating `currentState` and triggering delegate method call",
+          .tags(.persistence),
           arguments: PersistenceHelper.errorScenarios
     )
     func filmDetailViewModel_updateStatus_onSaveError_whenRemovingFilmFromWatched_handlesError(
