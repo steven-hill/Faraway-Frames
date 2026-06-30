@@ -153,7 +153,7 @@ struct ExploreDetailVCTests {
         #expect(sut.updatedFilm == nil, "Should be nil.")
     }
     
-    @Test("`didUpdateUpNextStatus` flips VC's isUpNext state property to true")
+    @Test("`didUpdateUpNextStatus` flips VC's isUpNext state property to true", .tags(.persistence))
     func exploreDetailVC_didUpdateUpNextStatus_flipsUpNextStatePropertyToTrue() {
         let sut = makeSUTWithFilm()
         
@@ -162,7 +162,7 @@ struct ExploreDetailVCTests {
         #expect(sut.isUpNext == true, "Should be true.")
     }
     
-    @Test("`didUpdateUpNextStatus` flips VC's isUpNext state property to false")
+    @Test("`didUpdateUpNextStatus` flips VC's isUpNext state property to false", .tags(.persistence))
     func exploreDetailVC_didUpdateUpNextStatus_flipsUpNextStatePropertyToFalse() {
         let sut = makeSUTWithFilm()
         
@@ -171,7 +171,7 @@ struct ExploreDetailVCTests {
         #expect(sut.isUpNext == false, "Should be false.")
     }
     
-    @Test("`didUpdateWatchedStatus` flips VC's isWatched state property to true")
+    @Test("`didUpdateWatchedStatus` flips VC's isWatched state property to true", .tags(.persistence))
     func exploreDetailVC_didUpdateWatchedStatus_isWatchedStatePropertyChangedToTrue() {
         let sut = makeSUTWithFilm()
         
@@ -180,7 +180,7 @@ struct ExploreDetailVCTests {
         #expect(sut.isWatched == true, "Should be true.")
     }
     
-    @Test("`didUpdateWatchedStatus` flips VC's isWatched state property to false")
+    @Test("`didUpdateWatchedStatus` flips VC's isWatched state property to false", .tags(.persistence))
     func exploreDetailVC_didUpdateWatchedStatus_isWatchedStatePropertyChangedToFalse() {
         let sut = makeSUTWithFilm()
         
@@ -190,6 +190,7 @@ struct ExploreDetailVCTests {
     }
     
     @Test("VC requests that the system update the content-unavailable configuration for the error state",
+          .tags(.persistence),
           arguments: PersistenceHelper.errorScenarios
     )
     func exploreDetailVC_didReceiveError_notifiesContentUnavailableConfigurationToUpdate(
@@ -216,6 +217,7 @@ struct ExploreDetailVCTests {
     }
     
     @Test("VC creates configuration for the error state",
+          .tags(.persistence),
           arguments: PersistenceHelper.errorScenarios
     )
     func exploreDetailVC_createErrorConfig_createsConfiguration(
@@ -246,6 +248,7 @@ struct ExploreDetailVCTests {
     }
     
     @Test("Tapping `Retry` button on error config calls VM's updateStatus method again and sets `attemptingUpdate` flag to true",
+          .tags(.persistence),
           arguments: PersistenceHelper.errorScenarios
     )
     func exploreDetailVC_tapRetryButtonOnErrorConfig_callsVMUpdateStatusAgain(
@@ -275,6 +278,7 @@ struct ExploreDetailVCTests {
     }
     
     @Test("Tapping `cancel` button on error config reloads film content and updates VM's `currentState`",
+          .tags(.persistence),
           arguments: PersistenceHelper.errorScenarios
     )
     func exploreDetailVC_tapCancelButtonOnErrorConfig_reloadsFilmContentAndUpdatesState(
@@ -348,7 +352,7 @@ struct ExploreDetailVCTests {
                 "Buttons container must be visible when state is `.content`.")
     }
     
-    @Test("Tapping upNextButton invokes the view model with the correct parameters")
+    @Test("Tapping upNextButton invokes the view model with the correct parameters", .tags(.persistence))
     func exploreDetailVC_upNextButtonTap_callsViewModelUpdateStatus() async {
         let (sut, spyVM) = makeSUTWithFilmAndSpyVM()
         
@@ -360,7 +364,7 @@ struct ExploreDetailVCTests {
         #expect(spyVM.capturedAction == .add, "Action should be add.")
     }
     
-    @Test("Tapping watchedButton invokes the view model with the correct parameters")
+    @Test("Tapping watchedButton invokes the view model with the correct parameters", .tags(.persistence))
     func exploreDetailVC_watchedButtonTap_callsViewModelUpdateStatus() async {
         let (sut, spyVM) = makeSUTWithFilmAndSpyVM()
         
@@ -372,7 +376,7 @@ struct ExploreDetailVCTests {
         #expect(spyVM.capturedAction == .add, "Action should be add.")
     }
     
-    @Test("Tapping upNextButton disables the button while persistence operation is performed")
+    @Test("Tapping upNextButton disables the button while persistence operation is performed", .tags(.persistence))
     func exploreDetailVC_upNextButtonTap_disablesButtonTemporarily() async {
         let sut = makeSUTWithFilm()
         _ = sut.view
@@ -389,7 +393,7 @@ struct ExploreDetailVCTests {
         #expect(sut.watchedButton.isEnabled == true, "The button should be enabled.")
     }
     
-    @Test("Tapping watchedButton disables the button while persistence operation is performed")
+    @Test("Tapping watchedButton disables the button while persistence operation is performed", .tags(.persistence))
     func exploreDetailVC_watchedButtonTap_disablesButtonTemporarily() async {
         let sut = makeSUTWithFilm()
         _ = sut.view
@@ -406,7 +410,7 @@ struct ExploreDetailVCTests {
         #expect(sut.upNextButton.isEnabled == true, "The button should be enabled.")
     }
     
-    @Test("`viewWillDisappear` calls delegate with the film when view model has changes")
+    @Test("`viewWillDisappear` calls delegate with the film when view model has changes", .tags(.persistence))
     func exploreDetailVC_viewWillDisappear_whenHasChangesIsTrue_notifiesDelegate() async {
         let sut = makeSUTWithFilm()
         let delegateSpy = FilmDetailViewControllerDelegateSpy()
