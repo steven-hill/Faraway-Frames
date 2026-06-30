@@ -365,11 +365,14 @@ struct FilmsListViewModelUnitTests {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
         let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader, filmSyncService: filmSyncService)
+        let delegateSpy = FilmsListViewModelDelegateSpy()
+        sut.delegate = delegateSpy
         
         sut.retryLoadingAllFilms()
         await sut.refreshTask?.value
         
         #expect(mockService.fetchWasCalled == true)
+        #expect(delegateSpy.didRetryCallCount == 1, "Should have called delegate method once.")
     }
     
     @Test func filmsListViewModel_retryLoadingAllFilms_emptiesFilteredFilms() async {
