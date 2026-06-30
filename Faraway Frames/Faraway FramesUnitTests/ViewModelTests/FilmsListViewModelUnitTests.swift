@@ -191,12 +191,15 @@ struct FilmsListViewModelUnitTests {
     ])
     func filmsListViewModel_filter_whenThereAreNoFilmsToSearchThrough_doesNotUpdateFilteredFilmsArray(expectedError: APIError) async {
         let sut = makeSUTForFailureCase(error: expectedError)
+        let delegateSpy = FilmsListViewModelDelegateSpy()
+        sut.delegate = delegateSpy
         
         await sut.getAllFilms()
         sut.filterFilms(by: "query")
         
         #expect(sut.films.isEmpty, "Films array should be empty on failure.")
         #expect(sut.filteredFilms.isEmpty, "Filtered films array should be empty.")
+        #expect(delegateSpy.didFailToMatchResultsCallCount == 1, "Should have called delegate method once.")
     }
     
     @Test(.tags(.search))
