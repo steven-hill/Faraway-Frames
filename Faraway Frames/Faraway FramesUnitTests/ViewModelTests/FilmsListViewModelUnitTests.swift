@@ -83,11 +83,14 @@ struct FilmsListViewModelUnitTests {
     ])
     func filmsListViewModel_getAllFilms_handlesAPIError(expectedError: APIError) async {
         let sut = makeSUTForFailureCase(error: expectedError)
+        let delegateSpy = FilmsListViewModelDelegateSpy()
+        sut.delegate = delegateSpy
         
         await sut.getAllFilms()
         
         #expect(sut.films.isEmpty, "Films array should be empty on failure.")
         #expect(sut.currentState == .error(expectedError), "Should be `.error(APIError)`.")
+        #expect(delegateSpy.didFailToLoadFilmsCallCount == 1, "Should have called delegate method once.")
     }
     
     @Test("Covers `handleFailure()`",.tags(.networkRequest))
