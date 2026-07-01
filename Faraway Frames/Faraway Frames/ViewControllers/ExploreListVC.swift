@@ -22,11 +22,13 @@ final class ExploreListVC: UIViewController {
     var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
     let searchController = UISearchController(searchResultsController: nil)
     private(set) var loadTask: Task<Void, Never>?
-    private var voiceOverAnnouncementTask: Task<Void, Never>?
+    private let accessibilityService: AccessibilityService
+    private(set) var voiceOverAnnouncementTask: Task<Void, Never>?
     
     // MARK: - Initialisation
-    init(viewModel: FilmsListViewModel) {
+    init(viewModel: FilmsListViewModel, accessibilityService: AccessibilityService) {
         self.viewModel = viewModel
+        self.accessibilityService = accessibilityService
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -275,12 +277,12 @@ extension ExploreListVC: FilmsListViewModelDelegate {
     }
     
     func didRequestVoiceOverAnnouncement(with message: String) {
-        guard UIAccessibility.isVoiceOverRunning else { return }
+        guard accessibilityService.isVoiceOverRunning else { return }
         voiceOverAnnouncementTask?.cancel()
         voiceOverAnnouncementTask = Task {
             try? await Task.sleep(nanoseconds: 500_000_000)
             guard !Task.isCancelled else { return }
-            UIAccessibility.post(notification: .announcement, argument: message)
+            accessibilityService.post(notification: .announcement, argument: message)
         }
     }
 }

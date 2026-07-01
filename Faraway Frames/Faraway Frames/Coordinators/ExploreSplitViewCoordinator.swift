@@ -11,7 +11,7 @@ import CoreData
 
 final class ExploreSplitViewCoordinator: Coordinator {
     
-    typealias Dependencies = FilmsListServicing & ImageLoading
+    typealias Dependencies = FilmsListServicing & ImageLoading & AccessibilityServicing
     private let dependencies: Dependencies
     private let filmQueueService: FilmQueueService
     private let filmSyncService: FilmSyncService
@@ -37,8 +37,8 @@ final class ExploreSplitViewCoordinator: Coordinator {
         exploreSplitVC.preferredDisplayMode = .oneBesideSecondary
         exploreSplitVC.delegate = self
         let filmsListViewModel = FilmsListViewModel(filmsListService: dependencies.makeFilmsListService(), imageLoader: dependencies.makeImageLoader(), filmSyncService: filmSyncService)
-        let exploreListVC = ExploreListVC(viewModel: filmsListViewModel)
-        exploreListVC.navigationDelegate = self 
+        let exploreListVC = ExploreListVC(viewModel: filmsListViewModel, accessibilityService: dependencies.makeAccessibilityService())
+        exploreListVC.navigationDelegate = self
         let exploreListNav = UINavigationController(rootViewController: exploreListVC)
         exploreSplitVC.setViewController(exploreListNav, for: .primary)
         

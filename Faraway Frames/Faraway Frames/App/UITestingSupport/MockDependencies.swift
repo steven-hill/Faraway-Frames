@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class MockDependencies: FilmsListServicing, ImageLoading, PersistentStoring {
+final class MockDependencies: FilmsListServicing, ImageLoading, PersistentStoring, AccessibilityServicing {
     private let shouldSucceed: Bool = ProcessInfo.processInfo.isUITestingMockNetworkSuccess
     private let isUsingFileManagerData: Bool = ProcessInfo.processInfo.isUITestingMockNetworkFailureWithFileManagerData
     
@@ -21,5 +21,9 @@ final class MockDependencies: FilmsListServicing, ImageLoading, PersistentStorin
     
     func makePersistenceController() throws -> PersistenceControlling {
         return try PersistenceController(inMemory: true)
+    }
+    
+    func makeAccessibilityService() -> AccessibilityService {
+        return MockAccessibilityServiceForUITests()
     }
 }
