@@ -11,7 +11,7 @@ import UIKit
 final class MainCoordinator: Coordinator {
     var childCoordinators = [Coordinator]()
     var window: WindowProtocol
-    typealias Dependencies = FilmsListServicing & ImageLoading
+    typealias Dependencies = FilmsListServicing & ImageLoading & AccessibilityServicing
     let dependencies: Dependencies
     let persistenceController: PersistenceControlling
     let tabBarController = TabBarController()

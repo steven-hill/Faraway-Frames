@@ -8,7 +8,8 @@
 import Foundation
 @testable import Faraway_Frames
 
-final class MockContainer: FilmsListServicing, ImageLoading, PersistentStoring {
+final class MockContainer: FilmsListServicing, ImageLoading, PersistentStoring, AccessibilityServicing {
+    
     func makePersistenceController() throws -> PersistenceControlling {
         return try PersistenceController(inMemory: true)
     }
@@ -19,5 +20,9 @@ final class MockContainer: FilmsListServicing, ImageLoading, PersistentStoring {
     
     func makeImageLoader() -> ImageLoader {
         return MockImageLoader()
+    }
+    
+    func makeAccessibilityService() -> AccessibilityService {
+        return MockAccessibilityService()
     }
 }

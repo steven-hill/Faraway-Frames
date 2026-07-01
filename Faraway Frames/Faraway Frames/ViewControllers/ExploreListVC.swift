@@ -22,11 +22,13 @@ final class ExploreListVC: UIViewController {
     var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
     let searchController = UISearchController(searchResultsController: nil)
     private(set) var loadTask: Task<Void, Never>?
+    private let accessibilityService: AccessibilityService
     private var voiceOverAnnouncementTask: Task<Void, Never>?
     
     // MARK: - Initialisation
-    init(viewModel: FilmsListViewModel) {
+    init(viewModel: FilmsListViewModel, accessibilityService: AccessibilityService) {
         self.viewModel = viewModel
+        self.accessibilityService = accessibilityService
         super.init(nibName: nil, bundle: nil)
     }
     
