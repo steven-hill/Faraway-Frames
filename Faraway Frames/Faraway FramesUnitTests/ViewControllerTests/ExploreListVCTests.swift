@@ -63,7 +63,7 @@ struct ExploreListVCTests {
     }
     
     @Test(.tags(.networkRequest))
-    func exploreListVC_canUpdateFilmsArraySuccessfully() async {
+    func exploreListVC_canUpdateFilmsArraySuccessfullyAndUpdateUI() async {
         let sut = makeSUTForNetworkSuccess()
         
         sut.loadViewIfNeeded()
