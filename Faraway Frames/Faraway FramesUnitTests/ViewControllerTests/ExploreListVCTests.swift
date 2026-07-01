@@ -70,6 +70,10 @@ struct ExploreListVCTests {
         await sut.loadTask?.value
         
         #expect(sut.films.count == 22, "VC's film should contain 22 films.")
+        #expect(sut.viewModel.currentState == .content(isUsingArchivedData: false), "Should set the state to .content.")
+        #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
+        #expect(sut.collectionView.isHidden == false)
+        #expect(sut.searchController.searchBar.isEnabled == true)
     }
     
     @Test("ExploreListVC shows error view for all API errors", .tags(.networkRequest), arguments: [
