@@ -46,19 +46,12 @@ struct ExploreListVCTests {
         #expect(sut.viewModel.delegate != nil, "View model's delegate should be set.")
     }
     
-    @Test func exploreListVC_setsCollectionViewDelegate() {
+    @Test func exploreListVC_setsCollectionViewDelegateAndDataSource() {
         let sut = makeSUT()
         
         sut.loadViewIfNeeded()
         
         #expect(sut.collectionView.delegate != nil, "Collection view delegate should be set.")
-    }
-    
-    @Test func exploreListVC_setsCollectionViewDataSource() {
-        let sut = makeSUT()
-        
-        sut.loadViewIfNeeded()
-        
         #expect(sut.collectionView.dataSource != nil, "Collection view data source should be set.")
     }
     
