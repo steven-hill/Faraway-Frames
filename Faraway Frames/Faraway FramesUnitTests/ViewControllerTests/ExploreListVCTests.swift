@@ -494,6 +494,8 @@ struct ExploreListVCTests {
         
         sut.loadViewIfNeeded()
         sut.collectionView.refreshControl?.sendActions(for: .valueChanged)
+        #expect(sut.viewModel.currentState == .retrying, "Should be set to `.retrying`.")
+        #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
         await sut.viewModel.refreshTask?.value
         
         #expect(mockService.fetchWasCalled == true, "Should call fetchAllFilms.")
