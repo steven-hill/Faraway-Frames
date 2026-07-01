@@ -625,7 +625,10 @@ struct ExploreListVCTests {
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
         let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
         let mockAccessibilityService = MockAccessibilityService()
+        mockAccessibilityService.isVoiceOverRunningStub = false
         let sut = ExploreListVC(viewModel: filmsListViewModel, accessibilityService: mockAccessibilityService)
+        
+        
     }
     
     // MARK: - SUT Helper Methods

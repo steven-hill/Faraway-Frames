@@ -9,8 +9,8 @@ import UIKit
 @testable import Faraway_Frames
 
 final class MockAccessibilityService: AccessibilityService {
-    var isVoiceOverRunning = false
-    
+    var isVoiceOverRunningStub = false
+    var isVoiceOverRunning: Bool { isVoiceOverRunningStub }
     func post(notification: UIAccessibility.Notification, argument: Any?) {
     }
 }
