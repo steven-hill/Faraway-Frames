@@ -43,6 +43,7 @@
 		5B3CF7BB2F90E20300BA59CA /* Exceptions for "Faraway Frames" folder in "Faraway FramesUITests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				App/UITestingSupport/MockAccessibilityServiceForUITests.swift,
 				Constants/CurrentDevice.swift,
 				Constants/SFSymbols.swift,
 				Resources/ghibliFilms.json,

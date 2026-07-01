@@ -613,8 +613,13 @@ struct ExploreListVCTests {
     
     @Test("Does not post announcement when VoiceOver is disabled")
     func exploreListVC_whenVoiceOverIsDisabled_doesNotPost() {
-        let mockService = MockAccessibilityService()
-        
+        let mockFilmsListService = MockFilmsListService()
+        let imageLoader = MockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
+        let mockAccessibilityService = MockAccessibilityService()
+        let sut = ExploreListVC(viewModel: filmsListViewModel, accessibilityService: mockAccessibilityService)
     }
     
     // MARK: - SUT Helper Methods
