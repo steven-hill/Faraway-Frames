@@ -613,7 +613,7 @@ struct ExploreListVCTests {
     
     @Test("Does not post announcement when VoiceOver is disabled")
     func exploreListVC_whenVoiceOverIsDisabled_doesNotPost() {
-        
+        let mockService = MockAccessibilityService()
         
     }
     
