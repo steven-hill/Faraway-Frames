@@ -611,6 +611,12 @@ struct ExploreListVCTests {
         }
     }
     
+    @Test("Does not post announcement when VoiceOver is disabled")
+    func exploreListVC_whenVoiceOverIsDisabled_doesNotPost() {
+        
+        
+    }
+    
     // MARK: - SUT Helper Methods
     private func makeSUT() -> ExploreListVC {
         let mockFilmsListService = MockFilmsListService()
