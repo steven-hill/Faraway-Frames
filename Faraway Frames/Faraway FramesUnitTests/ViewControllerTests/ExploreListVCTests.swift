@@ -618,15 +618,8 @@ struct ExploreListVCTests {
     }
     
     @Test("Does not post announcement when VoiceOver is disabled")
-    func exploreListVC_didRequestVoiceOverAnnouncement_whenVoiceOverIsDisabled_doesNotPost() {
-        let mockFilmsListService = MockFilmsListService()
-        let imageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
-        let mockAccessibilityService = MockAccessibilityService()
-        mockAccessibilityService.isVoiceOverRunningStub = false
-        let sut = ExploreListVC(viewModel: filmsListViewModel, accessibilityService: mockAccessibilityService)
+    func exploreListVC_didRequestVoiceOverAnnouncement_whenVoiceOverIsDisabled_doesNotPost() async {
+        let (sut, mockAccessibilityService) = await makeSUTForVOTests(voiceOverIsOn: false)
         
         sut.didRequestVoiceOverAnnouncement(with: "test")
         
@@ -637,16 +630,7 @@ struct ExploreListVCTests {
     
     @Test("Posts notification with message after the debounce delay completes")
     func exploreListVC_didRequestVoiceOverAnnouncement_whenVoiceOverIsOn_postsMessageAfterDelay() async throws {
-        let mockFilmsListService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
-        let imageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
-        let mockAccessibilityService = MockAccessibilityService()
-        mockAccessibilityService.isVoiceOverRunningStub = true
-        let sut = ExploreListVC(viewModel: filmsListViewModel, accessibilityService: mockAccessibilityService)
-        sut.loadViewIfNeeded()
-        await sut.loadTask?.value
+        let (sut, mockAccessibilityService) = await makeSUTForVOTests(voiceOverIsOn: true)
         
         sut.didRequestVoiceOverAnnouncement(with: "Test Announcement")
         try await Task.sleep(nanoseconds: 600_000_000)
@@ -658,16 +642,7 @@ struct ExploreListVCTests {
     
     @Test("Cancels previous announcement task when a new one is requested rapidly")
     func exploreListVC_didRequestVoiceOverAnnouncement_multipleRequests_cancelsPreviousAndDebounces() async throws {
-        let mockFilmsListService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
-        let imageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
-        let mockAccessibilityService = MockAccessibilityService()
-        mockAccessibilityService.isVoiceOverRunningStub = true
-        let sut = ExploreListVC(viewModel: filmsListViewModel, accessibilityService: mockAccessibilityService)
-        sut.loadViewIfNeeded()
-        await sut.loadTask?.value
+        let (sut, mockAccessibilityService) = await makeSUTForVOTests(voiceOverIsOn: true)
         
         sut.didRequestVoiceOverAnnouncement(with: "First Message")
         let firstTask = sut.voiceOverAnnouncementTask
@@ -750,6 +725,20 @@ struct ExploreListVCTests {
         
         sut.didUpdateFilms([film])
         return (sut, cell, film, indexPath)
+    }
+    
+    private func makeSUTForVOTests(voiceOverIsOn: Bool) async -> (sut: ExploreListVC, mockAccessibilityService: MockAccessibilityService) {
+        let mockFilmsListService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
+        let imageLoader = MockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
+        let mockAccessibilityService = MockAccessibilityService()
+        mockAccessibilityService.isVoiceOverRunningStub = voiceOverIsOn
+        let sut = ExploreListVC(viewModel: filmsListViewModel, accessibilityService: mockAccessibilityService)
+        sut.loadViewIfNeeded()
+        await sut.loadTask?.value
+        return (sut, mockAccessibilityService)
     }
     
     // MARK: - Mock CollectionView
