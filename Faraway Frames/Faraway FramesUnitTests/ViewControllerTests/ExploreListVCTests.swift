@@ -654,6 +654,28 @@ struct ExploreListVCTests {
         #expect(mockAccessibilityService.postedArgument as? String == "Test Announcement")
     }
     
+    @Test("Cancels previous announcement task when a new one is requested rapidly")
+    func exploreListVC_didRequestVoiceOverAnnouncement_multipleRequests_cancelsPreviousAndDebounces() async throws {
+        let mockFilmsListService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
+        let imageLoader = MockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
+        let mockAccessibilityService = MockAccessibilityService()
+        mockAccessibilityService.isVoiceOverRunningStub = true
+        let sut = ExploreListVC(viewModel: filmsListViewModel, accessibilityService: mockAccessibilityService)
+        sut.loadViewIfNeeded()
+        await sut.loadTask?.value
+        
+        sut.didRequestVoiceOverAnnouncement(with: "First Message")
+        let firstTask = sut.voiceOverAnnouncementTask
+        sut.didRequestVoiceOverAnnouncement(with: "Second Message")
+        try await Task.sleep(nanoseconds: 600_000_000)
+        
+        #expect(firstTask?.isCancelled == true)
+        #expect(mockAccessibilityService.postedArgument as? String == "Second Message")
+    }
+    
     // MARK: - SUT Helper Methods
     private func makeSUT() -> ExploreListVC {
         let mockFilmsListService = MockFilmsListService()
