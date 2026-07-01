@@ -625,6 +625,7 @@ struct ExploreListVCTests {
         
         #expect(sut.voiceOverAnnouncementTask == nil, "Should be nil due to early exit via guard.")
         #expect(mockAccessibilityService.postedNotification == nil, "Should not have posted a notification.")
+        #expect(mockAccessibilityService.postedArgument as? String == nil, "Should be no argument.")
         #expect(mockAccessibilityService.postCallCount == 0, "Should not have been called.")
     }
     
@@ -635,8 +636,8 @@ struct ExploreListVCTests {
         sut.didRequestVoiceOverAnnouncement(with: "Test Announcement")
         try await Task.sleep(nanoseconds: 600_000_000)
         
-        #expect(mockAccessibilityService.postedNotification == .announcement)
-        #expect(mockAccessibilityService.postedArgument as? String == "Test Announcement")
+        #expect(mockAccessibilityService.postedNotification == .announcement, "The notification should be for an announcement.")
+        #expect(mockAccessibilityService.postedArgument as? String == "Test Announcement", "Should match the call's input.")
         #expect(mockAccessibilityService.postCallCount == 1, "Should have been called once.")
     }
     
@@ -649,8 +650,9 @@ struct ExploreListVCTests {
         sut.didRequestVoiceOverAnnouncement(with: "Second Message")
         try await Task.sleep(nanoseconds: 600_000_000)
         
-        #expect(firstTask?.isCancelled == true)
-        #expect(mockAccessibilityService.postedArgument as? String == "Second Message")
+        #expect(firstTask?.isCancelled == true, "Should have cancelled the first task.")
+        #expect(mockAccessibilityService.postedArgument as? String == "Second Message", "Should match input of second call.")
+        #expect(mockAccessibilityService.postedNotification == .announcement, "The notification should be for an announcement.")
         #expect(mockAccessibilityService.postCallCount == 1, "Due to task cancellation, only one announcement was made.")
     }
     
