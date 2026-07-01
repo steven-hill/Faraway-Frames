@@ -634,6 +634,26 @@ struct ExploreListVCTests {
         #expect(mockAccessibilityService.postedNotification == nil, "Should not have posted a notification.")
     }
     
+    @Test("Posts notification with message after the debounce delay completes")
+    func exploreListVC_didRequestVoiceOverAnnouncement_whenVoiceOverIsOn_postsMessageAfterDelay() async throws {
+        let mockFilmsListService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
+        let imageLoader = MockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
+        let mockAccessibilityService = MockAccessibilityService()
+        mockAccessibilityService.isVoiceOverRunningStub = true
+        let sut = ExploreListVC(viewModel: filmsListViewModel, accessibilityService: mockAccessibilityService)
+        sut.loadViewIfNeeded()
+        await sut.loadTask?.value
+        
+        sut.didRequestVoiceOverAnnouncement(with: "Test Announcement")
+        try await Task.sleep(nanoseconds: 600_000_000)
+        
+        #expect(mockAccessibilityService.postedNotification == .announcement)
+        #expect(mockAccessibilityService.postedArgument as? String == "Test Announcement")
+    }
+    
     // MARK: - SUT Helper Methods
     private func makeSUT() -> ExploreListVC {
         let mockFilmsListService = MockFilmsListService()

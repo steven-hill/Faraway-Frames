@@ -282,7 +282,7 @@ extension ExploreListVC: FilmsListViewModelDelegate {
         voiceOverAnnouncementTask = Task {
             try? await Task.sleep(nanoseconds: 500_000_000)
             guard !Task.isCancelled else { return }
-            UIAccessibility.post(notification: .announcement, argument: message)
+            accessibilityService.post(notification: .announcement, argument: message)
         }
     }
 }

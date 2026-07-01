@@ -11,8 +11,11 @@ import UIKit
 final class MockAccessibilityService: AccessibilityService {
     var isVoiceOverRunningStub = false
     var postedNotification: UIAccessibility.Notification?
+    var postedArgument: Any?
     var isVoiceOverRunning: Bool { isVoiceOverRunningStub }
     
     func post(notification: UIAccessibility.Notification, argument: Any?) {
+        postedNotification = notification
+        postedArgument = argument
     }
 }
