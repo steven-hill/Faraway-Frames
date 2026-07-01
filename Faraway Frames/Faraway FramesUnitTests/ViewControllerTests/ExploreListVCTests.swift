@@ -632,6 +632,7 @@ struct ExploreListVCTests {
         
         #expect(sut.voiceOverAnnouncementTask == nil, "Should be nil due to early exit via guard.")
         #expect(mockAccessibilityService.postedNotification == nil, "Should not have posted a notification.")
+        #expect(mockAccessibilityService.postCallCount == 0, "Should not have been called.")
     }
     
     @Test("Posts notification with message after the debounce delay completes")
@@ -652,6 +653,7 @@ struct ExploreListVCTests {
         
         #expect(mockAccessibilityService.postedNotification == .announcement)
         #expect(mockAccessibilityService.postedArgument as? String == "Test Announcement")
+        #expect(mockAccessibilityService.postCallCount == 1, "Should have been called once.")
     }
     
     @Test("Cancels previous announcement task when a new one is requested rapidly")
@@ -674,6 +676,7 @@ struct ExploreListVCTests {
         
         #expect(firstTask?.isCancelled == true)
         #expect(mockAccessibilityService.postedArgument as? String == "Second Message")
+        #expect(mockAccessibilityService.postCallCount == 1, "Due to task cancellation, only one announcement was made.")
     }
     
     // MARK: - SUT Helper Methods

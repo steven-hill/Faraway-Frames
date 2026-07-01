@@ -13,8 +13,10 @@ final class MockAccessibilityService: AccessibilityService {
     var postedNotification: UIAccessibility.Notification?
     var postedArgument: Any?
     var isVoiceOverRunning: Bool { isVoiceOverRunningStub }
+    private(set) var postCallCount = 0
     
     func post(notification: UIAccessibility.Notification, argument: Any?) {
+        postCallCount += 1
         postedNotification = notification
         postedArgument = argument
     }
