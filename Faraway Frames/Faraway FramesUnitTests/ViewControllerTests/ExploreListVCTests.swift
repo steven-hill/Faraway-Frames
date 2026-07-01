@@ -120,7 +120,7 @@ struct ExploreListVCTests {
         APIError.decodingError,
         APIError.unknown
     ])
-    func exploreListVC_showsRetryButtonTitle_andWhenTappedStartsRetrying_forAllErrors(expectedError: APIError) async {
+    func exploreListVC_forAllErrors_showsRetryButtonTitle_andWhenTappedStartsRetrying(expectedError: APIError) async {
         let sut = makeSUTForNetworkFailure(error: expectedError)
         sut.loadViewIfNeeded()
         
