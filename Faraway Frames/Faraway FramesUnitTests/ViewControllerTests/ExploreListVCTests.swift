@@ -618,7 +618,7 @@ struct ExploreListVCTests {
     }
     
     @Test("Does not post announcement when VoiceOver is disabled")
-    func exploreListVC_whenVoiceOverIsDisabled_doesNotPost() {
+    func exploreListVC_didRequestVoiceOverAnnouncement_whenVoiceOverIsDisabled_doesNotPost() {
         let mockFilmsListService = MockFilmsListService()
         let imageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
