@@ -628,7 +628,10 @@ struct ExploreListVCTests {
         mockAccessibilityService.isVoiceOverRunningStub = false
         let sut = ExploreListVC(viewModel: filmsListViewModel, accessibilityService: mockAccessibilityService)
         
+        sut.didRequestVoiceOverAnnouncement(with: "test")
         
+        #expect(sut.voiceOverAnnouncementTask == nil, "Should be nil due to early exit via guard.")
+        #expect(mockAccessibilityService.postedNotification == nil, "Should not have posted a notification.")
     }
     
     // MARK: - SUT Helper Methods

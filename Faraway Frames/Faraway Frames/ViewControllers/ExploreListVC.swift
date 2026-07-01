@@ -23,7 +23,7 @@ final class ExploreListVC: UIViewController {
     let searchController = UISearchController(searchResultsController: nil)
     private(set) var loadTask: Task<Void, Never>?
     private let accessibilityService: AccessibilityService
-    private var voiceOverAnnouncementTask: Task<Void, Never>?
+    private(set) var voiceOverAnnouncementTask: Task<Void, Never>?
     
     // MARK: - Initialisation
     init(viewModel: FilmsListViewModel, accessibilityService: AccessibilityService) {
@@ -277,7 +277,7 @@ extension ExploreListVC: FilmsListViewModelDelegate {
     }
     
     func didRequestVoiceOverAnnouncement(with message: String) {
-        guard UIAccessibility.isVoiceOverRunning else { return }
+        guard accessibilityService.isVoiceOverRunning else { return }
         voiceOverAnnouncementTask?.cancel()
         voiceOverAnnouncementTask = Task {
             try? await Task.sleep(nanoseconds: 500_000_000)
