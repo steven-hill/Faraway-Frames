@@ -46,30 +46,27 @@ struct ExploreListVCTests {
         #expect(sut.viewModel.delegate != nil, "View model's delegate should be set.")
     }
     
-    @Test func exploreListVC_setsCollectionViewDelegate() {
+    @Test func exploreListVC_setsCollectionViewDelegateAndDataSource() {
         let sut = makeSUT()
         
         sut.loadViewIfNeeded()
         
         #expect(sut.collectionView.delegate != nil, "Collection view delegate should be set.")
-    }
-    
-    @Test func exploreListVC_setsCollectionViewDataSource() {
-        let sut = makeSUT()
-        
-        sut.loadViewIfNeeded()
-        
         #expect(sut.collectionView.dataSource != nil, "Collection view data source should be set.")
     }
     
     @Test(.tags(.networkRequest))
-    func exploreListVC_canUpdateFilmsArraySuccessfully() async {
+    func exploreListVC_canUpdateFilmsArraySuccessfullyAndUpdateUI() async {
         let sut = makeSUTForNetworkSuccess()
         
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
         
         #expect(sut.films.count == 22, "VC's film should contain 22 films.")
+        #expect(sut.viewModel.currentState == .content(isUsingArchivedData: false), "Should set the state to .content.")
+        #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
+        #expect(sut.collectionView.isHidden == false)
+        #expect(sut.searchController.searchBar.isEnabled == true)
     }
     
     @Test("ExploreListVC shows error view for all API errors", .tags(.networkRequest), arguments: [
@@ -111,7 +108,7 @@ struct ExploreListVCTests {
         #expect(mockService.fetchWasCalled == true, "Should call fetchAllFilms once.")
     }
     
-    @Test("ExploreListVC shows retry button title for all API errors",
+    @Test("ExploreListVC shows retry button title for all API errors, and when tapped, starts retrying network request",
         .tags(.networkRequest),
           arguments: [
         APIError.noInternetConnection,
@@ -123,7 +120,7 @@ struct ExploreListVCTests {
         APIError.decodingError,
         APIError.unknown
     ])
-    func exploreListVC_showsRetryButtonTitle_forAllErrors(expectedError: APIError) async {
+    func exploreListVC_forAllErrors_showsRetryButtonTitle_andWhenTappedStartsRetrying(expectedError: APIError) async {
         let sut = makeSUTForNetworkFailure(error: expectedError)
         sut.loadViewIfNeeded()
         
@@ -134,6 +131,11 @@ struct ExploreListVCTests {
         
         #expect(config != nil, "Should not be nil.")
         #expect(config?.button.title != nil, "Should have a title.")
+        
+        config?.buttonProperties.primaryAction?.performWithSender(nil, target: nil)
+        
+        #expect(sut.viewModel.currentState == .retrying, "Should be set to `.retrying`.")
+        #expect(sut.viewModel.refreshTask != nil, "Should start a new `refreshTask`.")
     }
     
     @Test(.tags(.networkRequest))
@@ -497,6 +499,8 @@ struct ExploreListVCTests {
         
         sut.loadViewIfNeeded()
         sut.collectionView.refreshControl?.sendActions(for: .valueChanged)
+        #expect(sut.viewModel.currentState == .retrying, "Should be set to `.retrying`.")
+        #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
         await sut.viewModel.refreshTask?.value
         
         #expect(mockService.fetchWasCalled == true, "Should call fetchAllFilms.")
