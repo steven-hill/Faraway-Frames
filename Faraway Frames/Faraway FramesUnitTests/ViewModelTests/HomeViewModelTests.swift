@@ -73,6 +73,18 @@ struct HomeViewModelTests {
         #expect(watchedFilms.isEmpty == true, "Should be empty.")
     }
     
+    @Test("When `controllerDidChangeContent` is called, it should call the delegate")
+    func homeViewModel_controllerDidChangeContent_triggersDelegate() {
+        let (sut, _) = makeSUTWithContext()
+        let delegateSpy = HomeViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        let dummyController = NSFetchedResultsController<NSFetchRequestResult>()
+        
+        sut.controllerDidChangeContent(dummyController)
+        
+        #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
+    }
+    
     @Test("`performFetches` should handle errors by updating `currentState` and calling the delegate",
           (.tags(.persistence)),
           arguments: errorScenarios
