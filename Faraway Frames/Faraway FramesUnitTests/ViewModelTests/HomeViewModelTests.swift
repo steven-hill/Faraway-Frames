@@ -58,6 +58,21 @@ struct HomeViewModelTests {
         #expect(filmWatched.title == Film.sample[1].title, "Should be equal.")
     }
     
+    @Test("`HomeViewModel` upNextFilms and watchedFilms are empty if `performFetches` returns no results, and calls delegate", (.tags(.persistence)))
+    func homeViewModel_performFetches_whenFetchesReturnNoResults_arraysAreEmpty() throws {
+        let (sut, _) = makeSUTWithContext()
+        let delegateSpy = HomeViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        
+        sut.performFetches()
+        
+        let upNextFilms = try #require(delegateSpy.upNextFilms, "Delegate should have received upNextFilms array.")
+        let watchedFilms = try #require(delegateSpy.watchedFilms, "Delegate should have received watchedFilms array.")
+        #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
+        #expect(upNextFilms.isEmpty == true, "Should be empty.")
+        #expect(watchedFilms.isEmpty == true, "Should be empty.")
+    }
+    
     @Test("`performFetches` should handle errors by updating `currentState` and calling the delegate",
           (.tags(.persistence)),
           arguments: errorScenarios
