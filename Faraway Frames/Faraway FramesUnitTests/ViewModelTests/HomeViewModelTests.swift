@@ -13,14 +13,14 @@ import CoreData
 struct HomeViewModelTests {
     
     @Test("`currentState` is correct on init")
-    func homeViewModel_currentStateOnInit_isIdle() {
+    func homeViewModel_currentState_onInit_isIdle() {
         let (sut,_) = makeSUTWithContext()
         
         #expect(sut.currentState == .idle, "Should be `.idle`.")
     }
     
     @Test("`currentState` is correct after fetching Up Next films and Watched films")
-    func homeViewModel_currentStateAfterFetches_isFetchedObjects() {
+    func homeViewModel_currentState_afterFetchingSuccessfully_isFetchedObjects() {
         let (sut,_) = makeSUTWithContext()
         
         sut.performFetches()
@@ -29,7 +29,7 @@ struct HomeViewModelTests {
     }
     
     @Test("`HomeViewModel` can fetch up next films and watched films, and calls delegate", (.tags(.persistence)))
-    func homeViewModel_performFetches_fetchesCorrectly() throws {
+    func homeViewModel_performFetches_whenFilmsExistInDatabase_fetchesCorrectly() throws {
         let (sut, context) = makeSUTWithContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
@@ -58,11 +58,38 @@ struct HomeViewModelTests {
         #expect(filmWatched.title == Film.sample[1].title, "Should be equal.")
     }
     
+    @Test("`HomeViewModel` upNextFilms and watchedFilms are empty if `performFetches` returns no results, and calls delegate", (.tags(.persistence)))
+    func homeViewModel_performFetches_whenFetchesReturnNoResults_arraysAreEmpty() throws {
+        let (sut, _) = makeSUTWithContext()
+        let delegateSpy = HomeViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        
+        sut.performFetches()
+        
+        let upNextFilms = try #require(delegateSpy.upNextFilms, "Delegate should have received upNextFilms array.")
+        let watchedFilms = try #require(delegateSpy.watchedFilms, "Delegate should have received watchedFilms array.")
+        #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
+        #expect(upNextFilms.isEmpty == true, "Should be empty.")
+        #expect(watchedFilms.isEmpty == true, "Should be empty.")
+    }
+    
+    @Test("When `controllerDidChangeContent` is called, it should call the delegate")
+    func homeViewModel_controllerDidChangeContent_triggersDelegate() {
+        let (sut, _) = makeSUTWithContext()
+        let delegateSpy = HomeViewModelDelegateSpy()
+        sut.delegate = delegateSpy
+        let dummyController = NSFetchedResultsController<NSFetchRequestResult>()
+        
+        sut.controllerDidChangeContent(dummyController)
+        
+        #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
+    }
+    
     @Test("`performFetches` should handle errors by updating `currentState` and calling the delegate",
           (.tags(.persistence)),
           arguments: errorScenarios
     )
-    func homeViewModel_performFetches_setsCorrectFailureState(
+    func homeViewModel_performFetches_whenThereIsAnError_setsCorrectFailureState(
         for scenario: (systemError: Error,
                        expectedReason: HomeError.FailureReason)
     ) throws {
