@@ -13,14 +13,14 @@ import CoreData
 struct HomeViewModelTests {
     
     @Test("`currentState` is correct on init")
-    func homeViewModel_currentStateOnInit_isIdle() {
+    func homeViewModel_currentState_onInit_isIdle() {
         let (sut,_) = makeSUTWithContext()
         
         #expect(sut.currentState == .idle, "Should be `.idle`.")
     }
     
     @Test("`currentState` is correct after fetching Up Next films and Watched films")
-    func homeViewModel_currentStateAfterFetches_isFetchedObjects() {
+    func homeViewModel_currentState_afterFetchingSuccessfully_isFetchedObjects() {
         let (sut,_) = makeSUTWithContext()
         
         sut.performFetches()
@@ -29,7 +29,7 @@ struct HomeViewModelTests {
     }
     
     @Test("`HomeViewModel` can fetch up next films and watched films, and calls delegate", (.tags(.persistence)))
-    func homeViewModel_performFetches_fetchesCorrectly() throws {
+    func homeViewModel_performFetches_whenFilmsExistInDatabase_fetchesCorrectly() throws {
         let (sut, context) = makeSUTWithContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
@@ -77,7 +77,7 @@ struct HomeViewModelTests {
           (.tags(.persistence)),
           arguments: errorScenarios
     )
-    func homeViewModel_performFetches_setsCorrectFailureState(
+    func homeViewModel_performFetches_whenThereIsAnError_setsCorrectFailureState(
         for scenario: (systemError: Error,
                        expectedReason: HomeError.FailureReason)
     ) throws {
