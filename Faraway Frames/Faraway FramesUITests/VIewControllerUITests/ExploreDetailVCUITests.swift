@@ -90,6 +90,26 @@ final class ExploreDetailVCUITests: XCTestCase {
         XCTAssertEqual(changedResult, .completed, "The button label did not change to 'Add to Up Next' after tap.")
     }
     
+    func test_watchedButton_whenTapped_togglesTitle() {
+        NavigationHelper.navigateToExploreTab(app: app)
+        tapFirstCollectionViewCell()
+        app.swipeUp()
+        
+        let watchedButton = app.buttons["ExploreDetailVC_WatchedButton"]
+        let predicate = NSPredicate(format: "label == %@", "Add to Watched")
+        let expectation = expectation(for: predicate, evaluatedWith: watchedButton, handler: nil)
+        let result = XCTWaiter().wait(for: [expectation], timeout: 5.0)
+        XCTAssertEqual(result, .completed, "The button label did not load from Core Data in time.")
+        
+        watchedButton.tap()
+        
+        let changedPredicate = NSPredicate(format: "label == %@", "Remove from Watched")
+        let changedExpectation = XCTNSPredicateExpectation(predicate: changedPredicate, object: watchedButton)
+        
+        let changedResult = XCTWaiter().wait(for: [changedExpectation], timeout: 2.0)
+        XCTAssertEqual(changedResult, .completed, "The button label did not change to 'Remove from Watched' after tap.")
+    }
+    
     // MARK: - Helper methods
     private func assertExploreDetailElementsExist() {
         let elements = [
