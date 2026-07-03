@@ -71,9 +71,7 @@ final class ExploreDetailVCUITests: XCTestCase {
     }
     
     func test_upNextButton_whenTapped_togglesTitle() {
-        NavigationHelper.navigateToExploreTab(app: app)
-        tapFirstCollectionViewCell()
-        app.swipeUp()
+        revealButtons()
         
         let upNextButton = app.buttons["ExploreDetailVC_UpNextButton"]
         let predicate = NSPredicate(format: "label == %@", "Remove from Up Next")
@@ -91,9 +89,7 @@ final class ExploreDetailVCUITests: XCTestCase {
     }
     
     func test_watchedButton_whenTapped_togglesTitle() {
-        NavigationHelper.navigateToExploreTab(app: app)
-        tapFirstCollectionViewCell()
-        app.swipeUp()
+        revealButtons()
         
         let watchedButton = app.buttons["ExploreDetailVC_WatchedButton"]
         let predicate = NSPredicate(format: "label == %@", "Add to Watched")
@@ -111,6 +107,12 @@ final class ExploreDetailVCUITests: XCTestCase {
     }
     
     // MARK: - Helper methods
+    private func revealButtons() {
+        NavigationHelper.navigateToExploreTab(app: app)
+        tapFirstCollectionViewCell()
+        app.swipeUp()
+    }
+    
     private func assertExploreDetailElementsExist() {
         let elements = [
             app.images["ExploreDetailVC_MovieBanner"],
