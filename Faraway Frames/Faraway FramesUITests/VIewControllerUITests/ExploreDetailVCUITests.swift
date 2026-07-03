@@ -13,7 +13,7 @@ final class ExploreDetailVCUITests: XCTestCase {
     
     override func setUpWithError() throws {
         app = XCUIApplication()
-        app.launchArguments = ["-UITesting", "-UITestingMockNetworkSuccess"]
+        app.launchArguments = ["-UITesting", "-UITestingMockNetworkSuccess", "-UIMockPersistenceDataForUITests"]
         XCUIDevice.shared.orientation = .portrait
         app.launch()
         continueAfterFailure = false
@@ -66,6 +66,26 @@ final class ExploreDetailVCUITests: XCTestCase {
         XCTAssertTrue(app.buttons["ExploreDetailVC_UpNextButton"].isHittable, "Should be hittable.")
         XCTAssertTrue(app.buttons["ExploreDetailVC_WatchedButton"].isHittable, "Should be hittable.")
         XCTAssertTrue(app.buttons["ExploreDetailVC_MoreLikeThisButton"].isHittable, "Should be hittable.")
+    }
+    
+    func test_upNextButton_whenTapped_togglesTitle() {
+        NavigationHelper.navigateToExploreTab(app: app)
+        tapFirstCollectionViewCell()
+        app.swipeUp()
+        
+        let upNextButton = app.buttons["ExploreDetailVC_UpNextButton"]
+        let predicate = NSPredicate(format: "label == %@", "Remove from Up Next")
+        let expectation = expectation(for: predicate, evaluatedWith: upNextButton, handler: nil)
+        let result = XCTWaiter().wait(for: [expectation], timeout: 5.0)
+        XCTAssertEqual(result, .completed, "The button label did not update to `Remove from Up Next` from Core Data in time.")
+        
+        upNextButton.tap()
+        
+        let changedPredicate = NSPredicate(format: "label == %@", "Add to Up Next")
+        let changedExpectation = XCTNSPredicateExpectation(predicate: changedPredicate, object: upNextButton)
+        
+        let changedResult = XCTWaiter().wait(for: [changedExpectation], timeout: 2.0)
+        XCTAssertEqual(changedResult, .completed, "The button label did not change to 'Add to Up Next' after tap.")
     }
     
     // MARK: - Helper methods
