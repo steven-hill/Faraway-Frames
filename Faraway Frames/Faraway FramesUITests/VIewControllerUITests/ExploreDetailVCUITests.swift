@@ -13,7 +13,9 @@ final class ExploreDetailVCUITests: XCTestCase {
     
     override func setUpWithError() throws {
         app = XCUIApplication()
-        app.launchArguments = ["-UITesting", "-UITestingMockNetworkSuccess", "-UIMockPersistenceDataForUITests"]
+        app.launchArguments = ["-UITesting",
+                               "-UITestingMockNetworkSuccess",
+                               "-UITestingMockPersistenceData"]
         XCUIDevice.shared.orientation = .portrait
         app.launch()
         continueAfterFailure = false
