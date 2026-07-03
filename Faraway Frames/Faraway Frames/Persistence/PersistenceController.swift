@@ -31,7 +31,8 @@ final class PersistenceController: PersistenceControlling {
         
         container = NSPersistentContainer(name: containerName)
         
-        if inMemory {
+        let isUITesting = ProcessInfo.processInfo.isUITestingMockPersistenceData
+        if inMemory || isUITesting {
             let description = NSPersistentStoreDescription()
             description.url = URL(fileURLWithPath: "/dev/null")
             container.persistentStoreDescriptions = [description]
@@ -48,6 +49,10 @@ final class PersistenceController: PersistenceControlling {
         }
         
         container.viewContext.automaticallyMergesChangesFromParent = true
+        
+        if isUITesting {
+            createMockMO(context: viewContext)
+        }
     }
     
     // MARK: - Core Data Saving
@@ -59,5 +64,13 @@ final class PersistenceController: PersistenceControlling {
                 throw PersistenceError.savingFailed(error: error)
             }
         }
+    }
+}
+
+extension PersistenceController {
+    private func createMockMO(context: NSManagedObjectContext) {
+        let mockMO = Film.makeFilmMO(from: Film.sample[0], context: context)
+        mockMO.isUpNext = true
+        try? context.save()
     }
 }
