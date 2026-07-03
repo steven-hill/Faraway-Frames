@@ -67,6 +67,7 @@ final class PersistenceController: PersistenceControlling {
     }
 }
 
+/// Creates mock data for UI tests.
 extension PersistenceController {
     private func createMockMO(context: NSManagedObjectContext) {
         let mockMO = Film.makeFilmMO(from: Film.sample[0], context: context)
