@@ -13,7 +13,9 @@ final class ExploreDetailVCUITests: XCTestCase {
     
     override func setUpWithError() throws {
         app = XCUIApplication()
-        app.launchArguments = ["-UITesting", "-UITestingMockNetworkSuccess"]
+        app.launchArguments = ["-UITesting",
+                               "-UITestingMockNetworkSuccess",
+                               "-UITestingMockPersistenceData"]
         XCUIDevice.shared.orientation = .portrait
         app.launch()
         continueAfterFailure = false
@@ -68,7 +70,46 @@ final class ExploreDetailVCUITests: XCTestCase {
         XCTAssertTrue(app.buttons["ExploreDetailVC_MoreLikeThisButton"].isHittable, "Should be hittable.")
     }
     
+    func test_upNextButton_whenTapped_togglesTitle() {
+        revealButtons()
+        
+        let upNextButton = app.buttons["ExploreDetailVC_UpNextButton"]
+        let result = makeResult(for: upNextButton, buttonLabel: "Remove from Up Next")
+        XCTAssertEqual(result, .completed, "The button label did not load from Core Data in time.")
+        
+        upNextButton.tap()
+
+        let changedResult = makeResult(for: upNextButton, buttonLabel: "Add to Up Next")
+        XCTAssertEqual(changedResult, .completed, "The button label did not change to 'Add to Up Next' after tap.")
+    }
+    
+    func test_watchedButton_whenTapped_togglesTitle() {
+        revealButtons()
+        
+        let watchedButton = app.buttons["ExploreDetailVC_WatchedButton"]
+        let result = makeResult(for: watchedButton, buttonLabel: "Add to Watched")
+        XCTAssertEqual(result, .completed, "The button label did not load from Core Data in time.")
+        
+        watchedButton.tap()
+        
+        let changedResult = makeResult(for: watchedButton, buttonLabel: "Remove from Watched")
+        XCTAssertEqual(changedResult, .completed, "The button label did not change to 'Remove from Watched' after tap.")
+    }
+    
     // MARK: - Helper methods
+    private func revealButtons() {
+        NavigationHelper.navigateToExploreTab(app: app)
+        tapFirstCollectionViewCell()
+        app.swipeUp()
+    }
+    
+    private func makeResult(for button: XCUIElement, buttonLabel: String) -> XCTWaiter.Result {
+        let predicate = NSPredicate(format: "label == %@", buttonLabel)
+        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: button)
+        let result = XCTWaiter().wait(for: [expectation], timeout: 5.0)
+        return result
+    }
+    
     private func assertExploreDetailElementsExist() {
         let elements = [
             app.images["ExploreDetailVC_MovieBanner"],
