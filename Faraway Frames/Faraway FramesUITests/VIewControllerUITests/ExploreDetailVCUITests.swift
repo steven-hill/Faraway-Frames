@@ -74,17 +74,12 @@ final class ExploreDetailVCUITests: XCTestCase {
         revealButtons()
         
         let upNextButton = app.buttons["ExploreDetailVC_UpNextButton"]
-        let predicate = NSPredicate(format: "label == %@", "Remove from Up Next")
-        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: upNextButton)
-        let result = XCTWaiter().wait(for: [expectation], timeout: 5.0)
-        XCTAssertEqual(result, .completed, "The button label did not update to `Remove from Up Next` from Core Data in time.")
+        let result = makeResult(for: upNextButton, buttonLabel: "Remove from Up Next")
+        XCTAssertEqual(result, .completed, "The button label did not load from Core Data in time.")
         
         upNextButton.tap()
-        
-        let changedPredicate = NSPredicate(format: "label == %@", "Add to Up Next")
-        let changedExpectation = XCTNSPredicateExpectation(predicate: changedPredicate, object: upNextButton)
-        
-        let changedResult = XCTWaiter().wait(for: [changedExpectation], timeout: 2.0)
+
+        let changedResult = makeResult(for: upNextButton, buttonLabel: "Add to Up Next")
         XCTAssertEqual(changedResult, .completed, "The button label did not change to 'Add to Up Next' after tap.")
     }
     
@@ -92,17 +87,12 @@ final class ExploreDetailVCUITests: XCTestCase {
         revealButtons()
         
         let watchedButton = app.buttons["ExploreDetailVC_WatchedButton"]
-        let predicate = NSPredicate(format: "label == %@", "Add to Watched")
-        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: watchedButton)
-        let result = XCTWaiter().wait(for: [expectation], timeout: 5.0)
+        let result = makeResult(for: watchedButton, buttonLabel: "Add to Watched")
         XCTAssertEqual(result, .completed, "The button label did not load from Core Data in time.")
         
         watchedButton.tap()
         
-        let changedPredicate = NSPredicate(format: "label == %@", "Remove from Watched")
-        let changedExpectation = XCTNSPredicateExpectation(predicate: changedPredicate, object: watchedButton)
-        
-        let changedResult = XCTWaiter().wait(for: [changedExpectation], timeout: 2.0)
+        let changedResult = makeResult(for: watchedButton, buttonLabel: "Remove from Watched")
         XCTAssertEqual(changedResult, .completed, "The button label did not change to 'Remove from Watched' after tap.")
     }
     
@@ -111,6 +101,13 @@ final class ExploreDetailVCUITests: XCTestCase {
         NavigationHelper.navigateToExploreTab(app: app)
         tapFirstCollectionViewCell()
         app.swipeUp()
+    }
+    
+    private func makeResult(for button: XCUIElement, buttonLabel: String) -> XCTWaiter.Result {
+        let predicate = NSPredicate(format: "label == %@", buttonLabel)
+        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: button)
+        let result = XCTWaiter().wait(for: [expectation], timeout: 5.0)
+        return result
     }
     
     private func assertExploreDetailElementsExist() {
