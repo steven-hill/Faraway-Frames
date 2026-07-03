@@ -75,7 +75,7 @@ final class ExploreDetailVCUITests: XCTestCase {
         
         let upNextButton = app.buttons["ExploreDetailVC_UpNextButton"]
         let predicate = NSPredicate(format: "label == %@", "Remove from Up Next")
-        let expectation = expectation(for: predicate, evaluatedWith: upNextButton, handler: nil)
+        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: upNextButton)
         let result = XCTWaiter().wait(for: [expectation], timeout: 5.0)
         XCTAssertEqual(result, .completed, "The button label did not update to `Remove from Up Next` from Core Data in time.")
         
@@ -93,7 +93,7 @@ final class ExploreDetailVCUITests: XCTestCase {
         
         let watchedButton = app.buttons["ExploreDetailVC_WatchedButton"]
         let predicate = NSPredicate(format: "label == %@", "Add to Watched")
-        let expectation = expectation(for: predicate, evaluatedWith: watchedButton, handler: nil)
+        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: watchedButton)
         let result = XCTWaiter().wait(for: [expectation], timeout: 5.0)
         XCTAssertEqual(result, .completed, "The button label did not load from Core Data in time.")
         
