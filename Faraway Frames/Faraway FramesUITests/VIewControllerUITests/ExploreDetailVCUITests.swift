@@ -111,6 +111,14 @@ final class ExploreDetailVCUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Cancel"].isHittable, "Cancel button should be tappable.")
     }
     
+    func test_exploreDetailVC_whenAddingFilmResultsInDatabaseError_showsCorrectErrorMessage() {
+        app = XCUIApplication()
+        XCUIDevice.shared.orientation = .portrait
+        app.launch(with: .addDatabaseError)
+        NavigationHelper.navigateToExploreTab(app: app)
+        revealButtons()
+    }
+
     // MARK: - Helper methods
     private func launchAppAndNavigateToFilmDetails() {
         app = XCUIApplication()
