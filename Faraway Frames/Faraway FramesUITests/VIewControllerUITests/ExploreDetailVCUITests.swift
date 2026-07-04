@@ -12,12 +12,6 @@ final class ExploreDetailVCUITests: XCTestCase {
     private var app: XCUIApplication!
     
     override func setUpWithError() throws {
-        app = XCUIApplication()
-        app.launchArguments = ["-UITesting",
-                               "-UITestingMockNetworkSuccess",
-                               "-UITestingMockPersistenceData"]
-        XCUIDevice.shared.orientation = .portrait
-        app.launch()
         continueAfterFailure = false
     }
     
@@ -30,7 +24,7 @@ final class ExploreDetailVCUITests: XCTestCase {
             throw XCTSkip("iPad-only test")
         }
         
-        NavigationHelper.navigateToExploreTab(app: app)
+        launchAppAndNavigateToFilmDetails()
         
         XCTAssertTrue(app.staticTexts["No Film Selected"].isHittable, "Should show a message.")
         XCTAssertTrue(app.staticTexts["Select a film from the list for more details."].isHittable, "Should show a message.")
@@ -40,7 +34,7 @@ final class ExploreDetailVCUITests: XCTestCase {
     }
     
     func test_exploreDetailVC_hasAllUIElements() {
-        NavigationHelper.navigateToExploreTab(app: app)
+        launchAppAndNavigateToFilmDetails()
         
         tapFirstCollectionViewCell()
         
@@ -48,7 +42,7 @@ final class ExploreDetailVCUITests: XCTestCase {
     }
     
     func test_exploreDetailVC_hasAllUIElementsAfterDeviceRotation() {
-        NavigationHelper.navigateToExploreTab(app: app)
+        launchAppAndNavigateToFilmDetails()
         
         tapFirstCollectionViewCell()
         
@@ -60,7 +54,7 @@ final class ExploreDetailVCUITests: XCTestCase {
     }
     
     func test_exploreDetailVC_buttonsAreHittable() {
-        NavigationHelper.navigateToExploreTab(app: app)
+        launchAppAndNavigateToFilmDetails()
         tapFirstCollectionViewCell()
         
         app.swipeUp()
@@ -71,6 +65,7 @@ final class ExploreDetailVCUITests: XCTestCase {
     }
     
     func test_exploreDetailVC_upNextButton_whenTapped_togglesTitle() {
+        launchAppWithPersistenceData()
         revealButtons()
         
         let upNextButton = app.buttons["ExploreDetailVC_UpNextButton"]
@@ -84,6 +79,7 @@ final class ExploreDetailVCUITests: XCTestCase {
     }
     
     func test_exploreDetailVC_watchedButton_whenTapped_togglesTitle() {
+        launchAppWithPersistenceData()
         revealButtons()
         
         let watchedButton = app.buttons["ExploreDetailVC_WatchedButton"]
@@ -96,7 +92,30 @@ final class ExploreDetailVCUITests: XCTestCase {
         XCTAssertEqual(changedResult, .completed, "The button label did not change to 'Remove from Watched' after tap.")
     }
     
+    func test_exploreDetailVC_whenAddingFilmButDiskIsFull_showsCorrectErrorMessage() {
+        
+    }
+    
     // MARK: - Helper methods
+    private func launchAppAndNavigateToFilmDetails() {
+        app = XCUIApplication()
+        app.launchArguments = ["-UITesting",
+                               "-UITestingMockNetworkSuccess"]
+        XCUIDevice.shared.orientation = .portrait
+        app.launch()
+        NavigationHelper.navigateToExploreTab(app: app)
+    }
+    
+    private func launchAppWithPersistenceData() {
+        app = XCUIApplication()
+        app.launchArguments = ["-UITesting",
+                               "-UITestingMockNetworkSuccess",
+                               "-UITestingMockPersistenceData"]
+        XCUIDevice.shared.orientation = .portrait
+        app.launch()
+        NavigationHelper.navigateToExploreTab(app: app)
+    }
+    
     private func revealButtons() {
         NavigationHelper.navigateToExploreTab(app: app)
         tapFirstCollectionViewCell()
