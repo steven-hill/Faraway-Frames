@@ -13,4 +13,5 @@ enum LaunchArguments {
     static let uiTestingMockNetworkFailureWithFileManagerData = "-UITestingMockNetworkFailureWithFileManagerData"
     static let uiTestingMockNetworkFailure = "-UITestingMockNetworkFailure"
     static let uiTestingMockPersistenceData = "-UITestingMockPersistenceData"
+    static let uiTestingPersistenceSaveError = "-UITestingPersistenceSaveError"
 }

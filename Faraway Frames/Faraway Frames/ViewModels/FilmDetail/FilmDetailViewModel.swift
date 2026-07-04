@@ -138,7 +138,7 @@ class FilmDetailViewModel {
             
             #if DEBUG
             let env = ProcessInfo.processInfo.environment
-            if ProcessInfo.processInfo.arguments.contains("-UITestingPersistenceSaveError") {
+            if ProcessInfo.processInfo.isUITestingPersistenceSaveError {
                 let failureReason = env["MOCK_CD_FAILURE_REASON"]
                 let mappedReason: CocoaError.Code = (failureReason == "diskFull") ? .fileWriteOutOfSpace : .persistentStoreOpen
                 throw CocoaError(mappedReason)
