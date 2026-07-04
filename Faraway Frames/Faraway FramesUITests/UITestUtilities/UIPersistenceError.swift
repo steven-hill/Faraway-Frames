@@ -10,4 +10,5 @@ import Foundation
 enum UITestPersistenceError {
     case addDiskFull
     case addDatabaseError
+    case removeFromDatabaseError
 }
