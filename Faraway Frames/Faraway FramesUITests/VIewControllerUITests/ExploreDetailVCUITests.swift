@@ -136,6 +136,17 @@ final class ExploreDetailVCUITests: XCTestCase {
         app.launch(with: .deleteFromQueueError)
         NavigationHelper.navigateToExploreTab(app: app)
         revealButtons()
+        
+        let upNextButton = app.buttons["ExploreDetailVC_UpNextButton"]
+        let result = makeResult(for: upNextButton, buttonLabel: "Remove from Up Next")
+        XCTAssertEqual(result, .completed, "The button label did not load from Core Data in time.")
+        
+        upNextButton.tap()
+        
+        XCTAssertTrue(app.staticTexts["Error"].exists, "Should show primary error message.")
+        XCTAssertTrue(app.staticTexts["Failed to remove film. There was a problem with the database. Please try again."].exists, "Should show error secondary message.")
+        XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
+        XCTAssertTrue(app.buttons["Cancel"].isHittable, "Cancel button should be tappable.")
     }
 
     // MARK: - Helper methods
