@@ -12,12 +12,6 @@ final class ExploreDetailVCUITests: XCTestCase {
     private var app: XCUIApplication!
     
     override func setUpWithError() throws {
-        app = XCUIApplication()
-        app.launchArguments = ["-UITesting",
-                               "-UITestingMockNetworkSuccess",
-                               "-UITestingMockPersistenceData"]
-        XCUIDevice.shared.orientation = .portrait
-        app.launch()
         continueAfterFailure = false
     }
     
@@ -30,7 +24,7 @@ final class ExploreDetailVCUITests: XCTestCase {
             throw XCTSkip("iPad-only test")
         }
         
-        NavigationHelper.navigateToExploreTab(app: app)
+        launchAppAndNavigateToFilmDetails()
         
         XCTAssertTrue(app.staticTexts["No Film Selected"].isHittable, "Should show a message.")
         XCTAssertTrue(app.staticTexts["Select a film from the list for more details."].isHittable, "Should show a message.")
@@ -40,7 +34,7 @@ final class ExploreDetailVCUITests: XCTestCase {
     }
     
     func test_exploreDetailVC_hasAllUIElements() {
-        NavigationHelper.navigateToExploreTab(app: app)
+        launchAppAndNavigateToFilmDetails()
         
         tapFirstCollectionViewCell()
         
@@ -48,7 +42,7 @@ final class ExploreDetailVCUITests: XCTestCase {
     }
     
     func test_exploreDetailVC_hasAllUIElementsAfterDeviceRotation() {
-        NavigationHelper.navigateToExploreTab(app: app)
+        launchAppAndNavigateToFilmDetails()
         
         tapFirstCollectionViewCell()
         
@@ -60,7 +54,7 @@ final class ExploreDetailVCUITests: XCTestCase {
     }
     
     func test_exploreDetailVC_buttonsAreHittable() {
-        NavigationHelper.navigateToExploreTab(app: app)
+        launchAppAndNavigateToFilmDetails()
         tapFirstCollectionViewCell()
         
         app.swipeUp()
@@ -70,7 +64,8 @@ final class ExploreDetailVCUITests: XCTestCase {
         XCTAssertTrue(app.buttons["ExploreDetailVC_MoreLikeThisButton"].isHittable, "Should be hittable.")
     }
     
-    func test_upNextButton_whenTapped_togglesTitle() {
+    func test_exploreDetailVC_upNextButton_whenTapped_togglesTitle() {
+        launchAppWithPersistenceData()
         revealButtons()
         
         let upNextButton = app.buttons["ExploreDetailVC_UpNextButton"]
@@ -83,7 +78,8 @@ final class ExploreDetailVCUITests: XCTestCase {
         XCTAssertEqual(changedResult, .completed, "The button label did not change to 'Add to Up Next' after tap.")
     }
     
-    func test_watchedButton_whenTapped_togglesTitle() {
+    func test_exploreDetailVC_watchedButton_whenTapped_togglesTitle() {
+        launchAppWithPersistenceData()
         revealButtons()
         
         let watchedButton = app.buttons["ExploreDetailVC_WatchedButton"]
@@ -96,7 +92,83 @@ final class ExploreDetailVCUITests: XCTestCase {
         XCTAssertEqual(changedResult, .completed, "The button label did not change to 'Remove from Watched' after tap.")
     }
     
+    func test_exploreDetailVC_whenAddingFilmButDiskIsFull_showsCorrectErrorMessage() {
+        app = XCUIApplication()
+        XCUIDevice.shared.orientation = .portrait
+        app.launch(with: .addToQueueDiskFull)
+        NavigationHelper.navigateToExploreTab(app: app)
+        revealButtons()
+        
+        let watchedButton = app.buttons["ExploreDetailVC_WatchedButton"]
+        let result = makeResult(for: watchedButton, buttonLabel: "Add to Watched")
+        XCTAssertEqual(result, .completed, "The button label did not load from Core Data in time.")
+        
+        watchedButton.tap()
+        
+        XCTAssertTrue(app.staticTexts["Error"].exists, "Should show primary error message.")
+        XCTAssertTrue(app.staticTexts["Failed to add film. Your device storage is full. Free up space and try again."].exists, "Should show error secondary message.")
+        XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
+        XCTAssertTrue(app.buttons["Cancel"].isHittable, "Cancel button should be tappable.")
+    }
+    
+    func test_exploreDetailVC_whenAddingFilmResultsInDatabaseError_showsCorrectErrorMessage() {
+        app = XCUIApplication()
+        XCUIDevice.shared.orientation = .portrait
+        app.launch(with: .addToQueueDatabaseError)
+        NavigationHelper.navigateToExploreTab(app: app)
+        revealButtons()
+        
+        let watchedButton = app.buttons["ExploreDetailVC_WatchedButton"]
+        let result = makeResult(for: watchedButton, buttonLabel: "Add to Watched")
+        XCTAssertEqual(result, .completed, "The button label did not load from Core Data in time.")
+        
+        watchedButton.tap()
+        
+        XCTAssertTrue(app.staticTexts["Error"].exists, "Should show primary error message.")
+        XCTAssertTrue(app.staticTexts["Failed to add film. There was a problem with the database. Please try again."].exists, "Should show error secondary message.")
+        XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
+        XCTAssertTrue(app.buttons["Cancel"].isHittable, "Cancel button should be tappable.")
+    }
+    
+    func test_exploreDetailVC_whenRemovingFilmResultsInDatabaseError_showsCorrectErrorMessage() {
+        app = XCUIApplication()
+        XCUIDevice.shared.orientation = .portrait
+        app.launch(with: .deleteFromQueueDatabaseError)
+        NavigationHelper.navigateToExploreTab(app: app)
+        revealButtons()
+        
+        let upNextButton = app.buttons["ExploreDetailVC_UpNextButton"]
+        let result = makeResult(for: upNextButton, buttonLabel: "Remove from Up Next")
+        XCTAssertEqual(result, .completed, "The button label did not load from Core Data in time.")
+        
+        upNextButton.tap()
+        
+        XCTAssertTrue(app.staticTexts["Error"].exists, "Should show primary error message.")
+        XCTAssertTrue(app.staticTexts["Failed to remove film. There was a problem with the database. Please try again."].exists, "Should show error secondary message.")
+        XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
+        XCTAssertTrue(app.buttons["Cancel"].isHittable, "Cancel button should be tappable.")
+    }
+
     // MARK: - Helper methods
+    private func launchAppAndNavigateToFilmDetails() {
+        app = XCUIApplication()
+        app.launchArguments = ["-UITesting",
+                               "-UITestingMockNetworkSuccess"]
+        XCUIDevice.shared.orientation = .portrait
+        app.launch()
+        NavigationHelper.navigateToExploreTab(app: app)
+    }
+    
+    private func launchAppWithPersistenceData() {
+        app = XCUIApplication()
+        app.launchArguments = ["-UITesting",
+                               "-UITestingMockNetworkSuccess",
+                               "-UITestingMockPersistenceData"]
+        XCUIDevice.shared.orientation = .portrait
+        app.launch()
+        NavigationHelper.navigateToExploreTab(app: app)
+    }
+    
     private func revealButtons() {
         NavigationHelper.navigateToExploreTab(app: app)
         tapFirstCollectionViewCell()

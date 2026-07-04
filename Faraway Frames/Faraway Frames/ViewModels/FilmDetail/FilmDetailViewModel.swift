@@ -135,6 +135,11 @@ class FilmDetailViewModel {
     func updateStatus(for film: Film, queue: FilmQueue, action: QueueAction) async {
         do {
             attemptingToUpdateFilm = true
+            
+            #if DEBUG
+            try throwErrorForUITests()
+            #endif
+         
             let didStatusChange = try await filmQueueService.updateFilmStatus(film: film, queue: queue, action: action)
             attemptingToUpdateFilm = false
             if didStatusChange {
@@ -166,5 +171,16 @@ class FilmDetailViewModel {
     
     func returnToFilmContent(film: Film) {
         setFilm(film)
+    }
+}
+
+private extension FilmDetailViewModel {
+    private func throwErrorForUITests() throws {
+        let env = ProcessInfo.processInfo.environment
+        if ProcessInfo.processInfo.isUITestingPersistenceSaveError {
+            let failureReason = env["MOCK_CD_FAILURE_REASON"]
+            let mappedReason: CocoaError.Code = (failureReason == "diskFull") ? .fileWriteOutOfSpace : .persistentStoreOpen
+            throw CocoaError(mappedReason)
+        }
     }
 }

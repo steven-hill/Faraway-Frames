@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum UITestError: Error {
+enum UITestNetworkError: Error {
     case noInternetConnection
     case networkConnectionLost
     case networkTimeout

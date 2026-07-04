@@ -8,8 +8,9 @@
 import XCTest
 
 extension XCUIApplication {
-    func launch(with error: UITestError) {
-        self.launchArguments.append("-UITestingMockNetworkFailure")
+    func launch(with error: UITestNetworkError) {
+        self.launchArguments = ["-UITesting",
+                                "-UITestingMockNetworkFailure"]
         
         switch error {
         case .noInternetConnection:
@@ -29,6 +30,26 @@ extension XCUIApplication {
             self.launchEnvironment["MOCK_ERROR_TYPE"] = "decodingError"
         case .unknown:
             self.launchEnvironment["MOCK_ERROR_TYPE"] = "Unknown error"
+        }
+        self.launch()
+    }
+    
+    func launch(with persistenceError: UITestPersistenceError) {
+        self.launchArguments = ["-UITesting",
+                                "-UITestingMockNetworkSuccess",
+                                "-UITestingMockPersistenceData",
+                                "-UITestingPersistenceSaveError"]
+        
+        switch persistenceError {
+        case .addToQueueDiskFull:
+            self.launchEnvironment["MOCK_CD_ERROR_TYPE"] = "add"
+            self.launchEnvironment["MOCK_CD_FAILURE_REASON"] = "diskFull"
+        case .addToQueueDatabaseError:
+            self.launchEnvironment["MOCK_CD_ERROR_TYPE"] = "add"
+            self.launchEnvironment["MOCK_CD_FAILURE_REASON"] = "databaseError"
+        case .deleteFromQueueDatabaseError:
+            self.launchEnvironment["MOCK_CD_ERROR_TYPE"] = "delete"
+            self.launchEnvironment["MOCK_CD_FAILURE_REASON"] = "databaseError"
         }
         self.launch()
     }
