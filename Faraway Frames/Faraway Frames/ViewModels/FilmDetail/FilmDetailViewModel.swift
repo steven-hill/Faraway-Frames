@@ -135,6 +135,16 @@ class FilmDetailViewModel {
     func updateStatus(for film: Film, queue: FilmQueue, action: QueueAction) async {
         do {
             attemptingToUpdateFilm = true
+            
+            #if DEBUG
+            let env = ProcessInfo.processInfo.environment
+            if ProcessInfo.processInfo.arguments.contains("-UITestingPersistenceSaveError") {
+                let failureReason = env["MOCK_CD_FAILURE_REASON"]
+                let mappedReason: CocoaError.Code = (failureReason == "diskFull") ? .fileWriteOutOfSpace : .persistentStoreOpen
+                throw CocoaError(mappedReason)
+            }
+            #endif
+         
             let didStatusChange = try await filmQueueService.updateFilmStatus(film: film, queue: queue, action: action)
             attemptingToUpdateFilm = false
             if didStatusChange {
