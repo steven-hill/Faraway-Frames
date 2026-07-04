@@ -44,5 +44,6 @@ extension XCUIApplication {
             self.launchEnvironment["MOCK_CD_ERROR_TYPE"] = "add"
             self.launchEnvironment["MOCK_CD_FAILURE_REASON"] = "diskFull"
         }
+        self.launch()
     }
 }
