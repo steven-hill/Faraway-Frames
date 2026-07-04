@@ -9,7 +9,8 @@ import XCTest
 
 extension XCUIApplication {
     func launch(with error: UITestNetworkError) {
-        self.launchArguments.append("-UITestingMockNetworkFailure")
+        self.launchArguments = ["-UITesting",
+                                "-UITestingMockNetworkFailure"]
         
         switch error {
         case .noInternetConnection:
