@@ -42,13 +42,10 @@ extension XCUIApplication {
         
         switch persistenceError {
         case .addToQueueDiskFull:
-            self.launchEnvironment["MOCK_CD_ERROR_TYPE"] = "add"
             self.launchEnvironment["MOCK_CD_FAILURE_REASON"] = "diskFull"
         case .addToQueueDatabaseError:
-            self.launchEnvironment["MOCK_CD_ERROR_TYPE"] = "add"
             self.launchEnvironment["MOCK_CD_FAILURE_REASON"] = "databaseError"
         case .deleteFromQueueDatabaseError:
-            self.launchEnvironment["MOCK_CD_ERROR_TYPE"] = "delete"
             self.launchEnvironment["MOCK_CD_FAILURE_REASON"] = "databaseError"
         }
         self.launch()
