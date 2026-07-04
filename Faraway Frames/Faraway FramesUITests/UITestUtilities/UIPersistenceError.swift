@@ -8,7 +8,7 @@
 import Foundation
 
 enum UITestPersistenceError {
-    case addDiskFull
-    case addDatabaseError
-    case deleteFromQueueError
+    case addToQueueDiskFull
+    case addToQueueDatabaseError
+    case deleteFromQueueDatabaseError
 }

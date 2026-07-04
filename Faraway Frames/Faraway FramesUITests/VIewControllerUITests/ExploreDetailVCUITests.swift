@@ -95,7 +95,7 @@ final class ExploreDetailVCUITests: XCTestCase {
     func test_exploreDetailVC_whenAddingFilmButDiskIsFull_showsCorrectErrorMessage() {
         app = XCUIApplication()
         XCUIDevice.shared.orientation = .portrait
-        app.launch(with: .addDiskFull)
+        app.launch(with: .addToQueueDiskFull)
         NavigationHelper.navigateToExploreTab(app: app)
         revealButtons()
         
@@ -114,7 +114,7 @@ final class ExploreDetailVCUITests: XCTestCase {
     func test_exploreDetailVC_whenAddingFilmResultsInDatabaseError_showsCorrectErrorMessage() {
         app = XCUIApplication()
         XCUIDevice.shared.orientation = .portrait
-        app.launch(with: .addDatabaseError)
+        app.launch(with: .addToQueueDatabaseError)
         NavigationHelper.navigateToExploreTab(app: app)
         revealButtons()
         
@@ -133,7 +133,7 @@ final class ExploreDetailVCUITests: XCTestCase {
     func test_exploreDetailVC_whenRemovingFilmResultsInDatabaseError_showsCorrectErrorMessage() {
         app = XCUIApplication()
         XCUIDevice.shared.orientation = .portrait
-        app.launch(with: .deleteFromQueueError)
+        app.launch(with: .deleteFromQueueDatabaseError)
         NavigationHelper.navigateToExploreTab(app: app)
         revealButtons()
         
