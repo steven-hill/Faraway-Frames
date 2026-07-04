@@ -32,4 +32,17 @@ extension XCUIApplication {
         }
         self.launch()
     }
+    
+    func launch(with persistenceError: UITestPersistenceError) {
+        self.launchArguments = ["-UITesting",
+                                "-UITestingMockNetworkSuccess",
+                                "-UITestingMockPersistenceData",
+                                "-UITestingPersistenceSaveError"]
+        
+        switch persistenceError {
+        case .addDiskFull:
+            self.launchEnvironment["MOCK_CD_ERROR_TYPE"] = "add"
+            self.launchEnvironment["MOCK_CD_FAILURE_REASON"] = "diskFull"
+        }
+    }
 }

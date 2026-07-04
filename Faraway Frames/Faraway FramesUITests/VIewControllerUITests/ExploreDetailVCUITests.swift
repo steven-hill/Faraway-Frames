@@ -93,7 +93,10 @@ final class ExploreDetailVCUITests: XCTestCase {
     }
     
     func test_exploreDetailVC_whenAddingFilmButDiskIsFull_showsCorrectErrorMessage() {
-        
+        app = XCUIApplication()
+        XCUIDevice.shared.orientation = .portrait
+        app.launch(with: .addDiskFull)
+        NavigationHelper.navigateToExploreTab(app: app)
     }
     
     // MARK: - Helper methods
