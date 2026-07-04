@@ -46,6 +46,9 @@ extension XCUIApplication {
         case .addDatabaseError:
             self.launchEnvironment["MOCK_CD_ERROR_TYPE"] = "add"
             self.launchEnvironment["MOCK_CD_FAILURE_REASON"] = "databaseError"
+        case .deleteFromQueueError:
+            self.launchEnvironment["MOCK_CD_ERROR_TYPE"] = "delete"
+            self.launchEnvironment["MOCK_CD_FAILURE_REASON"] = "databaseError"
         }
         self.launch()
     }

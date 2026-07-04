@@ -133,7 +133,7 @@ final class ExploreDetailVCUITests: XCTestCase {
     func test_exploreDetailVC_whenRemovingFilmResultsInDatabaseError_showsCorrectErrorMessage() {
         app = XCUIApplication()
         XCUIDevice.shared.orientation = .portrait
-        app.launch(with: .removeFromDatabaseError)
+        app.launch(with: .deleteFromQueueError)
         NavigationHelper.navigateToExploreTab(app: app)
         revealButtons()
     }
