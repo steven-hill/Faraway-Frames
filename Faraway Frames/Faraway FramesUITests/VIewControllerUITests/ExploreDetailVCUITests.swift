@@ -117,6 +117,17 @@ final class ExploreDetailVCUITests: XCTestCase {
         app.launch(with: .addDatabaseError)
         NavigationHelper.navigateToExploreTab(app: app)
         revealButtons()
+        
+        let watchedButton = app.buttons["ExploreDetailVC_WatchedButton"]
+        let result = makeResult(for: watchedButton, buttonLabel: "Add to Watched")
+        XCTAssertEqual(result, .completed, "The button label did not load from Core Data in time.")
+        
+        watchedButton.tap()
+        
+        XCTAssertTrue(app.staticTexts["Error"].exists, "Should show primary error message.")
+        XCTAssertTrue(app.staticTexts["Failed to add film. Your device storage is full. Free up space and try again."].exists, "Should show error secondary message.")
+        XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
+        XCTAssertTrue(app.buttons["Cancel"].isHittable, "Cancel button should be tappable.")
     }
 
     // MARK: - Helper methods
