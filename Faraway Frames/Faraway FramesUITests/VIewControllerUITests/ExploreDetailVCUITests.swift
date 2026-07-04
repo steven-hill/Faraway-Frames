@@ -97,6 +97,13 @@ final class ExploreDetailVCUITests: XCTestCase {
         XCUIDevice.shared.orientation = .portrait
         app.launch(with: .addDiskFull)
         NavigationHelper.navigateToExploreTab(app: app)
+        revealButtons()
+        
+        let watchedButton = app.buttons["ExploreDetailVC_WatchedButton"]
+        let result = makeResult(for: watchedButton, buttonLabel: "Add to Watched")
+        XCTAssertEqual(result, .completed, "The button label did not load from Core Data in time.")
+        
+        watchedButton.tap()
     }
     
     // MARK: - Helper methods
