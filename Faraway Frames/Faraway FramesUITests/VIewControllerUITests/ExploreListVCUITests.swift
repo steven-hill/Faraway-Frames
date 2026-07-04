@@ -250,7 +250,7 @@ final class ExploreListVCUITests: XCTestCase {
         NavigationHelper.navigateToExploreTab(app: app)
     }
     
-    private func launchAppForNetworkFailureCase(with error: UITestError) {
+    private func launchAppForNetworkFailureCase(with error: UITestNetworkError) {
         app = XCUIApplication()
         app.launchArguments.append("-UITesting")
         app.launch(with: error)
