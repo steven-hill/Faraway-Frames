@@ -70,7 +70,7 @@ final class ExploreDetailVCUITests: XCTestCase {
         XCTAssertTrue(app.buttons["ExploreDetailVC_MoreLikeThisButton"].isHittable, "Should be hittable.")
     }
     
-    func test_upNextButton_whenTapped_togglesTitle() {
+    func test_exploreDetailVC_upNextButton_whenTapped_togglesTitle() {
         revealButtons()
         
         let upNextButton = app.buttons["ExploreDetailVC_UpNextButton"]
@@ -83,7 +83,7 @@ final class ExploreDetailVCUITests: XCTestCase {
         XCTAssertEqual(changedResult, .completed, "The button label did not change to 'Add to Up Next' after tap.")
     }
     
-    func test_watchedButton_whenTapped_togglesTitle() {
+    func test_exploreDetailVC_watchedButton_whenTapped_togglesTitle() {
         revealButtons()
         
         let watchedButton = app.buttons["ExploreDetailVC_WatchedButton"]
