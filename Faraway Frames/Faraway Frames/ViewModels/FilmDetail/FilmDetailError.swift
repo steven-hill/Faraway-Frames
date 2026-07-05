@@ -31,6 +31,7 @@ enum FilmDetailError: Error, Equatable {
     case deleteFailed(FailureReason)
 }
 
+// MARK: - User Facing Descriptions
 extension FilmDetailError: LocalizedError {
     var errorDescription: String? {
         switch self {
@@ -52,6 +53,7 @@ extension FilmDetailError {
     }
 }
 
+// MARK: - Factory Mappings
 extension FilmDetailError {
     private static func mapReason(_ error: Error) -> FailureReason {
         guard let cocoaError = error as? CocoaError else {
