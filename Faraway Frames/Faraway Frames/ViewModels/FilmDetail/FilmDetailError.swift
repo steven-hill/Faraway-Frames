@@ -35,22 +35,9 @@ extension FilmDetailError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .addFailed(let reason):
-            return "Failed to add film. \(reason.description)"
+            return "Failed to add film."
         case .deleteFailed(let reason):
-            return "Failed to remove film. \(reason.description)"
-        }
-    }
-}
-
-extension FilmDetailError.FailureReason {
-    nonisolated var description: String {
-        switch self {
-        case .diskFull:
-            return "Your device storage is full. Free up space and try again."
-        case .databaseError:
-            return "There was a problem with the database. Please try again."
-        case .unknown(let message):
-            return message
+            return "Failed to remove film."
         }
     }
 }
