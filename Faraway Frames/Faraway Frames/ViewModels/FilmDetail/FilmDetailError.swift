@@ -54,17 +54,20 @@ extension FilmDetailError {
 
 extension FilmDetailError {
     private static func mapReason(_ error: Error) -> FailureReason {
-        if let cocoaError = error as? CocoaError {
-            switch cocoaError.code {
-            case .fileWriteOutOfSpace:
-                return .diskFull
-            case .persistentStoreOpen, .persistentStoreTypeMismatch, .managedObjectReferentialIntegrity:
-                return .databaseError
-            default:
-                return .databaseError
-            }
+        guard let cocoaError = error as? CocoaError else {
+            return .unknown(error.localizedDescription)
         }
-        return .unknown(error.localizedDescription)
+        
+        switch cocoaError.code {
+        case .fileWriteOutOfSpace:
+            return .diskFull
+        case .persistentStoreOpen,
+                .persistentStoreTypeMismatch,
+                .managedObjectReferentialIntegrity:
+            return .databaseError
+        default:
+            return .databaseError
+        }
     }
     
     static func add(_ error: Error) -> Self { .addFailed(mapReason(error)) }
