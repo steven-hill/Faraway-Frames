@@ -21,7 +21,7 @@ enum FilmDetailError: Error, Equatable {
 }
 
 extension FilmDetailError: LocalizedError {
-    nonisolated var description: String {
+    nonisolated var errorDescription: String? {
         switch self {
         case .addFailed(let reason):
             return "Failed to add film. \(reason.description)"
