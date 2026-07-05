@@ -43,6 +43,16 @@ extension FilmDetailError: LocalizedError {
 }
 
 extension FilmDetailError {
+    var secondaryText: String {
+        switch self {
+        case .addFailed(let reason),
+                .deleteFailed(let reason):
+            return reason.message
+        }
+    }
+}
+
+extension FilmDetailError {
     private static func mapReason(_ error: Error) -> FailureReason {
         if let cocoaError = error as? CocoaError {
             switch cocoaError.code {
