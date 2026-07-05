@@ -14,6 +14,17 @@ enum FilmDetailError: Error, Equatable {
         case diskFull
         case databaseError
         case unknown(String)
+        
+        var message: String {
+            switch self {
+            case .diskFull:
+                return "Your device storage is full. Free up space and try again."
+            case .databaseError:
+                return "There was a problem with the database. Please try again."
+            case .unknown(let message):
+                return message
+            }
+        }
     }
     
     case addFailed(FailureReason)
