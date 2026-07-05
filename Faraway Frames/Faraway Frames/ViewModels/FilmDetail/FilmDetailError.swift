@@ -34,10 +34,10 @@ enum FilmDetailError: Error, Equatable {
 extension FilmDetailError: LocalizedError {
     var errorDescription: String? {
         switch self {
-        case .addFailed(let reason):
-            return "Failed to add film."
-        case .deleteFailed(let reason):
-            return "Failed to remove film."
+        case .addFailed:
+            return "Error adding film."
+        case .deleteFailed:
+            return "Error removing film."
         }
     }
 }
