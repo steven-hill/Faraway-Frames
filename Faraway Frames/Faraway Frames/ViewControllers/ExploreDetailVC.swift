@@ -166,7 +166,7 @@ final class ExploreDetailVC: UIViewController {
     private func createErrorConfig(error: FilmDetailError, film: Film, queue: FilmQueue) -> UIContentUnavailableConfiguration {
         var config = UIContentUnavailableConfiguration.empty()
         config.text = "\(error.localizedDescription)"
-        config.secondaryText = "\(error.localizedDescription)"
+        config.secondaryText = "\(error.secondaryText)"
         config.image = SFSymbols.exclamationMarkTriangle
         config.imageProperties.tintColor = .systemRed
         

@@ -105,8 +105,8 @@ final class ExploreDetailVCUITests: XCTestCase {
         
         watchedButton.tap()
         
-        XCTAssertTrue(app.staticTexts["Error"].exists, "Should show primary error message.")
-        XCTAssertTrue(app.staticTexts["Failed to add film. Your device storage is full. Free up space and try again."].exists, "Should show error secondary message.")
+        XCTAssertTrue(app.staticTexts["Error adding film"].exists, "Should show primary error message.")
+        XCTAssertTrue(app.staticTexts["Your device storage is full. Free up space and try again."].exists, "Should show secondary error message.")
         XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
         XCTAssertTrue(app.buttons["Cancel"].isHittable, "Cancel button should be tappable.")
     }
@@ -124,8 +124,8 @@ final class ExploreDetailVCUITests: XCTestCase {
         
         watchedButton.tap()
         
-        XCTAssertTrue(app.staticTexts["Error"].exists, "Should show primary error message.")
-        XCTAssertTrue(app.staticTexts["Failed to add film. There was a problem with the database. Please try again."].exists, "Should show error secondary message.")
+        XCTAssertTrue(app.staticTexts["Error adding film"].exists, "Should show primary error message.")
+        XCTAssertTrue(app.staticTexts["There was a problem with the database. Please try again."].exists, "Should show secondary error message.")
         XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
         XCTAssertTrue(app.buttons["Cancel"].isHittable, "Cancel button should be tappable.")
     }
@@ -143,8 +143,8 @@ final class ExploreDetailVCUITests: XCTestCase {
         
         upNextButton.tap()
         
-        XCTAssertTrue(app.staticTexts["Error"].exists, "Should show primary error message.")
-        XCTAssertTrue(app.staticTexts["Failed to remove film. There was a problem with the database. Please try again."].exists, "Should show error secondary message.")
+        XCTAssertTrue(app.staticTexts["Error removing film"].exists, "Should show primary error message.")
+        XCTAssertTrue(app.staticTexts["There was a problem with the database. Please try again."].exists, "Should show error secondary message.")
         XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
         XCTAssertTrue(app.buttons["Cancel"].isHittable, "Cancel button should be tappable.")
     }

@@ -35,9 +35,9 @@ extension FilmDetailError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .addFailed:
-            return "Error adding film."
+            return "Error adding film"
         case .deleteFailed:
-            return "Error removing film."
+            return "Error removing film"
         }
     }
 }
