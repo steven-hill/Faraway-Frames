@@ -76,7 +76,7 @@ struct ExploreListVCTests {
         APIError.invalidURL,
         APIError.invalidResponse,
         APIError.serverError(statusCode: 500),
-        APIError.decodingError,
+        APIError.decodingError(""),
         APIError.unknown
     ])
     func exploreListVC_showsErrorViewForAllErrors(expectedError: APIError) async {
@@ -118,7 +118,7 @@ struct ExploreListVCTests {
         APIError.invalidURL,
         APIError.invalidResponse,
         APIError.serverError(statusCode: 500),
-        APIError.decodingError,
+        APIError.decodingError(""),
         APIError.unknown
     ])
     func exploreListVC_forAllErrors_showsRetryButtonTitle_andWhenTappedStartsRetrying(expectedError: APIError) async {
@@ -382,7 +382,7 @@ struct ExploreListVCTests {
         APIError.invalidURL,
         APIError.invalidResponse,
         APIError.serverError(statusCode: 500),
-        APIError.decodingError,
+        APIError.decodingError(""),
         APIError.unknown
     ])
     func exploreListVC_searchBarIsNotEnabledForAllErrors(expectedError: APIError) async throws {

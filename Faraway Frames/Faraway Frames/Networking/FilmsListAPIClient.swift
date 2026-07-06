@@ -60,7 +60,8 @@ final class FilmsListAPIClient: FilmsListService {
         do {
             return try decoder.decode([Film].self, from: data)
         } catch {
-            throw APIError.decodingError
+            let reason = (error as? DecodingError)?.failureReasonForLogs ?? error.localizedDescription
+            throw APIError.decodingError(reason)
         }
     }
     

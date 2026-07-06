@@ -42,12 +42,22 @@ extension APIError: LocalizedError {
 extension APIError: CustomDebugStringConvertible {
     var debugDescription: String {
         switch self {
+        case .noInternetConnection:
+            return "APIError.noInternetConnection"
+        case .networkConnectionLost:
+            return "APIError.networkConnectionLost"
+        case .networkTimeout:
+            return "APIError.networkTimeout"
+        case .invalidURL:
+            return "APIError.invalidURL"
+        case .invalidResponse:
+            return "APIError.invalidResponse"
         case .serverError(let statusCode):
             return "APIError.serverError(statusCode: \(statusCode))"
         case .decodingError(let context):
             return "APIError.decodingError: \(context)"
-        default:
-            return String(reflecting: self)
+        case .unknown:
+            return "APIError.unknown"
         }
     }
 }
@@ -83,7 +93,7 @@ extension APIError {
     }
 }
 
-private extension DecodingError {
+extension DecodingError {
     /// Helper to extract context for logs.
     var failureReasonForLogs: String {
         switch self {

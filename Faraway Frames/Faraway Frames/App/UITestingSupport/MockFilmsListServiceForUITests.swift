@@ -55,7 +55,7 @@ final class MockFilmsListServiceForUITests: FilmsListService {
             let code = Int(env["MOCK_ERROR_CODE"] ?? "500") ?? 500
             return .serverError(statusCode: code)
         case "decodingError":
-            return .decodingError
+            return .decodingError("")
         default:
             return .unknown
         }

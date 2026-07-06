@@ -78,7 +78,7 @@ struct FilmsListViewModelUnitTests {
         APIError.invalidURL,
         APIError.invalidResponse,
         APIError.serverError(statusCode: 500),
-        APIError.decodingError,
+        APIError.decodingError(""),
         APIError.unknown
     ])
     func filmsListViewModel_getAllFilms_handlesAPIError(expectedError: APIError) async {
@@ -188,7 +188,7 @@ struct FilmsListViewModelUnitTests {
         APIError.invalidURL,
         APIError.invalidResponse,
         APIError.serverError(statusCode: 500),
-        APIError.decodingError,
+        APIError.decodingError(""),
         APIError.unknown
     ])
     func filmsListViewModel_filterFilms_whenThereAreNoFilmsToSearchThrough_doesNotUpdateFilteredFilmsArray(expectedError: APIError) async {

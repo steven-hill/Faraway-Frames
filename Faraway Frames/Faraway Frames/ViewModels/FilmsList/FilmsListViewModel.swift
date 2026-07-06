@@ -51,29 +51,10 @@ final class FilmsListViewModel {
             delegate?.didRequestVoiceOverAnnouncement(with: allFilmsMessage)
         } catch {
             guard !Task.isCancelled else { return }
-            let networkError = handleFailure(error)
+            let networkError = APIError(from: error)
             currentState = .error(networkError)
             delegate?.didFailToLoadFilms()
         }
-    }
-    
-    private func handleFailure(_ error: Error) -> APIError {
-        if let apiError = error as? APIError {
-            return apiError
-        }
-        if let urlError = error as? URLError {
-            switch urlError.code {
-            case .notConnectedToInternet:
-                return .noInternetConnection
-            case .networkConnectionLost:
-                return .networkConnectionLost
-            case .timedOut:
-                return .networkTimeout
-            default:
-                return .unknown
-            }
-        }
-        return .unknown
     }
     
     func getImage(for film: Film) async -> UIImage? {

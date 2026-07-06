@@ -139,8 +139,14 @@ struct FilmsListAPIClientTests {
         )!
         let sut = makeSUT(data: mockInvalidData, response: mockResponse)
         
-        await #expect(throws: APIError.decodingError, "The error should be .decodingError.") {
-            try await sut.fetchAllFilms()
+        do {
+            _ = try await sut.fetchAllFilms()
+            Issue.record("Expected fetchAllFilms to throw, but it succeeded.")
+        } catch {
+            guard case .decodingError = error as? APIError else {
+                Issue.record("Expected APIError.decodingError, but got \(error) instead.")
+                return
+            }
         }
     }
     
@@ -151,7 +157,7 @@ struct FilmsListAPIClientTests {
         APIError.invalidURL,
         APIError.invalidResponse,
         APIError.serverError(statusCode: 500),
-        APIError.decodingError,
+        APIError.decodingError(""),
         APIError.unknown
     ])
     func filmsListAPIClient_fetchAllFilms_ifThereIsAnError_checksForDataInFileManager(expectedError: APIError) async throws {
