@@ -8,61 +8,34 @@
 import Foundation
 import CoreData
 
-enum HomeError: Error, Equatable {
-    
-    enum FailureReason: Equatable {
-        case diskFull
-        case databaseError
-        case unknown(String)
-    }
-    
-    case fetchFailed(FailureReason)
-    case addFailed(FailureReason)
-    case deleteFailed(FailureReason)
+nonisolated enum HomeError: Error, Equatable, Sendable {
+    case fetchFailed(PersistenceFailureReason)
+    case addFailed(PersistenceFailureReason)
+    case removeFailed(PersistenceFailureReason)
 }
 
+// MARK: - User-facing Description
 extension HomeError: LocalizedError {
-    nonisolated var errorDescription: String? {
+    var errorDescription: String? {
         switch self {
-        case .fetchFailed(let reason):
-            return "Failed to load films. \(reason.description)"
-        case .addFailed(let reason):
-            return "Failed to add film. \(reason.description)"
-        case .deleteFailed(let reason):
-            return "Failed to delete film. \(reason.description)"
+        case .fetchFailed:
+            return "Error loading films."
+        case .addFailed:
+            return "Error adding film."
+        case .removeFailed:
+            return "Error removing film."
         }
     }
 }
 
-extension HomeError.FailureReason {
-    nonisolated var description: String {
-        switch self {
-        case .diskFull:
-            return "Your device storage is full. Free up space and try again."
-        case .databaseError:
-            return "There was a problem with the database. Please try again."
-        case .unknown(let message):
-            return message
-        }
-    }
-}
-
+// MARK: - User-facing Secondary Text
 extension HomeError {
-    private static func mapReason(_ error: Error) -> FailureReason {
-        if let cocoaError = error as? CocoaError {
-            switch cocoaError.code {
-            case .fileWriteOutOfSpace:
-                return .diskFull
-            case .persistentStoreOpen, .persistentStoreTypeMismatch, .managedObjectReferentialIntegrity:
-                return .databaseError
-            default:
-                return .databaseError
-            }
+    var secondaryText: String {
+        switch self {
+        case .fetchFailed(let reason),
+                .addFailed(let reason),
+                .removeFailed(let reason):
+            return reason.message
         }
-        return .unknown(error.localizedDescription)
     }
-    
-    static func fetch(_ error: Error) -> Self { .fetchFailed(mapReason(error)) }
-    static func add(_ error: Error) -> Self { .addFailed(mapReason(error)) }
-    static func delete(_ error: Error) -> Self { .deleteFailed(mapReason(error)) }
 }

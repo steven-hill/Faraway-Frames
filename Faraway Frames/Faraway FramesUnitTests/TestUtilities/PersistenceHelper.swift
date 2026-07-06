@@ -50,7 +50,7 @@ struct PersistenceHelper {
     }
     
     /// Used in tests involving Core Data operations error handling.
-    nonisolated static var errorScenarios: [(systemError: Error, expectedReason: FilmDetailError.FailureReason)] {
+    nonisolated static var errorScenarios: [(systemError: Error, expectedReason: PersistenceFailureReason)] {
         [
             (CocoaError(.fileWriteOutOfSpace), .diskFull),
             (CocoaError(.persistentStoreOpen), .databaseError),

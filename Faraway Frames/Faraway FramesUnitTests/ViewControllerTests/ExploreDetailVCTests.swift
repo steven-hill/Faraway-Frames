@@ -195,7 +195,7 @@ struct ExploreDetailVCTests {
     )
     func exploreDetailVC_didReceiveError_notifiesContentUnavailableConfigurationToUpdate(
     scenario: (systemError: Error,
-               expectedReason: FilmDetailError.FailureReason)
+               expectedReason: PersistenceFailureReason)
     ) async {
         let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
@@ -222,7 +222,7 @@ struct ExploreDetailVCTests {
     )
     func exploreDetailVC_createErrorConfig_createsConfiguration(
     scenario: (systemError: Error,
-               expectedReason: FilmDetailError.FailureReason)
+               expectedReason: PersistenceFailureReason)
     ) async {
         let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
@@ -253,7 +253,7 @@ struct ExploreDetailVCTests {
     )
     func exploreDetailVC_tapRetryButtonOnErrorConfig_callsVMUpdateStatusAgain(
     scenario: (systemError: Error,
-               expectedReason: FilmDetailError.FailureReason)
+               expectedReason: PersistenceFailureReason)
     ) async {
         let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
@@ -283,7 +283,7 @@ struct ExploreDetailVCTests {
     )
     func exploreDetailVC_tapCancelButtonOnErrorConfig_reloadsFilmContentAndUpdatesState(
     scenario: (systemError: Error,
-               expectedReason: FilmDetailError.FailureReason)
+               expectedReason: PersistenceFailureReason)
     ) async {
         let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)

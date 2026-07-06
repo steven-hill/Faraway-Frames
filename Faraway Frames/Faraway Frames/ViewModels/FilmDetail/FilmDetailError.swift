@@ -8,70 +8,30 @@
 import Foundation
 import CoreData
 
-enum FilmDetailError: Error, Equatable {
-    
-    enum FailureReason: Equatable {
-        case diskFull
-        case databaseError
-        case unknown(String)
-        
-        var message: String {
-            switch self {
-            case .diskFull:
-                return "Your device storage is full. Free up space and try again."
-            case .databaseError:
-                return "There was a problem with the database. Please try again."
-            case .unknown(let message):
-                return message
-            }
-        }
-    }
-    
-    case addFailed(FailureReason)
-    case deleteFailed(FailureReason)
+nonisolated enum FilmDetailError: Error, Equatable, Sendable {
+    case addFailed(PersistenceFailureReason)
+    case removeFailed(PersistenceFailureReason)
 }
 
-// MARK: - User Facing Descriptions
+// MARK: - User-facing Description
 extension FilmDetailError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .addFailed:
             return "Error adding film"
-        case .deleteFailed:
+        case .removeFailed:
             return "Error removing film"
         }
     }
 }
 
+// MARK: - User-facing Secondary Text
 extension FilmDetailError {
     var secondaryText: String {
         switch self {
         case .addFailed(let reason),
-                .deleteFailed(let reason):
+                .removeFailed(let reason):
             return reason.message
         }
     }
-}
-
-// MARK: - Factory Mappings
-extension FilmDetailError {
-    private static func mapReason(_ error: Error) -> FailureReason {
-        guard let cocoaError = error as? CocoaError else {
-            return .unknown(error.localizedDescription)
-        }
-        
-        switch cocoaError.code {
-        case .fileWriteOutOfSpace:
-            return .diskFull
-        case .persistentStoreOpen,
-                .persistentStoreTypeMismatch,
-                .managedObjectReferentialIntegrity:
-            return .databaseError
-        default:
-            return .databaseError
-        }
-    }
-    
-    static func add(_ error: Error) -> Self { .addFailed(mapReason(error)) }
-    static func delete(_ error: Error) -> Self { .deleteFailed(mapReason(error)) }
 }

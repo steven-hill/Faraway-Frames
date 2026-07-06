@@ -164,7 +164,8 @@ class FilmDetailViewModel {
                 }
             }
         } catch {
-            let filmDetailError = action == .add ? FilmDetailError.add(error) : FilmDetailError.delete(error)
+            let reason = PersistenceFailureReason(from: error)
+            let filmDetailError = action == .add ? FilmDetailError.addFailed(reason) : FilmDetailError.removeFailed(reason)
             currentState = .error(filmDetailError, film, queue)
         }
     }
