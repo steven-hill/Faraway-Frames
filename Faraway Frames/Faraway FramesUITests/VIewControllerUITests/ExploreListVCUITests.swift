@@ -65,7 +65,7 @@ final class ExploreListVCUITests: XCTestCase {
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
         
         XCTAssertTrue(app.staticTexts["Error loading films"].exists, "Should show error text.")
-        XCTAssertTrue(app.staticTexts["The internet connection appears to be offline"].exists, "Should show error secondary text.")
+        XCTAssertTrue(app.staticTexts["The internet connection appears to be offline."].exists, "Should show error secondary text.")
         XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
         XCTAssertFalse(header.exists)
     }
@@ -76,7 +76,7 @@ final class ExploreListVCUITests: XCTestCase {
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
         
         XCTAssertTrue(app.staticTexts["Error loading films"].exists, "Should show error text.")
-        XCTAssertTrue(app.staticTexts["Network connection lost"].exists, "Should show error secondary text.")
+        XCTAssertTrue(app.staticTexts["The network connection was lost."].exists, "Should show error secondary text.")
         XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
         XCTAssertFalse(header.exists)
     }
@@ -87,7 +87,7 @@ final class ExploreListVCUITests: XCTestCase {
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
         
         XCTAssertTrue(app.staticTexts["Error loading films"].exists, "Should show error text.")
-        XCTAssertTrue(app.staticTexts["Network request timed out"].exists, "Should show error secondary text.")
+        XCTAssertTrue(app.staticTexts["The network request timed out."].exists, "Should show error secondary text.")
         XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
         XCTAssertFalse(header.exists)
     }
@@ -98,7 +98,7 @@ final class ExploreListVCUITests: XCTestCase {
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
         
         XCTAssertTrue(app.staticTexts["Error loading films"].exists, "Should show error text.")
-        XCTAssertTrue(app.staticTexts["Invalid URL"].exists, "Should show error secondary text.")
+        XCTAssertTrue(app.staticTexts["Something went wrong. Please try again."].exists, "Should show error secondary text.")
         XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
         XCTAssertFalse(header.exists)
     }
@@ -109,7 +109,7 @@ final class ExploreListVCUITests: XCTestCase {
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
         
         XCTAssertTrue(app.staticTexts["Error loading films"].exists, "Should show error text.")
-        XCTAssertTrue(app.staticTexts["Invalid response"].exists, "Should show error secondary text.")
+        XCTAssertTrue(app.staticTexts["Something went wrong. Please try again."].exists, "Should show error secondary text.")
         XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
         XCTAssertFalse(header.exists)
     }
@@ -120,7 +120,7 @@ final class ExploreListVCUITests: XCTestCase {
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
         
         XCTAssertTrue(app.staticTexts["Error loading films"].exists, "Should show error text.")
-        XCTAssertTrue(app.staticTexts["Server error with status code: 500"].exists, "Should show error secondary text.")
+        XCTAssertTrue(app.staticTexts["The server responded with an error (Status: 500)."].exists, "Should show error secondary text.")
         XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
         XCTAssertFalse(header.exists)
     }
@@ -131,7 +131,7 @@ final class ExploreListVCUITests: XCTestCase {
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
         
         XCTAssertTrue(app.staticTexts["Error loading films"].exists, "Should show error text.")
-        XCTAssertTrue(app.staticTexts["Failed to decode data"].exists, "Should show error secondary text.")
+        XCTAssertTrue(app.staticTexts["Something went wrong. Please try again."].exists, "Should show error secondary text.")
         XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
         XCTAssertFalse(header.exists)
     }
@@ -142,7 +142,7 @@ final class ExploreListVCUITests: XCTestCase {
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
         
         XCTAssertTrue(app.staticTexts["Error loading films"].exists, "Should show error text.")
-        XCTAssertTrue(app.staticTexts["Unknown error"].exists, "Should show error secondary text.")
+        XCTAssertTrue(app.staticTexts["An unknown error occurred. Please try again."].exists, "Should show error secondary text.")
         XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
         XCTAssertFalse(header.exists)
     }
