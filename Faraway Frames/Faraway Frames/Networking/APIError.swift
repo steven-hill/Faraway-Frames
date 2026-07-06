@@ -84,6 +84,7 @@ extension APIError {
 }
 
 private extension DecodingError {
+    /// Helper to extract context for logs.
     var failureReasonForLogs: String {
         switch self {
         case .typeMismatch(let type, let context):
