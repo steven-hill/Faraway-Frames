@@ -62,6 +62,7 @@ extension APIError: CustomDebugStringConvertible {
     }
 }
 
+// MARK: - Mapping Logic
 extension APIError {
     /// Converts generic network or system errors into a strongly-typed APIError.
     init(from error: Error) {
@@ -90,23 +91,5 @@ extension APIError {
         }
         
         self = .unknown
-    }
-}
-
-extension DecodingError {
-    /// Helper to extract context for logs.
-    var failureReasonForLogs: String {
-        switch self {
-        case .typeMismatch(let type, let context):
-            return "Type mismatch for type \(type). Path: \(context.codingPath.map(\.stringValue).joined(separator: ".")) — \(context.debugDescription)"
-        case .valueNotFound(let type, let context):
-            return "Value not found for type \(type). Path: \(context.codingPath.map(\.stringValue).joined(separator: ".")) — \(context.debugDescription)"
-        case .keyNotFound(let key, let context):
-            return "Key '\(key.stringValue)' not found. Path: \(context.codingPath.map(\.stringValue).joined(separator: ".")) — \(context.debugDescription)"
-        case .dataCorrupted(let context):
-            return "Data corrupted. Path: \(context.codingPath.map(\.stringValue).joined(separator: ".")) — \(context.debugDescription)"
-        @unknown default:
-            return "Unknown decoding failure: \(self.localizedDescription)"
-        }
     }
 }
