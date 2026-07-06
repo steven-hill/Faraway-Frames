@@ -14,6 +14,17 @@ enum HomeError: Error, Equatable {
         case diskFull
         case databaseError
         case unknown(String)
+        
+        var message: String {
+            switch self {
+            case .diskFull:
+                return "Your device storage is full. Free up space and try again."
+            case .databaseError:
+                return "There was a problem with the database. Please try again."
+            case .unknown(let message):
+                return message
+            }
+        }
     }
     
     case fetchFailed(FailureReason)
@@ -25,24 +36,11 @@ extension HomeError: LocalizedError {
     nonisolated var errorDescription: String? {
         switch self {
         case .fetchFailed(let reason):
-            return "Failed to load films. \(reason.description)"
+            return "Failed to load films. \(reason)"
         case .addFailed(let reason):
-            return "Failed to add film. \(reason.description)"
+            return "Failed to add film. \(reason)"
         case .deleteFailed(let reason):
-            return "Failed to delete film. \(reason.description)"
-        }
-    }
-}
-
-extension HomeError.FailureReason {
-    nonisolated var description: String {
-        switch self {
-        case .diskFull:
-            return "Your device storage is full. Free up space and try again."
-        case .databaseError:
-            return "There was a problem with the database. Please try again."
-        case .unknown(let message):
-            return message
+            return "Failed to delete film. \(reason)"
         }
     }
 }
