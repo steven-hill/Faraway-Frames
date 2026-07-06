@@ -15,7 +15,7 @@ nonisolated enum FilmDetailError: Error, Equatable, Sendable {
 
 // MARK: - User-facing Description
 extension FilmDetailError: LocalizedError {
-    nonisolated var errorDescription: String? {
+    var errorDescription: String? {
         switch self {
         case .addFailed:
             return "Error adding film"
@@ -27,7 +27,7 @@ extension FilmDetailError: LocalizedError {
 
 // MARK: - User-facing Secondary Text
 extension FilmDetailError {
-    nonisolated var secondaryText: String {
+    var secondaryText: String {
         switch self {
         case .addFailed(let reason),
                 .removeFailed(let reason):

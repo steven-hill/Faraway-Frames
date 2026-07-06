@@ -26,7 +26,7 @@ nonisolated enum PersistenceFailureReason: Equatable, Sendable {
 }
 
 extension PersistenceFailureReason {
-    nonisolated init(from error: Error) {
+    init(from error: Error) {
         guard let cocoaError = error as? CocoaError else {
             self = .unknown(error.localizedDescription)
             return

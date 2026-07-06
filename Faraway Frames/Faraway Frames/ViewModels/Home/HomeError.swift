@@ -16,7 +16,7 @@ nonisolated enum HomeError: Error, Equatable, Sendable {
 
 // MARK: - User-facing Description
 extension HomeError: LocalizedError {
-    nonisolated var errorDescription: String? {
+    var errorDescription: String? {
         switch self {
         case .fetchFailed:
             return "Error loading films."
@@ -30,7 +30,7 @@ extension HomeError: LocalizedError {
 
 // MARK: - User-facing Secondary Text
 extension HomeError {
-    nonisolated var secondaryText: String {
+    var secondaryText: String {
         switch self {
         case .fetchFailed(let reason),
                 .addFailed(let reason),
