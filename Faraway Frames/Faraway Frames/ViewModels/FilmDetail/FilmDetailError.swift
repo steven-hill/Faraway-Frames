@@ -10,25 +10,8 @@ import CoreData
 
 enum FilmDetailError: Error, Equatable {
     
-    enum FailureReason: Equatable {
-        case diskFull
-        case databaseError
-        case unknown(String)
-        
-        var message: String {
-            switch self {
-            case .diskFull:
-                return "Your device storage is full. Free up space and try again."
-            case .databaseError:
-                return "There was a problem with the database. Please try again."
-            case .unknown(let message):
-                return message
-            }
-        }
-    }
-    
-    case addFailed(FailureReason)
-    case deleteFailed(FailureReason)
+    case addFailed(PersistenceFailureReason)
+    case deleteFailed(PersistenceFailureReason)
 }
 
 // MARK: - User Facing Descriptions
@@ -44,6 +27,7 @@ extension FilmDetailError: LocalizedError {
 }
 
 extension FilmDetailError {
+    @MainActor
     var secondaryText: String {
         switch self {
         case .addFailed(let reason),
@@ -51,27 +35,4 @@ extension FilmDetailError {
             return reason.message
         }
     }
-}
-
-// MARK: - Factory Mappings
-extension FilmDetailError {
-    private static func mapReason(_ error: Error) -> FailureReason {
-        guard let cocoaError = error as? CocoaError else {
-            return .unknown(error.localizedDescription)
-        }
-        
-        switch cocoaError.code {
-        case .fileWriteOutOfSpace:
-            return .diskFull
-        case .persistentStoreOpen,
-                .persistentStoreTypeMismatch,
-                .managedObjectReferentialIntegrity:
-            return .databaseError
-        default:
-            return .databaseError
-        }
-    }
-    
-    static func add(_ error: Error) -> Self { .addFailed(mapReason(error)) }
-    static func delete(_ error: Error) -> Self { .deleteFailed(mapReason(error)) }
 }
