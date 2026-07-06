@@ -16,25 +16,24 @@ enum APIError: Error, Equatable {
     case serverError(statusCode: Int)
     case decodingError
     case unknown
-    
-    var description: String {
+}
+
+// MARK: - User Facing Descriptions
+extension APIError: LocalizedError {
+    var errorDescription: String? {
         switch self {
         case .noInternetConnection:
-            return "The internet connection appears to be offline"
+            return "The internet connection appears to be offline."
         case .networkConnectionLost:
-            return "Network connection lost"
+            return "The network connection was lost."
         case .networkTimeout:
-            return "Network request timed out"
-        case .invalidURL:
-            return "Invalid URL"
-        case .invalidResponse:
-            return "Invalid response"
-        case .serverError(statusCode: let statusCode):
-            return "Server error with status code: \(statusCode)"
-        case .decodingError:
-            return "Failed to decode data"
+            return "The network request timed out."
+        case .invalidURL, .invalidResponse, .decodingError:
+            return "Something went wrong. Please try again."
+        case .serverError(let statusCode):
+            return "The server responded with an error (Status: \(statusCode))."
         case .unknown:
-            return "Unknown error"
+            return "An unknown error occurred. Please try again."
         }
     }
 }
