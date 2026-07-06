@@ -47,6 +47,17 @@ extension HomeError: LocalizedError {
 }
 
 extension HomeError {
+    var secondaryText: String {
+        switch self {
+        case .fetchFailed(let reason),
+                .addFailed(let reason),
+                .deleteFailed(let reason):
+            return reason.message
+        }
+    }
+}
+
+extension HomeError {
     private static func mapReason(_ error: Error) -> FailureReason {
         if let cocoaError = error as? CocoaError {
             switch cocoaError.code {
