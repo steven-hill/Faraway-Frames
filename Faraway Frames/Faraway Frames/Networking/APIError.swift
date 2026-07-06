@@ -14,7 +14,7 @@ enum APIError: Error, Equatable {
     case invalidURL
     case invalidResponse
     case serverError(statusCode: Int)
-    case decodingError
+    case decodingError(String)
     case unknown
 }
 
@@ -34,6 +34,20 @@ extension APIError: LocalizedError {
             return "The server responded with an error (Status: \(statusCode))."
         case .unknown:
             return "An unknown error occurred. Please try again."
+        }
+    }
+}
+
+// MARK: - Debugging Descriptions
+extension APIError: CustomDebugStringConvertible {
+    var debugDescription: String {
+        switch self {
+        case .serverError(let statusCode):
+            return "APIError.serverError(statusCode: \(statusCode))"
+        case .decodingError(let context):
+            return "APIError.decodingError: \(context)"
+        default:
+            return String(reflecting: self)
         }
     }
 }
