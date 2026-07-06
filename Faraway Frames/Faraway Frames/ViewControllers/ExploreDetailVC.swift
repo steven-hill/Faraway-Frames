@@ -174,7 +174,8 @@ final class ExploreDetailVC: UIViewController {
         config.button.title = "Retry"
         config.buttonProperties.primaryAction = UIAction { [weak self] _ in
             guard let self else { return }
-            let action: QueueAction = error == .add(error) ? .add : .remove
+            let reason = PersistenceFailureReason(from: error)
+            let action: QueueAction = error == .addFailed(reason) ? .add : .remove
             Task {
                 await filmDetailViewModel.updateStatus(for: film, queue: queue, action: action)
             }

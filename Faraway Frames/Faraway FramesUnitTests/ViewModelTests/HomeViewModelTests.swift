@@ -91,7 +91,7 @@ struct HomeViewModelTests {
     )
     func homeViewModel_performFetches_whenThereIsAnError_setsCorrectFailureState(
         for scenario: (systemError: Error,
-                       expectedReason: HomeError.FailureReason)
+                       expectedReason: PersistenceFailureReason)
     ) throws {
         let testPersistenceController = try PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
@@ -150,7 +150,7 @@ struct HomeViewModelTests {
     )
     func homeViewModel_toggleFilmInQueue_onSaveError_whenAddingFilm_handlesError(
         scenario: (systemError: Error,
-                   expectedReason: HomeError.FailureReason)
+                   expectedReason: PersistenceFailureReason)
     ) async {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let saver = ThrowingSaver(errorToThrow: scenario.systemError)
@@ -179,7 +179,7 @@ struct HomeViewModelTests {
     )
     func homeViewModel_toggleFilmInQueue_onSaveError_whenDeletingFilm_handlesError(
         scenario: (systemError: Error,
-                   expectedReason: HomeError.FailureReason)
+                   expectedReason: PersistenceFailureReason)
     ) async throws {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let saver = ThrowingSaver(errorToThrow: scenario.systemError)
@@ -201,7 +201,7 @@ struct HomeViewModelTests {
         )
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
-        let expectedError = HomeError.deleteFailed(scenario.expectedReason)
+        let expectedError = HomeError.removeFailed(scenario.expectedReason)
         
         await sut.toggleFilmInQueue(film: sampleFilm, queue: .upNext, action: .remove)
         
@@ -384,7 +384,7 @@ struct HomeViewModelTests {
     
     // MARK: - System Errors Helper
     /// Used in tests involving error handling.
-    nonisolated static var errorScenarios: [(systemError: Error, expectedReason: HomeError.FailureReason)] {
+    nonisolated static var errorScenarios: [(systemError: Error, expectedReason: PersistenceFailureReason)] {
         [
             (CocoaError(.fileWriteOutOfSpace), .diskFull),
             (CocoaError(.persistentStoreOpen), .databaseError),

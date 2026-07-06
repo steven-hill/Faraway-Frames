@@ -8,14 +8,14 @@
 import Foundation
 import CoreData
 
-enum FilmDetailError: Error, Equatable {
+nonisolated enum FilmDetailError: Error, Equatable, Sendable {
     case addFailed(PersistenceFailureReason)
     case removeFailed(PersistenceFailureReason)
 }
 
 // MARK: - User-facing Description
 extension FilmDetailError: LocalizedError {
-    var errorDescription: String? {
+    nonisolated var errorDescription: String? {
         switch self {
         case .addFailed:
             return "Error adding film"
@@ -27,8 +27,7 @@ extension FilmDetailError: LocalizedError {
 
 // MARK: - User-facing Secondary Text
 extension FilmDetailError {
-    @MainActor
-    var secondaryText: String {
+    nonisolated var secondaryText: String {
         switch self {
         case .addFailed(let reason),
                 .removeFailed(let reason):

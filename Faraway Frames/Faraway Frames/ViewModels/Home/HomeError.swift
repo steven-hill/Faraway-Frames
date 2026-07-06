@@ -8,7 +8,7 @@
 import Foundation
 import CoreData
 
-enum HomeError: Error, Equatable {
+nonisolated enum HomeError: Error, Equatable, Sendable {
     case fetchFailed(PersistenceFailureReason)
     case addFailed(PersistenceFailureReason)
     case removeFailed(PersistenceFailureReason)
@@ -16,7 +16,7 @@ enum HomeError: Error, Equatable {
 
 // MARK: - User-facing Description
 extension HomeError: LocalizedError {
-    var errorDescription: String? {
+    nonisolated var errorDescription: String? {
         switch self {
         case .fetchFailed:
             return "Error loading films."
@@ -30,8 +30,7 @@ extension HomeError: LocalizedError {
 
 // MARK: - User-facing Secondary Text
 extension HomeError {
-    @MainActor
-    var secondaryText: String {
+    nonisolated var secondaryText: String {
         switch self {
         case .fetchFailed(let reason),
                 .addFailed(let reason),

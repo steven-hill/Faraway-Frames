@@ -8,7 +8,7 @@
 import Foundation
 import CoreData
 
-enum PersistenceFailureReason: Equatable {
+nonisolated enum PersistenceFailureReason: Equatable, Sendable {
     case diskFull
     case databaseError
     case unknown(String)
@@ -26,7 +26,7 @@ enum PersistenceFailureReason: Equatable {
 }
 
 extension PersistenceFailureReason {
-    init(from error: Error) {
+    nonisolated init(from error: Error) {
         guard let cocoaError = error as? CocoaError else {
             self = .unknown(error.localizedDescription)
             return

@@ -304,7 +304,7 @@ struct FilmDetailViewModelTests {
     )
     func filmDetailViewModel_updateStatus_onSaveError_whenAddingFilmToUpNext_handlesError(
         scenario: (systemError: Error,
-                   expectedReason: FilmDetailError.FailureReason)
+                   expectedReason: PersistenceFailureReason)
     ) async {
         let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
@@ -330,7 +330,7 @@ struct FilmDetailViewModelTests {
     )
     func filmDetailViewModel_updateStatus_onSaveError_whenRemovingFilmFromUpNext_handlesError(
         scenario: (systemError: Error,
-                   expectedReason: FilmDetailError.FailureReason)
+                   expectedReason: PersistenceFailureReason)
     ) async throws {
         let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
@@ -349,7 +349,7 @@ struct FilmDetailViewModelTests {
                                       filmQueueService: filmQueueService)
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
-        let expectedError = FilmDetailError.deleteFailed(scenario.expectedReason)
+        let expectedError = FilmDetailError.removeFailed(scenario.expectedReason)
         
         await sut.updateStatus(for: targetFilm, queue: .upNext, action: .remove)
         
@@ -363,7 +363,7 @@ struct FilmDetailViewModelTests {
     )
     func filmDetailViewModel_updateStatus_onSaveError_whenAddingFilmToWatched_handlesError(
         scenario: (systemError: Error,
-                   expectedReason: FilmDetailError.FailureReason)
+                   expectedReason: PersistenceFailureReason)
     ) async {
         let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
@@ -389,7 +389,7 @@ struct FilmDetailViewModelTests {
     )
     func filmDetailViewModel_updateStatus_onSaveError_whenRemovingFilmFromWatched_handlesError(
         scenario: (systemError: Error,
-                   expectedReason: FilmDetailError.FailureReason)
+                   expectedReason: PersistenceFailureReason)
     ) async throws {
         let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
@@ -408,7 +408,7 @@ struct FilmDetailViewModelTests {
                                       filmQueueService: filmQueueService)
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
-        let expectedError = FilmDetailError.deleteFailed(scenario.expectedReason)
+        let expectedError = FilmDetailError.removeFailed(scenario.expectedReason)
         
         await sut.updateStatus(for: targetFilm, queue: .watched, action: .remove)
         

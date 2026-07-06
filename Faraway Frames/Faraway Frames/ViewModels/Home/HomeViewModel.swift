@@ -56,7 +56,8 @@ final class HomeViewModel: NSObject {
             currentState = .fetchedObjects
             delegate?.filmsDidChange(upNextFilms, watchedFilms)
         } catch {
-            let homeError = HomeError.fetch(error)
+            let reason = PersistenceFailureReason(from: error)
+            let homeError = HomeError.fetchFailed(reason)
             handleError(homeError)
         }
     }
@@ -65,7 +66,8 @@ final class HomeViewModel: NSObject {
         do {
             try await filmQueueService.updateFilmStatus(film: film, queue: queue, action: action)
         } catch {
-            let homeError = action == .add ? HomeError.add(error) : HomeError.delete(error)
+            let reason = PersistenceFailureReason(from: error)
+            let homeError = action == .add ? HomeError.addFailed(reason) : HomeError.removeFailed(reason)
             handleError(homeError)
         }
     }
