@@ -32,15 +32,16 @@ enum HomeError: Error, Equatable {
     case deleteFailed(FailureReason)
 }
 
+// MARK: - User-facing Descriptions
 extension HomeError: LocalizedError {
-    nonisolated var errorDescription: String? {
+    var errorDescription: String? {
         switch self {
-        case .fetchFailed(let reason):
-            return "Failed to load films. \(reason)"
-        case .addFailed(let reason):
-            return "Failed to add film. \(reason)"
-        case .deleteFailed(let reason):
-            return "Failed to delete film. \(reason)"
+        case .fetchFailed:
+            return "Error loading films."
+        case .addFailed:
+            return "Error adding film."
+        case .deleteFailed:
+            return "Error removing film."
         }
     }
 }
