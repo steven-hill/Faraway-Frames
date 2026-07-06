@@ -11,7 +11,7 @@ import CoreData
 enum HomeError: Error, Equatable {
     case fetchFailed(PersistenceFailureReason)
     case addFailed(PersistenceFailureReason)
-    case deleteFailed(PersistenceFailureReason)
+    case removeFailed(PersistenceFailureReason)
 }
 
 // MARK: - User-facing Description
@@ -22,7 +22,7 @@ extension HomeError: LocalizedError {
             return "Error loading films."
         case .addFailed:
             return "Error adding film."
-        case .deleteFailed:
+        case .removeFailed:
             return "Error removing film."
         }
     }
@@ -35,7 +35,7 @@ extension HomeError {
         switch self {
         case .fetchFailed(let reason),
                 .addFailed(let reason),
-                .deleteFailed(let reason):
+                .removeFailed(let reason):
             return reason.message
         }
     }

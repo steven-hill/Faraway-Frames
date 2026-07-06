@@ -10,7 +10,7 @@ import CoreData
 
 enum FilmDetailError: Error, Equatable {
     case addFailed(PersistenceFailureReason)
-    case deleteFailed(PersistenceFailureReason)
+    case removeFailed(PersistenceFailureReason)
 }
 
 // MARK: - User-facing Description
@@ -19,7 +19,7 @@ extension FilmDetailError: LocalizedError {
         switch self {
         case .addFailed:
             return "Error adding film"
-        case .deleteFailed:
+        case .removeFailed:
             return "Error removing film"
         }
     }
@@ -31,7 +31,7 @@ extension FilmDetailError {
     var secondaryText: String {
         switch self {
         case .addFailed(let reason),
-                .deleteFailed(let reason):
+                .removeFailed(let reason):
             return reason.message
         }
     }
