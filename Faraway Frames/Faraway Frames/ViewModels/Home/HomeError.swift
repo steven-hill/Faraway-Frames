@@ -14,7 +14,7 @@ enum HomeError: Error, Equatable {
     case deleteFailed(PersistenceFailureReason)
 }
 
-// MARK: - User-facing Descriptions
+// MARK: - User-facing Description
 extension HomeError: LocalizedError {
     var errorDescription: String? {
         switch self {
@@ -28,6 +28,7 @@ extension HomeError: LocalizedError {
     }
 }
 
+// MARK: - User-facing Secondary Text
 extension HomeError {
     @MainActor
     var secondaryText: String {

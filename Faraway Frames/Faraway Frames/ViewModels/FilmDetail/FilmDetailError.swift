@@ -9,12 +9,11 @@ import Foundation
 import CoreData
 
 enum FilmDetailError: Error, Equatable {
-    
     case addFailed(PersistenceFailureReason)
     case deleteFailed(PersistenceFailureReason)
 }
 
-// MARK: - User Facing Descriptions
+// MARK: - User-facing Description
 extension FilmDetailError: LocalizedError {
     var errorDescription: String? {
         switch self {
@@ -26,6 +25,7 @@ extension FilmDetailError: LocalizedError {
     }
 }
 
+// MARK: - User-facing Secondary Text
 extension FilmDetailError {
     @MainActor
     var secondaryText: String {
