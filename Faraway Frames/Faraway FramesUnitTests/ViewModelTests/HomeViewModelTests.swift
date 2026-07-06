@@ -87,7 +87,7 @@ struct HomeViewModelTests {
     
     @Test("`performFetches` should handle errors by updating `currentState` and calling the delegate",
           (.tags(.persistence)),
-          arguments: errorScenarios
+          arguments: PersistenceHelper.errorScenarios
     )
     func homeViewModel_performFetches_whenThereIsAnError_setsCorrectFailureState(
         for scenario: (systemError: Error,
@@ -146,7 +146,7 @@ struct HomeViewModelTests {
     
     @Test("`toggleFilmInQueue` should handle add film errors by updating `currentState` and calling the delegate",
           (.tags(.persistence)),
-          arguments: errorScenarios
+          arguments: PersistenceHelper.errorScenarios
     )
     func homeViewModel_toggleFilmInQueue_onSaveError_whenAddingFilm_handlesError(
         scenario: (systemError: Error,
@@ -175,7 +175,7 @@ struct HomeViewModelTests {
     
     @Test("`toggleFilmInQueue` should handle delete film errors by updating `currentState` and calling the delegate",
           (.tags(.persistence)),
-          arguments: errorScenarios
+          arguments: PersistenceHelper.errorScenarios
     )
     func homeViewModel_toggleFilmInQueue_onSaveError_whenDeletingFilm_handlesError(
         scenario: (systemError: Error,
@@ -380,18 +380,5 @@ struct HomeViewModelTests {
         override func performFetch() throws {
             throw errorToThrow
         }
-    }
-    
-    // MARK: - System Errors Helper
-    /// Used in tests involving error handling.
-    nonisolated static var errorScenarios: [(systemError: Error, expectedReason: PersistenceFailureReason)] {
-        [
-            (CocoaError(.fileWriteOutOfSpace), .diskFull),
-            (CocoaError(.persistentStoreOpen), .databaseError),
-            (CocoaError(.managedObjectReferentialIntegrity), .databaseError),
-            (CocoaError(.persistentStoreTypeMismatch), .databaseError),
-            (CocoaError(.fileNoSuchFile), .databaseError),
-            (UnknownError(), .unknown("Unknown error."))
-        ]
     }
 }
