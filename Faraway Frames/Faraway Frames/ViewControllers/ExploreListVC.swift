@@ -94,7 +94,6 @@ final class ExploreListVC: UIViewController {
         return UICollectionViewCompositionalLayout(sectionProvider: sectionProvider)
     }
     
-    @MainActor
     func updateCellImage(_ cell: UICollectionViewCell, filmID: Film.ID, indexPath: IndexPath) async {
         guard let film = filmLookup[filmID] else { return }
         
