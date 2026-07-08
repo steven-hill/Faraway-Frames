@@ -192,6 +192,21 @@ struct ExploreListVCTests {
         #expect(sut.filmLookup["non existent ID"] == nil, "Should return nil if no film with that ID exists.")
     }
     
+    @Test("When film is missing from lookup, the cell is not updated.")
+    func updateCellImage_whenFilmIsMissingFromLookup_doesNothing() async {
+        let (sut, cell, _, indexPath) = makeSUTForUpdateCellImageTests(
+            shouldSucceed: false,
+            dataSourceFilmID: "2baf70d1-42bb-4437-b551-e5fed5a87abe"
+        )
+        let baselineConfiguration = UIListContentConfiguration.cell()
+        cell.contentConfiguration = baselineConfiguration
+        
+        await sut.updateCellImage(cell, filmID: "non-existent-id", indexPath: indexPath)
+        
+        #expect(cell.contentConfiguration as? UIListContentConfiguration == baselineConfiguration,
+                "Should exit early and leave the baseline configuration untouched if the film is missing from lookup.")
+    }
+
     @Test("When cell still represents the film, the view has a downloaded image, and film ID matches, the cell is updated.")
     func exploreListVC_updateCellImage_whenEverythingMatchesAndImageDownloadSucceeds_updatesCellConfiguration() async {
         let (sut, cell, film, indexPath) = makeSUTForUpdateCellImageTests(
