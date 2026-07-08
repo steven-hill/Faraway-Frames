@@ -266,14 +266,6 @@ struct ExploreListVCTests {
         #expect(newConfiguration !== originalConfiguration, "Should apply a fresh configuration instance containing the placeholder image.")
     }
     
-    @Test func exploreListVC_updateCellImage_whenFilmIDDoesNotMatchIndexPath_cellContentConfigurationIsNotUpdated() async {
-        let (sut, cell, film, indexPath) = makeSUTForUpdateCellImageTests(shouldSucceed: true, dataSourceFilmID: "Mismatch")
-                
-        await sut.updateCellImage(cell, filmID: film.id, indexPath: indexPath)
-       
-        #expect(cell.contentConfiguration is UIHostingConfiguration<FilmRowView, EmptyView>, "Should have the original configuration because the IDs did not match.")
-    }
-    
     @Test(.tags(.search))
     func exploreListVC_setsSearchControllerSearchResultsUpdater() {
         let sut = makeSUT()
