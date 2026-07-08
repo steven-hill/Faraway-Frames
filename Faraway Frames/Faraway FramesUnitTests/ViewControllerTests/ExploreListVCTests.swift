@@ -192,12 +192,32 @@ struct ExploreListVCTests {
         #expect(sut.filmLookup["non existent ID"] == nil, "Should return nil if no film with that ID exists.")
     }
     
-    @Test func exploreListVC_updateCellImage_whenImageLoadingSucceeds_setsCellContentConfigurationCorrectly() async {
-        let (sut, cell, film, indexPath) = makeSUTForUpdateCellImageTests(shouldSucceed: true, dataSourceFilmID: "2baf70d1-42bb-4437-b551-e5fed5a87abe")
+    @Test("When cell still represents the film, the view has a downloaded image, and film ID matches, the cell is updated.")
+    func exploreListVC_updateCellImage_whenEverythingMatchesAndImageDownloadSucceeds_updatesCellConfiguration() async {
+        let (sut, cell, film, indexPath) = makeSUTForUpdateCellImageTests(
+            shouldSucceed: true,
+            dataSourceFilmID: "2baf70d1-42bb-4437-b551-e5fed5a87abe"
+        )
+        let originalConfiguration = cell.contentConfiguration as AnyObject
         
         await sut.updateCellImage(cell, filmID: film.id, indexPath: indexPath)
         
-        #expect(cell.contentConfiguration is UIHostingConfiguration<FilmRowView, EmptyView>, "Cell should have been updated with `UIHostingConfiguration` and `FilmRowView`.")
+        let newConfiguration = cell.contentConfiguration as AnyObject
+        #expect(newConfiguration !== originalConfiguration, "Should apply a fresh configuration instance containing the downloaded image.")
+    }
+    
+    @Test("When cell still represents the film, the view uses the placeholder image, and film ID matches, the cell is updated.")
+    func exploreListVC_updateCellImage_whenEverythingMatchesButImageDownloadFails_updatesCellConfiguration() async {
+        let (sut, cell, film, indexPath) = makeSUTForUpdateCellImageTests(
+            shouldSucceed: false,
+            dataSourceFilmID: "2baf70d1-42bb-4437-b551-e5fed5a87abe"
+        )
+        let originalConfiguration = cell.contentConfiguration as AnyObject
+        
+        await sut.updateCellImage(cell, filmID: film.id, indexPath: indexPath)
+        
+        let newConfiguration = cell.contentConfiguration as AnyObject
+        #expect(newConfiguration !== originalConfiguration, "Should apply a fresh configuration instance containing the placeholder image.")
     }
     
     @Test func exploreListVC_updateCellImage_whenFilmIDDoesNotMatchIndexPath_cellContentConfigurationIsNotUpdated() async {
@@ -206,14 +226,6 @@ struct ExploreListVCTests {
         await sut.updateCellImage(cell, filmID: film.id, indexPath: indexPath)
        
         #expect(cell.contentConfiguration is UIHostingConfiguration<FilmRowView, EmptyView>, "Should have the original configuration because the IDs did not match.")
-    }
-    
-    @Test func exploreListVC_updateCellImage_whenImageLoadFails_setsCellContentConfigurationCorrectly() async {
-        let (sut, cell, film, indexPath) = makeSUTForUpdateCellImageTests(shouldSucceed: false, dataSourceFilmID: "2baf70d1-42bb-4437-b551-e5fed5a87abe")
-        
-        await sut.updateCellImage(cell, filmID: film.id, indexPath: indexPath)
-        
-        #expect(cell.contentConfiguration is UIHostingConfiguration<FilmRowView, EmptyView>, "Cell should have been updated with `UIHostingConfiguration` and `FilmRowView`.")
     }
     
     @Test(.tags(.search))
