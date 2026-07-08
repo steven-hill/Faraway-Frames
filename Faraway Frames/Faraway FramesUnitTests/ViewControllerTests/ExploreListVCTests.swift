@@ -192,8 +192,8 @@ struct ExploreListVCTests {
         #expect(sut.filmLookup["non existent ID"] == nil, "Should return nil if no film with that ID exists.")
     }
     
-    @Test("When film is missing from lookup, the cell is not updated.")
-    func updateCellImage_whenFilmIsMissingFromLookup_doesNothing() async {
+    @Test("When film is missing from lookup, the cell configuration is not updated.")
+    func exploreListVC_updateCellImage_whenFilmIsMissingFromLookup_doesNothing() async {
         let (sut, cell, _, indexPath) = makeSUTForUpdateCellImageTests(
             shouldSucceed: false,
             dataSourceFilmID: "2baf70d1-42bb-4437-b551-e5fed5a87abe"
