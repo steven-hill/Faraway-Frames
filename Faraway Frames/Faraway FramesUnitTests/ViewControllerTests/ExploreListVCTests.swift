@@ -710,10 +710,9 @@ struct ExploreListVCTests {
         let mockAccessibilityService = MockAccessibilityService()
         let sut = ExploreListVC(viewModel: filmsListViewModel, accessibilityService: mockAccessibilityService)
         let film = Film.sample[0]
-        let placeholderImage = SFSymbols.photo
         let cell = UICollectionViewListCell()
         cell.contentConfiguration = UIHostingConfiguration {
-            FilmRowView(film: film, image: placeholderImage)
+            FilmRowView(film: film, image: nil)
         }
         
         let mockCV = MockCollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())

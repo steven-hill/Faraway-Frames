@@ -116,13 +116,10 @@ final class ExploreListVC: UIViewController {
     private func configureDataSource() {
         let filmCellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Film> { [weak self] (cell, indexPath, film) in
             guard let self else { return }
-            let placeholderImage = SFSymbols.photo
-            
             cell.contentConfiguration = UIHostingConfiguration {
-                FilmRowView(film: film, image: placeholderImage)
+                FilmRowView(film: film, image: nil)
             }
             cell.accessories = [.disclosureIndicator()]
-            
             Task { [weak self, weak cell] in
                 guard let self, let cell else { return }
                 await self.updateCellImage(cell, filmID: film.id, indexPath: indexPath)
