@@ -110,6 +110,7 @@ final class ExploreListVC: UIViewController {
         cell.contentConfiguration = UIHostingConfiguration {
             FilmRowView(film: film, image: filmImage)
         }
+        setNeedsUpdateContentUnavailableConfiguration()
     }
     
     private func configureDataSource() {
@@ -251,7 +252,6 @@ extension ExploreListVC: FilmsListViewModelDelegate {
         let filmIds = films.map({ $0.id })
         filmLookup = Dictionary(uniqueKeysWithValues: films.map { ($0.id, $0) })
         collectionView.refreshControl?.endRefreshing()
-        setNeedsUpdateContentUnavailableConfiguration()
         
         var snapshot = NSDiffableDataSourceSnapshot<Section, Film.ID>()
         snapshot.appendSections([.main])
