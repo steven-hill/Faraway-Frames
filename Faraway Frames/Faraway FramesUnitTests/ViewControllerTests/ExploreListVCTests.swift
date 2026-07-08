@@ -206,6 +206,23 @@ struct ExploreListVCTests {
         #expect(cell.contentConfiguration as? UIListContentConfiguration == baselineConfiguration,
                 "Should exit early and leave the baseline configuration untouched if the film is missing from lookup.")
     }
+    
+    @Test("When index path has changed, the cell configuration is not updated.")
+    func exploreListVC_updateCellImage_whenCellHasBeenReusedForDifferentIndexPath_doesNothing() async {
+        let initialIndexPath = IndexPath(item: 0, section: 0)
+        let changedIndexPath = IndexPath(item: 1, section: 0)
+        let (sut, cell, film, _) = makeSUTForUpdateCellImageTests(
+            shouldSucceed: true,
+            indexPath: changedIndexPath,
+            dataSourceFilmID: "2baf70d1-42bb-4437-b551-e5fed5a87abe"
+        )
+        let originalConfiguration = UIListContentConfiguration.cell()
+        cell.contentConfiguration = originalConfiguration
+        
+        await sut.updateCellImage(cell, filmID: film.id, indexPath: initialIndexPath)
+        
+        #expect(cell.contentConfiguration as? UIListContentConfiguration == originalConfiguration, "Should preserve the original configuration instance if the index path changes.")
+    }
 
     @Test("When cell still represents the film, the view has a downloaded image, and film ID matches, the cell is updated.")
     func exploreListVC_updateCellImage_whenEverythingMatchesAndImageDownloadSucceeds_updatesCellConfiguration() async {
