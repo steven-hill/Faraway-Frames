@@ -223,6 +223,20 @@ struct ExploreListVCTests {
         
         #expect(cell.contentConfiguration as? UIListContentConfiguration == originalConfiguration, "Should preserve the original configuration instance if the index path changes.")
     }
+    
+    @Test("When item identifier has changed, the cell configuration is not updated.")
+    func exploreListVC_updateCellImage_whenItemIdentifierChanged_doesNothing() async {
+        let (sut, cell, film, indexPath) = makeSUTForUpdateCellImageTests(
+            shouldSucceed: true,
+            dataSourceFilmID: "mismatched-id-at-indexpath"
+        )
+        let originalConfiguration = UIListContentConfiguration.cell()
+        cell.contentConfiguration = originalConfiguration
+        
+        await sut.updateCellImage(cell, filmID: film.id, indexPath: indexPath)
+        
+        #expect(cell.contentConfiguration as? UIListContentConfiguration == originalConfiguration, "Should preserve the original configuration instance if the item identifier has changed.")
+    }
 
     @Test("When cell still represents the film, the view has a downloaded image, and film ID matches, the cell is updated.")
     func exploreListVC_updateCellImage_whenEverythingMatchesAndImageDownloadSucceeds_updatesCellConfiguration() async {
