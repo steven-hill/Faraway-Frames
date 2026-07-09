@@ -496,18 +496,3 @@ struct ExploreDetailVCTests {
         }
     }
 }
-
-//MARK: - Extension on UIView
-private extension UIView {
-    func findView(withIdentifier identifier: String) -> UIView? {
-        if accessibilityIdentifier == identifier {
-            return self
-        }
-        for subview in subviews {
-            if let foundView = subview.findView(withIdentifier: identifier) {
-                return foundView
-            }
-        }
-        return nil
-    }
-}
