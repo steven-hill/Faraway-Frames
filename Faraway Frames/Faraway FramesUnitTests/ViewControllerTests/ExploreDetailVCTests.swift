@@ -352,26 +352,26 @@ struct ExploreDetailVCTests {
                 "Buttons container must be visible when state is `.content`.")
     }
     
-    @Test("Tapping upNextButton invokes the view model with the correct parameters", .tags(.persistence))
-    func exploreDetailVC_upNextButtonTap_callsViewModelUpdateStatus() async {
+    @Test("Tapping `upNextButton` invokes the view model's service method with the correct parameters", .tags(.persistence))
+    func exploreDetailVC_upNextButtonTap_viaViewModel_callsServiceUpdateFilmStatus() async {
         let (sut, spyFQS) = makeSUTWithFilmAndFilmQueueServiceSpy()
         
         sut.upNextButton.sendActions(for: .touchUpInside)
         await Task.yield()
         
-        #expect(spyFQS.updateStatusCallCount == 1, "Should have called the method once.")
+        #expect(spyFQS.updateFilmStatusCallCount == 1, "Should have called the method once.")
         #expect(spyFQS.capturedQueue == .upNext, "Should be the upNext queue.")
         #expect(spyFQS.capturedAction == .add, "Action should be add.")
     }
     
-    @Test("Tapping watchedButton invokes the view model with the correct parameters", .tags(.persistence))
-    func exploreDetailVC_watchedButtonTap_callsViewModelUpdateStatus() async {
+    @Test("Tapping `watchedButton` invokes the view model's service method with the correct parameters", .tags(.persistence))
+    func exploreDetailVC_watchedButtonTap_viaViewModel_callsServiceUpdateFilmStatus() async {
         let (sut, spyFQS) = makeSUTWithFilmAndFilmQueueServiceSpy()
         
         sut.watchedButton.sendActions(for: .touchUpInside)
         await Task.yield()
         
-        #expect(spyFQS.updateStatusCallCount == 1, "Should have called the method once.")
+        #expect(spyFQS.updateFilmStatusCallCount == 1, "Should have called the method once.")
         #expect(spyFQS.capturedQueue == .watched, "Should be the watched queue.")
         #expect(spyFQS.capturedAction == .add, "Action should be add.")
     }
@@ -469,19 +469,19 @@ struct ExploreDetailVCTests {
     
     //MARK: - Film Queue Service Spy
     private final class FilmQueueServiceSpy: FilmQueueServiceProtocol {
-        var updateStatusCallCount = 0
+        var updateFilmStatusCallCount = 0
         var capturedFilm: Film?
         var capturedQueue: FilmQueue?
         var capturedAction: QueueAction?
         
         @discardableResult
         func updateFilmStatus(film: Film, queue: FilmQueue, action: QueueAction) async throws -> Bool {
-            updateStatusCallCount += 1
+            updateFilmStatusCallCount += 1
             capturedFilm = film
             capturedQueue = queue
             capturedAction = action
             
-            return updateStatusCallCount > 0 ? true : false
+            return updateFilmStatusCallCount > 0 ? true : false
         }
     }
     
