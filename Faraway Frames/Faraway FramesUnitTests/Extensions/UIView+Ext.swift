@@ -8,7 +8,7 @@
 import UIKit
 
 /// Finds a UIView from its accessibility identifier.
-/// Used in some ExploreDetailVC unit tests.
+/// Used in some `ExploreDetailVC` unit tests.
 extension UIView {
     func findView(withIdentifier identifier: String) -> UIView? {
         if accessibilityIdentifier == identifier {
