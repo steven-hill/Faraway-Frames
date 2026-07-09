@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 import CoreData
 
-class FilmDetailViewModel {
+final class FilmDetailViewModel {
     
     // MARK: - State Definition
     enum FilmDetailState: Equatable {
