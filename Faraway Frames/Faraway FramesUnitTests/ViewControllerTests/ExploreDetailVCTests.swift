@@ -467,20 +467,6 @@ struct ExploreDetailVCTests {
         return (sut, spyFQS)
     }
     
-    private func makeSUTWithFilmAndSpyVM() -> (vc: ExploreDetailVC, vm: FilmDetailViewModelSpy) {
-        let film = Film.sample[0]
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let spyVM = FilmDetailViewModelSpy(
-            film: film,
-            imageLoader: MockImageLoader(),
-            filmQueueService: filmQueueService
-        )
-        let vc = ExploreDetailVC(filmDetailViewModel: spyVM)
-        _ = vc.view
-        return (vc, spyVM)
-    }
-    
     //MARK: - Film Queue Service Spy
     private final class FilmQueueServiceSpy: FilmQueueServiceProtocol {
         var updateStatusCallCount = 0
@@ -496,22 +482,6 @@ struct ExploreDetailVCTests {
             capturedAction = action
             
             return updateStatusCallCount > 0 ? true : false
-        }
-    }
-    
-    //MARK: - Film Detail View Model Spy
-    @MainActor
-    private final class FilmDetailViewModelSpy: FilmDetailViewModel {
-        var updateStatusCallCount = 0
-        var capturedFilm: Film?
-        var capturedQueue: FilmQueue?
-        var capturedAction: QueueAction?
-
-        override func updateStatus(for film: Film, queue: FilmQueue, action: QueueAction) async {
-            updateStatusCallCount += 1
-            capturedFilm = film
-            capturedQueue = queue
-            capturedAction = action
         }
     }
     
