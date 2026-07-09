@@ -463,6 +463,7 @@ struct ExploreDetailVCTests {
         let spyFQS = FilmQueueServiceSpy()
         let filmDetailViewModel = FilmDetailViewModel(film: film, imageLoader: MockImageLoader(), filmQueueService: spyFQS)
         let sut = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
+        sut.loadViewIfNeeded()
         return (sut, spyFQS)
     }
     
