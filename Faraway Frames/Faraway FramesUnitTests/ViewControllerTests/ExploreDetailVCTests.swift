@@ -366,14 +366,14 @@ struct ExploreDetailVCTests {
     
     @Test("Tapping watchedButton invokes the view model with the correct parameters", .tags(.persistence))
     func exploreDetailVC_watchedButtonTap_callsViewModelUpdateStatus() async {
-        let (sut, spyVM) = makeSUTWithFilmAndSpyVM()
+        let (sut, spyFQS) = makeSUTWithFilmAndFilmQueueServiceSpy()
         
         sut.watchedButton.sendActions(for: .touchUpInside)
         await Task.yield()
         
-        #expect(spyVM.updateStatusCallCount == 1, "Should have called the method once.")
-        #expect(spyVM.capturedQueue == .watched, "Should be the watched queue.")
-        #expect(spyVM.capturedAction == .add, "Action should be add.")
+        #expect(spyFQS.updateStatusCallCount == 1, "Should have called the method once.")
+        #expect(spyFQS.capturedQueue == .watched, "Should be the watched queue.")
+        #expect(spyFQS.capturedAction == .add, "Action should be add.")
     }
     
     @Test("Tapping upNextButton disables the button while persistence operation is performed", .tags(.persistence))
