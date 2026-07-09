@@ -8,7 +8,7 @@
 import Foundation
 import CoreData
 
-final class FilmQueueService {
+final class FilmQueueService: FilmQueueServiceProtocol {
     private let context: NSManagedObjectContext
     private let saver: ContextSaving
     

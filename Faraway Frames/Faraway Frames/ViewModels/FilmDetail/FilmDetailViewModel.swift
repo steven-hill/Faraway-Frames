@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 import CoreData
 
-class FilmDetailViewModel {
+final class FilmDetailViewModel {
     
     // MARK: - State Definition
     enum FilmDetailState: Equatable {
@@ -20,7 +20,7 @@ class FilmDetailViewModel {
     
     // MARK: - Properties
     private let imageLoader: ImageLoader
-    private let filmQueueService: FilmQueueService
+    private let filmQueueService: FilmQueueServiceProtocol
     private(set) var imageLoadTask: Task<Void, Never>?
     private(set) var currentState: FilmDetailState = .noFilmSelected {
         didSet {
@@ -34,7 +34,7 @@ class FilmDetailViewModel {
     // MARK: - Initialisation
     init(film: Film? = nil,
         imageLoader: ImageLoader,
-        filmQueueService: FilmQueueService) {
+        filmQueueService: FilmQueueServiceProtocol) {
         self.imageLoader = imageLoader
         self.filmQueueService = filmQueueService
         if let film {

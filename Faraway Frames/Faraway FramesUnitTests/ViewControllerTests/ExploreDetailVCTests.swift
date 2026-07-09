@@ -352,28 +352,28 @@ struct ExploreDetailVCTests {
                 "Buttons container must be visible when state is `.content`.")
     }
     
-    @Test("Tapping upNextButton invokes the view model with the correct parameters", .tags(.persistence))
-    func exploreDetailVC_upNextButtonTap_callsViewModelUpdateStatus() async {
-        let (sut, spyVM) = makeSUTWithFilmAndSpyVM()
+    @Test("Tapping `upNextButton` invokes the view model's service method with the correct parameters", .tags(.persistence))
+    func exploreDetailVC_upNextButtonTap_viaViewModel_callsServiceUpdateFilmStatus() async {
+        let (sut, spyFQS) = makeSUTWithFilmAndFilmQueueServiceSpy()
         
         sut.upNextButton.sendActions(for: .touchUpInside)
         await Task.yield()
         
-        #expect(spyVM.updateStatusCallCount == 1, "Should have called the method once.")
-        #expect(spyVM.capturedQueue == .upNext, "Should be the upNext queue.")
-        #expect(spyVM.capturedAction == .add, "Action should be add.")
+        #expect(spyFQS.updateFilmStatusCallCount == 1, "Should have called the method once.")
+        #expect(spyFQS.capturedQueue == .upNext, "Should be the upNext queue.")
+        #expect(spyFQS.capturedAction == .add, "Action should be add.")
     }
     
-    @Test("Tapping watchedButton invokes the view model with the correct parameters", .tags(.persistence))
-    func exploreDetailVC_watchedButtonTap_callsViewModelUpdateStatus() async {
-        let (sut, spyVM) = makeSUTWithFilmAndSpyVM()
+    @Test("Tapping `watchedButton` invokes the view model's service method with the correct parameters", .tags(.persistence))
+    func exploreDetailVC_watchedButtonTap_viaViewModel_callsServiceUpdateFilmStatus() async {
+        let (sut, spyFQS) = makeSUTWithFilmAndFilmQueueServiceSpy()
         
         sut.watchedButton.sendActions(for: .touchUpInside)
         await Task.yield()
         
-        #expect(spyVM.updateStatusCallCount == 1, "Should have called the method once.")
-        #expect(spyVM.capturedQueue == .watched, "Should be the watched queue.")
-        #expect(spyVM.capturedAction == .add, "Action should be add.")
+        #expect(spyFQS.updateFilmStatusCallCount == 1, "Should have called the method once.")
+        #expect(spyFQS.capturedQueue == .watched, "Should be the watched queue.")
+        #expect(spyFQS.capturedAction == .add, "Action should be add.")
     }
     
     @Test("Tapping upNextButton disables the button while persistence operation is performed", .tags(.persistence))
@@ -458,33 +458,30 @@ struct ExploreDetailVCTests {
         return sut
     }
     
-    private func makeSUTWithFilmAndSpyVM() -> (vc: ExploreDetailVC, vm: FilmDetailViewModelSpy) {
+    private func makeSUTWithFilmAndFilmQueueServiceSpy() -> (vc: ExploreDetailVC, spyFQS: FilmQueueServiceSpy) {
         let film = Film.sample[0]
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let spyVM = FilmDetailViewModelSpy(
-            film: film,
-            imageLoader: MockImageLoader(),
-            filmQueueService: filmQueueService
-        )
-        let vc = ExploreDetailVC(filmDetailViewModel: spyVM)
-        _ = vc.view
-        return (vc, spyVM)
+        let spyFQS = FilmQueueServiceSpy()
+        let filmDetailViewModel = FilmDetailViewModel(film: film, imageLoader: MockImageLoader(), filmQueueService: spyFQS)
+        let sut = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
+        sut.loadViewIfNeeded()
+        return (sut, spyFQS)
     }
     
-    //MARK: - Film Detail View Model Spy
-    @MainActor
-    private final class FilmDetailViewModelSpy: FilmDetailViewModel {
-        var updateStatusCallCount = 0
+    //MARK: - Film Queue Service Spy
+    private final class FilmQueueServiceSpy: FilmQueueServiceProtocol {
+        var updateFilmStatusCallCount = 0
         var capturedFilm: Film?
         var capturedQueue: FilmQueue?
         var capturedAction: QueueAction?
-
-        override func updateStatus(for film: Film, queue: FilmQueue, action: QueueAction) async {
-            updateStatusCallCount += 1
+        
+        @discardableResult
+        func updateFilmStatus(film: Film, queue: FilmQueue, action: QueueAction) async throws -> Bool {
+            updateFilmStatusCallCount += 1
             capturedFilm = film
             capturedQueue = queue
             capturedAction = action
+            
+            return updateFilmStatusCallCount > 0 ? true : false
         }
     }
     
@@ -497,20 +494,5 @@ struct ExploreDetailVCTests {
             didUpdateFilmCallCount += 1
             capturedFilm = updatedFilm
         }
-    }
-}
-
-//MARK: - Extension on UIView
-private extension UIView {
-    func findView(withIdentifier identifier: String) -> UIView? {
-        if accessibilityIdentifier == identifier {
-            return self
-        }
-        for subview in subviews {
-            if let foundView = subview.findView(withIdentifier: identifier) {
-                return foundView
-            }
-        }
-        return nil
     }
 }
