@@ -13,13 +13,13 @@ final class ExploreSplitViewCoordinator: Coordinator {
     
     typealias Dependencies = FilmsListServicing & ImageLoading & AccessibilityServicing
     private let dependencies: Dependencies
-    private let filmQueueService: FilmQueueService
+    private let filmQueueService: FilmQueueServiceProtocol
     private let filmSyncService: FilmSyncService
     let exploreSplitVC: UISplitViewController
     private(set) var filmDetailViewModel: FilmDetailViewModel
     
     init(dependencies: Dependencies,
-         filmQueueService: FilmQueueService,
+         filmQueueService: FilmQueueServiceProtocol,
          filmSyncService: FilmSyncService,
          exploreSplitVC: UISplitViewController = ExploreSplitVC(style: .doubleColumn)) {
         self.dependencies = dependencies
