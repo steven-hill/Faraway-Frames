@@ -29,6 +29,16 @@ struct HomeVCTests {
         #expect(sut.homeViewModel.delegate != nil, "View model's delegate should be set.")
     }
     
+    @Test("Empty state is displayed when `Up Next` segment is empty.")
+    func homeVC_whenUpNextIsEmpty_displaysUpNextEmptyState() {
+        let sut = makeSUT()
+        
+        sut.loadViewIfNeeded()
+        
+        let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
+        #expect(config != nil, "Should be displaying content unavailable view.")
+    }
+    
     // MARK: - SUT Helper Method
     private func makeSUT() -> HomeVC {
         let testPersistenceController = try! PersistenceController(inMemory: true)

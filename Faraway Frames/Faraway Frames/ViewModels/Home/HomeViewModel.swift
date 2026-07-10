@@ -76,6 +76,10 @@ final class HomeViewModel: NSObject {
         currentState = .failure(homeError)
         delegate?.didReceiveError(homeError)
     }
+    
+    func lookupUpNextFilm(for id: String) -> Film? {
+        return upNextFilms.first { $0.id == id }
+    }
 }
 
 // MARK: - Fetched Results Controller Delegate
