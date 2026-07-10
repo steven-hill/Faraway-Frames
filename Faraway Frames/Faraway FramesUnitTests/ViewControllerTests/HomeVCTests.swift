@@ -8,7 +8,6 @@
 import Testing
 @testable import Faraway_Frames
 import UIKit
-import CoreData
 
 @MainActor
 struct HomeVCTests {

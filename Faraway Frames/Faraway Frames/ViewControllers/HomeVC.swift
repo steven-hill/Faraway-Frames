@@ -75,14 +75,14 @@ final class HomeVC: UIViewController {
         }
     }
     
-    private func updateSnapshot(upNextFilms: [Film], watchedFilms: [Film]) {
+    private func updateSnapshot() {
         var snapshot = NSDiffableDataSourceSnapshot<Section, Film.ID>()
         snapshot.appendSections([.upNext])
-        let upNextFilmsIds = upNextFilms.map({ $0.id })
+        let upNextFilmsIds = homeViewModel.upNextFilms.map({ $0.id })
         snapshot.appendItems(upNextFilmsIds, toSection: .upNext)
         dataSource.apply(snapshot, animatingDifferences: true)
         
-        if upNextFilms.isEmpty {
+        if homeViewModel.upNextFilms.isEmpty {
             showEmptyState(forUpNext: true)
         }
     }
@@ -96,7 +96,7 @@ final class HomeVC: UIViewController {
 // MARK: - Home View Model Delegate
 extension HomeVC: HomeViewModelDelegate {
     func filmsDidChange(_ upNextFilms: [Film], _ watchedFilms: [Film]) {
-        updateSnapshot(upNextFilms: upNextFilms, watchedFilms: watchedFilms)
+        updateSnapshot()
     }
     
     func didReceiveError(_ error: HomeError) {
