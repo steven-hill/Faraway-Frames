@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import CoreData
 
 final class HomeVC: UIViewController {
     // MARK: - Diffable DataSource Section Identifier Type
@@ -101,4 +102,25 @@ extension HomeVC: HomeViewModelDelegate {
     
     func didReceiveError(_ error: HomeError) {
     }
+}
+
+// MARK: - Preview
+#Preview("Home VC") {
+    let testPersistenceController = try! PersistenceController(inMemory: true)
+    let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
+    let mockUpNextFRC = NSFetchedResultsController(
+        fetchRequest: FilmMO.upNextFetchRequest(),
+        managedObjectContext: testPersistenceController.viewContext,
+        sectionNameKeyPath: nil,
+        cacheName: nil
+    )
+    let mockWatchedFRC = NSFetchedResultsController(
+        fetchRequest: FilmMO.watchedFetchRequest(),
+        managedObjectContext: testPersistenceController.viewContext,
+        sectionNameKeyPath: nil,
+        cacheName: nil
+    )
+    let vm = HomeViewModel(upNextFRC: mockUpNextFRC, watchedFRC: mockWatchedFRC, filmQueueService: filmQueueService)
+    let vc = HomeVC(homeViewModel: vm)
+    vc
 }
