@@ -23,16 +23,8 @@ final class HomeViewModel: NSObject {
     private let upNextFRC: NSFetchedResultsController<FilmMO>
     private let watchedFRC: NSFetchedResultsController<FilmMO>
     private let filmQueueService: FilmQueueService
-    
-    private var upNextFilms: [Film] {
-        let managedObjects = upNextFRC.fetchedObjects ?? []
-        return managedObjects.map { Film(from: $0) }
-    }
-    
-    private var watchedFilms: [Film] {
-        let managedObjects = watchedFRC.fetchedObjects ?? []
-        return managedObjects.map { Film(from: $0) }
-    }
+    private(set) var upNextFilms: [Film] = []
+    private(set) var watchedFilms: [Film] = []
     
     // MARK: - Initialisation
     init(
@@ -54,6 +46,7 @@ final class HomeViewModel: NSObject {
             try upNextFRC.performFetch()
             try watchedFRC.performFetch()
             currentState = .fetchedObjects
+            updateFilms()
             delegate?.filmsDidChange(upNextFilms, watchedFilms)
         } catch {
             let reason = PersistenceFailureReason(from: error)
@@ -76,11 +69,25 @@ final class HomeViewModel: NSObject {
         currentState = .failure(homeError)
         delegate?.didReceiveError(homeError)
     }
+    
+    // MARK: - Helper Methods
+    private func updateFilms() {
+        let upNextObjects = upNextFRC.fetchedObjects ?? []
+        self.upNextFilms = upNextObjects.map { Film(from: $0) }
+        
+        let watchedObjects = watchedFRC.fetchedObjects ?? []
+        self.watchedFilms = watchedObjects.map { Film(from: $0) }
+    }
+    
+    func lookupUpNextFilm(for id: String) -> Film? {
+        return upNextFilms.first { $0.id == id }
+    }
 }
 
 // MARK: - Fetched Results Controller Delegate
 extension HomeViewModel: NSFetchedResultsControllerDelegate {
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        updateFilms()
         delegate?.filmsDidChange(upNextFilms, watchedFilms)
     }
 }

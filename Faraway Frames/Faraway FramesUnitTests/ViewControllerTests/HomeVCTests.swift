@@ -8,7 +8,6 @@
 import Testing
 @testable import Faraway_Frames
 import UIKit
-import CoreData
 
 @MainActor
 struct HomeVCTests {
@@ -27,6 +26,28 @@ struct HomeVCTests {
         sut.loadViewIfNeeded()
         
         #expect(sut.homeViewModel.delegate != nil, "View model's delegate should be set.")
+    }
+    
+    @Test("Empty state is displayed when `Up Next` segment is empty.")
+    func homeVC_whenUpNextIsEmpty_displaysUpNextEmptyState() {
+        let sut = makeSUT()
+        
+        sut.loadViewIfNeeded()
+        
+        let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
+        #expect(config != nil, "Should be displaying content unavailable view for Up Next films.")
+    }
+    
+    @Test("Empty state is displayed when `Watched` segment is empty.")
+    func homeVC_whenWatchedIsEmpty_displaysWatchedEmptyState() {
+        let sut = makeSUT()
+        sut.loadViewIfNeeded()
+        
+        sut.segmentedControl.selectedSegmentIndex = 1
+        sut.segmentedControl.sendActions(for: .valueChanged)
+        
+        let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
+        #expect(config != nil, "Should be displaying content unavailable view.")
     }
     
     // MARK: - SUT Helper Method
