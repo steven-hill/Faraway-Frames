@@ -61,7 +61,7 @@ struct HomeVCTests {
         #expect(sut.films.isEmpty, "Should be empty.")
     }
     
-    @Test("Films added to Up Next appear in Up Next segment")
+    @Test("Films added to `Up Next` appear in `Up Next` segment")
     func homeVC_whenFilmWasAddedToUpNext_onInit_displaysInUpNext() throws {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
@@ -87,7 +87,7 @@ struct HomeVCTests {
         #expect(sut.films[0].id == Film.sample[0].id, "Should be the film that was added.")
     }
     
-    @Test("Films added to Watched appear in Watched segment")
+    @Test("Films added to `Watched` appear in `Watched` segment")
     func homeVC_whenFilmWasAddedToWatched_onInit_displaysInWatched() throws {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
