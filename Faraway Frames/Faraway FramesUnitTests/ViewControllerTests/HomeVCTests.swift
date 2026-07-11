@@ -63,20 +63,7 @@ struct HomeVCTests {
     
     @Test("Films added to `Up Next` appear in `Up Next` segment")
     func homeVC_whenFilmWasAddedToUpNext_onInit_displaysInUpNext() throws {
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let context = testPersistenceController.viewContext
-        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
-        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
-        let filmQueueService = FilmQueueService(context: context)
-        let homeVM = HomeViewModel(
-            upNextFRC: mockUpNextFRC,
-            watchedFRC: mockWatchedFRC,
-            filmQueueService: filmQueueService)
-        let sut = HomeVC(homeViewModel: homeVM)
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
+        let (sut, context, entity) = try makeSUTWithContextAndEntity()
         _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
         try context.save()
         sut.loadViewIfNeeded()
@@ -89,20 +76,7 @@ struct HomeVCTests {
     
     @Test("Films added to `Watched` appear in `Watched` segment")
     func homeVC_whenFilmWasAddedToWatched_onInit_displaysInWatched() throws {
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let context = testPersistenceController.viewContext
-        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
-        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
-        let filmQueueService = FilmQueueService(context: context)
-        let homeVM = HomeViewModel(
-            upNextFRC: mockUpNextFRC,
-            watchedFRC: mockWatchedFRC,
-            filmQueueService: filmQueueService)
-        let sut = HomeVC(homeViewModel: homeVM)
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
+        let (sut, context, entity) = try makeSUTWithContextAndEntity()
         _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: false, isWatched: true)
         try context.save()
         
@@ -119,20 +93,7 @@ struct HomeVCTests {
     
     @Test("When segment changes, snapshot swaps sections to show correct films in their respective segments")
     func homeVC_whenUpNextAndWatchedHaveFilms_onInit_displaysFilmsInCorrectSegments() throws {
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let context = testPersistenceController.viewContext
-        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
-        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
-        let filmQueueService = FilmQueueService(context: context)
-        let homeVM = HomeViewModel(
-            upNextFRC: mockUpNextFRC,
-            watchedFRC: mockWatchedFRC,
-            filmQueueService: filmQueueService)
-        let sut = HomeVC(homeViewModel: homeVM)
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
+        let (sut, context, entity) = try makeSUTWithContextAndEntity()
         _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
         _ = PersistenceHelper.makeFilmMO(with: Film.sample[1], entity: entity, context: context, isUpNext: true, isWatched: false)
         _ = PersistenceHelper.makeFilmMO(with: Film.sample[2], entity: entity, context: context, isUpNext: false, isWatched: true)
@@ -156,20 +117,7 @@ struct HomeVCTests {
     
     @Test("When the same film was added to both queues, and segment selection changes, snapshot shows film in both segments")
     func homeVC_whenSameFilmExistsInBothSegments_eachSegmentDisplaysCorrectData() throws {
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let context = testPersistenceController.viewContext
-        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
-        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
-        let filmQueueService = FilmQueueService(context: context)
-        let homeVM = HomeViewModel(
-            upNextFRC: mockUpNextFRC,
-            watchedFRC: mockWatchedFRC,
-            filmQueueService: filmQueueService)
-        let sut = HomeVC(homeViewModel: homeVM)
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
+        let (sut, context, entity) = try makeSUTWithContextAndEntity()
         _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: true)
         try context.save()
         
@@ -192,7 +140,7 @@ struct HomeVCTests {
         #expect(sut.films[0].isWatched == true, "Should be true.")
     }
     
-    // MARK: - SUT Helper Method
+    // MARK: - SUT Helper Methods
     private func makeSUT() -> HomeVC {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
@@ -201,5 +149,25 @@ struct HomeVCTests {
         let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
         let homeViewModel = HomeViewModel(upNextFRC: mockUpNextFRC, watchedFRC: mockWatchedFRC, filmQueueService: filmQueueService)
         return HomeVC(homeViewModel: homeViewModel)
+    }
+    
+    private func makeSUTWithContextAndEntity() throws -> (sut: HomeVC,
+                                                          context: NSManagedObjectContext,
+                                                          entity: NSEntityDescription) {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
+        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
+        let filmQueueService = FilmQueueService(context: context)
+        let homeVM = HomeViewModel(
+            upNextFRC: mockUpNextFRC,
+            watchedFRC: mockWatchedFRC,
+            filmQueueService: filmQueueService)
+        let sut = HomeVC(homeViewModel: homeVM)
+        let entity = try #require(
+            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
+        return (sut, context, entity)
     }
 }
