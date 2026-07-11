@@ -117,6 +117,43 @@ struct HomeVCTests {
         #expect(sut.films[0].id == Film.sample[0].id, "Should be the film that was added.")
     }
     
+    @Test("When segment changes, snapshot swaps sections to show correct films in their respective segments")
+    func homeVC_whenUpNextAndWatchedHaveFilms_onInit_displaysFilmsInCorrectSegments() throws {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
+        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
+        let filmQueueService = FilmQueueService(context: context)
+        let homeVM = HomeViewModel(
+            upNextFRC: mockUpNextFRC,
+            watchedFRC: mockWatchedFRC,
+            filmQueueService: filmQueueService)
+        let sut = HomeVC(homeViewModel: homeVM)
+        let entity = try #require(
+            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
+        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
+        _ = PersistenceHelper.makeFilmMO(with: Film.sample[1], entity: entity, context: context, isUpNext: true, isWatched: false)
+        _ = PersistenceHelper.makeFilmMO(with: Film.sample[2], entity: entity, context: context, isUpNext: false, isWatched: true)
+        try context.save()
+        
+        sut.loadViewIfNeeded()
+        
+        let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
+        #expect(config == nil, "Should be displaying Up Next films, not `contentUnavailableConfiguration`.")
+        #expect(sut.films.count == 2, "Should have two films.")
+        #expect(sut.films[0].id == Film.sample[0].id, "Should be the first film that was added.")
+        #expect(sut.films[1].id == Film.sample[1].id, "Should be the second film that was added.")
+        
+        sut.segmentedControl.selectedSegmentIndex = 1
+        sut.segmentedControl.sendActions(for: .valueChanged)
+        
+        #expect(config == nil, "Should be displaying Watched films, not `contentUnavailableConfiguration`.")
+        #expect(sut.films.count == 1, "Should have one film.")
+        #expect(sut.films[0].id == Film.sample[2].id, "Should be the third film that was added.")
+    }
+    
     // MARK: - SUT Helper Method
     private func makeSUT() -> HomeVC {
         let testPersistenceController = try! PersistenceController(inMemory: true)
