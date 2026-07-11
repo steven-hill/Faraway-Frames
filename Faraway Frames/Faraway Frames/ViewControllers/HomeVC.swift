@@ -92,10 +92,17 @@ final class HomeVC: UIViewController {
     private func configureDataSource() {
         dataSource = UICollectionViewDiffableDataSource<Section, Film.ID>(collectionView: collectionView) { [weak self] collectionView, indexPath, filmID in
             guard let self = self,
+                  let section = Section(rawValue: indexPath.section),
                     let cell = collectionView.dequeueReusableCell(withReuseIdentifier: FilmGridCell.reuseID, for: indexPath) as? FilmGridCell else {
                 fatalError("Unable to dequeue FilmGridCell")
             }
-            let film = homeViewModel.lookupUpNextFilm(for: filmID)
+            let film: Film?
+            switch section {
+            case .upNext:
+                film = self.homeViewModel.lookupUpNextFilm(for: filmID)
+            case .watched:
+                film = self.homeViewModel.lookupWatchedFilm(for: filmID)
+            }
             if let film = film {
                 cell.configure(with: film)
             }

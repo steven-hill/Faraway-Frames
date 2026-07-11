@@ -82,6 +82,10 @@ final class HomeViewModel: NSObject {
     func lookupUpNextFilm(for id: String) -> Film? {
         return upNextFilms.first { $0.id == id }
     }
+    
+    func lookupWatchedFilm(for id: String) -> Film? {
+        return watchedFilms.first { $0.id == id }
+    }
 }
 
 // MARK: - Fetched Results Controller Delegate
