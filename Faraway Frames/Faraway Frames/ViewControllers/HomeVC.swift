@@ -12,12 +12,21 @@ final class HomeVC: UIViewController {
     // MARK: - Diffable DataSource Section Identifier Type
     enum Section: Int, Hashable, Sendable {
         case upNext
+        case watched
     }
     
     // MARK: - Properties
     let homeViewModel: HomeViewModel
     lazy var collectionView = UICollectionView()
     private var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
+    
+    // MARK: - UI Components
+    let segmentedControl: UISegmentedControl = {
+        let control = UISegmentedControl(items: ["Up Next", "Watched"])
+        control.selectedSegmentIndex = 0
+        control.translatesAutoresizingMaskIntoConstraints = false
+        return control
+    }()
     
     // MARK: - Initialisation
     init(homeViewModel: HomeViewModel) {
@@ -35,9 +44,26 @@ final class HomeVC: UIViewController {
         navigationController?.navigationBar.prefersLargeTitles = true
         title = "Home"
         homeViewModel.delegate = self
+        setupSegmentedControl()
         configureCollectionView()
         configureDataSource()
         homeViewModel.performFetches()
+    }
+    
+    private func setupSegmentedControl() {
+        view.addSubview(segmentedControl)
+        segmentedControl.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
+        
+        NSLayoutConstraint.activate([
+            segmentedControl.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
+            segmentedControl.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            segmentedControl.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            segmentedControl.heightAnchor.constraint(equalToConstant: 36)
+        ])
+    }
+    
+    @objc private func segmentChanged() {
+        updateSnapshot()
     }
     
     private func configureCollectionView() {
@@ -49,7 +75,7 @@ final class HomeVC: UIViewController {
         NSLayoutConstraint.activate([
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            collectionView.topAnchor.constraint(equalTo: view.topAnchor),
+            collectionView.topAnchor.constraint(equalTo: segmentedControl.bottomAnchor, constant: 8),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
@@ -78,18 +104,38 @@ final class HomeVC: UIViewController {
     
     private func updateSnapshot() {
         var snapshot = NSDiffableDataSourceSnapshot<Section, Film.ID>()
-        snapshot.appendSections([.upNext])
-        let upNextFilmsIds = homeViewModel.upNextFilms.map({ $0.id })
-        snapshot.appendItems(upNextFilmsIds, toSection: .upNext)
+        let isUpNextSelected = (segmentedControl.selectedSegmentIndex == 0)
+        if isUpNextSelected {
+            snapshot.appendSections([.upNext])
+            let upNextFilmsIds = homeViewModel.upNextFilms.map({ $0.id })
+            snapshot.appendItems(upNextFilmsIds, toSection: .upNext)
+        } else {
+            snapshot.appendSections([.watched])
+            let watchedFilmsIds = homeViewModel.watchedFilms.map({ $0.id })
+            snapshot.appendItems(watchedFilmsIds, toSection: .watched)
+        }
+        
         dataSource.apply(snapshot, animatingDifferences: true)
         
-        if homeViewModel.upNextFilms.isEmpty {
-            showEmptyState(forUpNext: true)
+        let isEmpty = isUpNextSelected ? homeViewModel.upNextFilms.isEmpty : homeViewModel.watchedFilms.isEmpty
+        if isEmpty {
+            showEmptyState(forUpNext: isUpNextSelected)
+        } else {
+            contentUnavailableConfiguration = nil
         }
     }
     
     private func showEmptyState(forUpNext: Bool) {
-        let config = UIContentUnavailableConfiguration.empty()
+        var config = UIContentUnavailableConfiguration.empty()
+        if forUpNext {
+            config.image = SFSymbols.movieClapper
+            config.text = "No Films Added Yet"
+            config.secondaryText = "Films added to Up Next appear here"
+        } else {
+            config.image = SFSymbols.movieClapper
+            config.text = "No Films Added Yet"
+            config.secondaryText = "Films added to Watched appear here"
+        }
         contentUnavailableConfiguration = config
     }
 }
