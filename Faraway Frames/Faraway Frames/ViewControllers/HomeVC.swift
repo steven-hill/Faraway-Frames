@@ -19,6 +19,7 @@ final class HomeVC: UIViewController {
     let homeViewModel: HomeViewModel
     lazy var collectionView = UICollectionView()
     private var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
+    private(set) var films: [Film] = []
     
     // MARK: - UI Components
     let segmentedControl: UISegmentedControl = {
@@ -70,6 +71,7 @@ final class HomeVC: UIViewController {
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.backgroundColor = .systemBackground
+        collectionView.register(FilmGridCell.self, forCellWithReuseIdentifier: FilmGridCell.reuseID)
         view.addSubview(collectionView)
         
         NSLayoutConstraint.activate([
@@ -81,20 +83,34 @@ final class HomeVC: UIViewController {
     }
     
     private func createLayout() -> UICollectionViewLayout {
-        let layout = UICollectionViewCompositionalLayout { (sectionIndex: Int, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? in
-            return nil
-        }
-        return layout
+        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.5), heightDimension: .fractionalHeight(1.0))
+        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+        item.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8)
+        
+        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(260))
+        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
+        
+        let section = NSCollectionLayoutSection(group: group)
+        section.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8)
+        
+        return UICollectionViewCompositionalLayout(section: section)
     }
     
     // MARK: - Data Source Configuration
     private func configureDataSource() {
         dataSource = UICollectionViewDiffableDataSource<Section, Film.ID>(collectionView: collectionView) { [weak self] collectionView, indexPath, filmID in
             guard let self = self,
+                  let section = Section(rawValue: indexPath.section),
                     let cell = collectionView.dequeueReusableCell(withReuseIdentifier: FilmGridCell.reuseID, for: indexPath) as? FilmGridCell else {
                 fatalError("Unable to dequeue FilmGridCell")
             }
-            let film = homeViewModel.lookupUpNextFilm(for: filmID)
+            let film: Film?
+            switch section {
+            case .upNext:
+                film = self.homeViewModel.lookupUpNextFilm(for: filmID)
+            case .watched:
+                film = self.homeViewModel.lookupWatchedFilm(for: filmID)
+            }
             if let film = film {
                 cell.configure(with: film)
             }
@@ -107,7 +123,7 @@ final class HomeVC: UIViewController {
         let activeSection: Section = (segmentedControl.selectedSegmentIndex == 0) ? .upNext : .watched
         snapshot.appendSections([activeSection])
         
-        let films = films(for: activeSection)
+        films = films(for: activeSection)
         snapshot.appendItems(films.map(\.id), toSection: activeSection)
         dataSource.apply(snapshot, animatingDifferences: true)
         

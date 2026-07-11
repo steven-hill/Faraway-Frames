@@ -354,6 +354,34 @@ struct HomeViewModelTests {
         #expect(result == nil, "Result should return nil.")
     }
     
+    @Test("Watched film lookup returns film when it exists in array")
+    func homeViewModel_lookupWatchedFilm_whenFilmExistsInArray_returnsFilm() throws {
+        let (sut, context) = makeSUTWithContext()
+        let entity = try #require(
+            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
+        let targetFilm = Film.sample[0].id
+        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: false, isWatched: true)
+        try context.save()
+        sut.performFetches()
+        
+        let result = sut.lookupWatchedFilm(for: targetFilm)
+        
+        #expect(result != nil, "Result should return a film.")
+    }
+    
+    @Test("Watched film lookup returns nil when film does not exist in array")
+    func homeViewModel_lookupUpWatchedFilm_whenFilmIsNotInArray_returnsNil() throws {
+        let (sut, _) = makeSUTWithContext()
+        let targetFilm = Film.sample[0].id
+        sut.performFetches()
+        
+        let result = sut.lookupWatchedFilm(for: targetFilm)
+        
+        #expect(result == nil, "Result should return nil.")
+    }
+    
     //MARK: - SUT Helper Method
     private func makeSUTWithContext() -> (sut: HomeViewModel, context: NSManagedObjectContext) {
         let testPersistenceController = try! PersistenceController(inMemory: true)

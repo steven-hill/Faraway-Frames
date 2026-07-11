@@ -8,6 +8,7 @@
 import Testing
 @testable import Faraway_Frames
 import UIKit
+import CoreData
 
 @MainActor
 struct HomeVCTests {
@@ -18,6 +19,14 @@ struct HomeVCTests {
         sut.loadViewIfNeeded()
         
         #expect(sut.view != nil, "VC should load the view.")
+    }
+    
+    @Test func homeVC_onInit_filmsArrayIsEmpty() {
+        let sut = makeSUT()
+        
+        sut.loadViewIfNeeded()
+        
+        #expect(sut.films.isEmpty, "Should be empty on init.")
     }
     
     @Test func homeVC_setsViewModelDelegateToSelf() {
@@ -36,6 +45,7 @@ struct HomeVCTests {
         
         let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
         #expect(config != nil, "Should be displaying content unavailable view for Up Next films.")
+        #expect(sut.films.isEmpty, "Should be empty.")
     }
     
     @Test("Empty state is displayed when `Watched` segment is empty.")
@@ -48,9 +58,89 @@ struct HomeVCTests {
         
         let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
         #expect(config != nil, "Should be displaying content unavailable view.")
+        #expect(sut.films.isEmpty, "Should be empty.")
     }
     
-    // MARK: - SUT Helper Method
+    @Test("Films added to `Up Next` appear in `Up Next` segment")
+    func homeVC_whenFilmWasAddedToUpNext_onInit_displaysInUpNext() throws {
+        let (sut, context, entity) = try makeSUTWithContextAndEntity()
+        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
+        try context.save()
+        sut.loadViewIfNeeded()
+        
+        let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
+        #expect(config == nil, "Should be displaying Up Next films, not `contentUnavailableConfiguration`.")
+        #expect(sut.films.count == 1, "Should be one film.")
+        #expect(sut.films[0].id == Film.sample[0].id, "Should be the film that was added.")
+    }
+    
+    @Test("Films added to `Watched` appear in `Watched` segment")
+    func homeVC_whenFilmWasAddedToWatched_onInit_displaysInWatched() throws {
+        let (sut, context, entity) = try makeSUTWithContextAndEntity()
+        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: false, isWatched: true)
+        try context.save()
+        
+        sut.loadViewIfNeeded()
+        
+        sut.segmentedControl.selectedSegmentIndex = 1
+        sut.segmentedControl.sendActions(for: .valueChanged)
+        
+        let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
+        #expect(config == nil, "Should be displaying Watched films, not `contentUnavailableConfiguration`.")
+        #expect(sut.films.count == 1, "Should be one film.")
+        #expect(sut.films[0].id == Film.sample[0].id, "Should be the film that was added.")
+    }
+    
+    @Test("When segment changes, snapshot swaps sections to show correct films in their respective segments")
+    func homeVC_whenUpNextAndWatchedHaveFilms_onInit_displaysFilmsInCorrectSegments() throws {
+        let (sut, context, entity) = try makeSUTWithContextAndEntity()
+        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
+        _ = PersistenceHelper.makeFilmMO(with: Film.sample[1], entity: entity, context: context, isUpNext: true, isWatched: false)
+        _ = PersistenceHelper.makeFilmMO(with: Film.sample[2], entity: entity, context: context, isUpNext: false, isWatched: true)
+        try context.save()
+        
+        sut.loadViewIfNeeded()
+        
+        let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
+        #expect(config == nil, "Should be displaying Up Next films, not `contentUnavailableConfiguration`.")
+        #expect(sut.films.count == 2, "Should have two films.")
+        #expect(sut.films[0].id == Film.sample[0].id, "Should be the first film that was added.")
+        #expect(sut.films[1].id == Film.sample[1].id, "Should be the second film that was added.")
+        
+        sut.segmentedControl.selectedSegmentIndex = 1
+        sut.segmentedControl.sendActions(for: .valueChanged)
+        
+        #expect(config == nil, "Should be displaying Watched films, not `contentUnavailableConfiguration`.")
+        #expect(sut.films.count == 1, "Should have one film.")
+        #expect(sut.films[0].id == Film.sample[2].id, "Should be the third film that was added.")
+    }
+    
+    @Test("When the same film was added to both queues, and segment selection changes, snapshot shows film in both segments")
+    func homeVC_whenSameFilmExistsInBothSegments_eachSegmentDisplaysCorrectData() throws {
+        let (sut, context, entity) = try makeSUTWithContextAndEntity()
+        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: true)
+        try context.save()
+        
+        sut.loadViewIfNeeded()
+        
+        let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
+        #expect(config == nil, "Should be displaying Up Next films, not `contentUnavailableConfiguration`.")
+        #expect(sut.films.count == 1, "Should have one film.")
+        #expect(sut.films[0].id == Film.sample[0].id, "Should be the first film that was added.")
+        #expect(sut.films[0].isUpNext == true, "Should be true.")
+        #expect(sut.films[0].isWatched == true, "Should be true.")
+        
+        sut.segmentedControl.selectedSegmentIndex = 1
+        sut.segmentedControl.sendActions(for: .valueChanged)
+        
+        #expect(config == nil, "Should be displaying Watched films, not `contentUnavailableConfiguration`.")
+        #expect(sut.films.count == 1, "Should have one film.")
+        #expect(sut.films[0].id == Film.sample[0].id, "Should be the third film that was added.")
+        #expect(sut.films[0].isUpNext == true, "Should be true.")
+        #expect(sut.films[0].isWatched == true, "Should be true.")
+    }
+    
+    // MARK: - SUT Helper Methods
     private func makeSUT() -> HomeVC {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
@@ -59,5 +149,25 @@ struct HomeVCTests {
         let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
         let homeViewModel = HomeViewModel(upNextFRC: mockUpNextFRC, watchedFRC: mockWatchedFRC, filmQueueService: filmQueueService)
         return HomeVC(homeViewModel: homeViewModel)
+    }
+    
+    private func makeSUTWithContextAndEntity() throws -> (sut: HomeVC,
+                                                          context: NSManagedObjectContext,
+                                                          entity: NSEntityDescription) {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
+        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
+        let filmQueueService = FilmQueueService(context: context)
+        let homeVM = HomeViewModel(
+            upNextFRC: mockUpNextFRC,
+            watchedFRC: mockWatchedFRC,
+            filmQueueService: filmQueueService)
+        let sut = HomeVC(homeViewModel: homeVM)
+        let entity = try #require(
+            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
+        return (sut, context, entity)
     }
 }
