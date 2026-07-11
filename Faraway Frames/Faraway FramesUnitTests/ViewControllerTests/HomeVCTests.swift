@@ -45,6 +45,7 @@ struct HomeVCTests {
         
         let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
         #expect(config != nil, "Should be displaying content unavailable view for Up Next films.")
+        #expect(sut.films.isEmpty, "Should be empty.")
     }
     
     @Test("Empty state is displayed when `Watched` segment is empty.")
@@ -57,6 +58,7 @@ struct HomeVCTests {
         
         let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
         #expect(config != nil, "Should be displaying content unavailable view.")
+        #expect(sut.films.isEmpty, "Should be empty.")
     }
     
     @Test("Films added to Up Next appear in Up Next segment")
