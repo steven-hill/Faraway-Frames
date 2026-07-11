@@ -21,6 +21,14 @@ struct HomeVCTests {
         #expect(sut.view != nil, "VC should load the view.")
     }
     
+    @Test func homeVC_onInit_filmsArrayIsEmpty() {
+        let sut = makeSUT()
+        
+        sut.loadViewIfNeeded()
+        
+        #expect(sut.films.isEmpty, "Should be empty on init.")
+    }
+    
     @Test func homeVC_setsViewModelDelegateToSelf() {
         let sut = makeSUT()
         
