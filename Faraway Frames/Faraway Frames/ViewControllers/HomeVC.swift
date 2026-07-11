@@ -19,6 +19,7 @@ final class HomeVC: UIViewController {
     let homeViewModel: HomeViewModel
     lazy var collectionView = UICollectionView()
     private var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
+    private(set) var films: [Film] = []
     
     // MARK: - UI Components
     let segmentedControl: UISegmentedControl = {
@@ -107,7 +108,7 @@ final class HomeVC: UIViewController {
         let activeSection: Section = (segmentedControl.selectedSegmentIndex == 0) ? .upNext : .watched
         snapshot.appendSections([activeSection])
         
-        let films = films(for: activeSection)
+        films = films(for: activeSection)
         snapshot.appendItems(films.map(\.id), toSection: activeSection)
         dataSource.apply(snapshot, animatingDifferences: true)
         

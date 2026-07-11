@@ -8,6 +8,7 @@
 import Testing
 @testable import Faraway_Frames
 import UIKit
+import CoreData
 
 @MainActor
 struct HomeVCTests {
@@ -48,6 +49,33 @@ struct HomeVCTests {
         
         let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
         #expect(config != nil, "Should be displaying content unavailable view.")
+    }
+    
+    @Test("Films added to Up Next appear in Up Next segment")
+    func homeVC_whenFilmWasAddedToUpNext_onInit_displaysInUpNext() throws {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
+        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
+        let filmQueueService = FilmQueueService(context: context)
+        let homeVM = HomeViewModel(
+            upNextFRC: mockUpNextFRC,
+            watchedFRC: mockWatchedFRC,
+            filmQueueService: filmQueueService)
+        let sut = HomeVC(homeViewModel: homeVM)
+        let entity = try #require(
+            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
+        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
+        try context.save()
+        
+        sut.loadViewIfNeeded()
+        
+        let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
+        #expect(config == nil, "Should be displaying Up Next films, not `contentUnavailableConfiguration`.")
+        #expect(sut.films.count == 1, "Should be one film.")
+        #expect(sut.films[0].id == Film.sample[0].id, "Should be the film that was added.")
     }
     
     // MARK: - SUT Helper Method
