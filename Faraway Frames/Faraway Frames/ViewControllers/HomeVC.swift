@@ -104,36 +104,35 @@ final class HomeVC: UIViewController {
     
     private func updateSnapshot() {
         var snapshot = NSDiffableDataSourceSnapshot<Section, Film.ID>()
-        let isUpNextSelected = (segmentedControl.selectedSegmentIndex == 0)
-        if isUpNextSelected {
-            snapshot.appendSections([.upNext])
-            let upNextFilmsIds = homeViewModel.upNextFilms.map({ $0.id })
-            snapshot.appendItems(upNextFilmsIds, toSection: .upNext)
-        } else {
-            snapshot.appendSections([.watched])
-            let watchedFilmsIds = homeViewModel.watchedFilms.map({ $0.id })
-            snapshot.appendItems(watchedFilmsIds, toSection: .watched)
-        }
+        let activeSection: Section = (segmentedControl.selectedSegmentIndex == 0) ? .upNext : .watched
+        snapshot.appendSections([activeSection])
         
+        let films = films(for: activeSection)
+        snapshot.appendItems(films.map(\.id), toSection: activeSection)
         dataSource.apply(snapshot, animatingDifferences: true)
         
-        let isEmpty = isUpNextSelected ? homeViewModel.upNextFilms.isEmpty : homeViewModel.watchedFilms.isEmpty
-        if isEmpty {
-            showEmptyState(forUpNext: isUpNextSelected)
+        if films.isEmpty {
+            showEmptyState(for: activeSection)
         } else {
             contentUnavailableConfiguration = nil
         }
     }
     
-    private func showEmptyState(forUpNext: Bool) {
+    private func films(for section: Section) -> [Film] {
+        switch section {
+        case .upNext:  return homeViewModel.upNextFilms
+        case .watched: return homeViewModel.watchedFilms
+        }
+    }
+    
+    private func showEmptyState(for section: Section) {
         var config = UIContentUnavailableConfiguration.empty()
-        if forUpNext {
-            config.image = SFSymbols.movieClapper
-            config.text = "No Films Added Yet"
+        config.image = SFSymbols.movieClapper
+        config.text = "No Films Added Yet"
+        switch section {
+        case .upNext:
             config.secondaryText = "Films added to Up Next appear here"
-        } else {
-            config.image = SFSymbols.movieClapper
-            config.text = "No Films Added Yet"
+        case .watched:
             config.secondaryText = "Films added to Watched appear here"
         }
         contentUnavailableConfiguration = config
