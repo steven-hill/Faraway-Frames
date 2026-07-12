@@ -185,3 +185,26 @@ extension HomeVC: HomeViewModelDelegate {
     let vc = HomeVC(homeViewModel: vm)
     vc
 }
+
+extension HomeVC {
+    enum LayoutMetrics {
+        static let uniformSpacing: CGFloat = 8.0
+        static let halfSpacing: CGFloat = 4.0
+        static let posterAspectRatio: CGFloat = 1.3
+        // Calculate columns by inspecting both width and height environments
+        static func columnCount(horizontal: UIUserInterfaceSizeClass, vertical: UIUserInterfaceSizeClass) -> Int {
+            // If the height is compact (iPhone Landscape), increase columns to shrink the posters
+            if vertical == .compact {
+                return 4
+            }
+            
+            // Otherwise fall back to standard width-based layout constraints
+            switch horizontal {
+            case .compact:  return 2  // iPhone Portrait
+            case .regular:  return 4  // iPad Full Screen
+            case .unspecified: return 2
+            @unknown default: return 2
+            }
+        }
+    }
+}
