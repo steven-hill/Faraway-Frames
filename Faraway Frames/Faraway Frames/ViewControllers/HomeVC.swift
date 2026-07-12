@@ -57,6 +57,16 @@ final class HomeVC: UIViewController {
         }
     }
     
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        coordinator.animate(alongsideTransition: { [weak self] _ in
+            guard let self = self else { return }
+            self.collectionView.collectionViewLayout.invalidateLayout()
+            let freshLayout = self.createLayout(for: size.width)
+            self.collectionView.setCollectionViewLayout(freshLayout, animated: true)
+        })
+    }
+    
     private func setupSegmentedControl() {
         view.addSubview(segmentedControl)
         segmentedControl.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
