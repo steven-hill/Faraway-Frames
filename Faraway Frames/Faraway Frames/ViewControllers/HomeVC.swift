@@ -84,7 +84,7 @@ final class HomeVC: UIViewController {
     }
     
     private func configureCollectionView() {
-        collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
+        collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout(for: view.bounds.width))
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.backgroundColor = .systemBackground
         collectionView.register(FilmGridCell.self, forCellWithReuseIdentifier: FilmGridCell.reuseID)
