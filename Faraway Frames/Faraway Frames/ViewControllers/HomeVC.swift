@@ -49,26 +49,26 @@ final class HomeVC: UIViewController {
         configureCollectionView()
         configureDataSource()
         homeViewModel.performFetches()
+        registerForTraitChanges([UITraitHorizontalSizeClass.self, UITraitVerticalSizeClass.self]) { [weak self] (vc: Self, previousTraitCollection: UITraitCollection) in
+            guard let self = self else { return }
+            self.collectionView.collectionViewLayout.invalidateLayout()
+            let freshLayout = self.createLayout(for: self.view.bounds.width)
+            self.collectionView.setCollectionViewLayout(freshLayout, animated: true)
+        }
     }
     
-    private func setupSegmentedControl() {
-        view.addSubview(segmentedControl)
-        segmentedControl.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
-        
-        NSLayoutConstraint.activate([
-            segmentedControl.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
-            segmentedControl.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            segmentedControl.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            segmentedControl.heightAnchor.constraint(equalToConstant: 36)
-        ])
-    }
-    
-    @objc private func segmentChanged() {
-        updateSnapshot()
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        coordinator.animate(alongsideTransition: { [weak self] _ in
+            guard let self = self else { return }
+            self.collectionView.collectionViewLayout.invalidateLayout()
+            let freshLayout = self.createLayout(for: size.width)
+            self.collectionView.setCollectionViewLayout(freshLayout, animated: true)
+        })
     }
     
     private func configureCollectionView() {
-        collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
+        collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout(for: view.bounds.width))
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.backgroundColor = .systemBackground
         collectionView.register(FilmGridCell.self, forCellWithReuseIdentifier: FilmGridCell.reuseID)
@@ -82,16 +82,50 @@ final class HomeVC: UIViewController {
         ])
     }
     
-    private func createLayout() -> UICollectionViewLayout {
-        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.5), heightDimension: .fractionalHeight(1.0))
-        let item = NSCollectionLayoutItem(layoutSize: itemSize)
-        item.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8)
+    private func createLayout(for width: CGFloat) -> UICollectionViewLayout {
+        let hSizeClass = traitCollection.horizontalSizeClass
+        let vSizeClass = traitCollection.verticalSizeClass
         
-        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(260))
+        // Fetch the appropriate column split count
+        let numberOfColumns = LayoutMetrics.columnCount(horizontal: hSizeClass, vertical: vSizeClass)
+        let itemFraction = 1.0 / CGFloat(numberOfColumns)
+        
+        // Lower the baseline estimate for compact vertical size classes
+        let baselineEstimate: CGFloat = (vSizeClass == .compact) ? 140.0 : 180.0
+        
+        let itemSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(itemFraction),
+            heightDimension: .estimated(baselineEstimate)
+        )
+        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+        
+        item.contentInsets = NSDirectionalEdgeInsets(
+            top: 0,
+            leading: LayoutMetrics.uniformSpacing,
+            bottom: 0,
+            trailing: LayoutMetrics.uniformSpacing
+        )
+        
+        item.edgeSpacing = NSCollectionLayoutEdgeSpacing(
+            leading: nil,
+            top: .fixed(LayoutMetrics.halfSpacing),
+            trailing: nil,
+            bottom: .fixed(LayoutMetrics.halfSpacing)
+        )
+        
+        let groupSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .estimated(baselineEstimate)
+        )
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
         
         let section = NSCollectionLayoutSection(group: group)
-        section.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8)
+        section.contentInsets = NSDirectionalEdgeInsets(
+            top: LayoutMetrics.halfSpacing,
+            leading: LayoutMetrics.uniformSpacing,
+            bottom: LayoutMetrics.uniformSpacing,
+            trailing: LayoutMetrics.uniformSpacing
+        )
         
         return UICollectionViewCompositionalLayout(section: section)
     }
@@ -153,6 +187,23 @@ final class HomeVC: UIViewController {
         }
         contentUnavailableConfiguration = config
     }
+    
+    // MARK: - UI Component Setup
+    private func setupSegmentedControl() {
+        view.addSubview(segmentedControl)
+        segmentedControl.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
+        
+        NSLayoutConstraint.activate([
+            segmentedControl.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
+            segmentedControl.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            segmentedControl.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            segmentedControl.heightAnchor.constraint(equalToConstant: 36)
+        ])
+    }
+    
+    @objc private func segmentChanged() {
+        updateSnapshot()
+    }
 }
 
 // MARK: - Home View Model Delegate
@@ -162,6 +213,31 @@ extension HomeVC: HomeViewModelDelegate {
     }
     
     func didReceiveError(_ error: HomeError) {
+    }
+}
+
+// MARK: - Layout Metrics Extension
+/// Provides spacing and poster aspect ratio constants, and column count calculation based on size classes for collection view layout.
+extension HomeVC {
+    enum LayoutMetrics {
+        static let uniformSpacing: CGFloat = 8.0
+        static let halfSpacing: CGFloat = 4.0
+        static let posterAspectRatio: CGFloat = 1.3
+        // Calculate columns by inspecting both width and height environments
+        static func columnCount(horizontal: UIUserInterfaceSizeClass, vertical: UIUserInterfaceSizeClass) -> Int {
+            // If the height is compact (iPhone Landscape), increase columns to shrink the posters
+            if vertical == .compact {
+                return 4
+            }
+            
+            // Otherwise fall back to standard width-based layout constraints
+            switch horizontal {
+            case .compact:  return 2  // iPhone Portrait
+            case .regular:  return 4  // iPad Full Screen
+            case .unspecified: return 2
+            @unknown default: return 2
+            }
+        }
     }
 }
 
