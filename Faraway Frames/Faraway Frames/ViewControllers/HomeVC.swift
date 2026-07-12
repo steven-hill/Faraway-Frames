@@ -49,6 +49,12 @@ final class HomeVC: UIViewController {
         configureCollectionView()
         configureDataSource()
         homeViewModel.performFetches()
+        registerForTraitChanges([UITraitHorizontalSizeClass.self, UITraitVerticalSizeClass.self]) { [weak self] (vc: Self, previousTraitCollection: UITraitCollection) in
+            guard let self = self else { return }
+            self.collectionView.collectionViewLayout.invalidateLayout()
+            let freshLayout = self.createLayout(for: self.view.bounds.width)
+            self.collectionView.setCollectionViewLayout(freshLayout, animated: true)
+        }
     }
     
     private func setupSegmentedControl() {
