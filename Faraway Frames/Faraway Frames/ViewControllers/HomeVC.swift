@@ -98,16 +98,50 @@ final class HomeVC: UIViewController {
         ])
     }
     
-    private func createLayout() -> UICollectionViewLayout {
-        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.5), heightDimension: .fractionalHeight(1.0))
-        let item = NSCollectionLayoutItem(layoutSize: itemSize)
-        item.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8)
+    private func createLayout(for width: CGFloat) -> UICollectionViewLayout {
+        let hSizeClass = traitCollection.horizontalSizeClass
+        let vSizeClass = traitCollection.verticalSizeClass
         
-        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(260))
+        // Fetch the appropriate column split count
+        let numberOfColumns = LayoutMetrics.columnCount(horizontal: hSizeClass, vertical: vSizeClass)
+        let itemFraction = 1.0 / CGFloat(numberOfColumns)
+        
+        // Lower the baseline estimate for compact vertical size classes
+        let baselineEstimate: CGFloat = (vSizeClass == .compact) ? 140.0 : 180.0
+        
+        let itemSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(itemFraction),
+            heightDimension: .estimated(baselineEstimate)
+        )
+        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+        
+        item.contentInsets = NSDirectionalEdgeInsets(
+            top: 0,
+            leading: LayoutMetrics.uniformSpacing,
+            bottom: 0,
+            trailing: LayoutMetrics.uniformSpacing
+        )
+        
+        item.edgeSpacing = NSCollectionLayoutEdgeSpacing(
+            leading: nil,
+            top: .fixed(LayoutMetrics.halfSpacing),
+            trailing: nil,
+            bottom: .fixed(LayoutMetrics.halfSpacing)
+        )
+        
+        let groupSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .estimated(baselineEstimate)
+        )
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
         
         let section = NSCollectionLayoutSection(group: group)
-        section.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8)
+        section.contentInsets = NSDirectionalEdgeInsets(
+            top: LayoutMetrics.halfSpacing,
+            leading: LayoutMetrics.uniformSpacing,
+            bottom: LayoutMetrics.uniformSpacing,
+            trailing: LayoutMetrics.uniformSpacing
+        )
         
         return UICollectionViewCompositionalLayout(section: section)
     }
