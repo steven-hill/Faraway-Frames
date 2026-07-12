@@ -67,22 +67,6 @@ final class HomeVC: UIViewController {
         })
     }
     
-    private func setupSegmentedControl() {
-        view.addSubview(segmentedControl)
-        segmentedControl.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
-        
-        NSLayoutConstraint.activate([
-            segmentedControl.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
-            segmentedControl.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            segmentedControl.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            segmentedControl.heightAnchor.constraint(equalToConstant: 36)
-        ])
-    }
-    
-    @objc private func segmentChanged() {
-        updateSnapshot()
-    }
-    
     private func configureCollectionView() {
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout(for: view.bounds.width))
         collectionView.translatesAutoresizingMaskIntoConstraints = false
@@ -203,6 +187,23 @@ final class HomeVC: UIViewController {
         }
         contentUnavailableConfiguration = config
     }
+    
+    // MARK: - UI Component Setup
+    private func setupSegmentedControl() {
+        view.addSubview(segmentedControl)
+        segmentedControl.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
+        
+        NSLayoutConstraint.activate([
+            segmentedControl.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
+            segmentedControl.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            segmentedControl.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            segmentedControl.heightAnchor.constraint(equalToConstant: 36)
+        ])
+    }
+    
+    @objc private func segmentChanged() {
+        updateSnapshot()
+    }
 }
 
 // MARK: - Home View Model Delegate
@@ -212,6 +213,31 @@ extension HomeVC: HomeViewModelDelegate {
     }
     
     func didReceiveError(_ error: HomeError) {
+    }
+}
+
+// MARK: - Layout Metrics Extension
+/// Provides spacing and poster aspect ratio constants, and column count calculation based on size classes for collection view layout.
+extension HomeVC {
+    enum LayoutMetrics {
+        static let uniformSpacing: CGFloat = 8.0
+        static let halfSpacing: CGFloat = 4.0
+        static let posterAspectRatio: CGFloat = 1.3
+        // Calculate columns by inspecting both width and height environments
+        static func columnCount(horizontal: UIUserInterfaceSizeClass, vertical: UIUserInterfaceSizeClass) -> Int {
+            // If the height is compact (iPhone Landscape), increase columns to shrink the posters
+            if vertical == .compact {
+                return 4
+            }
+            
+            // Otherwise fall back to standard width-based layout constraints
+            switch horizontal {
+            case .compact:  return 2  // iPhone Portrait
+            case .regular:  return 4  // iPad Full Screen
+            case .unspecified: return 2
+            @unknown default: return 2
+            }
+        }
     }
 }
 
@@ -234,27 +260,4 @@ extension HomeVC: HomeViewModelDelegate {
     let vm = HomeViewModel(upNextFRC: mockUpNextFRC, watchedFRC: mockWatchedFRC, filmQueueService: filmQueueService)
     let vc = HomeVC(homeViewModel: vm)
     vc
-}
-
-extension HomeVC {
-    enum LayoutMetrics {
-        static let uniformSpacing: CGFloat = 8.0
-        static let halfSpacing: CGFloat = 4.0
-        static let posterAspectRatio: CGFloat = 1.3
-        // Calculate columns by inspecting both width and height environments
-        static func columnCount(horizontal: UIUserInterfaceSizeClass, vertical: UIUserInterfaceSizeClass) -> Int {
-            // If the height is compact (iPhone Landscape), increase columns to shrink the posters
-            if vertical == .compact {
-                return 4
-            }
-            
-            // Otherwise fall back to standard width-based layout constraints
-            switch horizontal {
-            case .compact:  return 2  // iPhone Portrait
-            case .regular:  return 4  // iPad Full Screen
-            case .unspecified: return 2
-            @unknown default: return 2
-            }
-        }
-    }
 }
