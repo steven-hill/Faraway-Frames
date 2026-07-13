@@ -37,6 +37,21 @@ struct HomeVCTests {
         #expect(sut.homeViewModel.delegate != nil, "View model's delegate should be set.")
     }
     
+    @Test("Datasource returns a `FilmGridCell`")
+    func homeVC_dataSource_returnsACell() throws {
+        let (sut, context, entity) = try makeSUTWithContextAndEntity()
+        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
+        try context.save()
+        sut.loadViewIfNeeded()
+        let indexPath = IndexPath(item: 0, section: 0)
+        
+        let cell = sut.collectionView.dataSource?.collectionView(sut.collectionView, cellForItemAt: indexPath) as? FilmGridCell
+        let itemCount = sut.collectionView.numberOfItems(inSection: 0)
+        
+        #expect(cell != nil, "Should successfully return a `FilmGridCell`.")
+        #expect(itemCount == 1, "Should be 1 item in the collection view.")
+    }
+    
     @Test("Empty state is displayed when `Up Next` segment is empty.")
     func homeVC_whenUpNextIsEmpty_displaysUpNextEmptyState() {
         let sut = makeSUT()

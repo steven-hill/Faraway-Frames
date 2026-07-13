@@ -138,7 +138,7 @@ final class HomeVC: UIViewController {
             guard let self = self,
                   let section = Section(rawValue: indexPath.section),
                     let cell = collectionView.dequeueReusableCell(withReuseIdentifier: FilmGridCell.reuseID, for: indexPath) as? FilmGridCell else {
-                fatalError("Unable to dequeue FilmGridCell")
+                return UICollectionViewCell()
             }
             let film: Film?
             switch section {
