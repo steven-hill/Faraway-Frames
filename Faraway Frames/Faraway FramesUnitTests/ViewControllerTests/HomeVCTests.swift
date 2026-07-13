@@ -52,6 +52,19 @@ struct HomeVCTests {
         #expect(itemCount == 1, "Should be 1 item in the collection view.")
     }
     
+    @Test("Supplementary View Provider dequeues the segmented control header type")
+    func homeVC_collectionView_hasSegmentedControlAsHeaderView() {
+        let sut = makeSUT()
+        sut.loadViewIfNeeded()
+        let indexPath = IndexPath(item: 0, section: 0)
+        
+        let kind = UICollectionView.elementKindSectionHeader
+        let header = sut.collectionView.supplementaryView(forElementKind: kind, at: indexPath)
+                
+        #expect(header != nil, "Should not be nil.")
+        #expect(header is SegmentedControlHeaderView, "Should be the custom header view.")
+    }
+
     @Test("Empty state is displayed when `Up Next` segment is empty.")
     func homeVC_whenUpNextIsEmpty_displaysUpNextEmptyState() {
         let sut = makeSUT()
