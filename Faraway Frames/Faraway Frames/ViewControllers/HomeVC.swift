@@ -51,9 +51,7 @@ final class HomeVC: UIViewController {
         homeViewModel.performFetches()
         registerForTraitChanges([UITraitHorizontalSizeClass.self, UITraitVerticalSizeClass.self]) { [weak self] (vc: Self, previousTraitCollection: UITraitCollection) in
             guard let self = self else { return }
-            self.collectionView.collectionViewLayout.invalidateLayout()
-            let freshLayout = self.createLayout(for: self.view.bounds.width)
-            self.collectionView.setCollectionViewLayout(freshLayout, animated: true)
+            self.transitionLayout(toWidth: self.view.bounds.width)
         }
     }
     
@@ -61,10 +59,14 @@ final class HomeVC: UIViewController {
         super.viewWillTransition(to: size, with: coordinator)
         coordinator.animate(alongsideTransition: { [weak self] _ in
             guard let self = self else { return }
-            self.collectionView.collectionViewLayout.invalidateLayout()
-            let freshLayout = self.createLayout(for: size.width)
-            self.collectionView.setCollectionViewLayout(freshLayout, animated: true)
+            self.transitionLayout(toWidth: size.width)
         })
+    }
+    
+    func transitionLayout(toWidth width: CGFloat) {
+        collectionView.collectionViewLayout.invalidateLayout()
+        let freshLayout = createLayout(for: width)
+        collectionView.setCollectionViewLayout(freshLayout, animated: true)
     }
     
     private func configureCollectionView() {
