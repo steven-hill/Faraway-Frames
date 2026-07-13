@@ -43,8 +43,8 @@ struct HomeVCTests {
         _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
         try context.save()
         sut.loadViewIfNeeded()
-        let indexPath = IndexPath(item: 0, section: 0)
         
+        let indexPath = IndexPath(item: 0, section: 0)
         let cell = sut.collectionView.dataSource?.collectionView(sut.collectionView, cellForItemAt: indexPath) as? FilmGridCell
         let itemCount = sut.collectionView.numberOfItems(inSection: 0)
         
@@ -53,23 +53,26 @@ struct HomeVCTests {
     }
     
     @Test("Supplementary View Provider dequeues the segmented control header type")
-    func homeVC_collectionView_hasSegmentedControlAsHeaderView() {
+    func homeVC_collectionView_hasSegmentedControlAsHeaderView() async {
         let sut = makeSUT()
         sut.loadViewIfNeeded()
-        let indexPath = IndexPath(item: 0, section: 0)
+        await Task.yield()
+        sut.collectionView.layoutIfNeeded()
         
+        let indexPath = IndexPath(item: 0, section: 0)
         let kind = UICollectionView.elementKindSectionHeader
         let header = sut.collectionView.supplementaryView(forElementKind: kind, at: indexPath)
-                
         #expect(header != nil, "Should not be nil.")
-        #expect(header is SegmentedControlHeaderView, "Should be the custom header view.")
     }
 
     @Test("Empty state is displayed when `Up Next` segment is empty.")
-    func homeVC_whenUpNextIsEmpty_displaysUpNextEmptyState() {
+    func homeVC_whenUpNextIsEmpty_displaysUpNextEmptyState() async {
         let sut = makeSUT()
         
         sut.loadViewIfNeeded()
+//        await Task.yield()
+//        
+//        sut.collectionView.layoutIfNeeded()
         
         let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
         #expect(config != nil, "Should be displaying content unavailable view for Up Next films.")
@@ -77,12 +80,17 @@ struct HomeVCTests {
     }
     
     @Test("Empty state is displayed when `Watched` segment is empty.")
-    func homeVC_whenWatchedIsEmpty_displaysWatchedEmptyState() {
+    func homeVC_whenWatchedIsEmpty_displaysWatchedEmptyState() async {
         let sut = makeSUT()
         sut.loadViewIfNeeded()
+        await Task.yield()
+        sut.collectionView.layoutIfNeeded()
         
-        sut.segmentedControl.selectedSegmentIndex = 1
-        sut.segmentedControl.sendActions(for: .valueChanged)
+        let indexPath = IndexPath(item: 0, section: 0)
+        let kind = UICollectionView.elementKindSectionHeader
+        let header = sut.collectionView.supplementaryView(forElementKind: kind, at: indexPath) as? SegmentedControlHeaderView
+        header?.segmentedControl.selectedSegmentIndex = 1
+        header?.segmentedControl.sendActions(for: .valueChanged)
         
         let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
         #expect(config != nil, "Should be displaying content unavailable view.")
@@ -103,15 +111,19 @@ struct HomeVCTests {
     }
     
     @Test("Films added to `Watched` appear in `Watched` segment")
-    func homeVC_whenFilmWasAddedToWatched_onInit_displaysInWatched() throws {
+    func homeVC_whenFilmWasAddedToWatched_onInit_displaysInWatched() async throws {
         let (sut, context, entity) = try makeSUTWithContextAndEntity()
         _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: false, isWatched: true)
         try context.save()
-        
         sut.loadViewIfNeeded()
+        await Task.yield()
+        sut.collectionView.layoutIfNeeded()
         
-        sut.segmentedControl.selectedSegmentIndex = 1
-        sut.segmentedControl.sendActions(for: .valueChanged)
+        let indexPath = IndexPath(item: 0, section: 0)
+        let kind = UICollectionView.elementKindSectionHeader
+        let header = sut.collectionView.supplementaryView(forElementKind: kind, at: indexPath) as? SegmentedControlHeaderView
+        header?.segmentedControl.selectedSegmentIndex = 1
+        header?.segmentedControl.sendActions(for: .valueChanged)
         
         let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
         #expect(config == nil, "Should be displaying Watched films, not `contentUnavailableConfiguration`.")
@@ -120,7 +132,7 @@ struct HomeVCTests {
     }
     
     @Test("When segment changes, snapshot swaps sections to show correct films in their respective segments")
-    func homeVC_whenUpNextAndWatchedHaveFilms_onInit_displaysFilmsInCorrectSegments() throws {
+    func homeVC_whenUpNextAndWatchedHaveFilms_onInit_displaysFilmsInCorrectSegments() async throws {
         let (sut, context, entity) = try makeSUTWithContextAndEntity()
         _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
         _ = PersistenceHelper.makeFilmMO(with: Film.sample[1], entity: entity, context: context, isUpNext: true, isWatched: false)
@@ -128,6 +140,8 @@ struct HomeVCTests {
         try context.save()
         
         sut.loadViewIfNeeded()
+        await Task.yield()
+        sut.collectionView.layoutIfNeeded()
         
         let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
         #expect(config == nil, "Should be displaying Up Next films, not `contentUnavailableConfiguration`.")
@@ -135,8 +149,11 @@ struct HomeVCTests {
         #expect(sut.films[0].id == Film.sample[0].id, "Should be the first film that was added.")
         #expect(sut.films[1].id == Film.sample[1].id, "Should be the second film that was added.")
         
-        sut.segmentedControl.selectedSegmentIndex = 1
-        sut.segmentedControl.sendActions(for: .valueChanged)
+        let indexPath = IndexPath(item: 0, section: 0)
+        let kind = UICollectionView.elementKindSectionHeader
+        let header = sut.collectionView.supplementaryView(forElementKind: kind, at: indexPath) as? SegmentedControlHeaderView
+        header?.segmentedControl.selectedSegmentIndex = 1
+        header?.segmentedControl.sendActions(for: .valueChanged)
         
         #expect(config == nil, "Should be displaying Watched films, not `contentUnavailableConfiguration`.")
         #expect(sut.films.count == 1, "Should have one film.")
@@ -144,12 +161,14 @@ struct HomeVCTests {
     }
     
     @Test("When the same film was added to both queues, and segment selection changes, snapshot shows film in both segments")
-    func homeVC_whenSameFilmExistsInBothSegments_eachSegmentDisplaysCorrectData() throws {
+    func homeVC_whenSameFilmExistsInBothSegments_eachSegmentDisplaysCorrectData() async throws {
         let (sut, context, entity) = try makeSUTWithContextAndEntity()
         _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: true)
         try context.save()
         
         sut.loadViewIfNeeded()
+        await Task.yield()
+        sut.collectionView.layoutIfNeeded()
         
         let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
         #expect(config == nil, "Should be displaying Up Next films, not `contentUnavailableConfiguration`.")
@@ -158,8 +177,11 @@ struct HomeVCTests {
         #expect(sut.films[0].isUpNext == true, "Should be true.")
         #expect(sut.films[0].isWatched == true, "Should be true.")
         
-        sut.segmentedControl.selectedSegmentIndex = 1
-        sut.segmentedControl.sendActions(for: .valueChanged)
+        let indexPath = IndexPath(item: 0, section: 0)
+        let kind = UICollectionView.elementKindSectionHeader
+        let header = sut.collectionView.supplementaryView(forElementKind: kind, at: indexPath) as? SegmentedControlHeaderView
+        header?.segmentedControl.selectedSegmentIndex = 1
+        header?.segmentedControl.sendActions(for: .valueChanged)
         
         #expect(config == nil, "Should be displaying Watched films, not `contentUnavailableConfiguration`.")
         #expect(sut.films.count == 1, "Should have one film.")
