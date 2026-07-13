@@ -51,9 +51,7 @@ final class HomeVC: UIViewController {
         homeViewModel.performFetches()
         registerForTraitChanges([UITraitHorizontalSizeClass.self, UITraitVerticalSizeClass.self]) { [weak self] (vc: Self, previousTraitCollection: UITraitCollection) in
             guard let self = self else { return }
-            self.collectionView.collectionViewLayout.invalidateLayout()
-            let freshLayout = self.createLayout(for: self.view.bounds.width)
-            self.collectionView.setCollectionViewLayout(freshLayout, animated: true)
+            self.transitionLayout(toWidth: self.view.bounds.width)
         }
     }
     
@@ -61,10 +59,14 @@ final class HomeVC: UIViewController {
         super.viewWillTransition(to: size, with: coordinator)
         coordinator.animate(alongsideTransition: { [weak self] _ in
             guard let self = self else { return }
-            self.collectionView.collectionViewLayout.invalidateLayout()
-            let freshLayout = self.createLayout(for: size.width)
-            self.collectionView.setCollectionViewLayout(freshLayout, animated: true)
+            self.transitionLayout(toWidth: size.width)
         })
+    }
+    
+    func transitionLayout(toWidth width: CGFloat) {
+        collectionView.collectionViewLayout.invalidateLayout()
+        let freshLayout = createLayout(for: width)
+        collectionView.setCollectionViewLayout(freshLayout, animated: true)
     }
     
     private func configureCollectionView() {
@@ -136,7 +138,7 @@ final class HomeVC: UIViewController {
             guard let self = self,
                   let section = Section(rawValue: indexPath.section),
                     let cell = collectionView.dequeueReusableCell(withReuseIdentifier: FilmGridCell.reuseID, for: indexPath) as? FilmGridCell else {
-                fatalError("Unable to dequeue FilmGridCell")
+                return UICollectionViewCell()
             }
             let film: Film?
             switch section {
@@ -225,15 +227,15 @@ extension HomeVC {
         static let posterAspectRatio: CGFloat = 1.3
         // Calculate columns by inspecting both width and height environments
         static func columnCount(horizontal: UIUserInterfaceSizeClass, vertical: UIUserInterfaceSizeClass) -> Int {
-            // If the height is compact (iPhone Landscape), increase columns to shrink the posters
+            // If the height is compact (iPhone Landscape), increase columns to shrink the posters.
             if vertical == .compact {
                 return 4
             }
             
-            // Otherwise fall back to standard width-based layout constraints
+            // Otherwise fall back to standard width-based layout constraints.
             switch horizontal {
-            case .compact:  return 2  // iPhone Portrait
-            case .regular:  return 4  // iPad Full Screen
+            case .compact:  return 2
+            case .regular:  return 4
             case .unspecified: return 2
             @unknown default: return 2
             }

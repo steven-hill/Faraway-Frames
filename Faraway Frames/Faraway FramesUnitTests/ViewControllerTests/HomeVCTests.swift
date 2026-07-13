@@ -37,6 +37,21 @@ struct HomeVCTests {
         #expect(sut.homeViewModel.delegate != nil, "View model's delegate should be set.")
     }
     
+    @Test("Datasource returns a `FilmGridCell`")
+    func homeVC_dataSource_returnsACell() throws {
+        let (sut, context, entity) = try makeSUTWithContextAndEntity()
+        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
+        try context.save()
+        sut.loadViewIfNeeded()
+        let indexPath = IndexPath(item: 0, section: 0)
+        
+        let cell = sut.collectionView.dataSource?.collectionView(sut.collectionView, cellForItemAt: indexPath) as? FilmGridCell
+        let itemCount = sut.collectionView.numberOfItems(inSection: 0)
+        
+        #expect(cell != nil, "Should successfully return a `FilmGridCell`.")
+        #expect(itemCount == 1, "Should be 1 item in the collection view.")
+    }
+    
     @Test("Empty state is displayed when `Up Next` segment is empty.")
     func homeVC_whenUpNextIsEmpty_displaysUpNextEmptyState() {
         let sut = makeSUT()
@@ -138,6 +153,34 @@ struct HomeVCTests {
         #expect(sut.films[0].id == Film.sample[0].id, "Should be the third film that was added.")
         #expect(sut.films[0].isUpNext == true, "Should be true.")
         #expect(sut.films[0].isWatched == true, "Should be true.")
+    }
+    
+    @Test("Collection view updates layout when device is rotated to landscape.")
+    func homeVC_transitionLayout_recreatesCompositionalLayoutWithNewWidth() {
+        let sut = makeSUT()
+        sut.loadViewIfNeeded()
+        let initialLayout = sut.collectionView.collectionViewLayout
+        
+        sut.transitionLayout(toWidth: 852)
+        
+        let updatedLayout = sut.collectionView.collectionViewLayout
+        
+        #expect(updatedLayout !== initialLayout, "Should instantiate a fresh layout object on size shifts.")
+    }
+    
+    @Test("`LayoutMetrics` calculates number of columns for different size classes correctly")
+    func homeVC_layoutMetricsColumnCount_returnsCorrectNumberOfColumns() {
+        let iPhonePortraitNumberOfColumns = HomeVC.LayoutMetrics.columnCount(horizontal: .compact, vertical: .regular)
+        #expect(iPhonePortraitNumberOfColumns == 2)
+            
+        let iPhoneLandscapeNumberOfColumns = HomeVC.LayoutMetrics.columnCount(horizontal: .compact, vertical: .compact)
+        #expect(iPhoneLandscapeNumberOfColumns == 4)
+
+        let iPadFullScreenNumberOfColumns = HomeVC.LayoutMetrics.columnCount(horizontal: .regular, vertical: .regular)
+        #expect(iPadFullScreenNumberOfColumns == 4)
+        
+        let iPadSplitViewNumberOfColumns = HomeVC.LayoutMetrics.columnCount(horizontal: .compact, vertical: .regular)
+        #expect(iPadSplitViewNumberOfColumns == 2)
     }
     
     // MARK: - SUT Helper Methods
