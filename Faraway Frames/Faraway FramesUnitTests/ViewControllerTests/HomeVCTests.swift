@@ -140,6 +140,21 @@ struct HomeVCTests {
         #expect(sut.films[0].isWatched == true, "Should be true.")
     }
     
+    @Test("`LayoutMetrics` calculates number of columns for different size classes correctly")
+    func homeVC_layoutMetricsColumnCount_returnsCorrectNumberOfColumns() {
+        let iPhonePortraitNumberOfColumns = HomeVC.LayoutMetrics.columnCount(horizontal: .compact, vertical: .regular)
+        #expect(iPhonePortraitNumberOfColumns == 2)
+            
+        let iPhoneLandscapeNumberOfColumns = HomeVC.LayoutMetrics.columnCount(horizontal: .compact, vertical: .compact)
+        #expect(iPhoneLandscapeNumberOfColumns == 4)
+
+        let iPadFullScreenNumberOfColumns = HomeVC.LayoutMetrics.columnCount(horizontal: .regular, vertical: .regular)
+        #expect(iPadFullScreenNumberOfColumns == 4)
+        
+        let iPadSplitViewNumberOfColumns = HomeVC.LayoutMetrics.columnCount(horizontal: .compact, vertical: .regular)
+        #expect(iPadSplitViewNumberOfColumns == 2)
+    }
+    
     // MARK: - SUT Helper Methods
     private func makeSUT() -> HomeVC {
         let testPersistenceController = try! PersistenceController(inMemory: true)
