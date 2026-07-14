@@ -7,6 +7,7 @@
 - Explore all Studio Ghibli films
 - Search for films by title
 - View details about each film
+- Add a film to 'Up Next' and/or 'Watched' queues, which are displayed on the 'Home' tab.
 - Supports portrait and landscape on iPhone and iPad
 
 ### Targets
@@ -24,6 +25,7 @@
   - async/await with `URLSession` for network requests.
   - `NSCache` and `URLCache` for caching of network responses.
   - save data from API to `FileManager` to aid offline support, and provide local data in case of any network error.
+- Persistence layer uses `CoreData` with `NSFetchedResultsController`, allowing users to keep track of films they want to watch next or have finished watching.
 - The testing frameworks used are Swift Testing and XCTest, and the project is built with TDD.
 - Includes accessibility support for Dynamic Type and VoiceOver.
 
