@@ -59,9 +59,6 @@ struct HomeVCTests {
         await Task.yield()
         sut.collectionView.layoutIfNeeded()
         
-//        let indexPath = IndexPath(item: 0, section: 0)
-//        let kind = UICollectionView.elementKindSectionHeader
-//        let header = sut.collectionView.supplementaryView(forElementKind: kind, at: indexPath)
         let header = getHeader(sut: sut)
         #expect(header != nil, "Should not be nil.")
     }
@@ -84,9 +81,6 @@ struct HomeVCTests {
         await Task.yield()
         sut.collectionView.layoutIfNeeded()
         
-//        let indexPath = IndexPath(item: 0, section: 0)
-//        let kind = UICollectionView.elementKindSectionHeader
-//        let header = sut.collectionView.supplementaryView(forElementKind: kind, at: indexPath) as? SegmentedControlHeaderView
         let header = getHeader(sut: sut)
         header?.segmentedControl.selectedSegmentIndex = 1
         header?.segmentedControl.sendActions(for: .valueChanged)
@@ -118,9 +112,6 @@ struct HomeVCTests {
         await Task.yield()
         sut.collectionView.layoutIfNeeded()
         
-//        let indexPath = IndexPath(item: 0, section: 0)
-//        let kind = UICollectionView.elementKindSectionHeader
-//        let header = sut.collectionView.supplementaryView(forElementKind: kind, at: indexPath) as? SegmentedControlHeaderView
         let header = getHeader(sut: sut)
         header?.segmentedControl.selectedSegmentIndex = 1
         header?.segmentedControl.sendActions(for: .valueChanged)
@@ -149,9 +140,6 @@ struct HomeVCTests {
         #expect(sut.films[0].id == Film.sample[0].id, "Should be the first film that was added.")
         #expect(sut.films[1].id == Film.sample[1].id, "Should be the second film that was added.")
         
-//        let indexPath = IndexPath(item: 0, section: 0)
-//        let kind = UICollectionView.elementKindSectionHeader
-//        let header = sut.collectionView.supplementaryView(forElementKind: kind, at: indexPath) as? SegmentedControlHeaderView
         let header = getHeader(sut: sut)
         header?.segmentedControl.selectedSegmentIndex = 1
         header?.segmentedControl.sendActions(for: .valueChanged)
@@ -178,9 +166,6 @@ struct HomeVCTests {
         #expect(sut.films[0].isUpNext == true, "Should be true.")
         #expect(sut.films[0].isWatched == true, "Should be true.")
         
-//        let indexPath = IndexPath(item: 0, section: 0)
-//        let kind = UICollectionView.elementKindSectionHeader
-//        let header = sut.collectionView.supplementaryView(forElementKind: kind, at: indexPath) as? SegmentedControlHeaderView
         let header = getHeader(sut: sut)
         header?.segmentedControl.selectedSegmentIndex = 1
         header?.segmentedControl.sendActions(for: .valueChanged)
