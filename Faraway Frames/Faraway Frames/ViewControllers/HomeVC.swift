@@ -20,14 +20,7 @@ final class HomeVC: UIViewController {
     lazy var collectionView = UICollectionView()
     private var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
     private(set) var films: [Film] = []
-    
-    // MARK: - UI Components
-    let segmentedControl: UISegmentedControl = {
-        let control = UISegmentedControl(items: ["Up Next", "Watched"])
-        control.selectedSegmentIndex = 0
-        control.translatesAutoresizingMaskIntoConstraints = false
-        return control
-    }()
+    private(set) var segmentedControlIndex = 0
     
     // MARK: - Initialisation
     init(homeViewModel: HomeViewModel) {
@@ -45,7 +38,6 @@ final class HomeVC: UIViewController {
         navigationController?.navigationBar.prefersLargeTitles = true
         title = "Home"
         homeViewModel.delegate = self
-        setupSegmentedControl()
         configureCollectionView()
         configureDataSource()
         homeViewModel.performFetches()
@@ -70,16 +62,27 @@ final class HomeVC: UIViewController {
     }
     
     private func configureCollectionView() {
-        collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout(for: view.bounds.width))
+        collectionView = UICollectionView(
+            frame: .zero,
+            collectionViewLayout: createLayout(for: view.bounds.width)
+        )
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.backgroundColor = .systemBackground
-        collectionView.register(FilmGridCell.self, forCellWithReuseIdentifier: FilmGridCell.reuseID)
+        collectionView.register(
+                SegmentedControlHeaderView.self,
+                forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+                withReuseIdentifier: SegmentedControlHeaderView.reuseID
+            )
+        collectionView.register(
+            FilmGridCell.self,
+            forCellWithReuseIdentifier: FilmGridCell.reuseID
+        )
         view.addSubview(collectionView)
         
         NSLayoutConstraint.activate([
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            collectionView.topAnchor.constraint(equalTo: segmentedControl.bottomAnchor, constant: 8),
+            collectionView.topAnchor.constraint(equalTo: view.topAnchor),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
@@ -88,7 +91,6 @@ final class HomeVC: UIViewController {
         let hSizeClass = traitCollection.horizontalSizeClass
         let vSizeClass = traitCollection.verticalSizeClass
         
-        // Fetch the appropriate column split count
         let numberOfColumns = LayoutMetrics.columnCount(horizontal: hSizeClass, vertical: vSizeClass)
         let itemFraction = 1.0 / CGFloat(numberOfColumns)
         
@@ -129,6 +131,18 @@ final class HomeVC: UIViewController {
             trailing: LayoutMetrics.uniformSpacing
         )
         
+        let headerSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .absolute(52)
+        )
+        
+        let sectionHeader = NSCollectionLayoutBoundarySupplementaryItem(
+            layoutSize: headerSize,
+            elementKind: UICollectionView.elementKindSectionHeader,
+            alignment: .top)
+        sectionHeader.pinToVisibleBounds = false
+        
+        section.boundarySupplementaryItems = [sectionHeader]
         return UICollectionViewCompositionalLayout(section: section)
     }
     
@@ -152,11 +166,25 @@ final class HomeVC: UIViewController {
             }
             return cell
         }
+        
+        dataSource.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
+            guard kind == UICollectionView.elementKindSectionHeader else { return nil }
+            guard let header = collectionView.dequeueReusableSupplementaryView(
+                ofKind: kind,
+                withReuseIdentifier: SegmentedControlHeaderView.reuseID,
+                for: indexPath
+                ) as? SegmentedControlHeaderView else { return nil }
+            header.segmentedControl.addTarget(self, action: #selector(self?.segmentChanged), for: .valueChanged)
+            if let currentSelection = self?.segmentedControlIndex {
+                header.segmentedControl.selectedSegmentIndex = currentSelection
+            }
+            return header
+        }
     }
     
     private func updateSnapshot() {
         var snapshot = NSDiffableDataSourceSnapshot<Section, Film.ID>()
-        let activeSection: Section = (segmentedControl.selectedSegmentIndex == 0) ? .upNext : .watched
+        let activeSection: Section = (segmentedControlIndex == 0) ? .upNext : .watched
         snapshot.appendSections([activeSection])
         
         films = films(for: activeSection)
@@ -190,20 +218,9 @@ final class HomeVC: UIViewController {
         contentUnavailableConfiguration = config
     }
     
-    // MARK: - UI Component Setup
-    private func setupSegmentedControl() {
-        view.addSubview(segmentedControl)
-        segmentedControl.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
-        
-        NSLayoutConstraint.activate([
-            segmentedControl.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
-            segmentedControl.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            segmentedControl.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            segmentedControl.heightAnchor.constraint(equalToConstant: 36)
-        ])
-    }
-    
-    @objc private func segmentChanged() {
+    // MARK: - Segmented Control Action
+    @objc private func segmentChanged(_ sender: UISegmentedControl) {
+        segmentedControlIndex = sender.selectedSegmentIndex
         updateSnapshot()
     }
 }
