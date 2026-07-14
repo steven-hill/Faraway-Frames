@@ -7,8 +7,8 @@
 
 import UIKit
 
-final class NetworkErrorReusableView: UICollectionReusableView {
-    static let identifier = "NetworkErrorReusableView"
+final class NetworkErrorHeaderView: UICollectionReusableView {
+    static let identifier = "NetworkErrorHeaderView"
     
     private let containerView: UIView = {
         let view = UIView()
@@ -55,7 +55,7 @@ final class NetworkErrorReusableView: UICollectionReusableView {
         textStackView.addArrangedSubview(descriptionLabel)
         containerView.translatesAutoresizingMaskIntoConstraints = false
         textStackView.translatesAutoresizingMaskIntoConstraints = false
-        textStackView.accessibilityIdentifier = "Network_Error_Reusable_View"
+        textStackView.accessibilityIdentifier = "Network_Error_Header_View"
         
         NSLayoutConstraint.activate([
             containerView.topAnchor.constraint(equalTo: topAnchor, constant: 4),

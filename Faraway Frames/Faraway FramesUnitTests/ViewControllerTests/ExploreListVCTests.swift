@@ -613,7 +613,7 @@ struct ExploreListVCTests {
         let header = sut.collectionView.supplementaryView(forElementKind: kind, at: indexPath)
             
         #expect(header != nil, "Should not be nil.")
-        #expect(header is NetworkErrorReusableView, "Should be the custom header view.")
+        #expect(header is NetworkErrorHeaderView, "Should be the custom header view.")
     }
     
     @Test("When data in File Manager is not being used, collection view has no header view.")

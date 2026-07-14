@@ -66,9 +66,9 @@ final class ExploreListVC: UIViewController {
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
         collectionView.delegate = self
         collectionView.translatesAutoresizingMaskIntoConstraints = false
-        collectionView.register(NetworkErrorReusableView.self,
+        collectionView.register(NetworkErrorHeaderView.self,
             forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
-            withReuseIdentifier: NetworkErrorReusableView.identifier)
+            withReuseIdentifier: NetworkErrorHeaderView.identifier)
         view.addSubview(collectionView)
         
         NSLayoutConstraint.activate([
@@ -137,9 +137,9 @@ final class ExploreListVC: UIViewController {
             guard kind == UICollectionView.elementKindSectionHeader else { return nil }
             let header = collectionView.dequeueReusableSupplementaryView(
                 ofKind: kind,
-                withReuseIdentifier: NetworkErrorReusableView.identifier,
+                withReuseIdentifier: NetworkErrorHeaderView.identifier,
                 for: indexPath
-            ) as? NetworkErrorReusableView
+            ) as? NetworkErrorHeaderView
             return header
         }
     }
