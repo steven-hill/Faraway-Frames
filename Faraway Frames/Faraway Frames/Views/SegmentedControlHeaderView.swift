@@ -30,8 +30,8 @@ final class SegmentedControlHeaderView: UICollectionReusableView {
         
         NSLayoutConstraint.activate([
             segmentedControl.topAnchor.constraint(equalTo: topAnchor, constant: 8),
-            segmentedControl.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            segmentedControl.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            segmentedControl.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
+            segmentedControl.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
             segmentedControl.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8)
         ])
     }
