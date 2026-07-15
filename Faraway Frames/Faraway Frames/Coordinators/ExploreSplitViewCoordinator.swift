@@ -11,22 +11,25 @@ import CoreData
 
 final class ExploreSplitViewCoordinator: Coordinator {
     
-    typealias Dependencies = FilmsListServicing & ImageLoading & AccessibilityServicing
+    typealias Dependencies = FilmsListServicing & AccessibilityServicing
     private let dependencies: Dependencies
+    private let imageLoader: ImageLoader
     private let filmQueueService: FilmQueueServiceProtocol
     private let filmSyncService: FilmSyncService
     let exploreSplitVC: UISplitViewController
     private(set) var filmDetailViewModel: FilmDetailViewModel
     
     init(dependencies: Dependencies,
+         imageLoader: ImageLoader,
          filmQueueService: FilmQueueServiceProtocol,
          filmSyncService: FilmSyncService,
          exploreSplitVC: UISplitViewController = ExploreSplitVC(style: .doubleColumn)) {
         self.dependencies = dependencies
+        self.imageLoader = imageLoader
         self.filmQueueService = filmQueueService
         self.filmSyncService = filmSyncService
         self.exploreSplitVC = exploreSplitVC
-        filmDetailViewModel = FilmDetailViewModel(film: nil, imageLoader: dependencies.makeImageLoader(), filmQueueService: filmQueueService)
+        filmDetailViewModel = FilmDetailViewModel(film: nil, imageLoader: imageLoader, filmQueueService: filmQueueService)
     }
     
     func start() {
@@ -36,7 +39,7 @@ final class ExploreSplitViewCoordinator: Coordinator {
     private func createExploreSplitVC() {
         exploreSplitVC.preferredDisplayMode = .oneBesideSecondary
         exploreSplitVC.delegate = self
-        let filmsListViewModel = FilmsListViewModel(filmsListService: dependencies.makeFilmsListService(), imageLoader: dependencies.makeImageLoader(), filmSyncService: filmSyncService)
+        let filmsListViewModel = FilmsListViewModel(filmsListService: dependencies.makeFilmsListService(), imageLoader: imageLoader, filmSyncService: filmSyncService)
         let exploreListVC = ExploreListVC(viewModel: filmsListViewModel, accessibilityService: dependencies.makeAccessibilityService())
         exploreListVC.navigationDelegate = self
         let exploreListNav = UINavigationController(rootViewController: exploreListVC)

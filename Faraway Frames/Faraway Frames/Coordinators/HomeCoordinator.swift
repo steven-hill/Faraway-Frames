@@ -11,11 +11,16 @@ import CoreData
 final class HomeCoordinator: Coordinator {
     var navigationController: UINavigationController
     private let context: NSManagedObjectContext
+    private let imageLoader: ImageLoader
     private let filmQueueService: FilmQueueService
     
-    init(navigationController: UINavigationController, context: NSManagedObjectContext, filmQueueService: FilmQueueService) {
+    init(navigationController: UINavigationController,
+         context: NSManagedObjectContext,
+         imageLoader: ImageLoader,
+         filmQueueService: FilmQueueService) {
         self.navigationController = navigationController
         self.context = context
+        self.imageLoader = imageLoader
         self.filmQueueService = filmQueueService
     }
     
@@ -39,6 +44,7 @@ final class HomeCoordinator: Coordinator {
         let homeViewModel = HomeViewModel(
             upNextFRC: upNextFRC,
             watchedFRC: watchedFRC,
+            imageLoader: imageLoader,
             filmQueueService: filmQueueService
         )
         

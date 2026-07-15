@@ -26,12 +26,19 @@ final class MainCoordinator: Coordinator {
         let managedObjectContext = persistenceController.viewContext
         let filmQueueService = FilmQueueService(context: managedObjectContext)
         let filmSyncService = FilmSyncService(context: managedObjectContext)
+        let imageLoader = dependencies.makeImageLoader()
         
-        let homeCoordinator = HomeCoordinator(navigationController: UINavigationController(), context: managedObjectContext, filmQueueService: filmQueueService)
+        let homeCoordinator = HomeCoordinator(navigationController: UINavigationController(),
+                                              context: managedObjectContext,
+                                              imageLoader: imageLoader,
+                                              filmQueueService: filmQueueService)
         homeCoordinator.start()
         childCoordinators.append(homeCoordinator)
         
-        let exploreSplitViewCoordinator = ExploreSplitViewCoordinator(dependencies: dependencies, filmQueueService: filmQueueService, filmSyncService: filmSyncService)
+        let exploreSplitViewCoordinator = ExploreSplitViewCoordinator(dependencies: dependencies,
+                                                                      imageLoader: imageLoader,
+                                                                      filmQueueService: filmQueueService,
+                                                                      filmSyncService: filmSyncService)
         exploreSplitViewCoordinator.start()
         childCoordinators.append(exploreSplitViewCoordinator)
         
