@@ -114,6 +114,16 @@ struct HomeViewModelTests {
         #expect(delegateSpy.receivedError == expectedError, "Should match.")
     }
     
+    @Test("Image loading request returns fallback image when URL is invalid")
+    func homeViewModel_getImage_whenURLIsInvalid_returnsFallback() async {
+        let (sut, _) = makeSUTWithContext()
+        let targetFilm = Film.sample[0]
+        
+        let returnedImage = await sut.getImage(for: targetFilm)
+        
+        #expect(returnedImage == SFSymbols.movieClapper, "Should instantly catch the invalid URL and provide the fallback image.")
+    }
+    
     @Test("Adding a film to upNext should add it to `upNextFilms`, and call delegate method", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_addsFilmToUpNext() async throws {
         let (sut, _) = makeSUTWithContext()

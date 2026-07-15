@@ -7,6 +7,7 @@
 
 import Foundation
 import CoreData
+import UIKit
 
 final class HomeViewModel: NSObject {
     
@@ -56,6 +57,14 @@ final class HomeViewModel: NSObject {
             let homeError = HomeError.fetchFailed(reason)
             handleError(homeError)
         }
+    }
+    
+    func getImage(for film: Film) async -> UIImage? {
+        let fallbackImage = SFSymbols.movieClapper
+        guard let url = URL(string: film.image) else {
+            return fallbackImage
+        }
+        return fallbackImage
     }
     
     func toggleFilmInQueue(film: Film, queue: FilmQueue, action: QueueAction) async {
