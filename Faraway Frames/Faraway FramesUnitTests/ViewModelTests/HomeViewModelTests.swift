@@ -99,7 +99,7 @@ struct HomeViewModelTests {
         let throwingController = ThrowingFetchedResultsController(context: context, errorToThrow: scenario.systemError)
         let sut = HomeViewModel(
             upNextFRC: throwingController,
-            watchedFRC: throwingController,
+            watchedFRC: throwingController, imageLoader: MockImageLoader(),
             filmQueueService: filmQueueService
         )
         let delegateSpy = HomeViewModelDelegateSpy()
@@ -161,6 +161,7 @@ struct HomeViewModelTests {
         let sut = HomeViewModel(
             upNextFRC: mockUpNextFRC,
             watchedFRC: mockWatchedFRC,
+            imageLoader: MockImageLoader(),
             filmQueueService: filmQueueService)
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
@@ -197,6 +198,7 @@ struct HomeViewModelTests {
         let sut = HomeViewModel(
             upNextFRC: mockUpNextFRC,
             watchedFRC: mockWatchedFRC,
+            imageLoader: MockImageLoader(),
             filmQueueService: filmQueueService
         )
         let delegateSpy = HomeViewModelDelegateSpy()
@@ -316,6 +318,7 @@ struct HomeViewModelTests {
         let sut = HomeViewModel(
             upNextFRC: mockUpNextFRC,
             watchedFRC: mockWatchedFRC,
+            imageLoader: MockImageLoader(),
             filmQueueService: filmQueueService)
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
@@ -391,7 +394,7 @@ struct HomeViewModelTests {
         let filmQueueService = FilmQueueService(context: context)
         let sut = HomeViewModel(
             upNextFRC: mockUpNextFRC,
-            watchedFRC: mockWatchedFRC,
+            watchedFRC: mockWatchedFRC, imageLoader: MockImageLoader(),
             filmQueueService: filmQueueService)
         return (sut, context)
     }

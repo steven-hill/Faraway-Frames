@@ -15,7 +15,11 @@ struct HomeCoordinatorTests {
     @Test func homeCoordinator_start_placesViewControllerOnNavigationStack() {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let sut = HomeCoordinator(navigationController: UINavigationController(), context: testPersistenceController.viewContext, filmQueueService: filmQueueService)
+        let sut = HomeCoordinator(navigationController: UINavigationController(),
+                                  context: testPersistenceController.viewContext,
+                                  imageLoader: MockImageLoader(),
+                                  filmQueueService: filmQueueService
+        )
 
         sut.start()
         

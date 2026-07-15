@@ -17,7 +17,11 @@ struct ExploreSplitViewCoordinatorTests {
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
         let exploreSplitVCSpy = ExploreSplitVCSpy(style: .doubleColumn)
-        let sut = ExploreSplitViewCoordinator(dependencies: MockContainer(), filmQueueService: filmQueueService, filmSyncService: filmSyncService, exploreSplitVC: exploreSplitVCSpy)
+        let sut = ExploreSplitViewCoordinator(dependencies: MockContainer(),
+                                              imageLoader: MockImageLoader(),
+                                              filmQueueService: filmQueueService,
+                                              filmSyncService: filmSyncService,
+                                              exploreSplitVC: exploreSplitVCSpy)
         
         sut.start()
         
@@ -29,7 +33,11 @@ struct ExploreSplitViewCoordinatorTests {
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
         let exploreSplitVCSpy = ExploreSplitVCSpy(style: .doubleColumn)
-        let sut = ExploreSplitViewCoordinator(dependencies: MockContainer(), filmQueueService: filmQueueService, filmSyncService: filmSyncService, exploreSplitVC: exploreSplitVCSpy)
+        let sut = ExploreSplitViewCoordinator(dependencies: MockContainer(),
+                                              imageLoader: MockImageLoader(),
+                                              filmQueueService: filmQueueService,
+                                              filmSyncService: filmSyncService,
+                                              exploreSplitVC: exploreSplitVCSpy)
         
         sut.start()
         
@@ -43,7 +51,11 @@ struct ExploreSplitViewCoordinatorTests {
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
         let exploreSplitVCSpy = ExploreSplitVCSpy(style: .doubleColumn)
-        let sut = ExploreSplitViewCoordinator(dependencies: MockContainer(), filmQueueService: filmQueueService, filmSyncService: filmSyncService, exploreSplitVC: exploreSplitVCSpy)
+        let sut = ExploreSplitViewCoordinator(dependencies: MockContainer(),
+                                              imageLoader: MockImageLoader(),
+                                              filmQueueService: filmQueueService,
+                                              filmSyncService: filmSyncService,
+                                              exploreSplitVC: exploreSplitVCSpy)
         
         sut.start()
         
@@ -117,7 +129,11 @@ struct ExploreSplitViewCoordinatorTests {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        return ExploreSplitViewCoordinator(dependencies: MockContainer(), filmQueueService: filmQueueService, filmSyncService: filmSyncService, exploreSplitVC: spy)
+        return ExploreSplitViewCoordinator(dependencies: MockContainer(),
+                                           imageLoader: MockImageLoader(),
+                                           filmQueueService: filmQueueService,
+                                           filmSyncService: filmSyncService,
+                                           exploreSplitVC: spy)
     }
     
     // MARK: - ExploreSplitVC Spies

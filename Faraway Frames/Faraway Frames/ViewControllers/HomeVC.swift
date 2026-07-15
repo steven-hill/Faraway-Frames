@@ -276,7 +276,8 @@ extension HomeVC {
         sectionNameKeyPath: nil,
         cacheName: nil
     )
-    let vm = HomeViewModel(upNextFRC: mockUpNextFRC, watchedFRC: mockWatchedFRC, filmQueueService: filmQueueService)
+    let imageLoader = APIClientImageLoader(cacheManager: CacheManager())
+    let vm = HomeViewModel(upNextFRC: mockUpNextFRC, watchedFRC: mockWatchedFRC, imageLoader: imageLoader, filmQueueService: filmQueueService)
     let vc = HomeVC(homeViewModel: vm)
     vc
 }
