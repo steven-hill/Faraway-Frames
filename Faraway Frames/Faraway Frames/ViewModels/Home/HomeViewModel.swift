@@ -64,7 +64,8 @@ final class HomeViewModel: NSObject {
         guard let url = URL(string: film.image) else {
             return fallbackImage
         }
-        return fallbackImage
+        let downloadedImage = await imageLoader.loadImage(from: url)
+        return downloadedImage ?? fallbackImage
     }
     
     func toggleFilmInQueue(film: Film, queue: FilmQueue, action: QueueAction) async {

@@ -124,6 +124,16 @@ struct HomeViewModelTests {
         #expect(returnedImage == SFSymbols.movieClapper, "Should instantly catch the invalid URL and provide the fallback image.")
     }
     
+    @Test("Image loading request returns the downloaded image when network request succeeds")
+    func homeViewModel_getImage_whenRequestSucceeds_returnsDownloadedImage() async {
+        let (sut, _) = makeSUTWithContext()
+        let targetFilm = Film.sample[0]
+        
+        let returnedImage = await sut.getImage(for: targetFilm)
+        
+        #expect(returnedImage == SFSymbols.popcorn, "Should return the downloaded image (MockImageLoader stubbed to return `SFSymbols.popcorn` in success case).")
+    }
+    
     @Test("Adding a film to upNext should add it to `upNextFilms`, and call delegate method", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_addsFilmToUpNext() async throws {
         let (sut, _) = makeSUTWithContext()
