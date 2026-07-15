@@ -116,17 +116,7 @@ struct HomeViewModelTests {
     
     @Test("Image loading request returns fallback image when URL is invalid")
     func homeViewModel_getImage_whenURLIsInvalid_returnsFallback() async {
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let context = testPersistenceController.viewContext
-        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
-        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
-        let mockImageLoader = MockImageLoader()
-        mockImageLoader.shouldSucceed = false
-        let filmQueueService = FilmQueueService(context: context)
-        let sut = HomeViewModel(
-            upNextFRC: mockUpNextFRC,
-            watchedFRC: mockWatchedFRC, imageLoader: mockImageLoader,
-            filmQueueService: filmQueueService)
+        let sut = makeSUTForImageDownloadFailure()
         let targetFilm = Film.sample[0]
         
         let returnedImage = await sut.getImage(for: targetFilm)
@@ -146,18 +136,7 @@ struct HomeViewModelTests {
     
     @Test("Image loading request returns the fallback image when network request fails")
     func homeViewModel_getImage_whenRequestFails_returnsFallbackImage() async {
-        //let (sut, _) = makeSUTWithContext()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let context = testPersistenceController.viewContext
-        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
-        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
-        let mockImageLoader = MockImageLoader()
-        mockImageLoader.shouldSucceed = false
-        let filmQueueService = FilmQueueService(context: context)
-        let sut = HomeViewModel(
-            upNextFRC: mockUpNextFRC,
-            watchedFRC: mockWatchedFRC, imageLoader: mockImageLoader,
-            filmQueueService: filmQueueService)
+        let sut = makeSUTForImageDownloadFailure()
         let targetFilm = Film.sample[0]
         
         let returnedImage = await sut.getImage(for: targetFilm)
@@ -167,17 +146,7 @@ struct HomeViewModelTests {
     
     @Test("Image loading request catches cancellation and returns fallback image")
     func homeViewModel_getImage_whenTaskIsCancelledMidFlight_returnsFallback() async {
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let context = testPersistenceController.viewContext
-        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
-        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
-        let mockImageLoader = MockImageLoader()
-        mockImageLoader.shouldSucceed = true
-        let filmQueueService = FilmQueueService(context: context)
-        let sut = HomeViewModel(
-            upNextFRC: mockUpNextFRC,
-            watchedFRC: mockWatchedFRC, imageLoader: mockImageLoader,
-            filmQueueService: filmQueueService)
+        let sut = makeSUTForImageDownloadFailure()
         let targetFilm = Film.sample[0]
         let task = Task {
             await sut.getImage(for: targetFilm)
@@ -460,7 +429,7 @@ struct HomeViewModelTests {
         #expect(result == nil, "Result should return nil.")
     }
     
-    //MARK: - SUT Helper Method
+    //MARK: - SUT Helper Methods
     private func makeSUTWithContext() -> (sut: HomeViewModel, context: NSManagedObjectContext) {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
@@ -472,6 +441,21 @@ struct HomeViewModelTests {
             watchedFRC: mockWatchedFRC, imageLoader: MockImageLoader(),
             filmQueueService: filmQueueService)
         return (sut, context)
+    }
+    
+    private func makeSUTForImageDownloadFailure() -> HomeViewModel {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
+        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
+        let mockImageLoader = MockImageLoader()
+        mockImageLoader.shouldSucceed = false
+        let filmQueueService = FilmQueueService(context: context)
+        let sut = HomeViewModel(
+            upNextFRC: mockUpNextFRC,
+            watchedFRC: mockWatchedFRC, imageLoader: mockImageLoader,
+            filmQueueService: filmQueueService)
+        return sut
     }
     
     //MARK: - Home View Model Delegate Spy
