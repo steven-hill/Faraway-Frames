@@ -116,7 +116,17 @@ struct HomeViewModelTests {
     
     @Test("Image loading request returns fallback image when URL is invalid")
     func homeViewModel_getImage_whenURLIsInvalid_returnsFallback() async {
-        let (sut, _) = makeSUTWithContext()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
+        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
+        let mockImageLoader = MockImageLoader()
+        mockImageLoader.shouldSucceed = false
+        let filmQueueService = FilmQueueService(context: context)
+        let sut = HomeViewModel(
+            upNextFRC: mockUpNextFRC,
+            watchedFRC: mockWatchedFRC, imageLoader: mockImageLoader,
+            filmQueueService: filmQueueService)
         let targetFilm = Film.sample[0]
         
         let returnedImage = await sut.getImage(for: targetFilm)
