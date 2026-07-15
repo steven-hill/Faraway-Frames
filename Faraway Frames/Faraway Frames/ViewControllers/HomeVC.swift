@@ -148,10 +148,16 @@ final class HomeVC: UIViewController {
     
     // MARK: - Data Source Configuration
     private func configureDataSource() {
-        dataSource = UICollectionViewDiffableDataSource<Section, Film.ID>(collectionView: collectionView) { [weak self] collectionView, indexPath, filmID in
+        dataSource = UICollectionViewDiffableDataSource<Section, Film.ID>(
+            collectionView: collectionView
+        ) { [weak self] collectionView, indexPath, filmID in
             guard let self = self,
                   let section = Section(rawValue: indexPath.section),
-                    let cell = collectionView.dequeueReusableCell(withReuseIdentifier: FilmGridCell.reuseID, for: indexPath) as? FilmGridCell else {
+                    let cell = collectionView.dequeueReusableCell(
+                        withReuseIdentifier: FilmGridCell.reuseID,
+                        for: indexPath
+                    ) as? FilmGridCell
+            else {
                 return UICollectionViewCell()
             }
             let film: Film?
@@ -161,9 +167,16 @@ final class HomeVC: UIViewController {
             case .watched:
                 film = self.homeViewModel.lookupWatchedFilm(for: filmID)
             }
-            if let film = film {
-                cell.configure(with: film)
+            
+            guard let film else { return cell }
+            
+            cell.configure(with: film)
+            
+            Task { [weak self] in
+                guard let self else { return }
+                await self.updateCellImage(for: film)
             }
+            
             return cell
         }
         
@@ -180,6 +193,13 @@ final class HomeVC: UIViewController {
             }
             return header
         }
+    }
+    
+    func updateCellImage(for film: Film) async {
+        guard let image = await homeViewModel.getImage(for: film) else { return }
+        guard let indexPath = dataSource.indexPath(for: film.id) else { return }
+        guard let cell = collectionView.cellForItem(at: indexPath) as? FilmGridCell else { return }
+        cell.updateImage(image)
     }
     
     private func updateSnapshot() {

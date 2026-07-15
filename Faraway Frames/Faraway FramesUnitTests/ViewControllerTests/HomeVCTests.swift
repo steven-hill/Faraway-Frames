@@ -204,6 +204,25 @@ struct HomeVCTests {
         #expect(iPadSplitViewNumberOfColumns == 2)
     }
     
+    @Test("Film image is added to cell when cell has not been recycled and content matches")
+    func homeVC_updateCellImage_whenIndexPathAndFilmIDMatch_addsImageToCell() async throws {
+        let targetFilm = Film.sample[0]
+        let (sut, context, entity) = try makeSUTWithContextAndEntity()
+        _ = PersistenceHelper.makeFilmMO(with: targetFilm, entity: entity, context: context, isUpNext: true, isWatched: false)
+        try context.save()
+        sut.loadViewIfNeeded()
+        sut.collectionView.layoutIfNeeded()
+        let targetIndexPath = IndexPath(item: 0, section: 0)
+        guard let cell = sut.collectionView.cellForItem(at: targetIndexPath) as? FilmGridCell else {
+            Issue.record("Expected visible FilmGridCell")
+            return
+        }
+
+        await sut.updateCellImage(for: targetFilm)
+
+        #expect(cell.currentDisplayedImage == SFSymbols.popcorn, "The cell should be updated with the downloaded image (MockImageLoader stubbed to return `SFSymbols.popcorn` in success case).")
+    }
+    
     // MARK: - SUT Helper Methods
     private func makeSUT() -> HomeVC {
         let testPersistenceController = try! PersistenceController(inMemory: true)
