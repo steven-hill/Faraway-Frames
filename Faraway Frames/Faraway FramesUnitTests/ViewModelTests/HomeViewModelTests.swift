@@ -114,6 +114,50 @@ struct HomeViewModelTests {
         #expect(delegateSpy.receivedError == expectedError, "Should match.")
     }
     
+    @Test("Image loading request returns fallback image when URL is invalid")
+    func homeViewModel_getImage_whenURLIsInvalid_returnsFallback() async {
+        let sut = makeSUTForImageDownloadFailure()
+        let targetFilm = Film.sample[0]
+        
+        let returnedImage = await sut.getImage(for: targetFilm)
+        
+        #expect(returnedImage == SFSymbols.movieClapper, "Should instantly catch the invalid URL and provide the fallback image.")
+    }
+    
+    @Test("Image loading request returns the downloaded image when network request succeeds")
+    func homeViewModel_getImage_whenRequestSucceeds_returnsDownloadedImage() async {
+        let (sut, _) = makeSUTWithContext()
+        let targetFilm = Film.sample[0]
+        
+        let returnedImage = await sut.getImage(for: targetFilm)
+        
+        #expect(returnedImage == SFSymbols.popcorn, "Should return the downloaded image (MockImageLoader stubbed to return `SFSymbols.popcorn` in success case).")
+    }
+    
+    @Test("Image loading request returns the fallback image when network request fails")
+    func homeViewModel_getImage_whenRequestFails_returnsFallbackImage() async {
+        let sut = makeSUTForImageDownloadFailure()
+        let targetFilm = Film.sample[0]
+        
+        let returnedImage = await sut.getImage(for: targetFilm)
+        
+        #expect(returnedImage == SFSymbols.movieClapper, "Should return the fallback image.")
+    }
+    
+    @Test("Image loading request catches cancellation and returns fallback image")
+    func homeViewModel_getImage_whenTaskIsCancelledMidFlight_returnsFallback() async {
+        let sut = makeSUTForImageDownloadFailure()
+        let targetFilm = Film.sample[0]
+        let task = Task {
+            await sut.getImage(for: targetFilm)
+        }
+        task.cancel()
+        
+        let resultImage = await task.value
+        
+        #expect(resultImage == SFSymbols.movieClapper, "Cooperative cancellation should cause the method to bypass normal returns and return the fallback image.")
+    }
+    
     @Test("Adding a film to upNext should add it to `upNextFilms`, and call delegate method", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_addsFilmToUpNext() async throws {
         let (sut, _) = makeSUTWithContext()
@@ -385,7 +429,7 @@ struct HomeViewModelTests {
         #expect(result == nil, "Result should return nil.")
     }
     
-    //MARK: - SUT Helper Method
+    //MARK: - SUT Helper Methods
     private func makeSUTWithContext() -> (sut: HomeViewModel, context: NSManagedObjectContext) {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
@@ -397,6 +441,21 @@ struct HomeViewModelTests {
             watchedFRC: mockWatchedFRC, imageLoader: MockImageLoader(),
             filmQueueService: filmQueueService)
         return (sut, context)
+    }
+    
+    private func makeSUTForImageDownloadFailure() -> HomeViewModel {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
+        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
+        let mockImageLoader = MockImageLoader()
+        mockImageLoader.shouldSucceed = false
+        let filmQueueService = FilmQueueService(context: context)
+        let sut = HomeViewModel(
+            upNextFRC: mockUpNextFRC,
+            watchedFRC: mockWatchedFRC, imageLoader: mockImageLoader,
+            filmQueueService: filmQueueService)
+        return sut
     }
     
     //MARK: - Home View Model Delegate Spy
