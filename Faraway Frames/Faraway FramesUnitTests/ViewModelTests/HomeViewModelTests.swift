@@ -165,6 +165,30 @@ struct HomeViewModelTests {
         #expect(returnedImage == SFSymbols.movieClapper, "Should return the fallback image.")
     }
     
+    @Test("Image loading request catches cancellation and returns fallback image")
+    func homeViewModel_getImage_whenTaskIsCancelledMidFlight_returnsFallback() async {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
+        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
+        let mockImageLoader = MockImageLoader()
+        mockImageLoader.shouldSucceed = true
+        let filmQueueService = FilmQueueService(context: context)
+        let sut = HomeViewModel(
+            upNextFRC: mockUpNextFRC,
+            watchedFRC: mockWatchedFRC, imageLoader: mockImageLoader,
+            filmQueueService: filmQueueService)
+        let targetFilm = Film.sample[0]
+        let task = Task {
+            await sut.getImage(for: targetFilm)
+        }
+        task.cancel()
+        
+        let resultImage = await task.value
+        
+        #expect(resultImage == SFSymbols.movieClapper, "Cooperative cancellation should cause the method to bypass normal returns and return the fallback image.")
+    }
+    
     @Test("Adding a film to upNext should add it to `upNextFilms`, and call delegate method", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_addsFilmToUpNext() async throws {
         let (sut, _) = makeSUTWithContext()

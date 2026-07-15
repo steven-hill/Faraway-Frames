@@ -64,7 +64,9 @@ final class HomeViewModel: NSObject {
         guard let url = URL(string: film.image) else {
             return fallbackImage
         }
+        guard !Task.isCancelled else { return fallbackImage }
         let downloadedImage = await imageLoader.loadImage(from: url)
+        guard !Task.isCancelled else { return fallbackImage }
         return downloadedImage ?? fallbackImage
     }
     
