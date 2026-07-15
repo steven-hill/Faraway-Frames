@@ -134,6 +134,27 @@ struct HomeViewModelTests {
         #expect(returnedImage == SFSymbols.popcorn, "Should return the downloaded image (MockImageLoader stubbed to return `SFSymbols.popcorn` in success case).")
     }
     
+    @Test("Image loading request returns the fallback image when network request fails")
+    func homeViewModel_getImage_whenRequestFails_returnsFallbackImage() async {
+        //let (sut, _) = makeSUTWithContext()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
+        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
+        let mockImageLoader = MockImageLoader()
+        mockImageLoader.shouldSucceed = false
+        let filmQueueService = FilmQueueService(context: context)
+        let sut = HomeViewModel(
+            upNextFRC: mockUpNextFRC,
+            watchedFRC: mockWatchedFRC, imageLoader: mockImageLoader,
+            filmQueueService: filmQueueService)
+        let targetFilm = Film.sample[0]
+        
+        let returnedImage = await sut.getImage(for: targetFilm)
+        
+        #expect(returnedImage == SFSymbols.movieClapper, "Should return the fallback image.")
+    }
+    
     @Test("Adding a film to upNext should add it to `upNextFilms`, and call delegate method", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_addsFilmToUpNext() async throws {
         let (sut, _) = makeSUTWithContext()
