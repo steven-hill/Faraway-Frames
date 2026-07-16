@@ -12,7 +12,7 @@ import UIKit
 final class MockImageLoader: ImageLoader {
     var shouldSucceed: Bool = true
     
-    func loadImage(from url: URL) async -> UIImage? {
+    func loadImage(for image: String) async -> UIImage? {
         let image: UIImage?
         if shouldSucceed {
             image = SFSymbols.popcorn
@@ -20,5 +20,9 @@ final class MockImageLoader: ImageLoader {
             return nil
         }
         return image
+    }
+    
+    func checkCache(for image: String) -> UIImage? {
+        return nil
     }
 }

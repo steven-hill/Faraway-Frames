@@ -12,7 +12,7 @@ import UIKit
 final class ExploreDetailMovieBannerMockImageLoader: ImageLoader {
     var loadCount = 0
     private var continuation: CheckedContinuation<UIImage?, Never>?
-    func loadImage(from url: URL) async -> UIImage? {
+    func loadImage(for image: String) async -> UIImage? {
         loadCount += 1
         
         return await withCheckedContinuation { continuation in
@@ -24,5 +24,9 @@ final class ExploreDetailMovieBannerMockImageLoader: ImageLoader {
         let image = shouldSucceed ? SFSymbols.popcorn : SFSymbols.movieClapper
         continuation?.resume(returning: image)
         continuation = nil
+    }
+    
+    func checkCache(for image: String) -> UIImage? {
+        return nil
     }
 }

@@ -8,5 +8,6 @@
 import UIKit
 
 protocol ImageLoader {
-    func loadImage(from url: URL) async -> UIImage?
+    func loadImage(for image: String) async -> UIImage?
+    func checkCache(for image: String) -> UIImage?
 }

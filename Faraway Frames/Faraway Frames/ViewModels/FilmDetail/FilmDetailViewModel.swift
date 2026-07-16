@@ -69,14 +69,9 @@ final class FilmDetailViewModel {
     
     func getMovieBanner(for film: Film, displayModel: FilmDetailDisplayModel) {
         let fallbackImage = SFSymbols.movieClapper
-        guard let url = URL(string: film.movieBanner) else {
-            currentState = .content(displayModel: displayModel, image: fallbackImage)
-            return
-        }
-        
         imageLoadTask = Task { [weak self, displayModel] in
             guard let self, !Task.isCancelled else { return }
-            let downloadedImage = await imageLoader.loadImage(from: url)
+            let downloadedImage = await imageLoader.loadImage(for: film.movieBanner)
             guard !Task.isCancelled else { return }
             currentState = .content(displayModel: displayModel, image: downloadedImage ?? fallbackImage)
         }

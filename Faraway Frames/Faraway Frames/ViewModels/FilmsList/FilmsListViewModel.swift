@@ -58,8 +58,7 @@ final class FilmsListViewModel {
     }
     
     func getImage(for film: Film) async -> UIImage? {
-        guard let url = URL(string: film.image) else { return nil }
-        let image = await imageLoader.loadImage(from: url)
+        let image = await imageLoader.loadImage(for: film.image)
         return image
     }
     

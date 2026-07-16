@@ -61,11 +61,8 @@ final class HomeViewModel: NSObject {
     
     func getImage(for film: Film) async -> UIImage? {
         let fallbackImage = SFSymbols.movieClapper
-        guard let url = URL(string: film.image) else {
-            return fallbackImage
-        }
         guard !Task.isCancelled else { return fallbackImage }
-        let downloadedImage = await imageLoader.loadImage(from: url)
+        let downloadedImage = await imageLoader.loadImage(for: film.image)
         guard !Task.isCancelled else { return fallbackImage }
         return downloadedImage ?? fallbackImage
     }
