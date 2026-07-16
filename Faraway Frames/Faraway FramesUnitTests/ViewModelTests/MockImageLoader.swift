@@ -11,6 +11,7 @@ import UIKit
 
 final class MockImageLoader: ImageLoader {
     var shouldSucceed: Bool = true
+    private(set) var checkCacheCallCount = 0
     
     func loadImage(for image: String) async -> UIImage? {
         let image: UIImage?
@@ -23,6 +24,7 @@ final class MockImageLoader: ImageLoader {
     }
     
     func checkCache(for image: String) -> UIImage? {
+        checkCacheCallCount += 1
         return nil
     }
 }

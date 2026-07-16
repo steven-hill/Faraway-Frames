@@ -158,6 +158,25 @@ struct HomeViewModelTests {
         #expect(resultImage == SFSymbols.movieClapper, "Cooperative cancellation should cause the method to bypass normal returns and return the fallback image.")
     }
     
+    @Test("`checkCachesForFilmPoster` calls method on `imageLoader`")
+    func homeViewModel_checkCachesForFilmPoster_ifImageExistsInNSCache_returnsImage() {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
+        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
+        let mockImageLoader = MockImageLoader()
+        let filmQueueService = FilmQueueService(context: context)
+        let sut = HomeViewModel(
+            upNextFRC: mockUpNextFRC,
+            watchedFRC: mockWatchedFRC,
+            imageLoader: mockImageLoader,
+            filmQueueService: filmQueueService)
+        
+        _ = sut.checkCachesForFilmPoster(for: Film.sample[0])
+        
+        #expect(mockImageLoader.checkCacheCallCount == 1, "Should have called `checkCache` on `imageLoader` once.")
+    }
+    
     @Test("Adding a film to upNext should add it to `upNextFilms`, and call delegate method", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_addsFilmToUpNext() async throws {
         let (sut, _) = makeSUTWithContext()
@@ -438,7 +457,8 @@ struct HomeViewModelTests {
         let filmQueueService = FilmQueueService(context: context)
         let sut = HomeViewModel(
             upNextFRC: mockUpNextFRC,
-            watchedFRC: mockWatchedFRC, imageLoader: MockImageLoader(),
+            watchedFRC: mockWatchedFRC,
+            imageLoader: MockImageLoader(),
             filmQueueService: filmQueueService)
         return (sut, context)
     }

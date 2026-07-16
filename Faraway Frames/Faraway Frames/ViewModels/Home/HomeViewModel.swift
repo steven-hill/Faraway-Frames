@@ -67,6 +67,10 @@ final class HomeViewModel: NSObject {
         return downloadedImage ?? fallbackImage
     }
     
+    func checkCachesForFilmPoster(for film: Film) -> UIImage? {
+        return imageLoader.checkCache(for: film.image)
+    }
+    
     func toggleFilmInQueue(film: Film, queue: FilmQueue, action: QueueAction) async {
         do {
             try await filmQueueService.updateFilmStatus(film: film, queue: queue, action: action)
