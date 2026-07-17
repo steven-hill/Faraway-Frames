@@ -207,22 +207,7 @@ struct HomeVCTests {
     @Test("`FilmGridCell` is reconfigured with film image when image exists in cache.")
     func homeVC_loadImageAndRefreshItem_whenImageExistsInCache_reconfiguresCellWithFilmImage() async throws {
         let targetFilm = Film.sample[0]
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let context = testPersistenceController.viewContext
-        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
-        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
-        let mockImageLoader = MockImageLoader()
-        let filmQueueService = FilmQueueService(context: context)
-        let homeVM = HomeViewModel(
-            upNextFRC: mockUpNextFRC,
-            watchedFRC: mockWatchedFRC,
-            imageLoader: mockImageLoader,
-            filmQueueService: filmQueueService)
-        let sut = HomeVC(homeViewModel: homeVM)
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
+        let (sut, context, entity) = try makeSUTWithContextAndEntity()
         _ = PersistenceHelper.makeFilmMO(with: targetFilm, entity: entity, context: context, isUpNext: true, isWatched: false)
         try context.save()
         sut.loadViewIfNeeded()
@@ -244,23 +229,7 @@ struct HomeVCTests {
     @Test("`FilmGridCell` is not reconfigured with film image when image does not exist in cache.")
     func homeVC_loadImageAndRefreshItem_whenImageIsNotInCache_cellIsNotReconfiguredWithFilmImage() async throws {
         let targetFilm = Film.sample[0]
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let context = testPersistenceController.viewContext
-        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
-        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
-        let mockImageLoader = MockImageLoader()
-        mockImageLoader.shouldSucceed = false
-        let filmQueueService = FilmQueueService(context: context)
-        let homeVM = HomeViewModel(
-            upNextFRC: mockUpNextFRC,
-            watchedFRC: mockWatchedFRC,
-            imageLoader: mockImageLoader,
-            filmQueueService: filmQueueService)
-        let sut = HomeVC(homeViewModel: homeVM)
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
+        let (sut, context, entity) = try makeSUTWithEmptyMockImageLoaderCache()
         _ = PersistenceHelper.makeFilmMO(with: targetFilm, entity: entity, context: context, isUpNext: true, isWatched: false)
         try context.save()
         sut.loadViewIfNeeded()
@@ -305,6 +274,29 @@ struct HomeVCTests {
             upNextFRC: mockUpNextFRC,
             watchedFRC: mockWatchedFRC,
             imageLoader: MockImageLoader(),
+            filmQueueService: filmQueueService)
+        let sut = HomeVC(homeViewModel: homeVM)
+        let entity = try #require(
+            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
+        return (sut, context, entity)
+    }
+    
+    private func makeSUTWithEmptyMockImageLoaderCache() throws -> (sut: HomeVC,
+                                                                   context: NSManagedObjectContext,
+                                                                   entity: NSEntityDescription) {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
+        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
+        let mockImageLoader = MockImageLoader()
+        mockImageLoader.shouldSucceed = false
+        let filmQueueService = FilmQueueService(context: context)
+        let homeVM = HomeViewModel(
+            upNextFRC: mockUpNextFRC,
+            watchedFRC: mockWatchedFRC,
+            imageLoader: mockImageLoader,
             filmQueueService: filmQueueService)
         let sut = HomeVC(homeViewModel: homeVM)
         let entity = try #require(
