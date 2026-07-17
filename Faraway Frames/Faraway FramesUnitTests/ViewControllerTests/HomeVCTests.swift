@@ -204,23 +204,41 @@ struct HomeVCTests {
         #expect(iPadSplitViewNumberOfColumns == 2)
     }
     
-    @Test("Film image is added to cell when cell has not been recycled and content matches")
-    func homeVC_updateCellImage_whenIndexPathAndFilmIDMatch_addsImageToCell() async throws {
+    @Test("`FilmGridCell` is reconfigured with film image when image exists in cache.")
+    func homeVC_loadImageAndRefreshItem_whenImageExistsInCache_reconfiguresCellWithFilmImage() async throws {
         let targetFilm = Film.sample[0]
-        let (sut, context, entity) = try makeSUTWithContextAndEntity()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
+        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
+        let mockImageLoader = MockImageLoader()
+        let filmQueueService = FilmQueueService(context: context)
+        let homeVM = HomeViewModel(
+            upNextFRC: mockUpNextFRC,
+            watchedFRC: mockWatchedFRC,
+            imageLoader: mockImageLoader,
+            filmQueueService: filmQueueService)
+        let sut = HomeVC(homeViewModel: homeVM)
+        let entity = try #require(
+            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
         _ = PersistenceHelper.makeFilmMO(with: targetFilm, entity: entity, context: context, isUpNext: true, isWatched: false)
         try context.save()
         sut.loadViewIfNeeded()
         sut.collectionView.layoutIfNeeded()
+        await Task.yield()
         let targetIndexPath = IndexPath(item: 0, section: 0)
+        
+        await sut.loadImageAndRefreshItem(for: targetFilm)
+        
+        await Task.yield()
         guard let cell = sut.collectionView.cellForItem(at: targetIndexPath) as? FilmGridCell else {
-            Issue.record("Expected visible FilmGridCell")
+            Issue.record("Expected visible `FilmGridCell` to be present after reconfiguration")
             return
         }
-
-        await sut.updateCellImage(for: targetFilm)
-
-        #expect(cell.currentDisplayedImage == SFSymbols.popcorn, "The cell should be updated with the downloaded image (MockImageLoader stubbed to return `SFSymbols.popcorn` in success case).")
+        
+        #expect(cell.currentDisplayedImage == SFSymbols.popcorn, "The cell should be updated with the cached image (MockImageLoader stubbed to return `SFSymbols.popcorn` in success case).")
     }
     
     // MARK: - SUT Helper Methods

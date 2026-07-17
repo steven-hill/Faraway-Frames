@@ -178,6 +178,7 @@ final class HomeVC: UIViewController {
             }
             
             guard let film else { return UICollectionViewCell() }
+            requestImageIfNeeded(for: film)
             
             return collectionView.dequeueConfiguredReusableCell(
                 using: filmCellRegistration,
@@ -201,11 +202,27 @@ final class HomeVC: UIViewController {
         }
     }
     
-    func updateCellImage(for film: Film) async {
-        guard let image = await homeViewModel.getImage(for: film) else { return }
-        guard let indexPath = dataSource.indexPath(for: film.id) else { return }
-        guard let cell = collectionView.cellForItem(at: indexPath) as? FilmGridCell else { return }
-        cell.updateImage(image)
+    /// Decides whether to start the work.
+    private func requestImageIfNeeded(for film: Film) {
+        guard homeViewModel.checkCachesForFilmPoster(for: film) == nil else { return }
+        
+        Task { [weak self] in
+            await self?.loadImageAndRefreshItem(for: film)
+        }
+    }
+    
+    /// Performs the async work.
+    func loadImageAndRefreshItem(for film: Film) async {
+        guard await homeViewModel.getImage(for: film) != nil else { return }
+        reconfigureItem(film.id)
+    }
+    
+    /// Updates the diffable data source.
+    private func reconfigureItem(_ filmID: Film.ID) {
+        var snapshot = dataSource.snapshot()
+        guard snapshot.indexOfItem(filmID) != nil else { return }
+        snapshot.reconfigureItems([filmID])
+        dataSource.apply(snapshot, animatingDifferences: false)
     }
     
     private func updateSnapshot() {
