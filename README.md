@@ -7,7 +7,7 @@
 - Explore all Studio Ghibli films
 - Search for films by title
 - View details about each film
-- Add a film to 'Up Next' and/or 'Watched' queues, which are displayed on the 'Home' tab.
+- Add films to 'Up Next' and/or 'Watched' queues, which are displayed on the 'Home' tab
 - Supports portrait and landscape on iPhone and iPad
 
 ### Targets
