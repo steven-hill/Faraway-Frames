@@ -16,11 +16,12 @@ final class HomeVC: UIViewController {
     }
     
     // MARK: - Properties
-    let homeViewModel: HomeViewModel
-    lazy var collectionView = UICollectionView()
-    private var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
     private(set) var films: [Film] = []
     private(set) var segmentedControlIndex = 0
+    let homeViewModel: HomeViewModel
+    lazy var collectionView = UICollectionView()
+    private var filmCellRegistration: UICollectionView.CellRegistration<FilmGridCell, Film>!
+    private var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
     
     // MARK: - Initialisation
     init(homeViewModel: HomeViewModel) {
@@ -39,6 +40,7 @@ final class HomeVC: UIViewController {
         title = "Home"
         homeViewModel.delegate = self
         configureCollectionView()
+        configureCellRegistration()
         configureDataSource()
         homeViewModel.performFetches()
         registerForTraitChanges([UITraitHorizontalSizeClass.self, UITraitVerticalSizeClass.self]) { [weak self] (vc: Self, previousTraitCollection: UITraitCollection) in
@@ -85,6 +87,17 @@ final class HomeVC: UIViewController {
             collectionView.topAnchor.constraint(equalTo: view.topAnchor),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+    }
+    
+    private func configureCellRegistration() {
+        filmCellRegistration =
+        UICollectionView.CellRegistration<FilmGridCell, Film> { [weak self] cell, _, film in
+            guard let self else { return }
+            cell.configure(with: film)
+            if let image = homeViewModel.checkCachesForFilmPoster(for: film) {
+                cell.updateImage(image)
+            }
+        }
     }
     
     private func createLayout(for width: CGFloat) -> UICollectionViewLayout {
@@ -152,11 +165,7 @@ final class HomeVC: UIViewController {
             collectionView: collectionView
         ) { [weak self] collectionView, indexPath, filmID in
             guard let self = self,
-                  let section = Section(rawValue: indexPath.section),
-                    let cell = collectionView.dequeueReusableCell(
-                        withReuseIdentifier: FilmGridCell.reuseID,
-                        for: indexPath
-                    ) as? FilmGridCell
+                  let section = Section(rawValue: indexPath.section)
             else {
                 return UICollectionViewCell()
             }
@@ -168,16 +177,13 @@ final class HomeVC: UIViewController {
                 film = self.homeViewModel.lookupWatchedFilm(for: filmID)
             }
             
-            guard let film else { return cell }
+            guard let film else { return UICollectionViewCell() }
             
-            cell.configure(with: film)
-            
-            Task { [weak self] in
-                guard let self else { return }
-                await self.updateCellImage(for: film)
-            }
-            
-            return cell
+            return collectionView.dequeueConfiguredReusableCell(
+                using: filmCellRegistration,
+                for: indexPath,
+                item: film
+            )
         }
         
         dataSource.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
