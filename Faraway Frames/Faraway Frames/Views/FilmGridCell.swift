@@ -59,7 +59,17 @@ final class FilmGridCell: UICollectionViewCell {
     
     func configure(with film: Film) {
         titleLabel.text = film.title
-        posterImageView.image = SFSymbols.photo
+    }
+    
+    func updateImage(_ image: UIImage) {
+        UIView.transition(with: posterImageView, duration: 0.2, options: .transitionCrossDissolve) {
+            self.posterImageView.image = image
+        }
+    }
+    
+    /// Property accessible only for unit testing.
+    var currentDisplayedImage: UIImage? {
+        return posterImageView.image
     }
     
     override func prepareForReuse() {

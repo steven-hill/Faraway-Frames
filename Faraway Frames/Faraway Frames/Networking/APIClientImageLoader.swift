@@ -18,25 +18,36 @@ final class APIClientImageLoader: ImageLoader {
         self.cacheManager = cacheManager
     }
     
-    func loadImage(from url: URL) async -> UIImage? {
-        let key = url.absoluteString as NSString
-        if let cachedImage = cacheManager.getData(forKey: key) {
+    func loadImage(for image: String) async -> UIImage? {
+        if let cachedImage = checkCache(for: image) {
             return cachedImage
         }
         
-        let request = URLRequest(url: url)
-        if let cachedResponse = session.configuration.urlCache?.cachedResponse(for: request),
-           let imageFromURLCache = UIImage(data: cachedResponse.data) {
-            cacheManager.setData(imageFromURLCache, forKey: key)
-            return imageFromURLCache
-        }
-        
         do {
+            guard let url = URL(string: image) else { return nil }
+            let key = url.absoluteString as NSString
             let (data, _) = try await session.data(from: url)
             guard let image = UIImage(data: data) else { return nil }
             cacheManager.setData(image, forKey: key)
             return image
         } catch {
+            return nil
+        }
+    }
+    
+    func checkCache(for image: String) -> UIImage? {
+        guard let url = URL(string: image) else { return nil }
+        let key = url.absoluteString as NSString
+        if let imageInNSCache = cacheManager.getData(forKey: key) {
+            return imageInNSCache
+        }
+        
+        let request = URLRequest(url: url)
+        if let cachedResponse = session.configuration.urlCache?.cachedResponse(for: request),
+           let imageInURLCache = UIImage(data: cachedResponse.data) {
+            cacheManager.setData(imageInURLCache, forKey: key)
+            return imageInURLCache
+        } else {
             return nil
         }
     }

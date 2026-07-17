@@ -16,11 +16,12 @@ final class HomeVC: UIViewController {
     }
     
     // MARK: - Properties
-    let homeViewModel: HomeViewModel
-    lazy var collectionView = UICollectionView()
-    private var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
     private(set) var films: [Film] = []
     private(set) var segmentedControlIndex = 0
+    let homeViewModel: HomeViewModel
+    lazy var collectionView = UICollectionView()
+    private var filmCellRegistration: UICollectionView.CellRegistration<FilmGridCell, Film>!
+    private var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
     
     // MARK: - Initialisation
     init(homeViewModel: HomeViewModel) {
@@ -39,6 +40,7 @@ final class HomeVC: UIViewController {
         title = "Home"
         homeViewModel.delegate = self
         configureCollectionView()
+        configureCellRegistration()
         configureDataSource()
         homeViewModel.performFetches()
         registerForTraitChanges([UITraitHorizontalSizeClass.self, UITraitVerticalSizeClass.self]) { [weak self] (vc: Self, previousTraitCollection: UITraitCollection) in
@@ -85,6 +87,17 @@ final class HomeVC: UIViewController {
             collectionView.topAnchor.constraint(equalTo: view.topAnchor),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+    }
+    
+    private func configureCellRegistration() {
+        filmCellRegistration =
+        UICollectionView.CellRegistration<FilmGridCell, Film> { [weak self] cell, _, film in
+            guard let self else { return }
+            cell.configure(with: film)
+            if let image = homeViewModel.checkCachesForFilmPoster(for: film) {
+                cell.updateImage(image)
+            }
+        }
     }
     
     private func createLayout(for width: CGFloat) -> UICollectionViewLayout {
@@ -148,10 +161,12 @@ final class HomeVC: UIViewController {
     
     // MARK: - Data Source Configuration
     private func configureDataSource() {
-        dataSource = UICollectionViewDiffableDataSource<Section, Film.ID>(collectionView: collectionView) { [weak self] collectionView, indexPath, filmID in
+        dataSource = UICollectionViewDiffableDataSource<Section, Film.ID>(
+            collectionView: collectionView
+        ) { [weak self] collectionView, indexPath, filmID in
             guard let self = self,
-                  let section = Section(rawValue: indexPath.section),
-                    let cell = collectionView.dequeueReusableCell(withReuseIdentifier: FilmGridCell.reuseID, for: indexPath) as? FilmGridCell else {
+                  let section = Section(rawValue: indexPath.section)
+            else {
                 return UICollectionViewCell()
             }
             let film: Film?
@@ -161,10 +176,15 @@ final class HomeVC: UIViewController {
             case .watched:
                 film = self.homeViewModel.lookupWatchedFilm(for: filmID)
             }
-            if let film = film {
-                cell.configure(with: film)
-            }
-            return cell
+            
+            guard let film else { return UICollectionViewCell() }
+            requestImageIfNeeded(for: film)
+            
+            return collectionView.dequeueConfiguredReusableCell(
+                using: filmCellRegistration,
+                for: indexPath,
+                item: film
+            )
         }
         
         dataSource.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
@@ -180,6 +200,29 @@ final class HomeVC: UIViewController {
             }
             return header
         }
+    }
+    
+    /// Decides whether to start the work.
+    private func requestImageIfNeeded(for film: Film) {
+        guard homeViewModel.checkCachesForFilmPoster(for: film) == nil else { return }
+        
+        Task { [weak self] in
+            await self?.loadImageAndRefreshItem(for: film)
+        }
+    }
+    
+    /// Performs the async work.
+    private func loadImageAndRefreshItem(for film: Film) async {
+        guard await homeViewModel.getImage(for: film) != nil else { return }
+        reconfigureItem(film.id)
+    }
+    
+    /// Updates the diffable data source.
+    private func reconfigureItem(_ filmID: Film.ID) {
+        var snapshot = dataSource.snapshot()
+        guard snapshot.indexOfItem(filmID) != nil else { return }
+        snapshot.reconfigureItems([filmID])
+        dataSource.apply(snapshot, animatingDifferences: false)
     }
     
     private func updateSnapshot() {

@@ -116,7 +116,7 @@ struct HomeViewModelTests {
     
     @Test("Image loading request returns fallback image when URL is invalid")
     func homeViewModel_getImage_whenURLIsInvalid_returnsFallback() async {
-        let sut = makeSUTForImageDownloadFailure()
+        let (sut, _) = makeSUTWithImageLoader(shouldDownloadSucceed: false)
         let targetFilm = Film.sample[0]
         
         let returnedImage = await sut.getImage(for: targetFilm)
@@ -136,7 +136,7 @@ struct HomeViewModelTests {
     
     @Test("Image loading request returns the fallback image when network request fails")
     func homeViewModel_getImage_whenRequestFails_returnsFallbackImage() async {
-        let sut = makeSUTForImageDownloadFailure()
+        let (sut, _) = makeSUTWithImageLoader(shouldDownloadSucceed: false)
         let targetFilm = Film.sample[0]
         
         let returnedImage = await sut.getImage(for: targetFilm)
@@ -146,7 +146,7 @@ struct HomeViewModelTests {
     
     @Test("Image loading request catches cancellation and returns fallback image")
     func homeViewModel_getImage_whenTaskIsCancelledMidFlight_returnsFallback() async {
-        let sut = makeSUTForImageDownloadFailure()
+        let (sut, _) = makeSUTWithImageLoader(shouldDownloadSucceed: false)
         let targetFilm = Film.sample[0]
         let task = Task {
             await sut.getImage(for: targetFilm)
@@ -156,6 +156,15 @@ struct HomeViewModelTests {
         let resultImage = await task.value
         
         #expect(resultImage == SFSymbols.movieClapper, "Cooperative cancellation should cause the method to bypass normal returns and return the fallback image.")
+    }
+    
+    @Test("`checkCachesForFilmPoster` calls method on `imageLoader`")
+    func homeViewModel_checkCachesForFilmPoster_callsCorrectMethodOnImageLoaderOnce() {
+        let (sut, mockImageLoader) = makeSUTWithImageLoader(shouldDownloadSucceed: false)
+        
+        _ = sut.checkCachesForFilmPoster(for: Film.sample[0])
+        
+        #expect(mockImageLoader.checkCacheCallCount == 1, "Should have called `checkCache` on `imageLoader` once.")
     }
     
     @Test("Adding a film to upNext should add it to `upNextFilms`, and call delegate method", (.tags(.persistence)))
@@ -438,24 +447,26 @@ struct HomeViewModelTests {
         let filmQueueService = FilmQueueService(context: context)
         let sut = HomeViewModel(
             upNextFRC: mockUpNextFRC,
-            watchedFRC: mockWatchedFRC, imageLoader: MockImageLoader(),
+            watchedFRC: mockWatchedFRC,
+            imageLoader: MockImageLoader(),
             filmQueueService: filmQueueService)
         return (sut, context)
     }
     
-    private func makeSUTForImageDownloadFailure() -> HomeViewModel {
+    private func makeSUTWithImageLoader(shouldDownloadSucceed: Bool) -> (sut: HomeViewModel, mockImageLoader: MockImageLoader)  {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
         let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
         let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
         let mockImageLoader = MockImageLoader()
-        mockImageLoader.shouldSucceed = false
+        mockImageLoader.shouldSucceed = shouldDownloadSucceed
         let filmQueueService = FilmQueueService(context: context)
         let sut = HomeViewModel(
             upNextFRC: mockUpNextFRC,
-            watchedFRC: mockWatchedFRC, imageLoader: mockImageLoader,
+            watchedFRC: mockWatchedFRC,
+            imageLoader: mockImageLoader,
             filmQueueService: filmQueueService)
-        return sut
+        return (sut, mockImageLoader)
     }
     
     //MARK: - Home View Model Delegate Spy

@@ -204,6 +204,46 @@ struct HomeVCTests {
         #expect(iPadSplitViewNumberOfColumns == 2)
     }
     
+    @Test("`FilmGridCell` is reconfigured with film image when image exists in cache.")
+    func homeVC_whenImageExistsInCache_reconfiguresCellWithFilmImage() async throws {
+        let targetFilm = Film.sample[0]
+        let (sut, context, entity) = try makeSUTWithContextAndEntity()
+        _ = PersistenceHelper.makeFilmMO(with: targetFilm, entity: entity, context: context, isUpNext: true, isWatched: false)
+        try context.save()
+        sut.loadViewIfNeeded()
+
+        sut.collectionView.layoutIfNeeded()
+        
+        await Task.yield()
+        let targetIndexPath = IndexPath(item: 0, section: 0)
+        guard let cell = sut.collectionView.cellForItem(at: targetIndexPath) as? FilmGridCell else {
+            Issue.record("Expected visible `FilmGridCell` to be present after reconfiguration")
+            return
+        }
+        
+        #expect(cell.currentDisplayedImage == SFSymbols.popcorn, "The cell should be updated with the cached image (MockImageLoader stubbed to return `SFSymbols.popcorn` in success case).")
+    }
+    
+    @Test("`FilmGridCell` is not reconfigured with film image when image does not exist in cache.")
+    func homeVC_whenImageIsNotInCache_cellIsNotReconfiguredWithFilmImage() async throws {
+        let targetFilm = Film.sample[0]
+        let (sut, context, entity) = try makeSUTWithEmptyMockImageLoaderCache()
+        _ = PersistenceHelper.makeFilmMO(with: targetFilm, entity: entity, context: context, isUpNext: true, isWatched: false)
+        try context.save()
+        sut.loadViewIfNeeded()
+        
+        sut.collectionView.layoutIfNeeded()
+        
+        await Task.yield()
+        let targetIndexPath = IndexPath(item: 0, section: 0)
+        guard let cell = sut.collectionView.cellForItem(at: targetIndexPath) as? FilmGridCell else {
+            Issue.record("Expected visible `FilmGridCell` to be present after reconfiguration")
+            return
+        }
+        
+        #expect(cell.currentDisplayedImage == nil, "Should be nil if image is not in cache.")
+    }
+    
     // MARK: - SUT Helper Methods
     private func makeSUT() -> HomeVC {
         let testPersistenceController = try! PersistenceController(inMemory: true)
@@ -230,6 +270,29 @@ struct HomeVCTests {
             upNextFRC: mockUpNextFRC,
             watchedFRC: mockWatchedFRC,
             imageLoader: MockImageLoader(),
+            filmQueueService: filmQueueService)
+        let sut = HomeVC(homeViewModel: homeVM)
+        let entity = try #require(
+            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
+        return (sut, context, entity)
+    }
+    
+    private func makeSUTWithEmptyMockImageLoaderCache() throws -> (sut: HomeVC,
+                                                                   context: NSManagedObjectContext,
+                                                                   entity: NSEntityDescription) {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
+        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
+        let mockImageLoader = MockImageLoader()
+        mockImageLoader.shouldSucceed = false
+        let filmQueueService = FilmQueueService(context: context)
+        let homeVM = HomeViewModel(
+            upNextFRC: mockUpNextFRC,
+            watchedFRC: mockWatchedFRC,
+            imageLoader: mockImageLoader,
             filmQueueService: filmQueueService)
         let sut = HomeVC(homeViewModel: homeVM)
         let entity = try #require(
