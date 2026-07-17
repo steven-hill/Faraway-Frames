@@ -212,7 +212,7 @@ final class HomeVC: UIViewController {
     }
     
     /// Performs the async work.
-    func loadImageAndRefreshItem(for film: Film) async {
+    private func loadImageAndRefreshItem(for film: Film) async {
         guard await homeViewModel.getImage(for: film) != nil else { return }
         reconfigureItem(film.id)
     }

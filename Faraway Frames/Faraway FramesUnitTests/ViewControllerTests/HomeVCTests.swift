@@ -205,19 +205,17 @@ struct HomeVCTests {
     }
     
     @Test("`FilmGridCell` is reconfigured with film image when image exists in cache.")
-    func homeVC_loadImageAndRefreshItem_whenImageExistsInCache_reconfiguresCellWithFilmImage() async throws {
+    func homeVC_whenImageExistsInCache_reconfiguresCellWithFilmImage() async throws {
         let targetFilm = Film.sample[0]
         let (sut, context, entity) = try makeSUTWithContextAndEntity()
         _ = PersistenceHelper.makeFilmMO(with: targetFilm, entity: entity, context: context, isUpNext: true, isWatched: false)
         try context.save()
         sut.loadViewIfNeeded()
+
         sut.collectionView.layoutIfNeeded()
+        
         await Task.yield()
         let targetIndexPath = IndexPath(item: 0, section: 0)
-        
-        await sut.loadImageAndRefreshItem(for: targetFilm)
-        
-        await Task.yield()
         guard let cell = sut.collectionView.cellForItem(at: targetIndexPath) as? FilmGridCell else {
             Issue.record("Expected visible `FilmGridCell` to be present after reconfiguration")
             return
@@ -227,19 +225,17 @@ struct HomeVCTests {
     }
     
     @Test("`FilmGridCell` is not reconfigured with film image when image does not exist in cache.")
-    func homeVC_loadImageAndRefreshItem_whenImageIsNotInCache_cellIsNotReconfiguredWithFilmImage() async throws {
+    func homeVC_whenImageIsNotInCache_cellIsNotReconfiguredWithFilmImage() async throws {
         let targetFilm = Film.sample[0]
         let (sut, context, entity) = try makeSUTWithEmptyMockImageLoaderCache()
         _ = PersistenceHelper.makeFilmMO(with: targetFilm, entity: entity, context: context, isUpNext: true, isWatched: false)
         try context.save()
         sut.loadViewIfNeeded()
+        
         sut.collectionView.layoutIfNeeded()
+        
         await Task.yield()
         let targetIndexPath = IndexPath(item: 0, section: 0)
-        
-        await sut.loadImageAndRefreshItem(for: targetFilm)
-        
-        await Task.yield()
         guard let cell = sut.collectionView.cellForItem(at: targetIndexPath) as? FilmGridCell else {
             Issue.record("Expected visible `FilmGridCell` to be present after reconfiguration")
             return
