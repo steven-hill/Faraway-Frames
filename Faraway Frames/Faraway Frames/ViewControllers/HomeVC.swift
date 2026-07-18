@@ -176,7 +176,7 @@ final class HomeVC: UIViewController {
                 return collectionView.dequeueConfiguredReusableCell(
                     using: filmCellRegistration,
                     for: indexPath,
-                    item: Film(id: "", title: "Something went wrong", originalTitle: "", originalTitleRomanised: "", image: "", movieBanner: "", description: "", director: "", producer: "", releaseDate: "", runningTime: "", rottenTomatoesScore: "", url: "")
+                    item: Film.placeholder
                 )
             }
 
@@ -192,7 +192,7 @@ final class HomeVC: UIViewController {
                 return collectionView.dequeueConfiguredReusableCell(
                     using: filmCellRegistration,
                     for: indexPath,
-                    item: Film(id: "", title: "Something went wrong", originalTitle: "", originalTitleRomanised: "", image: "", movieBanner: "", description: "", director: "", producer: "", releaseDate: "", runningTime: "", rottenTomatoesScore: "", url: "")
+                    item: Film.placeholder
                 )
             }
             requestImageIfNeeded(for: film)
