@@ -8,7 +8,6 @@
 import UIKit
 
 final class FilmGridCell: UICollectionViewCell {
-    static let reuseID = "FilmGridCell"
     
     private let posterImageView: UIImageView = {
         let imageView = UIImageView()
