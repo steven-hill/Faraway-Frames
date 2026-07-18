@@ -164,11 +164,22 @@ final class HomeVC: UIViewController {
         dataSource = UICollectionViewDiffableDataSource<Section, Film.ID>(
             collectionView: collectionView
         ) { [weak self] collectionView, indexPath, filmID in
-            guard let self = self,
-                  let section = Section(rawValue: indexPath.section)
-            else {
-                return UICollectionViewCell()
+            guard let self = self else {
+                return collectionView.dequeueConfiguredReusableCell(
+                    using: UICollectionView.CellRegistration<UICollectionViewCell, Film.ID> { cell, _, _ in },
+                    for: indexPath,
+                    item: filmID
+                )
             }
+                  
+            guard let section = Section(rawValue: segmentedControlIndex) else {
+                return collectionView.dequeueConfiguredReusableCell(
+                    using: filmCellRegistration,
+                    for: indexPath,
+                    item: Film.placeholder
+                )
+            }
+
             let film: Film?
             switch section {
             case .upNext:
@@ -177,7 +188,13 @@ final class HomeVC: UIViewController {
                 film = self.homeViewModel.lookupWatchedFilm(for: filmID)
             }
             
-            guard let film else { return UICollectionViewCell() }
+            guard let film else {
+                return collectionView.dequeueConfiguredReusableCell(
+                    using: filmCellRegistration,
+                    for: indexPath,
+                    item: Film.placeholder
+                )
+            }
             requestImageIfNeeded(for: film)
             
             return collectionView.dequeueConfiguredReusableCell(

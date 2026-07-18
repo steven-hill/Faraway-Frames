@@ -74,6 +74,23 @@ extension Film {
         filmToBeSaved.url = film.url
         return filmToBeSaved
     }
+    
+    /// Provides some placeholder data for cell in case film lookup returns nil.
+    static let placeholder = Film(
+        id: "",
+        title: "Something went wrong",
+        originalTitle: "",
+        originalTitleRomanised: "",
+        image: "",
+        movieBanner: "",
+        description: "",
+        director: "",
+        producer: "",
+        releaseDate: "",
+        runningTime: "",
+        rottenTomatoesScore: "",
+        url: ""
+    )
 }
 
 extension Film {
