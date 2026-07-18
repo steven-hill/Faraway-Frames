@@ -165,7 +165,7 @@ final class HomeVC: UIViewController {
             collectionView: collectionView
         ) { [weak self] collectionView, indexPath, filmID in
             guard let self = self,
-                  let section = Section(rawValue: indexPath.section)
+                  let section = Section(rawValue: segmentedControlIndex)
             else {
                 return UICollectionViewCell()
             }
