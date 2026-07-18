@@ -72,11 +72,6 @@ final class HomeVC: UIViewController {
         )
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.backgroundColor = .systemBackground
-        collectionView.register(
-            SegmentedControlHeaderView.self,
-            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
-            withReuseIdentifier: SegmentedControlHeaderView.reuseID
-        )
         view.addSubview(collectionView)
         
         NSLayoutConstraint.activate([
