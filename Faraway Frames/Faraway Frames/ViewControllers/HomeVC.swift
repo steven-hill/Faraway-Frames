@@ -47,7 +47,7 @@ final class HomeVC: UIViewController {
         homeViewModel.performFetches()
         registerForTraitChanges([UITraitHorizontalSizeClass.self, UITraitVerticalSizeClass.self]) { [weak self] (vc: Self, previousTraitCollection: UITraitCollection) in
             guard let self = self else { return }
-            self.transitionLayout(toWidth: self.view.bounds.width)
+            transitionLayout(toWidth: self.view.bounds.width)
         }
     }
     
@@ -55,7 +55,7 @@ final class HomeVC: UIViewController {
         super.viewWillTransition(to: size, with: coordinator)
         coordinator.animate(alongsideTransition: { [weak self] _ in
             guard let self = self else { return }
-            self.transitionLayout(toWidth: size.width)
+            transitionLayout(toWidth: size.width)
         })
     }
     
@@ -87,8 +87,8 @@ final class HomeVC: UIViewController {
             elementKind: UICollectionView.elementKindSectionHeader
         ) { [weak self] headerView, elementKind, indexPath in
             guard let self = self else { return }
-            headerView.segmentedControl.addTarget(self, action: #selector(self.segmentChanged), for: .valueChanged)
-            headerView.segmentedControl.selectedSegmentIndex = self.segmentedControlIndex
+            headerView.segmentedControl.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
+            headerView.segmentedControl.selectedSegmentIndex = segmentedControlIndex
         }
     }
     
@@ -210,7 +210,7 @@ final class HomeVC: UIViewController {
         dataSource.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
             guard let self = self else { return nil }            
             return collectionView.dequeueConfiguredReusableSupplementary(
-                using: self.headerRegistration,
+                using: headerRegistration,
                 for: indexPath
             )
         }
