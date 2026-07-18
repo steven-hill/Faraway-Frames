@@ -186,9 +186,9 @@ final class HomeVC: UIViewController {
             let film: Film?
             switch section {
             case .upNext:
-                film = self.homeViewModel.lookupUpNextFilm(for: filmID)
+                film = homeViewModel.lookupUpNextFilm(for: filmID)
             case .watched:
-                film = self.homeViewModel.lookupWatchedFilm(for: filmID)
+                film = homeViewModel.lookupWatchedFilm(for: filmID)
             }
             
             guard let film else {
