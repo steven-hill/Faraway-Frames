@@ -20,6 +20,7 @@ final class HomeVC: UIViewController {
     private(set) var segmentedControlIndex = 0
     let homeViewModel: HomeViewModel
     lazy var collectionView = UICollectionView()
+    private var headerRegistration: UICollectionView.SupplementaryRegistration<SegmentedControlHeaderView>!
     private var filmCellRegistration: UICollectionView.CellRegistration<FilmGridCell, Film>!
     private var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
     
@@ -40,6 +41,7 @@ final class HomeVC: UIViewController {
         title = "Home"
         homeViewModel.delegate = self
         configureCollectionView()
+        configureSupplementaryRegistration()
         configureCellRegistration()
         configureDataSource()
         homeViewModel.performFetches()
@@ -83,6 +85,16 @@ final class HomeVC: UIViewController {
             collectionView.topAnchor.constraint(equalTo: view.topAnchor),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+    }
+    
+    private func configureSupplementaryRegistration() {
+        headerRegistration = UICollectionView.SupplementaryRegistration<SegmentedControlHeaderView>(
+            elementKind: UICollectionView.elementKindSectionHeader
+        ) { [weak self] headerView, elementKind, indexPath in
+            guard let self = self else { return }
+            headerView.segmentedControl.addTarget(self, action: #selector(self.segmentChanged), for: .valueChanged)
+            headerView.segmentedControl.selectedSegmentIndex = self.segmentedControlIndex
+        }
     }
     
     private func configureCellRegistration() {
@@ -199,19 +211,13 @@ final class HomeVC: UIViewController {
                 item: film
             )
         }
-        
+
         dataSource.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
-            guard kind == UICollectionView.elementKindSectionHeader else { return nil }
-            guard let header = collectionView.dequeueReusableSupplementaryView(
-                ofKind: kind,
-                withReuseIdentifier: SegmentedControlHeaderView.reuseID,
+            guard let self = self else { return nil }            
+            return collectionView.dequeueConfiguredReusableSupplementary(
+                using: self.headerRegistration,
                 for: indexPath
-                ) as? SegmentedControlHeaderView else { return nil }
-            header.segmentedControl.addTarget(self, action: #selector(self?.segmentChanged), for: .valueChanged)
-            if let currentSelection = self?.segmentedControlIndex {
-                header.segmentedControl.selectedSegmentIndex = currentSelection
-            }
-            return header
+            )
         }
     }
     
