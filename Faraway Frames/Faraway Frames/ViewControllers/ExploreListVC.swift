@@ -45,6 +45,7 @@ final class ExploreListVC: UIViewController {
         setUpBackButton()
         viewModel.delegate = self
         configureCollectionView()
+        configureCellRegistration()
         configureDataSource()
         configureSearchController()
         configureRefreshControl()
@@ -93,6 +94,20 @@ final class ExploreListVC: UIViewController {
             return NSCollectionLayoutSection.list(using: config, layoutEnvironment: layoutEnvironment)
         }
         return UICollectionViewCompositionalLayout(sectionProvider: sectionProvider)
+    }
+    
+    private func configureCellRegistration() {
+        filmCellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Film> { [weak self] (cell, indexPath, film) in
+            guard let self else { return }
+            cell.contentConfiguration = UIHostingConfiguration {
+                FilmRowView(film: film, image: nil)
+            }
+            cell.accessories = [.disclosureIndicator()]
+            Task { [weak self, weak cell] in
+                guard let self, let cell else { return }
+                await self.updateCellImage(cell, filmID: film.id, indexPath: indexPath)
+            }
+        }
     }
     
     func updateCellImage(_ cell: UICollectionViewCell, filmID: Film.ID, indexPath: IndexPath) async {
