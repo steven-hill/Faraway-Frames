@@ -162,14 +162,12 @@ final class ExploreListVC: UIViewController {
             )
         }
         
-        dataSource.supplementaryViewProvider = { (collectionView, kind, indexPath) in
-            guard kind == UICollectionView.elementKindSectionHeader else { return nil }
-            let header = collectionView.dequeueReusableSupplementaryView(
-                ofKind: kind,
-                withReuseIdentifier: NetworkErrorHeaderView.identifier,
+        dataSource.supplementaryViewProvider = { [weak self] (collectionView, _, indexPath) in
+            guard let self = self else { return nil }
+            return collectionView.dequeueConfiguredReusableSupplementary(
+                using: headerRegistration,
                 for: indexPath
-            ) as? NetworkErrorHeaderView
-            return header
+            )
         }
     }
     
