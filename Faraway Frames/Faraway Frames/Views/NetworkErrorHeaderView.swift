@@ -7,9 +7,7 @@
 
 import UIKit
 
-final class NetworkErrorHeaderView: UICollectionReusableView {
-    static let identifier = "NetworkErrorHeaderView"
-    
+final class NetworkErrorHeaderView: UICollectionReusableView {    
     private let containerView: UIView = {
         let view = UIView()
         view.backgroundColor = .systemOrange.withAlphaComponent(0.15)
