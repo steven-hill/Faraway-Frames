@@ -19,6 +19,7 @@ final class ExploreListVC: UIViewController {
     private(set) var filmLookup: [String: Film] = [:]
     let viewModel: FilmsListViewModel
     lazy var collectionView = UICollectionView()
+    private var filmCellRegistration: UICollectionView.CellRegistration<UICollectionViewListCell, Film>!
     var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
     let searchController = UISearchController(searchResultsController: nil)
     private(set) var loadTask: Task<Void, Never>?
