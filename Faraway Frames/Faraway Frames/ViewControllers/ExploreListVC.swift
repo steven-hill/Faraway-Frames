@@ -130,18 +130,6 @@ final class ExploreListVC: UIViewController {
     }
     
     private func configureDataSource() {
-        let filmCellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Film> { [weak self] (cell, indexPath, film) in
-            guard let self else { return }
-            cell.contentConfiguration = UIHostingConfiguration {
-                FilmRowView(film: film, image: nil)
-            }
-            cell.accessories = [.disclosureIndicator()]
-            Task { [weak self, weak cell] in
-                guard let self, let cell else { return }
-                await self.updateCellImage(cell, filmID: film.id, indexPath: indexPath)
-            }
-        }
-        
         dataSource = UICollectionViewDiffableDataSource<Section, Film.ID>(collectionView: collectionView) { [weak self] (collectionView, indexPath, filmID) -> UICollectionViewListCell in
             guard let self = self, let film = self.filmLookup[filmID] else {
                 return UICollectionViewListCell()
