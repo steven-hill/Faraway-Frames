@@ -19,6 +19,8 @@ final class ExploreListVC: UIViewController {
     private(set) var filmLookup: [String: Film] = [:]
     let viewModel: FilmsListViewModel
     lazy var collectionView = UICollectionView()
+    private var headerRegistration: UICollectionView.SupplementaryRegistration<NetworkErrorHeaderView>!
+    private var filmCellRegistration: UICollectionView.CellRegistration<UICollectionViewListCell, Film>!
     var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
     let searchController = UISearchController(searchResultsController: nil)
     private(set) var loadTask: Task<Void, Never>?
@@ -44,6 +46,8 @@ final class ExploreListVC: UIViewController {
         setUpBackButton()
         viewModel.delegate = self
         configureCollectionView()
+        configureSupplementaryRegistration()
+        configureCellRegistration()
         configureDataSource()
         configureSearchController()
         configureRefreshControl()
@@ -66,9 +70,6 @@ final class ExploreListVC: UIViewController {
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
         collectionView.delegate = self
         collectionView.translatesAutoresizingMaskIntoConstraints = false
-        collectionView.register(NetworkErrorHeaderView.self,
-            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
-            withReuseIdentifier: NetworkErrorHeaderView.identifier)
         view.addSubview(collectionView)
         
         NSLayoutConstraint.activate([
@@ -94,6 +95,26 @@ final class ExploreListVC: UIViewController {
         return UICollectionViewCompositionalLayout(sectionProvider: sectionProvider)
     }
     
+    private func configureSupplementaryRegistration() {
+        headerRegistration = UICollectionView.SupplementaryRegistration<NetworkErrorHeaderView>(
+            elementKind: UICollectionView.elementKindSectionHeader
+        ) { (_, _, _) in }
+    }
+    
+    private func configureCellRegistration() {
+        filmCellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Film> { [weak self] (cell, indexPath, film) in
+            guard let self else { return }
+            cell.contentConfiguration = UIHostingConfiguration {
+                FilmRowView(film: film, image: nil)
+            }
+            cell.accessories = [.disclosureIndicator()]
+            Task { [weak self, weak cell] in
+                guard let self, let cell else { return }
+                await self.updateCellImage(cell, filmID: film.id, indexPath: indexPath)
+            }
+        }
+    }
+    
     func updateCellImage(_ cell: UICollectionViewCell, filmID: Film.ID, indexPath: IndexPath) async {
         guard let film = filmLookup[filmID] else { return }
         
@@ -114,33 +135,36 @@ final class ExploreListVC: UIViewController {
     }
     
     private func configureDataSource() {
-        let filmCellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Film> { [weak self] (cell, indexPath, film) in
-            guard let self else { return }
-            cell.contentConfiguration = UIHostingConfiguration {
-                FilmRowView(film: film, image: nil)
-            }
-            cell.accessories = [.disclosureIndicator()]
-            Task { [weak self, weak cell] in
-                guard let self, let cell else { return }
-                await self.updateCellImage(cell, filmID: film.id, indexPath: indexPath)
-            }
-        }
-        
         dataSource = UICollectionViewDiffableDataSource<Section, Film.ID>(collectionView: collectionView) { [weak self] (collectionView, indexPath, filmID) -> UICollectionViewListCell in
-            guard let self = self, let film = self.filmLookup[filmID] else {
-                return UICollectionViewListCell()
+            guard let self = self else {
+                return collectionView.dequeueConfiguredReusableCell(
+                    using: UICollectionView.CellRegistration<UICollectionViewListCell, Film.ID> { cell, _, _ in },
+                    for: indexPath,
+                    item: filmID
+                )
             }
-            return collectionView.dequeueConfiguredReusableCell(using: filmCellRegistration, for: indexPath, item: film)
+            
+            guard let film = self.filmLookup[filmID] else {
+                return collectionView.dequeueConfiguredReusableCell(
+                    using: filmCellRegistration,
+                    for: indexPath,
+                    item: Film.placeholder
+                )
+            }
+            
+            return collectionView.dequeueConfiguredReusableCell(
+                using: filmCellRegistration,
+                for: indexPath,
+                item: film
+            )
         }
         
-        dataSource.supplementaryViewProvider = { (collectionView, kind, indexPath) in
-            guard kind == UICollectionView.elementKindSectionHeader else { return nil }
-            let header = collectionView.dequeueReusableSupplementaryView(
-                ofKind: kind,
-                withReuseIdentifier: NetworkErrorHeaderView.identifier,
+        dataSource.supplementaryViewProvider = { [weak self] (collectionView, _, indexPath) in
+            guard let self = self else { return nil }
+            return collectionView.dequeueConfiguredReusableSupplementary(
+                using: headerRegistration,
                 for: indexPath
-            ) as? NetworkErrorHeaderView
-            return header
+            )
         }
     }
     
