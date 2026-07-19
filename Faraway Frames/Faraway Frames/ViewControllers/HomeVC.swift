@@ -85,7 +85,7 @@ final class HomeVC: UIViewController {
     private func configureSupplementaryRegistration() {
         headerRegistration = UICollectionView.SupplementaryRegistration<SegmentedControlHeaderView>(
             elementKind: UICollectionView.elementKindSectionHeader
-        ) { [weak self] headerView, elementKind, indexPath in
+        ) { [weak self] headerView, _, _ in
             guard let self = self else { return }
             headerView.segmentedControl.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
             headerView.segmentedControl.selectedSegmentIndex = segmentedControlIndex
@@ -207,8 +207,8 @@ final class HomeVC: UIViewController {
             )
         }
 
-        dataSource.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
-            guard let self = self else { return nil }            
+        dataSource.supplementaryViewProvider = { [weak self] collectionView, _, indexPath in
+            guard let self = self else { return nil }
             return collectionView.dequeueConfiguredReusableSupplementary(
                 using: headerRegistration,
                 for: indexPath
