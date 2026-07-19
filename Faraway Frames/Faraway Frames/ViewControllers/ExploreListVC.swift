@@ -46,6 +46,7 @@ final class ExploreListVC: UIViewController {
         setUpBackButton()
         viewModel.delegate = self
         configureCollectionView()
+        configureSupplementaryRegistration()
         configureCellRegistration()
         configureDataSource()
         configureSearchController()
@@ -95,6 +96,12 @@ final class ExploreListVC: UIViewController {
             return NSCollectionLayoutSection.list(using: config, layoutEnvironment: layoutEnvironment)
         }
         return UICollectionViewCompositionalLayout(sectionProvider: sectionProvider)
+    }
+    
+    private func configureSupplementaryRegistration() {
+        headerRegistration = UICollectionView.SupplementaryRegistration<NetworkErrorHeaderView>(
+            elementKind: UICollectionView.elementKindSectionHeader
+        ) { (_, _, _) in }
     }
     
     private func configureCellRegistration() {
