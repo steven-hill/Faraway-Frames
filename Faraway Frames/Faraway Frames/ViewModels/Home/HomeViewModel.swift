@@ -9,6 +9,10 @@ import Foundation
 import CoreData
 import UIKit
 
+protocol HomeViewModelCoordinatorDelegate: AnyObject {
+    func homeViewModelDidSelectFilm(_ film: Film)
+}
+
 final class HomeViewModel: NSObject {
     
     // MARK: - State Definition
@@ -21,6 +25,7 @@ final class HomeViewModel: NSObject {
     // MARK: - Properties
     private(set) var currentState: HomeState = .idle
     weak var delegate: HomeViewModelDelegate?
+    weak var coordinatorDelegate: HomeViewModelCoordinatorDelegate?
     private let upNextFRC: NSFetchedResultsController<FilmMO>
     private let watchedFRC: NSFetchedResultsController<FilmMO>
     private let imageLoader: ImageLoader
