@@ -124,6 +124,29 @@ struct ExploreSplitViewCoordinatorTests {
         #expect(exploreSplitVCSpy.hideWasCalled == true, "Should collapse the primary view controller.")
     }
     
+    @Test("didSelectFilm pushes detail view controller onto primary navigation stack when split view is collapsed")
+    func exploreSplitViewCoordinator_didSelectFilm_whenCollapsed_pushesExploreDetailVCToPrimaryNavigation() {
+        let exploreSplitVCSpy = CollapsedSplitViewSpy(style: .doubleColumn)
+        let sut = makeSUT(with: exploreSplitVCSpy)
+        let mockFilmsListService = MockFilmsListService()
+        let imageLoader = MockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
+        let mockAccessibilityService = MockAccessibilityService()
+        let mockExploreListVC = ExploreListVC(viewModel: filmsListViewModel, accessibilityService: mockAccessibilityService)
+        let primaryNav = UINavigationController(rootViewController: mockExploreListVC)
+        sut.exploreListVC = mockExploreListVC
+        sut.exploreSplitVC.setViewController(primaryNav, for: .primary)
+        
+        primaryNav.traitOverrides.horizontalSizeClass = .compact
+        
+        let film = Film.sample[0]
+        sut.didSelectFilm(film)
+        
+        #expect(primaryNav.topViewController is ExploreDetailVC, "The primary navigation stack should now have `ExploreDetailVC` on top.")
+    }
+
     // MARK: - Helper Method
     private func makeSUT(with spy: UISplitViewController) -> ExploreSplitViewCoordinator {
         let testPersistenceController = try! PersistenceController(inMemory: true)
