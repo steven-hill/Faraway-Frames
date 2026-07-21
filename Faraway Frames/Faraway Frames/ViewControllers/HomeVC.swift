@@ -296,6 +296,15 @@ extension HomeVC: HomeViewModelDelegate {
 // MARK: - Collection View Delegate
 extension HomeVC: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let activeSection: Section = (segmentedControlIndex == 0) ? .upNext : .watched
+        let filmQueue: FilmQueue
+        if activeSection == .upNext {
+            filmQueue = .upNext
+        } else {
+            filmQueue = .watched
+        }
+        guard let filmID = dataSource.itemIdentifier(for: indexPath) else { return }
+        homeViewModel.selectFilm(at: filmID, in: filmQueue)
     }
 }
 
