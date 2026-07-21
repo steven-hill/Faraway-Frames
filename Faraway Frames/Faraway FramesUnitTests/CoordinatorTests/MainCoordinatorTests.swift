@@ -69,18 +69,7 @@ struct MainCoordinatorTests {
         #expect(window.makeKeyAndVisibleCalled, "Should have called makeKeyAndVisible.")
     }
 
-    final class ExploreNavigationDelegateSpy: ExploreNavigationDelegate {
-        var shouldDeselectAfterSelection = false
-        var didCallSelectFilmCallCount = 0
-        var capturedFilm: Film?
-        
-        func didSelectFilm(_ film: Film) {
-            didCallSelectFilmCallCount = 1
-            capturedFilm = film
-        }
-    }
-
-    @Test("MainCoordinator changes tab to `Explore`, and triggers the ExploreSplitViewCoordinator routing")
+    @Test("MainCoordinator changes tab to `Explore`, and triggers the `ExploreSplitViewCoordinator` routing")
     func mainCoordinator_homeCoordinatorDidRequestNavigationToExploreTab_handlesCrossTabRelay() throws {
         let (sut, _) = try makeSUT()
         sut.start()
@@ -110,6 +99,18 @@ struct MainCoordinatorTests {
         
         func makeKeyAndVisible() {
             makeKeyAndVisibleCalled = true
+        }
+    }
+    
+    // MARK: - Explore Navigation Delegate Spy
+    final class ExploreNavigationDelegateSpy: ExploreNavigationDelegate {
+        var shouldDeselectAfterSelection = false
+        var didCallSelectFilmCallCount = 0
+        var capturedFilm: Film?
+        
+        func didSelectFilm(_ film: Film) {
+            didCallSelectFilmCallCount = 1
+            capturedFilm = film
         }
     }
 }
