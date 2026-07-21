@@ -80,19 +80,19 @@ struct MainCoordinatorTests {
         }
     }
 
-    @Test("MainCoordinator changes tabs and triggers the ExploreSplitViewCoordinator routing")
+    @Test("MainCoordinator changes tab to `Explore`, and triggers the ExploreSplitViewCoordinator routing")
     func mainCoordinator_homeCoordinatorDidRequestNavigationToExploreTab_handlesCrossTabRelay() throws {
         let (sut, _) = try makeSUT()
+        sut.start()
         let exploreSpy = ExploreNavigationDelegateSpy()
         sut.exploreSplitViewCoordinator = exploreSpy
-        sut.start()
         let film = Film.sample[0]
         
         sut.homeCoordinatorDidRequestNavigationToExploreTab(for: film)
         
         #expect(sut.tabBarController.selectedTab == sut.exploreTab, "Should change selected tab to `Explore`.")
-        #expect(exploreSpy.didCallSelectFilmCallCount == 1, "Should have called delegate method.")
-        #expect(exploreSpy.capturedFilm?.title == "Interstellar")
+        #expect(exploreSpy.didCallSelectFilmCallCount == 1, "Should have called method on `ExploreSplitViewCoordinator`.")
+        #expect(exploreSpy.capturedFilm?.id == film.id)
     }
     
     // MARK: - Helper Method
