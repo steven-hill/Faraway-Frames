@@ -17,13 +17,14 @@ struct MainCoordinatorTests {
         #expect(sut.childCoordinators.isEmpty, "Should be empty on init.")
     }
     
-    @Test func mainCoordinator_start_createsHomeCoordinatorAsChildCoordinator() throws {
+    @Test func mainCoordinator_start_createsHomeCoordinatorAsChildCoordinatorAndSetsItsDelegate() throws {
         let (sut, _) = try makeSUT()
         
         sut.start()
         
         let childCoordinator = sut.childCoordinators.first as? HomeCoordinator
         #expect(childCoordinator != nil, "Should not be nil.")
+        #expect(sut.homeCoordinator?.delegate != nil, "Should be set to self.")
     }
     
     @Test func mainCoordinator_start_createsExploreSplitViewCoordinatorAsChildCoordinator() throws {

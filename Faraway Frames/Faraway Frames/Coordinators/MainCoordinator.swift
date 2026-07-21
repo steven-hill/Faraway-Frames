@@ -15,7 +15,7 @@ final class MainCoordinator: Coordinator {
     let dependencies: Dependencies
     let persistenceController: PersistenceControlling
     let tabBarController = TabBarController()
-    private var homeCoordinator: HomeCoordinator?
+    var homeCoordinator: HomeCoordinator?
     var exploreSplitViewCoordinator: ExploreNavigationDelegate?
     private(set) var homeTab: UITab?
     private(set) var exploreTab: UITab?
