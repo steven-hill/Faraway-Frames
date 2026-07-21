@@ -9,10 +9,6 @@ import Foundation
 import CoreData
 import UIKit
 
-protocol HomeViewModelCoordinatorDelegate: AnyObject {
-    func homeViewModelDidCaptureFilm(_ film: Film)
-}
-
 final class HomeViewModel: NSObject {
     
     // MARK: - State Definition
