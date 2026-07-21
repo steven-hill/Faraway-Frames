@@ -37,6 +37,14 @@ struct HomeVCTests {
         #expect(sut.homeViewModel.delegate != nil, "View model's delegate should be set.")
     }
     
+    @Test func homeVC_sets_collectionViewDelegate() {
+        let sut = makeSUT()
+        
+        sut.loadViewIfNeeded()
+        
+        #expect(sut.collectionView.delegate != nil, "Collection view's delegate should be set.")
+    }
+    
     @Test("Datasource returns a `FilmGridCell`")
     func homeVC_dataSource_returnsACell() throws {
         let (sut, context, entity) = try makeSUTWithContextAndEntity()
