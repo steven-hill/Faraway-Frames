@@ -20,6 +20,16 @@ struct HomeCoordinatorTests {
         #expect(sut.navigationController.viewControllers.count == 1, "Should push 1 view controller onto the navigation stack.")
         #expect(sut.navigationController.viewControllers.first is HomeVC, "Should be `HomeVC`.")
     }
+    
+    @Test("Sets Home View Model's coordinator delegate to self.")
+    func homeCoordinator_start_setsHomeViewModelsCoordinatorDelegate() {
+        let sut = makeSUT()
+        
+        sut.start()
+        let homeVC = sut.navigationController.viewControllers.first as! HomeVC
+        
+        #expect(homeVC.homeViewModel.coordinatorDelegate != nil, "Should be set.")
+    }
 
     @Test("HomeCoordinator forwards film from home view model up to delegate")
     func homeCoordinator_homeViewModelDidCaptureFilm_bubblesEventUpToDelegate() {
