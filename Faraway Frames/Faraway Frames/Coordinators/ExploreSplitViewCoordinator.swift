@@ -68,13 +68,21 @@ extension ExploreSplitViewCoordinator: ExploreNavigationDelegate {
     }
     
     func didSelectFilm(_ film: Film) {
+        exploreSplitVC.view.layoutIfNeeded()
         filmDetailViewModel.setFilm(film)
         let detailVC = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
-        if let primaryNav = exploreSplitVC.viewController(for: .primary) as? UINavigationController,
-           let exploreListVC = primaryNav.viewControllers.first as? ExploreListVC {
-            detailVC.delegate = exploreListVC
+        if let primaryNav = exploreSplitVC.viewController(for: .primary) as? UINavigationController {
+            if let exploreListVC = self.exploreListVC {
+                detailVC.delegate = exploreListVC
+            }
+            if exploreSplitVC.isCollapsed {
+                primaryNav.pushViewController(detailVC, animated: true)
+                return
+            }
         }
+        
         exploreSplitVC.showDetailViewController(detailVC, sender: nil)
+        
         if exploreSplitVC.isCollapsed == false {
             exploreSplitVC.hide(.primary)
         }
