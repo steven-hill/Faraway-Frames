@@ -10,7 +10,7 @@ import CoreData
 import UIKit
 
 protocol HomeViewModelCoordinatorDelegate: AnyObject {
-    func homeViewModelDidSelectFilm(_ film: Film)
+    func homeViewModelDidCaptureFilm(_ film: Film)
 }
 
 final class HomeViewModel: NSObject {
@@ -108,7 +108,8 @@ final class HomeViewModel: NSObject {
         return watchedFilms.first { $0.id == id }
     }
     
-    // MARK: - Home View Model Coordinator Delegate
+    // MARK: - Home View Model Coordinator Delegate Method
+    /// A tap on `FilmGridCell` on `HomeVC` flows through here on way to `HomeCoordinator`.
     func selectFilm(at id: Film.ID, in section: FilmQueue) {
         let film: Film?
         if section == .upNext {
@@ -117,7 +118,7 @@ final class HomeViewModel: NSObject {
             film = watchedFilms.first { $0.id == id }
         }
         guard let film else { return }
-        coordinatorDelegate?.homeViewModelDidSelectFilm(film)
+        coordinatorDelegate?.homeViewModelDidCaptureFilm(film)
     }
 }
 
