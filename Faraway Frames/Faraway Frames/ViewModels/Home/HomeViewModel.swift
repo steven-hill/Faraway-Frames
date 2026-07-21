@@ -107,6 +107,18 @@ final class HomeViewModel: NSObject {
     func lookupWatchedFilm(for id: String) -> Film? {
         return watchedFilms.first { $0.id == id }
     }
+    
+    // MARK: - Home View Model Coordinator Delegate
+    func selectFilm(at id: Film.ID, in section: FilmQueue) {
+        let film: Film?
+        if section == .upNext {
+            film = upNextFilms.first { $0.id == id }
+        } else {
+            film = watchedFilms.first { $0.id == id }
+        }
+        guard let film else { return }
+        coordinatorDelegate?.homeViewModelDidSelectFilm(film)
+    }
 }
 
 // MARK: - Fetched Results Controller Delegate
