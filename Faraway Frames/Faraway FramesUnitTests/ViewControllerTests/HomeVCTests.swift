@@ -299,6 +299,54 @@ struct HomeVCTests {
         #expect(spyDelegate.didCaptureFilmCallCount == 1, "The tap event should pass through the view model layer to coordinator delegate once.")
         #expect(spyDelegate.capturedFilm?.id == upNextFilm.id, "The correct film should be found by the view model.")
     }
+    
+    @Test("Tapping a cell in `Watched` flows through the view model and fires the coordinator delegate")
+    func homeVC_didSelectItemAt_filmInWatched_flowsThroughViewModelToCoordinatorDelegate() async throws {
+        let upNextFilm = Film.sample[0]
+        let watchedFilm = Film.sample[1]
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
+        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
+        let filmQueueService = FilmQueueService(context: context)
+        let homeVM = HomeViewModel(
+            upNextFRC: mockUpNextFRC,
+            watchedFRC: mockWatchedFRC,
+            imageLoader: MockImageLoader(),
+            filmQueueService: filmQueueService
+        )
+        let spyDelegate = SpyCoordinatorDelegate()
+        homeVM.coordinatorDelegate = spyDelegate
+        let sut = HomeVC(homeViewModel: homeVM)
+        let entity = try #require(
+            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            "The Core Data model schema must contain an entity definition named 'FilmMO'.")
+        _ = PersistenceHelper.makeFilmMO(with: upNextFilm,
+                                         entity: entity,
+                                         context: context,
+                                         isUpNext: true,
+                                         isWatched: false
+        )
+        _ = PersistenceHelper.makeFilmMO(with: watchedFilm,
+                                         entity: entity,
+                                         context: context,
+                                         isUpNext: false,
+                                         isWatched: true
+        )
+        try context.save()
+        sut.loadViewIfNeeded()
+        sut.collectionView.layoutIfNeeded()
+        await Task.yield()
+        let header = getHeader(sut: sut)
+        header?.segmentedControl.selectedSegmentIndex = 1
+        header?.segmentedControl.sendActions(for: .valueChanged)
+    
+        let targetIndexPath = IndexPath(item: 0, section: 0)
+        sut.collectionView.delegate?.collectionView?(sut.collectionView, didSelectItemAt: targetIndexPath)
+        
+        #expect(spyDelegate.didCaptureFilmCallCount == 1, "The tap event should pass through the view model layer to coordinator delegate once.")
+        #expect(spyDelegate.capturedFilm?.id == watchedFilm.id, "The correct film should be found by the view model.")
+    }
 
     // MARK: - SUT Helper Methods
     private func makeSUT() -> HomeVC {
