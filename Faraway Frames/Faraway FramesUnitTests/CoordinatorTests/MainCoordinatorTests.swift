@@ -68,6 +68,32 @@ struct MainCoordinatorTests {
         
         #expect(window.makeKeyAndVisibleCalled, "Should have called makeKeyAndVisible.")
     }
+
+    final class ExploreNavigationDelegateSpy: ExploreNavigationDelegate {
+        var shouldDeselectAfterSelection = false
+        var didCallSelectFilmCallCount = 0
+        var capturedFilm: Film?
+        
+        func didSelectFilm(_ film: Film) {
+            didCallSelectFilmCallCount = 1
+            capturedFilm = film
+        }
+    }
+
+    @Test("MainCoordinator changes tabs and triggers the ExploreSplitViewCoordinator routing")
+    func mainCoordinator_homeCoordinatorDidRequestNavigationToExploreTab_handlesCrossTabRelay() throws {
+        let (sut, _) = try makeSUT()
+        let exploreSpy = ExploreNavigationDelegateSpy()
+        sut.exploreSplitViewCoordinator = exploreSpy
+        sut.start()
+        let film = Film.sample[0]
+        
+        sut.homeCoordinatorDidRequestNavigationToExploreTab(for: film)
+        
+        #expect(sut.tabBarController.selectedTab == sut.exploreTab, "Should change selected tab to `Explore`.")
+        #expect(exploreSpy.didCallSelectFilmCallCount == 1, "Should have called delegate method.")
+        #expect(exploreSpy.capturedFilm?.title == "Interstellar")
+    }
     
     // MARK: - Helper Method
     private func makeSUT() throws -> (sut: MainCoordinator, window: WindowSpy) {
