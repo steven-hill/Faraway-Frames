@@ -37,6 +37,14 @@ struct HomeVCTests {
         #expect(sut.homeViewModel.delegate != nil, "View model's delegate should be set.")
     }
     
+    @Test func homeVC_sets_collectionViewDelegate() {
+        let sut = makeSUT()
+        
+        sut.loadViewIfNeeded()
+        
+        #expect(sut.collectionView.delegate != nil, "Collection view's delegate should be set.")
+    }
+    
     @Test("Datasource returns a `FilmGridCell`")
     func homeVC_dataSource_returnsACell() throws {
         let (sut, context, entity) = try makeSUTWithContextAndEntity()
@@ -243,7 +251,61 @@ struct HomeVCTests {
         
         #expect(cell.currentDisplayedImage == nil, "Should be nil if image is not in cache.")
     }
+
+    @Test("Tapping a cell in `Up Next` flows through the view model and fires the coordinator delegate")
+    func homeVC_didSelectItemAt_filmInUpNext_flowsThroughViewModelToCoordinatorDelegate() async throws {
+        let upNextFilm = Film.sample[0]
+        let (sut, context, spyDelegate, entity) = try makeSUTForCellTap()
+        _ = PersistenceHelper.makeFilmMO(with: upNextFilm,
+                                         entity: entity,
+                                         context: context,
+                                         isUpNext: true,
+                                         isWatched: false
+        )
+        try context.save()
+        sut.loadViewIfNeeded()
+        sut.collectionView.layoutIfNeeded()
+        await Task.yield()
     
+        let targetIndexPath = IndexPath(item: 0, section: 0)
+        sut.collectionView.delegate?.collectionView?(sut.collectionView, didSelectItemAt: targetIndexPath)
+        
+        #expect(spyDelegate.didCaptureFilmCallCount == 1, "The tap event should pass through the view model layer to coordinator delegate once.")
+        #expect(spyDelegate.capturedFilm?.id == upNextFilm.id, "The correct film should be found by the view model.")
+    }
+    
+    @Test("Tapping a cell in `Watched` flows through the view model and fires the coordinator delegate")
+    func homeVC_didSelectItemAt_filmInWatched_flowsThroughViewModelToCoordinatorDelegate() async throws {
+        let upNextFilm = Film.sample[0]
+        let watchedFilm = Film.sample[1]
+        let (sut, context, spyDelegate, entity) = try makeSUTForCellTap()
+        _ = PersistenceHelper.makeFilmMO(with: upNextFilm,
+                                         entity: entity,
+                                         context: context,
+                                         isUpNext: true,
+                                         isWatched: false
+        )
+        _ = PersistenceHelper.makeFilmMO(with: watchedFilm,
+                                         entity: entity,
+                                         context: context,
+                                         isUpNext: false,
+                                         isWatched: true
+        )
+        try context.save()
+        sut.loadViewIfNeeded()
+        sut.collectionView.layoutIfNeeded()
+        await Task.yield()
+        let header = getHeader(sut: sut)
+        header?.segmentedControl.selectedSegmentIndex = 1
+        header?.segmentedControl.sendActions(for: .valueChanged)
+    
+        let targetIndexPath = IndexPath(item: 0, section: 0)
+        sut.collectionView.delegate?.collectionView?(sut.collectionView, didSelectItemAt: targetIndexPath)
+        
+        #expect(spyDelegate.didCaptureFilmCallCount == 1, "The tap event should pass through the view model layer to coordinator delegate once.")
+        #expect(spyDelegate.capturedFilm?.id == watchedFilm.id, "The correct film should be found by the view model.")
+    }
+
     // MARK: - SUT Helper Methods
     private func makeSUT() -> HomeVC {
         let testPersistenceController = try! PersistenceController(inMemory: true)
@@ -302,11 +364,46 @@ struct HomeVCTests {
         return (sut, context, entity)
     }
     
+    private func makeSUTForCellTap() throws -> (sut: HomeVC,
+                                                context: NSManagedObjectContext,
+                                                spyDelegate: SpyCoordinatorDelegate,
+                                                entity: NSEntityDescription) {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
+        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
+        let filmQueueService = FilmQueueService(context: context)
+        let homeVM = HomeViewModel(
+            upNextFRC: mockUpNextFRC,
+            watchedFRC: mockWatchedFRC,
+            imageLoader: MockImageLoader(),
+            filmQueueService: filmQueueService
+        )
+        let spyDelegate = SpyCoordinatorDelegate()
+        homeVM.coordinatorDelegate = spyDelegate
+        let sut = HomeVC(homeViewModel: homeVM)
+        let entity = try #require(
+            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            "The Core Data model schema must contain an entity definition named 'FilmMO'.")
+        return (sut, context, spyDelegate, entity)
+    }
+    
     //MARK: - Collection View Header Helper
     private func getHeader(sut: HomeVC) -> SegmentedControlHeaderView? {
         let indexPath = IndexPath(item: 0, section: 0)
         let kind = UICollectionView.elementKindSectionHeader
         let header = sut.collectionView.supplementaryView(forElementKind: kind, at: indexPath) as? SegmentedControlHeaderView
         return header
+    }
+    
+    //MARK: - Home View Model Coordinator Delegate Spy
+    final class SpyCoordinatorDelegate: HomeViewModelCoordinatorDelegate {
+        var didCaptureFilmCallCount = 0
+        var capturedFilm: Film?
+        
+        func homeViewModelDidCaptureFilm(_ film: Film) {
+            didCaptureFilmCallCount = 1
+            capturedFilm = film
+        }
     }
 }

@@ -70,6 +70,7 @@ final class HomeVC: UIViewController {
             frame: .zero,
             collectionViewLayout: createLayout(for: view.bounds.width)
         )
+        collectionView.delegate = self
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.backgroundColor = .systemBackground
         view.addSubview(collectionView)
@@ -289,6 +290,21 @@ extension HomeVC: HomeViewModelDelegate {
     }
     
     func didReceiveError(_ error: HomeError) {
+    }
+}
+
+// MARK: - Collection View Delegate
+extension HomeVC: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let activeSection: Section = (segmentedControlIndex == 0) ? .upNext : .watched
+        let filmQueue: FilmQueue
+        if activeSection == .upNext {
+            filmQueue = .upNext
+        } else {
+            filmQueue = .watched
+        }
+        guard let filmID = dataSource.itemIdentifier(for: indexPath) else { return }
+        homeViewModel.selectFilm(at: filmID, in: filmQueue)
     }
 }
 

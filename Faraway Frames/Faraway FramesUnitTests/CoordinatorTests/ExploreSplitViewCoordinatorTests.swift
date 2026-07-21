@@ -88,7 +88,8 @@ struct ExploreSplitViewCoordinatorTests {
         #expect(sut.shouldDeselectAfterSelection == false, "Should be false.")
     }
     
-    @Test func exploreSplitViewCoordinator_didSelectFilm_withFilm_createsExploreDetailVCAndSetsDelegate() {
+    @Test("iPad only: two view controllers are displayed", .enabled(if: IpadHelper.isPad))
+    func exploreSplitViewCoordinator_didSelectFilm_withFilm_createsExploreDetailVCAndSetsDelegate() {
         let spy = ExploreSplitVCSpy(style: .doubleColumn)
         let sut = makeSUT(with: spy)
         sut.start()
@@ -124,6 +125,30 @@ struct ExploreSplitViewCoordinatorTests {
         #expect(exploreSplitVCSpy.hideWasCalled == true, "Should collapse the primary view controller.")
     }
     
+    @Test("didSelectFilm pushes detail view controller to primary column for compact horizontal size class")
+    func exploreSplitViewCoordinator_didSelectFilm_whenCollapsed_pushesExploreDetailVCToPrimaryColumn() {
+        let exploreSplitVCSpy = CollapsedSplitViewSpy(style: .doubleColumn)
+        let sut = makeSUT(with: exploreSplitVCSpy)
+        let mockFilmsListService = MockFilmsListService()
+        let imageLoader = MockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
+        let mockAccessibilityService = MockAccessibilityService()
+        let mockExploreListVC = ExploreListVC(viewModel: filmsListViewModel, accessibilityService: mockAccessibilityService)
+        let primaryNav = UINavigationController(rootViewController: mockExploreListVC)
+        sut.exploreListVC = mockExploreListVC
+        sut.exploreSplitVC.setViewController(primaryNav, for: .primary)
+        
+        primaryNav.traitOverrides.horizontalSizeClass = .compact
+        let film = Film.sample[0]
+        sut.didSelectFilm(film)
+                
+        let primaryVC = primaryNav.topViewController as! ExploreDetailVC
+        #expect(primaryNav.topViewController is ExploreDetailVC, "The primary column should have `ExploreDetailVC` on top.")
+        #expect(primaryVC.delegate === mockExploreListVC, "The detail view controller delegate must be set to the `ExploreListVC` instance.")
+    }
+
     // MARK: - Helper Method
     private func makeSUT(with spy: UISplitViewController) -> ExploreSplitViewCoordinator {
         let testPersistenceController = try! PersistenceController(inMemory: true)

@@ -15,6 +15,10 @@ final class MainCoordinator: Coordinator {
     let dependencies: Dependencies
     let persistenceController: PersistenceControlling
     let tabBarController = TabBarController()
+    var homeCoordinator: HomeCoordinator?
+    var exploreSplitViewCoordinator: ExploreNavigationDelegate?
+    private(set) var homeTab: UITab?
+    private(set) var exploreTab: UITab?
     
     init(window: WindowProtocol, dependencies: Dependencies, persistenceController: PersistenceControlling) {
         self.window = window
@@ -32,7 +36,9 @@ final class MainCoordinator: Coordinator {
                                               context: managedObjectContext,
                                               imageLoader: imageLoader,
                                               filmQueueService: filmQueueService)
+        homeCoordinator.delegate = self
         homeCoordinator.start()
+        self.homeCoordinator = homeCoordinator
         childCoordinators.append(homeCoordinator)
         
         let exploreSplitViewCoordinator = ExploreSplitViewCoordinator(dependencies: dependencies,
@@ -40,25 +46,37 @@ final class MainCoordinator: Coordinator {
                                                                       filmQueueService: filmQueueService,
                                                                       filmSyncService: filmSyncService)
         exploreSplitViewCoordinator.start()
+        self.exploreSplitViewCoordinator = exploreSplitViewCoordinator
         childCoordinators.append(exploreSplitViewCoordinator)
         
         let assistantCoordinator = AssistantCoordinator()
         assistantCoordinator.start()
         childCoordinators.append(assistantCoordinator)
         
-        tabBarController.tabs = [
-            UITab(title: "Home", image: SFSymbols.house, identifier: "homeTab") { _ in
+        let homeTab = UITab(title: "Home", image: SFSymbols.house, identifier: "homeTab") { _ in
                 return homeCoordinator.navigationController
-            },
-            UITab(title: "Explore", image: SFSymbols.filmStack, identifier: "exploreTab") { _ in
+            }
+        self.homeTab = homeTab
+        
+        let exploreTab = UITab(title: "Explore", image: SFSymbols.filmStack, identifier: "exploreTab") { _ in
                 return exploreSplitViewCoordinator.exploreSplitVC
-            },
-            UITab(title: "Assistant", image: SFSymbols.sparkles, identifier: "assistantTab") { _ in
+            }
+        self.exploreTab = exploreTab
+        
+        let assistantTab = UITab(title: "Assistant", image: SFSymbols.sparkles, identifier: "assistantTab") { _ in
                 return assistantCoordinator.navigationController
             }
-        ]
-        
+        tabBarController.tabs = [homeTab, exploreTab, assistantTab]
         window.rootViewController = tabBarController
         window.makeKeyAndVisible()
+    }
+}
+
+extension MainCoordinator: HomeCoordinatorDelegate {
+    func homeCoordinatorDidRequestNavigationToExploreTab(for film: Film) {
+        guard let exploreSplitViewCoordinator = self.exploreSplitViewCoordinator,
+              let exploreTab = self.exploreTab else { return }
+        tabBarController.selectedTab = exploreTab
+        exploreSplitViewCoordinator.didSelectFilm(film)
     }
 }

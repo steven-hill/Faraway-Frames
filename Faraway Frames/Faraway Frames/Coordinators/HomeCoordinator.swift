@@ -9,6 +9,7 @@ import UIKit
 import CoreData
 
 final class HomeCoordinator: Coordinator {
+    weak var delegate: HomeCoordinatorDelegate?
     var navigationController: UINavigationController
     private let context: NSManagedObjectContext
     private let imageLoader: ImageLoader
@@ -47,8 +48,14 @@ final class HomeCoordinator: Coordinator {
             imageLoader: imageLoader,
             filmQueueService: filmQueueService
         )
-        
+        homeViewModel.coordinatorDelegate = self
         let homeVC = HomeVC(homeViewModel: homeViewModel)
         navigationController.setViewControllers([homeVC], animated: false)
+    }
+}
+
+extension HomeCoordinator: HomeViewModelCoordinatorDelegate {
+    func homeViewModelDidCaptureFilm(_ film: Film) {
+        delegate?.homeCoordinatorDidRequestNavigationToExploreTab(for: film)
     }
 }

@@ -17,13 +17,14 @@ struct MainCoordinatorTests {
         #expect(sut.childCoordinators.isEmpty, "Should be empty on init.")
     }
     
-    @Test func mainCoordinator_start_createsHomeCoordinatorAsChildCoordinator() throws {
+    @Test func mainCoordinator_start_createsHomeCoordinatorAsChildCoordinatorAndSetsItsDelegate() throws {
         let (sut, _) = try makeSUT()
         
         sut.start()
         
         let childCoordinator = sut.childCoordinators.first as? HomeCoordinator
         #expect(childCoordinator != nil, "Should not be nil.")
+        #expect(sut.homeCoordinator?.delegate != nil, "Should be set to self.")
     }
     
     @Test func mainCoordinator_start_createsExploreSplitViewCoordinatorAsChildCoordinator() throws {
@@ -68,6 +69,21 @@ struct MainCoordinatorTests {
         
         #expect(window.makeKeyAndVisibleCalled, "Should have called makeKeyAndVisible.")
     }
+
+    @Test("MainCoordinator changes tab to `Explore`, and triggers the `ExploreSplitViewCoordinator` routing")
+    func mainCoordinator_homeCoordinatorDidRequestNavigationToExploreTab_handlesCrossTabRelay() throws {
+        let (sut, _) = try makeSUT()
+        sut.start()
+        let exploreSpy = ExploreNavigationDelegateSpy()
+        sut.exploreSplitViewCoordinator = exploreSpy
+        let film = Film.sample[0]
+        
+        sut.homeCoordinatorDidRequestNavigationToExploreTab(for: film)
+        
+        #expect(sut.tabBarController.selectedTab == sut.exploreTab, "Should change selected tab to `Explore`.")
+        #expect(exploreSpy.didCallSelectFilmCallCount == 1, "Should have called method on `ExploreSplitViewCoordinator`.")
+        #expect(exploreSpy.capturedFilm?.id == film.id)
+    }
     
     // MARK: - Helper Method
     private func makeSUT() throws -> (sut: MainCoordinator, window: WindowSpy) {
@@ -84,6 +100,18 @@ struct MainCoordinatorTests {
         
         func makeKeyAndVisible() {
             makeKeyAndVisibleCalled = true
+        }
+    }
+    
+    // MARK: - Explore Navigation Delegate Spy
+    final class ExploreNavigationDelegateSpy: ExploreNavigationDelegate {
+        var shouldDeselectAfterSelection = false
+        var didCallSelectFilmCallCount = 0
+        var capturedFilm: Film?
+        
+        func didSelectFilm(_ film: Film) {
+            didCallSelectFilmCallCount = 1
+            capturedFilm = film
         }
     }
 }

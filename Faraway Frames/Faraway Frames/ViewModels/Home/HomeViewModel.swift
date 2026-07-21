@@ -21,6 +21,7 @@ final class HomeViewModel: NSObject {
     // MARK: - Properties
     private(set) var currentState: HomeState = .idle
     weak var delegate: HomeViewModelDelegate?
+    weak var coordinatorDelegate: HomeViewModelCoordinatorDelegate?
     private let upNextFRC: NSFetchedResultsController<FilmMO>
     private let watchedFRC: NSFetchedResultsController<FilmMO>
     private let imageLoader: ImageLoader
@@ -101,6 +102,19 @@ final class HomeViewModel: NSObject {
     
     func lookupWatchedFilm(for id: String) -> Film? {
         return watchedFilms.first { $0.id == id }
+    }
+    
+    // MARK: - Home View Model Coordinator Delegate Method
+    /// A tap on `FilmGridCell` on `HomeVC` flows through here on way to `HomeCoordinator`.
+    func selectFilm(at id: Film.ID, in section: FilmQueue) {
+        let film: Film?
+        if section == .upNext {
+            film = upNextFilms.first { $0.id == id }
+        } else {
+            film = watchedFilms.first { $0.id == id }
+        }
+        guard let film else { return }
+        coordinatorDelegate?.homeViewModelDidCaptureFilm(film)
     }
 }
 
