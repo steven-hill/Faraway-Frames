@@ -56,6 +56,11 @@ final class HomeCoordinator: Coordinator {
 
 extension HomeCoordinator: HomeViewModelCoordinatorDelegate {
     func homeViewModelDidCaptureFilm(_ film: Film) {
-        delegate?.homeCoordinatorDidRequestNavigationToExploreTab(for: film)
+        let filmDetailViewModel = FilmDetailViewModel(film: film,
+                                                      imageLoader: imageLoader,
+                                                      filmQueueService: filmQueueService
+        )
+        let detailVC = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
+        navigationController.pushViewController(detailVC, animated: true)
     }
 }
