@@ -59,15 +59,4 @@ struct HomeCoordinatorTests {
         )
         return sut
     }
-    
-    // MARK: - Home Coordinator Delegate Spy
-    final class HomeCoordinatorDelegateSpy: HomeCoordinatorDelegate {
-        var didRequestNavigationCallCount = 0
-        var capturedFilm: Film?
-        
-        func homeCoordinatorDidRequestNavigationToExploreTab(for film: Film) {
-            didRequestNavigationCallCount = 1
-            capturedFilm = film
-        }
-    }
 }
