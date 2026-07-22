@@ -36,7 +36,6 @@ final class MainCoordinator: Coordinator {
                                               context: managedObjectContext,
                                               imageLoader: imageLoader,
                                               filmQueueService: filmQueueService)
-        homeCoordinator.delegate = self
         homeCoordinator.start()
         self.homeCoordinator = homeCoordinator
         childCoordinators.append(homeCoordinator)

@@ -9,7 +9,6 @@ import UIKit
 import CoreData
 
 final class HomeCoordinator: Coordinator {
-    weak var delegate: HomeCoordinatorDelegate?
     var navigationController: UINavigationController
     private let context: NSManagedObjectContext
     private let imageLoader: ImageLoader
