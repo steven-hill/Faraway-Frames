@@ -17,7 +17,6 @@ final class ExploreSplitViewCoordinator: Coordinator {
     private let filmQueueService: FilmQueueServiceProtocol
     private let filmSyncService: FilmSyncService
     let exploreSplitVC: UISplitViewController
-    var exploreListVC: ExploreListVC?
     private(set) var filmDetailViewModel: FilmDetailViewModel
     
     init(dependencies: Dependencies,
@@ -43,7 +42,6 @@ final class ExploreSplitViewCoordinator: Coordinator {
         let filmsListViewModel = FilmsListViewModel(filmsListService: dependencies.makeFilmsListService(), imageLoader: imageLoader, filmSyncService: filmSyncService)
         let exploreListVC = ExploreListVC(viewModel: filmsListViewModel, accessibilityService: dependencies.makeAccessibilityService())
         exploreListVC.navigationDelegate = self
-        self.exploreListVC = exploreListVC
         let exploreListNav = UINavigationController(rootViewController: exploreListVC)
         exploreSplitVC.setViewController(exploreListNav, for: .primary)
         
@@ -68,21 +66,13 @@ extension ExploreSplitViewCoordinator: ExploreNavigationDelegate {
     }
     
     func didSelectFilm(_ film: Film) {
-        exploreSplitVC.view.layoutIfNeeded()
         filmDetailViewModel.setFilm(film)
         let detailVC = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
-        if let primaryNav = exploreSplitVC.viewController(for: .primary) as? UINavigationController {
-            if let exploreListVC = self.exploreListVC {
-                detailVC.delegate = exploreListVC
-            }
-            if exploreSplitVC.isCollapsed {
-                primaryNav.pushViewController(detailVC, animated: true)
-                return
-            }
+        if let primaryNav = exploreSplitVC.viewController(for: .primary) as? UINavigationController,
+           let exploreListVC = primaryNav.viewControllers.first as? ExploreListVC {
+            detailVC.delegate = exploreListVC
         }
-        
         exploreSplitVC.showDetailViewController(detailVC, sender: nil)
-        
         if exploreSplitVC.isCollapsed == false {
             exploreSplitVC.hide(.primary)
         }
