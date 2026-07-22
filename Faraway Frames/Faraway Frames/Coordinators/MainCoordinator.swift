@@ -70,12 +70,3 @@ final class MainCoordinator: Coordinator {
         window.makeKeyAndVisible()
     }
 }
-
-extension MainCoordinator: HomeCoordinatorDelegate {
-    func homeCoordinatorDidRequestNavigationToExploreTab(for film: Film) {
-        guard let exploreSplitViewCoordinator = self.exploreSplitViewCoordinator,
-              let exploreTab = self.exploreTab else { return }
-        tabBarController.selectedTab = exploreTab
-        exploreSplitViewCoordinator.didSelectFilm(film)
-    }
-}
