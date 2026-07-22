@@ -31,17 +31,21 @@ struct HomeCoordinatorTests {
         #expect(homeVC.homeViewModel.coordinatorDelegate != nil, "Should be set.")
     }
 
-    @Test("HomeCoordinator forwards film from home view model up to delegate")
-    func homeCoordinator_homeViewModelDidCaptureFilm_bubblesEventUpToDelegate() {
+    @Test("HomeCoordinator pushes `ExploreDetailVC` onto navigation stack after delegate method passes over a film")
+    func homeCoordinator_homeViewModelDidCaptureFilm_displaysCorrectViewControllerWithFilm() {
         let sut = makeSUT()
-        let delegateSpy = HomeCoordinatorDelegateSpy()
-        sut.delegate = delegateSpy
+        sut.start()
         let film = Film.sample[0]
-        
+
         sut.homeViewModelDidCaptureFilm(film)
+        guard let detailVC = sut.navigationController.topViewController as? ExploreDetailVC else {
+            Issue.record("Expected to push an `ExploreDetailVC` onto the navigation stack.")
+            return
+        }
+        detailVC.view.layoutIfNeeded()
         
-        #expect(delegateSpy.didRequestNavigationCallCount == 1, "Should have called delegate method once.")
-        #expect(delegateSpy.capturedFilm?.id == film.id, "Should match the film passed to delegate method.")
+        #expect(sut.navigationController.viewControllers.count == 2, "Should be two view controllers on the navigation stack.")
+        #expect(detailVC.updatedFilm?.id == film.id, "Should match the film passed to delegate method.")
     }
     
     // MARK: - SUT Helper Method
