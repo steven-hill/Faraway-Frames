@@ -4,19 +4,19 @@
 ### An iOS and iPadOS app for exploring the Studio Ghibli films.
 
 ### Features
-- Explore all Studio Ghibli films
-- Search for films by title
-- View details about each film
-- Add films to 'Up Next' and/or 'Watched' queues, which are displayed on the 'Home' tab
-- Supports portrait and landscape on iPhone and iPad
+- Explore all Studio Ghibli films.
+- Search for films by title.
+- View details about each film.
+- Add films to 'Up Next' and/or 'Watched' queues, which are displayed on the 'Home' tab.
+- Supports portrait and landscape on iPhone and iPad.
 
 ### Targets
-- Swift 6.2
+- Swift 6.2.
 - Swift concurrency settings:
-  - Approachable Concurrency = Yes
-  - Default Actor Isolation = MainActor
-- iOS 26 and iPadOS 26
-- Xcode 26
+  - Approachable Concurrency = Yes.
+  - Default Actor Isolation = MainActor.
+- iOS 26 and iPadOS 26.
+- Xcode 26.
 
 ### Technical details
 - MVVM + Coordinator.
