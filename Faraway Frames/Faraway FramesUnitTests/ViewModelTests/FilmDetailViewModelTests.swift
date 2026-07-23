@@ -438,8 +438,45 @@ struct FilmDetailViewModelTests {
         #expect(spy.didReceiveErrorCallCount == 1, "Should have called delegate method once on add failure.")
     }
     
-    @Test("FRC delegate catches database edits from other tabs to keep the UI in sync", .tags(.persistence))
-    func filmDetailViewModel_frc_capturesExternalDatabaseSave_andUpdatesUI() async throws {
+    @Test("FRC delegate catches database film deletions, updates UI and calls delegates", .tags(.persistence))
+    func filmDetailViewModel_frc_handlesDeletionFromDatabase_andUpdatesUI() throws {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let filmQueueService = FilmQueueService(context: context)
+        let entity = try #require(
+            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
+        var targetFilm = Film.sample[0]
+        targetFilm.isUpNext = true
+        targetFilm.isWatched = true
+        let filmMO = PersistenceHelper.makeFilmMO(with: targetFilm, entity: entity, context: context, isUpNext: true, isWatched: true)
+        try? context.save()
+        let sut = FilmDetailViewModel(film: targetFilm,
+                                      imageLoader: MockImageLoader(),
+                                      managedObjectContext: context,
+                                      filmQueueService: filmQueueService)
+        let spy = FilmDetailViewModelSpy()
+        sut.delegate = spy
+        if case .content(let initialModel, _) = sut.currentState {
+                #expect(initialModel.isUpNext == true, "Should be true.")
+                #expect(initialModel.isWatched == true, "Should be true.")
+            }
+        
+        filmMO.isUpNext = false
+        filmMO.isWatched = false
+        try? context.save()
+        
+        #expect(spy.upNextStatusChangeCallCount == 1, "Should have notified the delegate once.")
+        #expect(spy.watchedStatusChangeCallCount == 1, "Should have notified the delegate once.")
+        if case .content(let displayModel, _) = sut.currentState {
+            #expect(displayModel.isUpNext == false, "Should be false.")
+            #expect(displayModel.isWatched == false, "Should be false.")
+        }
+    }
+
+    @Test("FRC delegate catches database edits from other tabs to keep the UI in sync and call delegate", .tags(.persistence))
+    func filmDetailViewModel_frc_capturesExternalDatabaseSave_andUpdatesUI() throws {
         let targetFilm = Film.sample[0]
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
@@ -461,7 +498,7 @@ struct FilmDetailViewModelTests {
         filmMO.isWatched = true
         try? context.save()
 
-        #expect(spy.watchedStatusChangeCallCount == 1, "The background FRC should have automatically detected the change and notified the delegate so its tab's button labels can be updated.")
+        #expect(spy.watchedStatusChangeCallCount == 1, "Should have notified the delegate once.")
         
         if case .content(let displayModel, _) = sut.currentState {
             #expect(displayModel.isWatched == true, "Should align with the fresh database record.")

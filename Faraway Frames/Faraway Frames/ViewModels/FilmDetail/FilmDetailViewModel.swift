@@ -212,6 +212,21 @@ extension FilmDetailViewModel: NSFetchedResultsControllerDelegate {
             currentImage = activeImage
         }
         
+        if controller.fetchedObjects?.isEmpty ?? true {
+            if case .content(let displayModel, _) = currentState {
+                var resetFilm = displayModel.film
+                resetFilm.isUpNext = false
+                resetFilm.isWatched = false
+                
+                let resetDisplayModel = FilmDetailDisplayModel(film: resetFilm)
+                currentState = .content(displayModel: resetDisplayModel, image: currentImage)
+                
+                notifyDelegateOfStatusChange(queue: .upNext, action: .remove)
+                notifyDelegateOfStatusChange(queue: .watched, action: .remove)
+            }
+            return
+        }
+        
         guard let updatedFilmMO = controller.fetchedObjects?.first as? FilmMO else { return }
         let freshFilmData = Film(from: updatedFilmMO)
         
