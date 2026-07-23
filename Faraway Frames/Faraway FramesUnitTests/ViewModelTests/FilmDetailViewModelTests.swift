@@ -30,7 +30,7 @@ struct FilmDetailViewModelTests {
         #expect(spy.updateWithEmptyStateCallCount == 1, "Should call delegate method once.")
     }
     
-    @Test func filmDetailViewModel_whenFilmIsPassedIn_updatesCurrentStateButNotHasChanges() {
+    @Test func filmDetailViewModel_whenFilmIsPassedIn_updatesCurrentStateButNotFilmWasUpdated() {
         let film = Film.sample[0]
         let mockImageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
@@ -53,7 +53,7 @@ struct FilmDetailViewModelTests {
         #expect(sut.filmWasUpdated == false, "Should still be false.")
     }
     
-    @Test func filmDetailViewModel_setFilm_whenFilmIsNil_updatesCurrentStateButNotHasChanges() {
+    @Test func filmDetailViewModel_setFilm_whenFilmIsNil_updatesCurrentStateButNotFilmWasUpdated() {
         let film: Film? = nil
         let sut = makeSUT()
         
