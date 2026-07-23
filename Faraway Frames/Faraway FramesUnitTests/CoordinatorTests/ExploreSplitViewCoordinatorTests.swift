@@ -109,6 +109,7 @@ struct ExploreSplitViewCoordinatorTests {
         let exploreSplitVCSpy = ExploreSplitVCSpy(style: .doubleColumn)
         let sut = ExploreSplitViewCoordinator(dependencies: MockContainer(),
                                               imageLoader: MockImageLoader(),
+                                              context: testPersistenceController.viewContext,
                                               filmQueueService: filmQueueService,
                                               filmSyncService: filmSyncService,
                                               exploreSplitVC: exploreSplitVCSpy)
@@ -121,6 +122,7 @@ struct ExploreSplitViewCoordinatorTests {
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
         return ExploreSplitViewCoordinator(dependencies: MockContainer(),
                                            imageLoader: MockImageLoader(),
+                                           context: testPersistenceController.viewContext,
                                            filmQueueService: filmQueueService,
                                            filmSyncService: filmSyncService,
                                            exploreSplitVC: spy)

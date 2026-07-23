@@ -653,7 +653,10 @@ struct ExploreListVCTests {
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let mockDetailVM = FilmDetailViewModel(imageLoader: imageLoader, filmQueueService: filmQueueService)
+        let mockDetailVM = FilmDetailViewModel(imageLoader: imageLoader,
+                                               managedObjectContext: testPersistenceController.viewContext,
+                                               filmQueueService: filmQueueService
+                                               )
         let dummyDetailVC = ExploreDetailVC(filmDetailViewModel: mockDetailVM)
         
         var mutatedFilm = initialFilm

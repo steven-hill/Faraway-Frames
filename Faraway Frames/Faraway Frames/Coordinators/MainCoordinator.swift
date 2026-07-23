@@ -37,6 +37,7 @@ final class MainCoordinator: Coordinator {
         
         let exploreSplitViewCoordinator = ExploreSplitViewCoordinator(dependencies: dependencies,
                                                                       imageLoader: imageLoader,
+                                                                      context: managedObjectContext,
                                                                       filmQueueService: filmQueueService,
                                                                       filmSyncService: filmSyncService)
         exploreSplitViewCoordinator.start()
