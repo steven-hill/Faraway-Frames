@@ -19,7 +19,7 @@ struct FilmDetailViewModelTests {
         #expect(sut.currentState == .noFilmSelected, "Should be `.noFilmSelected` on init.")
     }
 
-    @Test func filmDetailViewModel_setsCurrentStateToNoFilmSelected_whenFilmIsNil() {
+    @Test func filmDetailViewModel_whenFilmIsNil_setsCurrentStateToNoFilmSelectedAndCallsDelegate() {
         let sut = makeSUT()
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
