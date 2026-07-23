@@ -30,7 +30,8 @@ struct FilmDetailViewModelTests {
         #expect(spy.updateWithEmptyStateCallCount == 1, "Should call delegate method once.")
     }
     
-    @Test func filmDetailViewModel_whenFilmIsPassedIn_updatesCurrentStateButNotFilmWasUpdated() {
+    @Test("When a film is passed into the initialiser, `currentState` and `detailFRC` should be updated, but not `filmWasUpdated`.")
+    func filmDetailViewModel_whenFilmIsPassedIn_updatesCurrentStateAndFRCButNotFilmWasUpdated() {
         let film = Film.sample[0]
         let mockImageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
@@ -51,9 +52,11 @@ struct FilmDetailViewModelTests {
             Issue.record("Expected state to be `.content`, but it was `.error`.")
         }
         #expect(sut.filmWasUpdated == false, "Should still be false.")
+        #expect((sut.detailFRC != nil), "Should not be nil.")
     }
     
-    @Test func filmDetailViewModel_setFilm_whenFilmIsNil_updatesCurrentStateButNotFilmWasUpdated() {
+    @Test("When the view model is initialised without a film, `currentState` should be updated but not `detailFRC` or `filmWasUpdated`.")
+    func filmDetailViewModel_setFilm_whenFilmIsNil_updatesCurrentStateButNotFilmWasUpdatedOrFRC() {
         let film: Film? = nil
         let sut = makeSUT()
         
@@ -61,6 +64,7 @@ struct FilmDetailViewModelTests {
         
         #expect(sut.currentState == .noFilmSelected, "Should update the state to `.noFilmSelected` when film is nil.")
         #expect(sut.filmWasUpdated == false, "Should still be false.")
+        #expect((sut.detailFRC == nil), "Should be nil.")
     }
     
     @Test("Quick selection of films ignores the results of the cancelled task", .tags(.networkRequest))

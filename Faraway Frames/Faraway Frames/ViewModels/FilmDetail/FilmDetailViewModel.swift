@@ -21,7 +21,7 @@ final class FilmDetailViewModel: NSObject {
     // MARK: - Properties
     private let imageLoader: ImageLoader
     private let managedObjectContext: NSManagedObjectContext
-    private var detailFRC: NSFetchedResultsController<FilmMO>?
+    private(set) var detailFRC: NSFetchedResultsController<FilmMO>?
     private let filmQueueService: FilmQueueServiceProtocol
     private(set) var imageLoadTask: Task<Void, Never>?
     private(set) var currentState: FilmDetailState = .noFilmSelected {
