@@ -248,6 +248,7 @@ extension FilmDetailViewModel: NSFetchedResultsControllerDelegate {
     }
 }
 
+// MARK: - Extension for setting up UI tests
 private extension FilmDetailViewModel {
     private func throwErrorForUITests() throws {
         let env = ProcessInfo.processInfo.environment
