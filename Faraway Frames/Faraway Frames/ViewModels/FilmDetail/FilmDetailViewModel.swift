@@ -65,10 +65,7 @@ final class FilmDetailViewModel: NSObject {
     }
     
     private func setupFetchedResultsController(for film: Film) {
-        let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
-        request.predicate = NSPredicate(format: "id == %@", film.id)
-        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
-        
+        let request = FilmMO.exploreDetailFetchRequest(using: film.id)
         let frc = NSFetchedResultsController(fetchRequest: request,
                                                    managedObjectContext: managedObjectContext,
                                                    sectionNameKeyPath: nil,
