@@ -147,21 +147,26 @@ final class FilmDetailViewModel {
                     currentState = .content(displayModel: updatedDisplayModel, image: image)
                 }
                 filmWasUpdated = true
-                switch (queue, action) {
-                case (.upNext, .add):
-                    delegate?.didUpdateUpNextStatus(isUpNext: true)
-                case (.upNext, .remove):
-                    delegate?.didUpdateUpNextStatus(isUpNext: false)
-                case (.watched, .add):
-                    delegate?.didUpdateWatchedStatus(isWatched: true)
-                case (.watched, .remove):
-                    delegate?.didUpdateWatchedStatus(isWatched: false)
-                }
+                notifyDelegateOfStatusChange(queue: queue, action: action)
             }
         } catch {
             let reason = PersistenceFailureReason(from: error)
             let filmDetailError = action == .add ? FilmDetailError.addFailed(reason) : FilmDetailError.removeFailed(reason)
             currentState = .error(filmDetailError, film, queue)
+        }
+    }
+    
+    //MARK: - Delegate Helper
+    private func notifyDelegateOfStatusChange(queue: FilmQueue, action: QueueAction) {
+        switch (queue, action) {
+        case (.upNext, .add):
+            delegate?.didUpdateUpNextStatus(isUpNext: true)
+        case (.upNext, .remove):
+            delegate?.didUpdateUpNextStatus(isUpNext: false)
+        case (.watched, .add):
+            delegate?.didUpdateWatchedStatus(isWatched: true)
+        case (.watched, .remove):
+            delegate?.didUpdateWatchedStatus(isWatched: false)
         }
     }
     
