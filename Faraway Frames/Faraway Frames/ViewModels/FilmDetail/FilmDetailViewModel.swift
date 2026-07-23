@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 import CoreData
 
-final class FilmDetailViewModel {
+final class FilmDetailViewModel: NSObject {
     
     // MARK: - State Definition
     enum FilmDetailState: Equatable {
@@ -20,6 +20,8 @@ final class FilmDetailViewModel {
     
     // MARK: - Properties
     private let imageLoader: ImageLoader
+    private let managedObjectContext: NSManagedObjectContext
+    private var detailFRC: NSFetchedResultsController<FilmMO>?
     private let filmQueueService: FilmQueueServiceProtocol
     private(set) var imageLoadTask: Task<Void, Never>?
     private(set) var currentState: FilmDetailState = .noFilmSelected {
@@ -34,9 +36,12 @@ final class FilmDetailViewModel {
     // MARK: - Initialisation
     init(film: Film? = nil,
         imageLoader: ImageLoader,
+        managedObjectContext: NSManagedObjectContext,
         filmQueueService: FilmQueueServiceProtocol) {
         self.imageLoader = imageLoader
+        self.managedObjectContext = managedObjectContext
         self.filmQueueService = filmQueueService
+        super.init()
         if let film {
             setFilm(film)
         }
@@ -47,6 +52,8 @@ final class FilmDetailViewModel {
         imageLoadTask?.cancel()
         
         guard let film = film else {
+            detailFRC?.delegate = nil
+            detailFRC = nil
             currentState = .noFilmSelected
             return
         }
@@ -54,6 +61,28 @@ final class FilmDetailViewModel {
         let displayModel = FilmDetailDisplayModel(film: film)
         currentState = .content(displayModel: displayModel)
         getMovieBanner(for: film, displayModel: displayModel)
+        setupFetchedResultsController(for: film)
+    }
+    
+    private func setupFetchedResultsController(for film: Film) {
+        let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
+        request.predicate = NSPredicate(format: "id == %@", film.id)
+        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+        
+        let frc = NSFetchedResultsController(fetchRequest: request,
+                                                   managedObjectContext: managedObjectContext,
+                                                   sectionNameKeyPath: nil,
+                                                   cacheName: nil
+        )
+        frc.delegate = self
+        self.detailFRC = frc
+        
+        do {
+            try frc.performFetch()
+        } catch {
+        // TODO: - Implement error handling.
+            print("error: \(error.localizedDescription)")
+        }
     }
     
     func updateUI() {
@@ -172,6 +201,35 @@ final class FilmDetailViewModel {
     
     func returnToFilmContent(film: Film) {
         setFilm(film)
+    }
+}
+
+// MARK: - Fetched Results Controller Delegate
+extension FilmDetailViewModel: NSFetchedResultsControllerDelegate {
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        var currentImage: UIImage? = nil
+        if case .content(_, let activeImage) = currentState {
+            currentImage = activeImage
+        }
+        
+        guard let updatedFilmMO = controller.fetchedObjects?.first as? FilmMO else { return }
+        let freshFilmData = Film(from: updatedFilmMO)
+        
+        if case .content(let oldDisplayModel, _) = currentState {
+            let oldFilm = oldDisplayModel.film
+            
+            let updatedDisplayModel = FilmDetailDisplayModel(film: freshFilmData)
+            currentState = .content(displayModel: updatedDisplayModel, image: currentImage)
+            
+            if oldFilm.isUpNext != freshFilmData.isUpNext {
+                let action: QueueAction = freshFilmData.isUpNext ? .add : .remove
+                notifyDelegateOfStatusChange(queue: .upNext, action: action)
+            }
+            if oldFilm.isWatched != freshFilmData.isWatched {
+                let action: QueueAction = freshFilmData.isWatched ? .add : .remove
+                notifyDelegateOfStatusChange(queue: .watched, action: action)
+            }
+        }
     }
 }
 

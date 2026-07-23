@@ -14,6 +14,7 @@ final class ExploreSplitViewCoordinator: Coordinator {
     typealias Dependencies = FilmsListServicing & AccessibilityServicing
     private let dependencies: Dependencies
     private let imageLoader: ImageLoader
+    private let context: NSManagedObjectContext
     private let filmQueueService: FilmQueueServiceProtocol
     private let filmSyncService: FilmSyncService
     let exploreSplitVC: UISplitViewController
@@ -21,15 +22,21 @@ final class ExploreSplitViewCoordinator: Coordinator {
     
     init(dependencies: Dependencies,
          imageLoader: ImageLoader,
+         context: NSManagedObjectContext,
          filmQueueService: FilmQueueServiceProtocol,
          filmSyncService: FilmSyncService,
          exploreSplitVC: UISplitViewController = ExploreSplitVC(style: .doubleColumn)) {
         self.dependencies = dependencies
         self.imageLoader = imageLoader
+        self.context = context
         self.filmQueueService = filmQueueService
         self.filmSyncService = filmSyncService
         self.exploreSplitVC = exploreSplitVC
-        filmDetailViewModel = FilmDetailViewModel(film: nil, imageLoader: imageLoader, filmQueueService: filmQueueService)
+        filmDetailViewModel = FilmDetailViewModel(film: nil,
+                                                  imageLoader: imageLoader,
+                                                  managedObjectContext: context,
+                                                  filmQueueService: filmQueueService
+        )
     }
     
     func start() {

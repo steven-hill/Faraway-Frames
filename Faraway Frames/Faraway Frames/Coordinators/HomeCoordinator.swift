@@ -57,6 +57,7 @@ extension HomeCoordinator: HomeViewModelCoordinatorDelegate {
     func homeViewModelDidCaptureFilm(_ film: Film) {
         let filmDetailViewModel = FilmDetailViewModel(film: film,
                                                       imageLoader: imageLoader,
+                                                      managedObjectContext: context,
                                                       filmQueueService: filmQueueService
         )
         let detailVC = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
