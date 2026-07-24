@@ -116,25 +116,6 @@ final class ExploreListVC: UIViewController {
         }
     }
     
-//    func updateCellImage(_ cell: UICollectionViewCell, filmID: Film.ID, indexPath: IndexPath) async {
-//        guard let film = filmLookup[filmID] else { return }
-//        
-//        let filmImage = await viewModel.getImage(for: film)
-//        
-//        guard let currentIndexPath = collectionView.indexPath(for: cell),
-//              currentIndexPath == indexPath else { return }
-//        
-//        if let currentFilmID = dataSource.itemIdentifier(for: indexPath),
-//           currentFilmID != filmID {
-//            return
-//        }
-//        
-//        cell.contentConfiguration = UIHostingConfiguration {
-//            FilmRowView(film: film, image: filmImage)
-//        }
-//        setNeedsUpdateContentUnavailableConfiguration()
-//    }
-    
     private func configureDataSource() {
         dataSource = UICollectionViewDiffableDataSource<Section, Film.ID>(collectionView: collectionView) { [weak self] (collectionView, indexPath, filmID) -> UICollectionViewListCell in
             guard let self = self else {
