@@ -13,10 +13,9 @@ final class FilmRowCell: UICollectionViewListCell {
     private let posterImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.contentMode = .scaleAspectFill
+        imageView.contentMode = .scaleToFill
         imageView.clipsToBounds = true
         imageView.layer.cornerRadius = 10
-        imageView.layer.cornerCurve = .continuous
         imageView.accessibilityIdentifier = "Film_Cell_Poster"
         return imageView
     }()
