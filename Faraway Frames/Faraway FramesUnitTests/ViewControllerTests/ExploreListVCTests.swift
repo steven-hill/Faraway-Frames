@@ -144,6 +144,8 @@ struct ExploreListVCTests {
         let sut = makeSUT()
         sut.loadViewIfNeeded()
         let capturedTask = sut.loadTask
+        #expect(capturedTask?.isCancelled == false, "Should not be cancelled.")
+        #expect(sut.loadTask != nil, "Should not be nil.")
         
         sut.viewWillDisappear(false)
         
