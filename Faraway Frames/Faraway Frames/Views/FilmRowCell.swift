@@ -68,6 +68,7 @@ final class FilmRowCell: UICollectionViewListCell {
         
         imageWidthConstraint = posterImageView.widthAnchor.constraint(equalToConstant: 60)
         imageHeightConstraint = posterImageView.heightAnchor.constraint(equalToConstant: 90)
+        imageHeightConstraint?.priority = .init(999)
         
         NSLayoutConstraint.activate([
             imageWidthConstraint!,
