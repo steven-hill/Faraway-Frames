@@ -55,6 +55,18 @@ final class FilmRowCell: UICollectionViewListCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: - Prepare For Resuse
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        imageTask?.cancel()
+        imageTask = nil
+        titleLabel.text = nil
+        posterImageView.image = nil
+        accessibilityLabel = nil
+        isAccessibilityElement = false
+        accessories = []
+    }
+    
     // MARK: - Setup
     private func setupViews() {
         containerStackView.addArrangedSubview(posterImageView)
@@ -118,15 +130,5 @@ final class FilmRowCell: UICollectionViewListCell {
         accessories = [.disclosureIndicator()]
         isAccessibilityElement = true
         accessibilityLabel = title
-    }
-    
-    // MARK: - Reuse Optimisation
-    override func prepareForReuse() {
-        super.prepareForReuse()
-        titleLabel.text = nil
-        posterImageView.image = nil
-        accessibilityLabel = nil
-        isAccessibilityElement = false
-        accessories = []
     }
 }
