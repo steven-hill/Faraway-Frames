@@ -9,6 +9,9 @@ import UIKit
 
 final class FilmRowCell: UICollectionViewListCell {
     
+    // MARK: - Image Task
+    var imageTask: Task<Void, Never>?
+    
     // MARK: - UI Components
     private let posterImageView: UIImageView = {
         let imageView = UIImageView()
