@@ -10,7 +10,7 @@ import Foundation
 final class FilmRowCellConfigurator {
     
     // MARK: - Dependency
-    let viewModel: FilmsListViewModel
+    private let viewModel: FilmsListViewModel
     
     // MARK: - Initialisation
     init(viewModel: FilmsListViewModel) {
