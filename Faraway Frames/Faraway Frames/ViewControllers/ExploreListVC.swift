@@ -19,6 +19,7 @@ final class ExploreListVC: UIViewController {
     private(set) var filmLookup: [String: Film] = [:]
     let viewModel: FilmsListViewModel
     lazy var collectionView = UICollectionView()
+    private let cellConfigurator: FilmRowCellConfigurator
     private var headerRegistration: UICollectionView.SupplementaryRegistration<NetworkErrorHeaderView>!
     private var filmCellRegistration: UICollectionView.CellRegistration<FilmRowCell, Film>!
     var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
@@ -28,8 +29,11 @@ final class ExploreListVC: UIViewController {
     private(set) var voiceOverAnnouncementTask: Task<Void, Never>?
     
     // MARK: - Initialisation
-    init(viewModel: FilmsListViewModel, accessibilityService: AccessibilityService) {
+    init(viewModel: FilmsListViewModel,
+         cellConfigurator: FilmRowCellConfigurator,
+         accessibilityService: AccessibilityService) {
         self.viewModel = viewModel
+        self.cellConfigurator = cellConfigurator
         self.accessibilityService = accessibilityService
         super.init(nibName: nil, bundle: nil)
     }
@@ -104,14 +108,7 @@ final class ExploreListVC: UIViewController {
     private func configureCellRegistration() {
         filmCellRegistration = UICollectionView.CellRegistration<FilmRowCell, Film> { [weak self] (cell, _, film) in
             guard let self else { return }
-            cell.configureTitle(title: film.title)
-            cell.imageTask?.cancel()
-            cell.imageTask = Task { [weak cell, weak self] in
-                guard let self else { return }
-                let image = await viewModel.getImage(for: film)
-                guard !Task.isCancelled, let cell else { return }
-                cell.configureImage(image: image)
-            }
+            cellConfigurator.configure(cell, with: film)
             setNeedsUpdateContentUnavailableConfiguration()
         }
     }
