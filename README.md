@@ -20,7 +20,7 @@
 
 ### Technical details
 - MVVM + Coordinator.
-- UIKit app with SwiftUI for collection view cell content.
+- UIKit.
 - Networking with network-first, local fallback strategy:
   - async/await with `URLSession` for network requests.
   - `NSCache` and `URLCache` for caching of network responses.
