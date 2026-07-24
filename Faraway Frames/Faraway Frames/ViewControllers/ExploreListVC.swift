@@ -20,7 +20,7 @@ final class ExploreListVC: UIViewController {
     let viewModel: FilmsListViewModel
     lazy var collectionView = UICollectionView()
     private var headerRegistration: UICollectionView.SupplementaryRegistration<NetworkErrorHeaderView>!
-    private var filmCellRegistration: UICollectionView.CellRegistration<UICollectionViewListCell, Film>!
+    private var filmCellRegistration: UICollectionView.CellRegistration<FilmRowCell, Film>!
     var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
     let searchController = UISearchController(searchResultsController: nil)
     private(set) var loadTask: Task<Void, Never>?
@@ -102,7 +102,7 @@ final class ExploreListVC: UIViewController {
     }
     
     private func configureCellRegistration() {
-        filmCellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Film> { [weak self] (cell, indexPath, film) in
+        filmCellRegistration = UICollectionView.CellRegistration<FilmRowCell, Film> { [weak self] (cell, indexPath, film) in
             guard let self else { return }
             cell.contentConfiguration = UIHostingConfiguration {
                 FilmRowView(film: film, image: nil)
