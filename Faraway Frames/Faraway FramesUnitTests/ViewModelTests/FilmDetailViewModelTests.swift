@@ -123,6 +123,29 @@ struct FilmDetailViewModelTests {
         }
     }
     
+    @Test("Deallocating the view model cancels any active image download tasks", .tags(.networkRequest))
+    func filmDetailViewModel_deinit_cancelsActiveImageLoadTask() async throws {
+        let film = Film.sample[0]
+        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let filmQueueService = FilmQueueService(context: context)
+        var sut: FilmDetailViewModel? = FilmDetailViewModel(imageLoader: mockImageLoader,
+                                                            managedObjectContext: context,
+                                                            filmQueueService: filmQueueService
+        )
+        sut?.setFilm(film)
+        let capturedTask = sut?.imageLoadTask
+        #expect(capturedTask?.isCancelled == false, "Should not be cancelled.")
+        #expect(sut?.imageLoadTask != nil, "Should not be nil.")
+        
+        sut = nil
+        await Task.yield()
+        
+        #expect(capturedTask?.isCancelled == true, "Should be marked as cancelled.")
+        #expect(sut?.imageLoadTask == nil, "Should be nil.")
+    }
+    
     @Test("Verifies that the display model formats the Japanese title and range correctly for VoiceOver")
     func filmDetailViewModel_displayModel_setsCorrectAccessibilityPropertiesForOriginalTitle() {
         let film = Film.sample[0]
