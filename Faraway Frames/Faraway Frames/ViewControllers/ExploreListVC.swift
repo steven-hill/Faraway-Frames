@@ -19,8 +19,9 @@ final class ExploreListVC: UIViewController {
     private(set) var filmLookup: [String: Film] = [:]
     let viewModel: FilmsListViewModel
     lazy var collectionView = UICollectionView()
+    private let cellConfigurator: FilmRowCellConfigurator
     private var headerRegistration: UICollectionView.SupplementaryRegistration<NetworkErrorHeaderView>!
-    private var filmCellRegistration: UICollectionView.CellRegistration<UICollectionViewListCell, Film>!
+    private var filmCellRegistration: UICollectionView.CellRegistration<FilmRowCell, Film>!
     var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
     let searchController = UISearchController(searchResultsController: nil)
     private(set) var loadTask: Task<Void, Never>?
@@ -28,8 +29,11 @@ final class ExploreListVC: UIViewController {
     private(set) var voiceOverAnnouncementTask: Task<Void, Never>?
     
     // MARK: - Initialisation
-    init(viewModel: FilmsListViewModel, accessibilityService: AccessibilityService) {
+    init(viewModel: FilmsListViewModel,
+         cellConfigurator: FilmRowCellConfigurator,
+         accessibilityService: AccessibilityService) {
         self.viewModel = viewModel
+        self.cellConfigurator = cellConfigurator
         self.accessibilityService = accessibilityService
         super.init(nibName: nil, bundle: nil)
     }
@@ -102,36 +106,11 @@ final class ExploreListVC: UIViewController {
     }
     
     private func configureCellRegistration() {
-        filmCellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Film> { [weak self] (cell, indexPath, film) in
+        filmCellRegistration = UICollectionView.CellRegistration<FilmRowCell, Film> { [weak self] (cell, _, film) in
             guard let self else { return }
-            cell.contentConfiguration = UIHostingConfiguration {
-                FilmRowView(film: film, image: nil)
-            }
-            cell.accessories = [.disclosureIndicator()]
-            Task { [weak self, weak cell] in
-                guard let self, let cell else { return }
-                await self.updateCellImage(cell, filmID: film.id, indexPath: indexPath)
-            }
+            cellConfigurator.configure(cell, with: film)
+            setNeedsUpdateContentUnavailableConfiguration()
         }
-    }
-    
-    func updateCellImage(_ cell: UICollectionViewCell, filmID: Film.ID, indexPath: IndexPath) async {
-        guard let film = filmLookup[filmID] else { return }
-        
-        let filmImage = await viewModel.getImage(for: film)
-        
-        guard let currentIndexPath = collectionView.indexPath(for: cell),
-              currentIndexPath == indexPath else { return }
-        
-        if let currentFilmID = dataSource.itemIdentifier(for: indexPath),
-           currentFilmID != filmID {
-            return
-        }
-        
-        cell.contentConfiguration = UIHostingConfiguration {
-            FilmRowView(film: film, image: filmImage)
-        }
-        setNeedsUpdateContentUnavailableConfiguration()
     }
     
     private func configureDataSource() {

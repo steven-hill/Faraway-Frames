@@ -47,7 +47,10 @@ final class ExploreSplitViewCoordinator: Coordinator {
         exploreSplitVC.preferredDisplayMode = .oneBesideSecondary
         exploreSplitVC.delegate = self
         let filmsListViewModel = FilmsListViewModel(filmsListService: dependencies.makeFilmsListService(), imageLoader: imageLoader, filmSyncService: filmSyncService)
-        let exploreListVC = ExploreListVC(viewModel: filmsListViewModel, accessibilityService: dependencies.makeAccessibilityService())
+        let cellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
+        let exploreListVC = ExploreListVC(viewModel: filmsListViewModel,
+                                          cellConfigurator: cellConfigurator,
+                                          accessibilityService: dependencies.makeAccessibilityService())
         exploreListVC.navigationDelegate = self
         let exploreListNav = UINavigationController(rootViewController: exploreListVC)
         exploreSplitVC.setViewController(exploreListNav, for: .primary)
