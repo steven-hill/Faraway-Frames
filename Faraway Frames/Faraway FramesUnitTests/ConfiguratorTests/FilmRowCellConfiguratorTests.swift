@@ -56,6 +56,30 @@ struct FilmRowCellConfiguratorTests {
         #expect(spy.lastConfiguredImage == SFSymbols.popcorn, "Should have set the correct image (`SFSymbols.popcorn` is the image returned by `MockImageLoader` if download is successful).")
     }
     
+    @Test("Configuring a reused cell cancels its previous image download task")
+    func filmRowCellConfigurator_configure_cancelsPreviousTaskOnReuse() {
+        let filmA = Film.sample[0]
+        let filmB = Film.sample[1]
+        let spy = FilmRowCellSpy()
+        let mockService = MockFilmsListService()
+        let mockImageLoader = MockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockService,
+                                                    imageLoader: mockImageLoader,
+                                                    filmSyncService: filmSyncService)
+        let sut = FilmRowCellConfigurator(viewModel: filmsListViewModel)
+                
+        sut.configure(spy, with: filmA)
+        let firstTask = spy.imageTask
+        
+        sut.configure(spy, with: filmB)
+        let secondTask = spy.imageTask
+        
+        #expect(firstTask?.isCancelled == true, "The first cell task should have been cancelled.")
+        #expect(secondTask?.isCancelled == false, "The second cell task should remain actively running.")
+    }
+    
     // MARK: - Spy Cell
     final class FilmRowCellSpy: FilmRowCellRepresentable {
         var imageTask: Task<Void, Never>?
