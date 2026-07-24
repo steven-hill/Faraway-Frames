@@ -123,12 +123,15 @@ final class FilmRowCell: UICollectionViewListCell {
         posterImageView.layer.cornerRadius = scaledCornerRadius
     }
     
-    // MARK: - Configuration
-    func configure(with title: String, image: UIImage?) {
+    // MARK: - Configuration Methods
+    func configureTitle(title: String) {
         titleLabel.text = title
-        posterImageView.image = image ?? UIImage(systemName: "photo")
         accessories = [.disclosureIndicator()]
         isAccessibilityElement = true
         accessibilityLabel = title
+    }
+    
+    func configureImage(image: UIImage?) {
+        posterImageView.image = image ?? UIImage(systemName: "photo")
     }
 }
