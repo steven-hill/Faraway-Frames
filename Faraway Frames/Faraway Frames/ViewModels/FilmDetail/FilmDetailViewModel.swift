@@ -47,6 +47,12 @@ final class FilmDetailViewModel: NSObject {
         }
     }
     
+    //MARK: - Deinitialisation
+    deinit {
+        imageLoadTask?.cancel()
+        imageLoadTask = nil
+    }
+    
     // MARK: - Methods
     func setFilm(_ film: Film?) {
         imageLoadTask?.cancel()

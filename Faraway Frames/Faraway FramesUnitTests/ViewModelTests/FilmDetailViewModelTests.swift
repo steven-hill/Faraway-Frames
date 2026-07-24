@@ -123,7 +123,7 @@ struct FilmDetailViewModelTests {
         }
     }
     
-    @Test("Deallocating the ViewModel automatically cancels any active image download tasks", .tags(.networkRequest))
+    @Test("Deallocating the view model cancels any active image download tasks", .tags(.networkRequest))
     func filmDetailViewModel_deinit_cancelsActiveImageLoadTask() async throws {
         let film = Film.sample[0]
         let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
