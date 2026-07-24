@@ -106,7 +106,8 @@ final class ExploreListVC: UIViewController {
             guard let self else { return }
             cell.configureTitle(title: film.title)
             cell.imageTask?.cancel()
-            cell.imageTask = Task { [weak cell] in
+            cell.imageTask = Task { [weak cell, weak self] in
+                guard let self else { return }
                 let image = await viewModel.getImage(for: film)
                 guard !Task.isCancelled, let cell else { return }
                 cell.configureImage(image: image)
@@ -115,24 +116,24 @@ final class ExploreListVC: UIViewController {
         }
     }
     
-    func updateCellImage(_ cell: UICollectionViewCell, filmID: Film.ID, indexPath: IndexPath) async {
-        guard let film = filmLookup[filmID] else { return }
-        
-        let filmImage = await viewModel.getImage(for: film)
-        
-        guard let currentIndexPath = collectionView.indexPath(for: cell),
-              currentIndexPath == indexPath else { return }
-        
-        if let currentFilmID = dataSource.itemIdentifier(for: indexPath),
-           currentFilmID != filmID {
-            return
-        }
-        
-        cell.contentConfiguration = UIHostingConfiguration {
-            FilmRowView(film: film, image: filmImage)
-        }
-        setNeedsUpdateContentUnavailableConfiguration()
-    }
+//    func updateCellImage(_ cell: UICollectionViewCell, filmID: Film.ID, indexPath: IndexPath) async {
+//        guard let film = filmLookup[filmID] else { return }
+//        
+//        let filmImage = await viewModel.getImage(for: film)
+//        
+//        guard let currentIndexPath = collectionView.indexPath(for: cell),
+//              currentIndexPath == indexPath else { return }
+//        
+//        if let currentFilmID = dataSource.itemIdentifier(for: indexPath),
+//           currentFilmID != filmID {
+//            return
+//        }
+//        
+//        cell.contentConfiguration = UIHostingConfiguration {
+//            FilmRowView(film: film, image: filmImage)
+//        }
+//        setNeedsUpdateContentUnavailableConfiguration()
+//    }
     
     private func configureDataSource() {
         dataSource = UICollectionViewDiffableDataSource<Section, Film.ID>(collectionView: collectionView) { [weak self] (collectionView, indexPath, filmID) -> UICollectionViewListCell in
