@@ -27,8 +27,33 @@ struct FilmRowCellConfiguratorTests {
         
         sut.configure(spy, with: film)
         
-        #expect(spy.configureTitleCalledCallCount == 1, "Should have called configureTitle once.")
+        #expect(spy.configureTitleCalledCallCount == 1, "Should have called `configureTitle` once.")
         #expect(spy.lastConfiguredTitle == film.title, "Should match the film title.")
+    }
+    
+    @Test("Configuring a cell schedules an async task that yields the correct image")
+    func filmRowCellConfigurator_configure_fetchesImageAndUpdatesCell() async {
+        let film = Film.sample[0]
+        let spy = FilmRowCellSpy()
+        let mockService = MockFilmsListService()
+        let mockImageLoader = MockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockService,
+                                                    imageLoader: mockImageLoader,
+                                                    filmSyncService: filmSyncService)
+        let sut = FilmRowCellConfigurator(viewModel: filmsListViewModel)
+        
+        sut.configure(spy, with: film)
+        
+        guard let task = spy.imageTask else {
+            Issue.record("An image task should have been assigned to the cell.")
+            return
+        }
+        _ = await task.result
+        
+        #expect(spy.configureImageCalledCallCount == 1, "Should have called `configureImage` once.")
+        #expect(spy.lastConfiguredImage == SFSymbols.popcorn, "Should have set the correct image (`SFSymbols.popcorn` is the image returned by `MockImageLoader` if download is successful).")
     }
     
     // MARK: - Spy Cell
