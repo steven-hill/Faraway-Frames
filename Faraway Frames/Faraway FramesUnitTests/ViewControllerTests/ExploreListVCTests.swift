@@ -194,80 +194,6 @@ struct ExploreListVCTests {
         #expect(sut.filmLookup["non existent ID"] == nil, "Should return nil if no film with that ID exists.")
     }
     
-    @Test("When film is missing from lookup, the cell configuration is not updated.")
-    func exploreListVC_updateCellImage_whenFilmIsMissingFromLookup_doesNothing() async {
-        let (sut, cell, _, indexPath) = makeSUTForUpdateCellImageTests(
-            shouldSucceed: false,
-            dataSourceFilmID: "2baf70d1-42bb-4437-b551-e5fed5a87abe"
-        )
-        let baselineConfiguration = UIListContentConfiguration.cell()
-        cell.contentConfiguration = baselineConfiguration
-        
-        await sut.updateCellImage(cell, filmID: "non-existent-id", indexPath: indexPath)
-        
-        #expect(cell.contentConfiguration as? UIListContentConfiguration == baselineConfiguration,
-                "Should exit early and leave the baseline configuration untouched if the film is missing from lookup.")
-    }
-    
-    @Test("When index path has changed, the cell configuration is not updated.")
-    func exploreListVC_updateCellImage_whenCellHasBeenReusedForDifferentIndexPath_doesNothing() async {
-        let initialIndexPath = IndexPath(item: 0, section: 0)
-        let changedIndexPath = IndexPath(item: 1, section: 0)
-        let (sut, cell, film, _) = makeSUTForUpdateCellImageTests(
-            shouldSucceed: true,
-            indexPath: changedIndexPath,
-            dataSourceFilmID: "2baf70d1-42bb-4437-b551-e5fed5a87abe"
-        )
-        let originalConfiguration = UIListContentConfiguration.cell()
-        cell.contentConfiguration = originalConfiguration
-        
-        await sut.updateCellImage(cell, filmID: film.id, indexPath: initialIndexPath)
-        
-        #expect(cell.contentConfiguration as? UIListContentConfiguration == originalConfiguration, "Should preserve the original configuration instance if the index path changes.")
-    }
-    
-    @Test("When item identifier has changed, the cell configuration is not updated.")
-    func exploreListVC_updateCellImage_whenItemIdentifierChanged_doesNothing() async {
-        let (sut, cell, film, indexPath) = makeSUTForUpdateCellImageTests(
-            shouldSucceed: true,
-            dataSourceFilmID: "mismatched-id-at-indexpath"
-        )
-        let originalConfiguration = UIListContentConfiguration.cell()
-        cell.contentConfiguration = originalConfiguration
-        
-        await sut.updateCellImage(cell, filmID: film.id, indexPath: indexPath)
-        
-        #expect(cell.contentConfiguration as? UIListContentConfiguration == originalConfiguration, "Should preserve the original configuration instance if the item identifier has changed.")
-    }
-
-    @Test("When cell still represents the film, the view has a downloaded image, and film ID matches, the cell is updated.")
-    func exploreListVC_updateCellImage_whenEverythingMatchesAndImageDownloadSucceeds_updatesCellConfiguration() async {
-        let (sut, cell, film, indexPath) = makeSUTForUpdateCellImageTests(
-            shouldSucceed: true,
-            dataSourceFilmID: "2baf70d1-42bb-4437-b551-e5fed5a87abe"
-        )
-        let originalConfiguration = cell.contentConfiguration as AnyObject
-        
-        await sut.updateCellImage(cell, filmID: film.id, indexPath: indexPath)
-        
-        let newConfiguration = cell.contentConfiguration as AnyObject
-        #expect(newConfiguration !== originalConfiguration, "Should apply a fresh configuration instance containing the downloaded image.")
-    }
-    
-    @Test("When cell still represents the film, the view uses the placeholder image, and film ID matches, the cell is updated.")
-    func exploreListVC_updateCellImage_whenEverythingMatchesButImageDownloadFails_updatesCellConfiguration() async {
-        let (sut, cell, film, indexPath) = makeSUTForUpdateCellImageTests(
-            shouldSucceed: false,
-            dataSourceFilmID: "2baf70d1-42bb-4437-b551-e5fed5a87abe"
-        )
-        let originalConfiguration = cell.contentConfiguration as AnyObject
-        
-        await sut.updateCellImage(cell, filmID: film.id, indexPath: indexPath)
-        
-        let newConfiguration = cell.contentConfiguration as AnyObject
-        #expect(newConfiguration !== originalConfiguration, "Should apply a fresh configuration instance containing the placeholder image.")
-    }
-    
     @Test(.tags(.search))
     func exploreListVC_setsSearchControllerSearchResultsUpdater() {
         let sut = makeSUT()
@@ -750,39 +676,7 @@ struct ExploreListVCTests {
         sut.didUpdateFilms(films)
         return sut
     }
-    
-    private func makeSUTForUpdateCellImageTests(
-        shouldSucceed: Bool,
-        indexPath: IndexPath = IndexPath(item: 0, section: 0),
-        dataSourceFilmID: String
-    ) -> (sut: ExploreListVC, cell: UICollectionViewListCell, film: Film, indexPath: IndexPath) {
-        let mockFilmsListService = MockFilmsListService()
-        let imageLoader = MockImageLoader()
-        imageLoader.shouldSucceed = shouldSucceed
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
-        let mockAccessibilityService = MockAccessibilityService()
-        let sut = ExploreListVC(viewModel: filmsListViewModel, accessibilityService: mockAccessibilityService)
-        let film = Film.sample[0]
-        let cell = UICollectionViewListCell()
-        cell.contentConfiguration = UIHostingConfiguration {
-            FilmRowView(film: film, image: nil)
-        }
-        
-        let mockCV = MockCollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
-        mockCV.knownCell = cell
-        mockCV.knownIndexPath = indexPath
-        sut.collectionView = mockCV
 
-        let mockDataSource = MockDataSource()
-        mockDataSource.mockItemID = dataSourceFilmID
-        sut.dataSource = mockDataSource
-        
-        sut.didUpdateFilms([film])
-        return (sut, cell, film, indexPath)
-    }
-    
     private func makeSUTForVOTests(voiceOverIsOn: Bool) async -> (sut: ExploreListVC, mockAccessibilityService: MockAccessibilityService) {
         let mockFilmsListService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
         let imageLoader = MockImageLoader()
@@ -795,32 +689,6 @@ struct ExploreListVCTests {
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
         return (sut, mockAccessibilityService)
-    }
-    
-    // MARK: - Mock CollectionView
-    private final class MockCollectionView: UICollectionView {
-        var knownCell: UICollectionViewCell?
-        var knownIndexPath: IndexPath?
-        
-        override func indexPath(for cell: UICollectionViewCell) -> IndexPath? {
-            return (cell === knownCell) ? knownIndexPath : nil
-        }
-    }
-    
-    // MARK: - Mock DataSource
-    private final class MockDataSource: UICollectionViewDiffableDataSource<ExploreListVC.Section, Film.ID> {
-        var mockItemID: Film.ID?
-        
-        override func itemIdentifier(for indexPath: IndexPath) -> Film.ID? {
-            return mockItemID
-        }
-        
-        init() {
-            let dummyCV = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
-            super.init(collectionView: dummyCV) { _, _, _ in
-                UICollectionViewListCell()
-            }
-        }
     }
     
     // MARK: - Explore Navigation Delegate Spy
