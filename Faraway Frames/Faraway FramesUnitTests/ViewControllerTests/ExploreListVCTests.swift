@@ -98,9 +98,14 @@ struct ExploreListVCTests {
         let imageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: imageLoader, filmSyncService: filmSyncService)
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockService,
+                                                    imageLoader: imageLoader,
+                                                    filmSyncService: filmSyncService)
+        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
         let mockAccessibilityService = MockAccessibilityService()
-        let sut = ExploreListVC(viewModel: filmsListViewModel, accessibilityService: mockAccessibilityService)
+        let sut = ExploreListVC(viewModel: filmsListViewModel,
+                                cellConfigurator: mockCellConfigurator,
+                                accessibilityService: mockAccessibilityService)
         
         sut.loadViewIfNeeded()
         sut.viewModel.retryLoadingAllFilms()
@@ -304,8 +309,11 @@ struct ExploreListVCTests {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
         let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
+        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
         let mockAccessibilityService = MockAccessibilityService()
-        let sut = ExploreListVC(viewModel: filmsListViewModel, accessibilityService: mockAccessibilityService)
+        let sut = ExploreListVC(viewModel: filmsListViewModel,
+                                cellConfigurator: mockCellConfigurator,
+                                accessibilityService: mockAccessibilityService)
         mockFilmsListService.shouldPauseForLoadingStateTest = true
         
         sut.loadViewIfNeeded()
@@ -474,9 +482,14 @@ struct ExploreListVCTests {
         let imageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: imageLoader, filmSyncService: filmSyncService)
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockService,
+                                                    imageLoader: imageLoader,
+                                                    filmSyncService: filmSyncService)
+        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
         let mockAccessibilityService = MockAccessibilityService()
-        let sut = ExploreListVC(viewModel: filmsListViewModel, accessibilityService: mockAccessibilityService)
+        let sut = ExploreListVC(viewModel: filmsListViewModel,
+                                cellConfigurator: mockCellConfigurator,
+                                accessibilityService: mockAccessibilityService)
         
         sut.loadViewIfNeeded()
         sut.collectionView.refreshControl?.sendActions(for: .valueChanged)
@@ -528,8 +541,11 @@ struct ExploreListVCTests {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
         let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
+        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
         let mockAccessibilityService = MockAccessibilityService()
-        let sut = ExploreListVC(viewModel: filmsListViewModel, accessibilityService: mockAccessibilityService)
+        let sut = ExploreListVC(viewModel: filmsListViewModel,
+                                cellConfigurator: mockCellConfigurator,
+                                accessibilityService: mockAccessibilityService)
         sut.loadViewIfNeeded()
         let films: [Film] = [Film.sample[0]]
 
@@ -551,9 +567,14 @@ struct ExploreListVCTests {
         let imageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService,
+                                                    imageLoader: imageLoader,
+                                                    filmSyncService: filmSyncService)
+        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
         let mockAccessibilityService = MockAccessibilityService()
-        let sut = ExploreListVC(viewModel: filmsListViewModel, accessibilityService: mockAccessibilityService)
+        let sut = ExploreListVC(viewModel: filmsListViewModel,
+                                cellConfigurator: mockCellConfigurator,
+                                accessibilityService: mockAccessibilityService)
         sut.loadViewIfNeeded()
         
         let films: [Film] = [Film.sample[0]]
@@ -575,9 +596,14 @@ struct ExploreListVCTests {
         let imageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService,
+                                                    imageLoader: imageLoader,
+                                                    filmSyncService: filmSyncService)
+        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
         let mockAccessibilityService = MockAccessibilityService()
-        let sut = ExploreListVC(viewModel: filmsListViewModel, accessibilityService: mockAccessibilityService)
+        let sut = ExploreListVC(viewModel: filmsListViewModel,
+                                cellConfigurator: mockCellConfigurator,
+                                accessibilityService: mockAccessibilityService)
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
@@ -643,9 +669,14 @@ struct ExploreListVCTests {
         let imageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService,
+                                                    imageLoader: imageLoader,
+                                                    filmSyncService: filmSyncService)
+        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
         let mockAccessibilityService = MockAccessibilityService()
-        return ExploreListVC(viewModel: filmsListViewModel, accessibilityService: mockAccessibilityService)
+        return ExploreListVC(viewModel: filmsListViewModel,
+                             cellConfigurator: mockCellConfigurator,
+                             accessibilityService: mockAccessibilityService)
     }
     
     private func makeSUTForNetworkSuccess() -> ExploreListVC {
@@ -653,9 +684,14 @@ struct ExploreListVCTests {
         let imageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService,
+                                                    imageLoader: imageLoader,
+                                                    filmSyncService: filmSyncService)
+        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
         let mockAccessibilityService = MockAccessibilityService()
-        return ExploreListVC(viewModel: filmsListViewModel, accessibilityService: mockAccessibilityService)
+        return ExploreListVC(viewModel: filmsListViewModel,
+                             cellConfigurator: mockCellConfigurator,
+                             accessibilityService: mockAccessibilityService)
     }
     
     private func makeSUTForNetworkFailure(error: APIError) -> ExploreListVC {
@@ -664,9 +700,14 @@ struct ExploreListVCTests {
         let imageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockService, imageLoader: imageLoader, filmSyncService: filmSyncService)
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockService,
+                                                    imageLoader: imageLoader,
+                                                    filmSyncService: filmSyncService)
+        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
         let mockAccessibilityService = MockAccessibilityService()
-        return ExploreListVC(viewModel: filmsListViewModel, accessibilityService: mockAccessibilityService)
+        return ExploreListVC(viewModel: filmsListViewModel,
+                             cellConfigurator: mockCellConfigurator,
+                             accessibilityService: mockAccessibilityService)
     }
     
     private func makeSUTForDataSource() -> ExploreListVC {
@@ -682,10 +723,15 @@ struct ExploreListVCTests {
         let imageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService,
+                                                    imageLoader: imageLoader,
+                                                    filmSyncService: filmSyncService)
+        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
         let mockAccessibilityService = MockAccessibilityService()
         mockAccessibilityService.isVoiceOverRunningStub = voiceOverIsOn
-        let sut = ExploreListVC(viewModel: filmsListViewModel, accessibilityService: mockAccessibilityService)
+        let sut = ExploreListVC(viewModel: filmsListViewModel,
+                                cellConfigurator: mockCellConfigurator,
+                                accessibilityService: mockAccessibilityService)
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
         return (sut, mockAccessibilityService)
