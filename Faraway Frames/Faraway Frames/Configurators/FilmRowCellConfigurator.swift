@@ -19,12 +19,12 @@ final class FilmRowCellConfigurator {
     
     // MARK: - Method
     func configure(_ cell: FilmRowCellRepresentable, with film: Film) {
-        cell.configureTitle(title: film.title)
+        cell.configureTitle(with: film.title)
         cell.imageTask?.cancel()
         cell.imageTask = Task { [weak cell] in
             let image = await viewModel.getImage(for: film)
             guard !Task.isCancelled, let cell = cell else { return }
-            cell.configureImage(image: image)
+            cell.configureImage(with: image)
         }
     }
 }

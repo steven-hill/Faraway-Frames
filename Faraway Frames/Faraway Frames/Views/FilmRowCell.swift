@@ -124,14 +124,14 @@ final class FilmRowCell: UICollectionViewListCell {
     }
     
     // MARK: - Configuration Methods
-    func configureTitle(title: String) {
+    func configureTitle(with title: String) {
         titleLabel.text = title
         accessories = [.disclosureIndicator()]
         isAccessibilityElement = true
         accessibilityLabel = title
     }
     
-    func configureImage(image: UIImage?) {
+    func configureImage(with image: UIImage?) {
         posterImageView.image = image ?? UIImage(systemName: "photo")
     }
 }

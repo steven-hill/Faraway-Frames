@@ -88,12 +88,12 @@ struct FilmRowCellConfiguratorTests {
         var lastConfiguredTitle: String?
         var lastConfiguredImage: UIImage?
         
-        func configureTitle(title: String) {
+        func configureTitle(with title: String) {
             configureTitleCalledCallCount += 1
             lastConfiguredTitle = title
         }
         
-        func configureImage(image: UIImage?) {
+        func configureImage(with image: UIImage?) {
             configureImageCalledCallCount += 1
             lastConfiguredImage = image
         }
