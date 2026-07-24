@@ -102,9 +102,15 @@ final class ExploreListVC: UIViewController {
     }
     
     private func configureCellRegistration() {
-        filmCellRegistration = UICollectionView.CellRegistration<FilmRowCell, Film> { [weak self] (cell, indexPath, film) in
+        filmCellRegistration = UICollectionView.CellRegistration<FilmRowCell, Film> { [weak self] (cell, _, film) in
             guard let self else { return }
-            cell.configure(with: film.title, image: nil)
+            cell.configureTitle(title: film.title)
+            cell.imageTask?.cancel()
+            cell.imageTask = Task { [weak cell] in
+                let image = await viewModel.getImage(for: film)
+                guard !Task.isCancelled, let cell else { return }
+                cell.configureImage(image: image)
+            }
             setNeedsUpdateContentUnavailableConfiguration()
         }
     }
