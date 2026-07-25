@@ -87,7 +87,7 @@ final class ExploreListVC: UIViewController {
     private func createLayout() -> UICollectionViewLayout {
         let sectionProvider = { [weak self] (sectionIndex: Int, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? in
             guard let self = self else { return nil }
-            var config = UICollectionLayoutListConfiguration(appearance: CurrentDevice.isIPhone ? .plain : .sidebar)
+            var config = UICollectionLayoutListConfiguration(appearance: .sidebar)
             config.backgroundColor = .systemBackground
             config.showsSeparators = true
             config.headerMode = self.viewModel.currentState == .content(isUsingArchivedData: true) ? .supplementary : .none
