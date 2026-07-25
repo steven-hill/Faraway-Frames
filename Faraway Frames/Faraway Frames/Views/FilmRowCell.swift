@@ -25,6 +25,7 @@ final class FilmRowCell: UICollectionViewListCell {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleToFill
+        imageView.backgroundColor = .secondarySystemBackground
         imageView.clipsToBounds = true
         imageView.layer.cornerRadius = Layout.cornerRadius
         imageView.accessibilityIdentifier = "Film_Cell_Poster"
