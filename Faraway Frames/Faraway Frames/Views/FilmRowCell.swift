@@ -80,14 +80,14 @@ final class FilmRowCell: UICollectionViewListCell {
             containerStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8)
         ])
         
-        imageWidthConstraint = posterImageView.widthAnchor.constraint(equalToConstant: 60)
-        imageHeightConstraint = posterImageView.heightAnchor.constraint(equalToConstant: 90)
-        imageHeightConstraint?.priority = .init(999)
-        
-        NSLayoutConstraint.activate([
-            imageWidthConstraint!,
-            imageHeightConstraint!
-        ])
+        let width = posterImageView.widthAnchor.constraint(equalToConstant: 60)
+        let height = posterImageView.heightAnchor.constraint(equalToConstant: 90)
+        height.priority = .init(999)
+
+        self.imageWidthConstraint = width
+        self.imageHeightConstraint = height
+
+        NSLayoutConstraint.activate([width, height])
         
         updateLayoutForTraits(traitCollection)
     }
