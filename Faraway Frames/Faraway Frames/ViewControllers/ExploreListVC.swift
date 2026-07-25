@@ -89,7 +89,6 @@ final class ExploreListVC: UIViewController {
             guard let self = self else { return nil }
             var config = UICollectionLayoutListConfiguration(appearance: .sidebar)
             config.backgroundColor = .systemBackground
-            config.showsSeparators = true
             config.headerMode = self.viewModel.currentState == .content(isUsingArchivedData: true) ? .supplementary : .none
             return NSCollectionLayoutSection.list(using: config, layoutEnvironment: layoutEnvironment)
         }
