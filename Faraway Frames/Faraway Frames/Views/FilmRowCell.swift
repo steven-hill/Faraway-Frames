@@ -9,6 +9,14 @@ import UIKit
 
 final class FilmRowCell: UICollectionViewListCell {
     
+    // MARK: - Layout Constants
+    /// Unscaled design dimensions for `posterImageView`.
+    private enum Layout {
+        static let posterWidth: CGFloat = 60
+        static let posterHeight: CGFloat = 90
+        static let cornerRadius: CGFloat = 10
+    }
+    
     // MARK: - Image Task
     var imageTask: Task<Void, Never>?
     
@@ -18,7 +26,7 @@ final class FilmRowCell: UICollectionViewListCell {
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleToFill
         imageView.clipsToBounds = true
-        imageView.layer.cornerRadius = 10
+        imageView.layer.cornerRadius = Layout.cornerRadius
         imageView.accessibilityIdentifier = "Film_Cell_Poster"
         return imageView
     }()
@@ -80,8 +88,8 @@ final class FilmRowCell: UICollectionViewListCell {
             containerStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8)
         ])
         
-        let width = posterImageView.widthAnchor.constraint(equalToConstant: 60)
-        let height = posterImageView.heightAnchor.constraint(equalToConstant: 90)
+        let width = posterImageView.widthAnchor.constraint(equalToConstant: Layout.posterWidth)
+        let height = posterImageView.heightAnchor.constraint(equalToConstant: Layout.posterHeight)
         height.priority = .init(999)
         imageWidthConstraint = width
         imageHeightConstraint = height
@@ -112,9 +120,9 @@ final class FilmRowCell: UICollectionViewListCell {
         }
         
         let bodyMetrics = UIFontMetrics(forTextStyle: .body)
-        let scaledWidth = bodyMetrics.scaledValue(for: 60, compatibleWith: traits)
-        let scaledHeight = bodyMetrics.scaledValue(for: 90, compatibleWith: traits)
-        let scaledCornerRadius = bodyMetrics.scaledValue(for: 10, compatibleWith: traits)
+        let scaledWidth = bodyMetrics.scaledValue(for: Layout.posterWidth, compatibleWith: traits)
+        let scaledHeight = bodyMetrics.scaledValue(for: Layout.posterHeight, compatibleWith: traits)
+        let scaledCornerRadius = bodyMetrics.scaledValue(for: Layout.cornerRadius, compatibleWith: traits)
         
         imageWidthConstraint?.constant = scaledWidth
         imageHeightConstraint?.constant = scaledHeight
