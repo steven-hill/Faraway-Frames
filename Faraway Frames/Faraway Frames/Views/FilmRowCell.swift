@@ -83,12 +83,9 @@ final class FilmRowCell: UICollectionViewListCell {
         let width = posterImageView.widthAnchor.constraint(equalToConstant: 60)
         let height = posterImageView.heightAnchor.constraint(equalToConstant: 90)
         height.priority = .init(999)
-
-        self.imageWidthConstraint = width
-        self.imageHeightConstraint = height
-
+        imageWidthConstraint = width
+        imageHeightConstraint = height
         NSLayoutConstraint.activate([width, height])
-        
         updateLayoutForTraits(traitCollection)
     }
     
@@ -100,6 +97,7 @@ final class FilmRowCell: UICollectionViewListCell {
     }
     
     // MARK: - Layout Customisation
+    /// Sets the poster image view's default width and height, and adjusts the stack view and poster size based on the user's Dynamic Type font settings.
     private func updateLayoutForTraits(_ traits: UITraitCollection) {
         let isAccessibilitySize = traits.preferredContentSizeCategory.isAccessibilityCategory
         
