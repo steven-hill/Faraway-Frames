@@ -52,7 +52,7 @@ final class HomeViewModel: NSObject {
             try watchedFRC.performFetch()
             currentState = .fetchedObjects
             updateFilms()
-            delegate?.filmsDidChange(upNextFilms, watchedFilms)
+            delegate?.filmsDidChange()
         } catch {
             let reason = PersistenceFailureReason(from: error)
             let homeError = HomeError.fetchFailed(reason)
@@ -122,6 +122,6 @@ final class HomeViewModel: NSObject {
 extension HomeViewModel: NSFetchedResultsControllerDelegate {
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         updateFilms()
-        delegate?.filmsDidChange(upNextFilms, watchedFilms)
+        delegate?.filmsDidChange()
     }
 }
