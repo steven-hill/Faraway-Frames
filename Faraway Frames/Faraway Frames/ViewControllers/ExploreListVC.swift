@@ -276,10 +276,12 @@ extension ExploreListVC: FilmsListViewModelDelegate {
     func didRequestVoiceOverAnnouncement(with message: String) {
         guard accessibilityService.isVoiceOverRunning else { return }
         voiceOverAnnouncementTask?.cancel()
-        voiceOverAnnouncementTask = Task {
+        voiceOverAnnouncementTask = Task { [weak self] in
+            guard let self else { return }
             try? await Task.sleep(nanoseconds: 500_000_000)
             guard !Task.isCancelled else { return }
             accessibilityService.post(notification: .announcement, argument: message)
+            voiceOverAnnouncementTask = nil
         }
     }
 }
