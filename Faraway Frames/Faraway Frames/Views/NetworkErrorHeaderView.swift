@@ -14,6 +14,7 @@ final class NetworkErrorHeaderView: UICollectionReusableView {
         static let verticalSpacing: CGFloat = 4
     }
     
+    // MARK: - UI Components
     private let containerView: UIView = {
         let view = UIView()
         view.backgroundColor = .systemOrange.withAlphaComponent(0.15)
@@ -51,6 +52,7 @@ final class NetworkErrorHeaderView: UICollectionReusableView {
         return stackView
     }()
     
+    // MARK: - Initialisation
     override init(frame: CGRect) {
         super.init(frame: frame)
         addSubview(containerView)
