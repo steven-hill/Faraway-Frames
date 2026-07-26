@@ -471,15 +471,11 @@ struct HomeViewModelTests {
     
     //MARK: - Home View Model Delegate Spy
     final class HomeViewModelDelegateSpy: HomeViewModelDelegate {
-        var upNextFilms: [Film]?
-        var watchedFilms: [Film]?
         var filmsDidChangeCallCount: Int = 0
         var didReceiveErrorCallCount: Int = 0
         var receivedError: HomeError?
         
-        func filmsDidChange(_ upNextFilms: [Film], _ watchedFilms: [Film]) {
-            self.upNextFilms = upNextFilms
-            self.watchedFilms = watchedFilms
+        func filmsDidChange() {
             self.filmsDidChangeCallCount += 1
         }
         
