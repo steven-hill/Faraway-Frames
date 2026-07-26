@@ -61,7 +61,9 @@ final class ExploreListVC: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         loadTask?.cancel()
+        voiceOverAnnouncementTask?.cancel()
         loadTask = nil
+        voiceOverAnnouncementTask = nil
     }
     
     private func setUpBackButton() {
