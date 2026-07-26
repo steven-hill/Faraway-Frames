@@ -10,8 +10,8 @@ import UIKit
 
 final class MockAccessibilityService: AccessibilityService {
     var isVoiceOverRunningStub = false
-    var postedNotification: UIAccessibility.Notification?
-    var postedArgument: Any?
+    private(set) var postedNotification: UIAccessibility.Notification?
+    private(set) var postedArgument: Any?
     var isVoiceOverRunning: Bool { isVoiceOverRunningStub }
     private(set) var postCallCount = 0
     
