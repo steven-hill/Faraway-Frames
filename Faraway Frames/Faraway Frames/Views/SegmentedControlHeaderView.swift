@@ -8,6 +8,11 @@
 import UIKit
 
 final class SegmentedControlHeaderView: UICollectionReusableView {
+    
+    private enum Layout {
+        static let offset: CGFloat = 8
+    }
+    
     let segmentedControl: UISegmentedControl = {
         let control = UISegmentedControl(items: ["Up Next", "Watched"])
         control.selectedSegmentIndex = 0
