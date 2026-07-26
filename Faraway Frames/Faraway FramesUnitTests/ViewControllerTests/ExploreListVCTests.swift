@@ -663,6 +663,21 @@ struct ExploreListVCTests {
         #expect(mockAccessibilityService.postCallCount == 1, "Due to task cancellation, only one announcement was made.")
     }
     
+    @Test("Clean up `voiceOverAnnouncementTask` in `viewWillDisappear`")
+    func exploreListVC_viewWillDisappear_cancelsVoiceOverTaskAndSetsItToNil() async {
+        let (sut, mockAccessibilityService) = await makeSUTForVOTests(voiceOverIsOn: true)
+        sut.didRequestVoiceOverAnnouncement(with: "Message")
+        let capturedTask = sut.voiceOverAnnouncementTask
+        #expect(capturedTask?.isCancelled == false, "Should not be cancelled.")
+        #expect(sut.loadTask != nil, "Should not be nil.")
+        
+        sut.viewWillDisappear(false)
+        
+        #expect(capturedTask?.isCancelled == true, "Should be marked for cancellation.")
+        #expect(sut.voiceOverAnnouncementTask == nil, "Should be nil.")
+        #expect(mockAccessibilityService.postCallCount == 0, "Due to task cancellation, no announcement was made.")
+    }
+    
     // MARK: - SUT Helper Methods
     private func makeSUT() -> ExploreListVC {
         let mockFilmsListService = MockFilmsListService()
