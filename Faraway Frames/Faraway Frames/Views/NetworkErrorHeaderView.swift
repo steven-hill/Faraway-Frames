@@ -8,6 +8,7 @@
 import UIKit
 
 final class NetworkErrorHeaderView: UICollectionReusableView {    
+    
     private let containerView: UIView = {
         let view = UIView()
         view.backgroundColor = .systemOrange.withAlphaComponent(0.15)
@@ -56,15 +57,15 @@ final class NetworkErrorHeaderView: UICollectionReusableView {
         textStackView.accessibilityIdentifier = "Network_Error_Header_View"
         
         NSLayoutConstraint.activate([
-            containerView.topAnchor.constraint(equalTo: topAnchor, constant: 4),
+            containerView.topAnchor.constraint(equalTo: topAnchor),
             containerView.leadingAnchor.constraint(equalTo: leadingAnchor),
             containerView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            containerView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -4),
+            containerView.bottomAnchor.constraint(equalTo: bottomAnchor),
             
-            textStackView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 10),
-            textStackView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 12),
-            textStackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -12),
-            textStackView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -10)
+            textStackView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 4),
+            textStackView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            textStackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            textStackView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -4)
         ])
     }
     
