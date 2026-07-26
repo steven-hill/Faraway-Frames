@@ -646,6 +646,7 @@ struct ExploreListVCTests {
         #expect(mockAccessibilityService.postedNotification == .announcement, "The notification should be for an announcement.")
         #expect(mockAccessibilityService.postedArgument as? String == "Test Announcement", "Should match the call's input.")
         #expect(mockAccessibilityService.postCallCount == 1, "Should have been called once.")
+        #expect(sut.voiceOverAnnouncementTask == nil, "Should be set to nil after posting.")
     }
     
     @Test("Cancels previous announcement task when a new one is requested rapidly")
