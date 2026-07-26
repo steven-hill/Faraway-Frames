@@ -7,7 +7,12 @@
 
 import UIKit
 
-final class NetworkErrorHeaderView: UICollectionReusableView {    
+final class NetworkErrorHeaderView: UICollectionReusableView {
+    
+    // MARK: - Layout constant
+    private enum Layout {
+        static let verticalSpacing: CGFloat = 4
+    }
     
     private let containerView: UIView = {
         let view = UIView()
@@ -62,10 +67,12 @@ final class NetworkErrorHeaderView: UICollectionReusableView {
             containerView.trailingAnchor.constraint(equalTo: trailingAnchor),
             containerView.bottomAnchor.constraint(equalTo: bottomAnchor),
             
-            textStackView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 4),
+            textStackView.topAnchor.constraint(equalTo: containerView.topAnchor,
+                                               constant: Layout.verticalSpacing),
             textStackView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
             textStackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
-            textStackView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -4)
+            textStackView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor,
+                                                  constant: -Layout.verticalSpacing)
         ])
     }
     
