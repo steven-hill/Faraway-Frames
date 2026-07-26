@@ -9,7 +9,10 @@ import UIKit
 
 final class FilmCreditsStackView: UIStackView {
     
-    func configure(withDirector director: String, producer: String, accessibilityLabelText: String) {
+    // MARK: - Configure Method
+    func configure(withDirector director: String,
+                   producer: String,
+                   accessibilityLabelText: String) {
         arrangedSubviews.forEach { $0.removeFromSuperview() }
         let directorView = createCreditView(name: director, role: "Director")
         let producerView = createCreditView(name: producer, role: "Producer")
@@ -18,7 +21,9 @@ final class FilmCreditsStackView: UIStackView {
         self.accessibilityLabel = accessibilityLabelText
     }
     
-    private func createCreditView(name: String, role: String) -> UIView {
+    // MARK: - Credit View Method
+    private func createCreditView(name: String,
+                                  role: String) -> UIView {
         let nameLabel = UILabel()
         nameLabel.text = name
         nameLabel.font = .preferredFont(forTextStyle: .headline)

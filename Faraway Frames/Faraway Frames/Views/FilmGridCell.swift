@@ -9,6 +9,7 @@ import UIKit
 
 final class FilmGridCell: UICollectionViewCell {
     
+    // MARK: - UI Components
     private let posterImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleToFill
@@ -28,6 +29,7 @@ final class FilmGridCell: UICollectionViewCell {
         return label
     }()
     
+    // MARK: - Initialisation
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupSubviews()
@@ -37,6 +39,7 @@ final class FilmGridCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: - Setup
     private func setupSubviews() {
         contentView.addSubview(posterImageView)
         contentView.addSubview(titleLabel)
@@ -56,6 +59,7 @@ final class FilmGridCell: UICollectionViewCell {
         ])
     }
     
+    // MARK: - Configuration Methods
     func configure(with film: Film) {
         titleLabel.text = film.title
     }
@@ -66,14 +70,18 @@ final class FilmGridCell: UICollectionViewCell {
         }
     }
     
-    /// Property accessible only for unit testing.
-    var currentDisplayedImage: UIImage? {
-        return posterImageView.image
-    }
-    
+    // MARK: - Prepare For Reuse
     override func prepareForReuse() {
         super.prepareForReuse()
         posterImageView.image = nil
         titleLabel.text = nil
+    }
+}
+
+// MARK: - Extension
+extension FilmGridCell {
+    /// Property accessible only for purposes of unit testing.
+    var currentDisplayedImage: UIImage? {
+        return posterImageView.image
     }
 }

@@ -7,7 +7,14 @@
 
 import UIKit
 
-final class NetworkErrorHeaderView: UICollectionReusableView {    
+final class NetworkErrorHeaderView: UICollectionReusableView {
+    
+    // MARK: - Layout constant
+    private enum Layout {
+        static let verticalSpacing: CGFloat = 4
+    }
+    
+    // MARK: - UI Components
     private let containerView: UIView = {
         let view = UIView()
         view.backgroundColor = .systemOrange.withAlphaComponent(0.15)
@@ -45,6 +52,7 @@ final class NetworkErrorHeaderView: UICollectionReusableView {
         return stackView
     }()
     
+    // MARK: - Initialisation
     override init(frame: CGRect) {
         super.init(frame: frame)
         addSubview(containerView)
@@ -56,15 +64,17 @@ final class NetworkErrorHeaderView: UICollectionReusableView {
         textStackView.accessibilityIdentifier = "Network_Error_Header_View"
         
         NSLayoutConstraint.activate([
-            containerView.topAnchor.constraint(equalTo: topAnchor, constant: 4),
+            containerView.topAnchor.constraint(equalTo: topAnchor),
             containerView.leadingAnchor.constraint(equalTo: leadingAnchor),
             containerView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            containerView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -4),
+            containerView.bottomAnchor.constraint(equalTo: bottomAnchor),
             
-            textStackView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 10),
-            textStackView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 12),
-            textStackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -12),
-            textStackView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -10)
+            textStackView.topAnchor.constraint(equalTo: containerView.topAnchor,
+                                               constant: Layout.verticalSpacing),
+            textStackView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            textStackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            textStackView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor,
+                                                  constant: -Layout.verticalSpacing)
         ])
     }
     

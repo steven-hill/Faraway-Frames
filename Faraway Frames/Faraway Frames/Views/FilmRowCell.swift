@@ -17,6 +17,10 @@ final class FilmRowCell: UICollectionViewListCell {
         static let cornerRadius: CGFloat = 10
     }
     
+    // MARK: - Constraints References
+    private var imageWidthConstraint: NSLayoutConstraint?
+    private var imageHeightConstraint: NSLayoutConstraint?
+    
     // MARK: - Image Task
     var imageTask: Task<Void, Never>?
     
@@ -48,10 +52,6 @@ final class FilmRowCell: UICollectionViewListCell {
         stack.spacing = 12
         return stack
     }()
-    
-    // MARK: - Constraints References
-    private var imageWidthConstraint: NSLayoutConstraint?
-    private var imageHeightConstraint: NSLayoutConstraint?
     
     // MARK: - Initializers
     override init(frame: CGRect) {
