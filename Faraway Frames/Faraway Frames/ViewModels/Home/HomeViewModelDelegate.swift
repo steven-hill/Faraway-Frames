@@ -8,6 +8,6 @@
 import Foundation
 
 protocol HomeViewModelDelegate: AnyObject {
-    func filmsDidChange(_ upNextFilms: [Film], _ watchedFilms: [Film])
+    func filmsDidChange()
     func didReceiveError(_ error: HomeError)
 }
