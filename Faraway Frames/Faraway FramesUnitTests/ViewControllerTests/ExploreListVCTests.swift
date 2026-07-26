@@ -646,6 +646,7 @@ struct ExploreListVCTests {
         #expect(mockAccessibilityService.postedNotification == .announcement, "The notification should be for an announcement.")
         #expect(mockAccessibilityService.postedArgument as? String == "Test Announcement", "Should match the call's input.")
         #expect(mockAccessibilityService.postCallCount == 1, "Should have been called once.")
+        #expect(sut.voiceOverAnnouncementTask == nil, "Should be set to nil after posting.")
     }
     
     @Test("Cancels previous announcement task when a new one is requested rapidly")
@@ -661,6 +662,21 @@ struct ExploreListVCTests {
         #expect(mockAccessibilityService.postedArgument as? String == "Second Message", "Should match input of second call.")
         #expect(mockAccessibilityService.postedNotification == .announcement, "The notification should be for an announcement.")
         #expect(mockAccessibilityService.postCallCount == 1, "Due to task cancellation, only one announcement was made.")
+    }
+    
+    @Test("Clean up `voiceOverAnnouncementTask` in `viewWillDisappear`")
+    func exploreListVC_viewWillDisappear_cancelsVoiceOverTaskAndSetsItToNil() async {
+        let (sut, mockAccessibilityService) = await makeSUTForVOTests(voiceOverIsOn: true)
+        sut.didRequestVoiceOverAnnouncement(with: "Message")
+        let capturedTask = sut.voiceOverAnnouncementTask
+        #expect(capturedTask?.isCancelled == false, "Should not be cancelled.")
+        #expect(sut.loadTask != nil, "Should not be nil.")
+        
+        sut.viewWillDisappear(false)
+        
+        #expect(capturedTask?.isCancelled == true, "Should be marked for cancellation.")
+        #expect(sut.voiceOverAnnouncementTask == nil, "Should be nil.")
+        #expect(mockAccessibilityService.postCallCount == 0, "Due to task cancellation, no announcement was made.")
     }
     
     // MARK: - SUT Helper Methods
