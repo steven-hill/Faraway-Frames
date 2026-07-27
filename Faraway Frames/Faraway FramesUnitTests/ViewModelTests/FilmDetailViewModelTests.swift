@@ -95,8 +95,8 @@ struct FilmDetailViewModelTests {
         
         sut.setFilm(Film.sample[0])
         
-        #expect(sut.currentState == .noFilmSelected, "Should match.")
-        #expect(delegateSpy.didReceiveErrorCallCount == 0, "Should call the delegate once.")
+        #expect(sut.currentState == .fetchFailure, "Should be `.fetchFailure`.")
+        #expect(delegateSpy.didReceiveErrorCallCount == 1, "Should call the delegate once.")
     }
     
     @Test("Quick selection of films ignores the results of the cancelled task", .tags(.networkRequest))

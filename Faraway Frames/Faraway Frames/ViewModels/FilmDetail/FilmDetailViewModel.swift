@@ -83,9 +83,7 @@ final class FilmDetailViewModel: NSObject {
         do {
             try frc.performFetch()
         } catch {
-        // TODO: - Implement error handling.
             currentState = .fetchFailure
-            print("error: \(error.localizedDescription)")
         }
     }
     
