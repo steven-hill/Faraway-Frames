@@ -13,13 +13,13 @@ final class HomeCoordinator: Coordinator {
     private let context: NSManagedObjectContext
     private let imageLoader: ImageLoader
     private let filmQueueService: FilmQueueService
-    private let frcFactory: FRCFactory
+    private let frcFactory: HomeFRCFactory & FilmDetailFRCFactory
     
     init(navigationController: UINavigationController,
          context: NSManagedObjectContext,
          imageLoader: ImageLoader,
          filmQueueService: FilmQueueService,
-         frcFactory: FRCFactory) {
+         frcFactory: HomeFRCFactory & FilmDetailFRCFactory) {
         self.navigationController = navigationController
         self.context = context
         self.imageLoader = imageLoader
