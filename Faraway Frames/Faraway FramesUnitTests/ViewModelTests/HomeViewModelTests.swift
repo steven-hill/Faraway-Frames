@@ -469,27 +469,4 @@ struct HomeViewModelTests {
             receivedError = error
         }
     }
-    
-    //MARK: - Throwing Fetched Results Controller
-    /// Used in test for `performFetches` failure.
-    final class ThrowingFetchedResultsController: NSFetchedResultsController<FilmMO> {
-        let errorToThrow: Error
-        
-        init(context: NSManagedObjectContext, errorToThrow: Error) {
-            self.errorToThrow = errorToThrow
-            
-            let validRequest = NSFetchRequest<FilmMO>(entityName: "FilmMO")
-            validRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
-            super.init(
-                fetchRequest: validRequest,
-                managedObjectContext: context,
-                sectionNameKeyPath: nil,
-                cacheName: nil
-            )
-        }
-        
-        override func performFetch() throws {
-            throw errorToThrow
-        }
-    }
 }
