@@ -94,7 +94,8 @@ struct HomeViewModelTests {
         let throwingController = ThrowingFetchedResultsController(context: context, errorToThrow: scenario.systemError)
         let sut = HomeViewModel(
             upNextFRC: throwingController,
-            watchedFRC: throwingController, imageLoader: MockImageLoader(),
+            watchedFRC: throwingController,
+            imageLoader: MockImageLoader(),
             filmQueueService: filmQueueService
         )
         let delegateSpy = HomeViewModelDelegateSpy()
