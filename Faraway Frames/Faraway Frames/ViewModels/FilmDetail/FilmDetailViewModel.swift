@@ -71,10 +71,10 @@ final class FilmDetailViewModel: NSObject {
         let displayModel = FilmDetailDisplayModel(film: film)
         currentState = .content(displayModel: displayModel)
         getMovieBanner(for: film, displayModel: displayModel)
-        setupFetchedResultsController(for: film)
+        setupFRCAndPerformFetch(for: film)
     }
     
-    private func setupFetchedResultsController(for film: Film) {
+    private func setupFRCAndPerformFetch(for film: Film) {
         let frc = frcFactory.makeFilmDetailFRC(for: film.id,
                                                context: managedObjectContext)
         frc.delegate = self

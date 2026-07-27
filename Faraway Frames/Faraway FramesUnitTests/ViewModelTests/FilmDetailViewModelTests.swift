@@ -74,7 +74,7 @@ struct FilmDetailViewModelTests {
           (.tags(.persistence)),
           arguments: PersistenceHelper.errorScenarios
     )
-    func filmDetailViewModel_performFetches_whenThereIsAnError_setsCorrectFailureState(
+    func filmDetailViewModel_setFilm_performsFetch_whenThereIsAnError_setsCorrectFailureState(
         for scenario: (systemError: Error,
                        expectedReason: PersistenceFailureReason)
     ) throws {
