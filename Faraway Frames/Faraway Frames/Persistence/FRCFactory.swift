@@ -7,7 +7,7 @@
 
 import CoreData
 
-struct FRCFactory: FilmDetailFRCFactory {
+struct FRCFactory: HomeFRCFactory, FilmDetailFRCFactory {
     
     func makeHomeUpNextFRC(context: NSManagedObjectContext) -> NSFetchedResultsController<FilmMO> {
         let request = FilmMO.upNextFetchRequest()
