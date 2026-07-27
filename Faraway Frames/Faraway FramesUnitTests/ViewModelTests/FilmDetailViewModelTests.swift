@@ -95,37 +95,6 @@ struct FilmDetailViewModelTests {
         #expect(delegateSpy.didReceiveErrorCallCount == 1, "Should call the delegate once.")
     }
     
-    //MARK: - Throwing Fetched Results Controller
-    /// Used in test for `performFetch` failure.
-    final class ThrowingFetchedResultsController: NSFetchedResultsController<FilmMO> {
-        let errorToThrow: Error
-        
-        init(context: NSManagedObjectContext, errorToThrow: Error) {
-            self.errorToThrow = errorToThrow
-            
-            let validRequest = NSFetchRequest<FilmMO>(entityName: "FilmMO")
-            validRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
-            super.init(
-                fetchRequest: validRequest,
-                managedObjectContext: context,
-                sectionNameKeyPath: nil,
-                cacheName: nil
-            )
-        }
-        
-        override func performFetch() throws {
-            throw errorToThrow
-        }
-    }
-    
-    struct ThrowingFRCFactoryStub: FilmDetailFRCFactory {
-        let errorToThrow: Error
-        
-        func makeFilmDetailFRC(for filmID: String, context: NSManagedObjectContext) -> NSFetchedResultsController<FilmMO> {
-            return ThrowingFetchedResultsController(context: context, errorToThrow: errorToThrow)
-        }
-    }
-    
     @Test("Quick selection of films ignores the results of the cancelled task", .tags(.networkRequest))
     func filmDetailViewModel_setFilm_cancelsPreviousImageDownloadTask() async {
         let filmA = Film.sample[0]
@@ -631,6 +600,38 @@ struct FilmDetailViewModelTests {
                                    managedObjectContext: persistenceController.viewContext,
                                    filmQueueService: filmQueueService
         )
+    }
+    
+    //MARK: - Throwing Fetched Results Controller Factory Stub
+    struct ThrowingFRCFactoryStub: FilmDetailFRCFactory {
+        let errorToThrow: Error
+        
+        func makeFilmDetailFRC(for filmID: String, context: NSManagedObjectContext) -> NSFetchedResultsController<FilmMO> {
+            return ThrowingFetchedResultsController(context: context, errorToThrow: errorToThrow)
+        }
+    }
+    
+    //MARK: - Throwing Fetched Results Controller
+    /// Used in test for `performFetch` failure.
+    final class ThrowingFetchedResultsController: NSFetchedResultsController<FilmMO> {
+        let errorToThrow: Error
+        
+        init(context: NSManagedObjectContext, errorToThrow: Error) {
+            self.errorToThrow = errorToThrow
+            
+            let validRequest = NSFetchRequest<FilmMO>(entityName: "FilmMO")
+            validRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+            super.init(
+                fetchRequest: validRequest,
+                managedObjectContext: context,
+                sectionNameKeyPath: nil,
+                cacheName: nil
+            )
+        }
+        
+        override func performFetch() throws {
+            throw errorToThrow
+        }
     }
     
     //MARK: - Film Detail View Model Spy
