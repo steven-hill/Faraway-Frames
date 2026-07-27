@@ -39,6 +39,7 @@ struct FilmDetailViewModelTests {
         let sut = FilmDetailViewModel(film: film,
                                       imageLoader: mockImageLoader,
                                       managedObjectContext: testPersistenceController.viewContext,
+                                      frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService
         )
         
@@ -104,6 +105,7 @@ struct FilmDetailViewModelTests {
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
         let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
                                       managedObjectContext: testPersistenceController.viewContext,
+                                      frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService
         )
         let spy = FilmDetailViewModelSpy()
@@ -134,6 +136,7 @@ struct FilmDetailViewModelTests {
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
         let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
                                       managedObjectContext: testPersistenceController.viewContext,
+                                      frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService
         )
         let spy = FilmDetailViewModelSpy()
@@ -160,6 +163,7 @@ struct FilmDetailViewModelTests {
         let filmQueueService = FilmQueueService(context: context)
         var sut: FilmDetailViewModel? = FilmDetailViewModel(imageLoader: mockImageLoader,
                                                             managedObjectContext: context,
+                                                            frcFactory: MockFRCFactory(),
                                                             filmQueueService: filmQueueService
         )
         sut?.setFilm(film)
@@ -268,6 +272,7 @@ struct FilmDetailViewModelTests {
         let sut = FilmDetailViewModel(film: targetFilm,
                                       imageLoader: mockImageLoader,
                                       managedObjectContext: testPersistenceController.viewContext,
+                                      frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService
         )
         
@@ -290,6 +295,7 @@ struct FilmDetailViewModelTests {
         let sut = FilmDetailViewModel(film: targetFilm,
                                       imageLoader: mockImageLoader,
                                       managedObjectContext: testPersistenceController.viewContext,
+                                      frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService
         )
         
@@ -387,6 +393,7 @@ struct FilmDetailViewModelTests {
         let sut = FilmDetailViewModel(film: targetFilm,
                                       imageLoader: mockImageLoader,
                                       managedObjectContext: testPersistenceController.viewContext,
+                                      frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService)
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
@@ -421,6 +428,7 @@ struct FilmDetailViewModelTests {
         let sut = FilmDetailViewModel(film: targetFilm,
                                       imageLoader: mockImageLoader,
                                       managedObjectContext: context,
+                                      frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService)
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
@@ -448,6 +456,7 @@ struct FilmDetailViewModelTests {
         let sut = FilmDetailViewModel(film: targetFilm,
                                       imageLoader: mockImageLoader,
                                       managedObjectContext: testPersistenceController.viewContext,
+                                      frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService)
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
@@ -482,6 +491,7 @@ struct FilmDetailViewModelTests {
         let sut = FilmDetailViewModel(film: targetFilm,
                                       imageLoader: mockImageLoader,
                                       managedObjectContext: context,
+                                      frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService)
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
@@ -510,6 +520,7 @@ struct FilmDetailViewModelTests {
         let sut = FilmDetailViewModel(film: targetFilm,
                                       imageLoader: MockImageLoader(),
                                       managedObjectContext: context,
+                                      frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService)
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
@@ -546,6 +557,7 @@ struct FilmDetailViewModelTests {
         let sut = FilmDetailViewModel(film: targetFilm,
                                       imageLoader: MockImageLoader(),
                                       managedObjectContext: context,
+                                      frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService)
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
@@ -569,6 +581,7 @@ struct FilmDetailViewModelTests {
         let sut = FilmDetailViewModel(film: film,
                                       imageLoader: mockImageLoader,
                                       managedObjectContext: testPersistenceController.viewContext,
+                                      frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService)
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
@@ -598,6 +611,7 @@ struct FilmDetailViewModelTests {
         let filmQueueService = FilmQueueService(context: persistenceController.viewContext)
         return FilmDetailViewModel(imageLoader: mockImageLoader,
                                    managedObjectContext: persistenceController.viewContext,
+                                   frcFactory: MockFRCFactory(),
                                    filmQueueService: filmQueueService
         )
     }
