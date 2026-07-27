@@ -609,6 +609,7 @@ struct ExploreListVCTests {
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
         let mockDetailVM = FilmDetailViewModel(imageLoader: imageLoader,
                                                managedObjectContext: testPersistenceController.viewContext,
+                                               frcFactory: MockFRCFactory(),
                                                filmQueueService: filmQueueService
                                                )
         let dummyDetailVC = ExploreDetailVC(filmDetailViewModel: mockDetailVM)
