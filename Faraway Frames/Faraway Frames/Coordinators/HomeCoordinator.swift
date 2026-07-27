@@ -13,33 +13,23 @@ final class HomeCoordinator: Coordinator {
     private let context: NSManagedObjectContext
     private let imageLoader: ImageLoader
     private let filmQueueService: FilmQueueService
+    private let frcFactory: FRCFactory
     
     init(navigationController: UINavigationController,
          context: NSManagedObjectContext,
          imageLoader: ImageLoader,
-         filmQueueService: FilmQueueService) {
+         filmQueueService: FilmQueueService,
+         frcFactory: FRCFactory) {
         self.navigationController = navigationController
         self.context = context
         self.imageLoader = imageLoader
         self.filmQueueService = filmQueueService
+        self.frcFactory = frcFactory
     }
     
     func start() {
-        let upNextRequest = FilmMO.upNextFetchRequest()
-        let upNextFRC = NSFetchedResultsController(
-            fetchRequest: upNextRequest,
-            managedObjectContext: context,
-            sectionNameKeyPath: nil,
-            cacheName: nil
-        )
-        
-        let watchedRequest = FilmMO.watchedFetchRequest()
-        let watchedFRC = NSFetchedResultsController(
-            fetchRequest: watchedRequest,
-            managedObjectContext: context,
-            sectionNameKeyPath: nil,
-            cacheName: nil
-        )
+        let upNextFRC = frcFactory.makeHomeUpNextFRC(context: context)
+        let watchedFRC = frcFactory.makeHomeWatchedFRC(context: context)
         
         let homeViewModel = HomeViewModel(
             upNextFRC: upNextFRC,
@@ -58,6 +48,7 @@ extension HomeCoordinator: HomeViewModelCoordinatorDelegate {
         let filmDetailViewModel = FilmDetailViewModel(film: film,
                                                       imageLoader: imageLoader,
                                                       managedObjectContext: context,
+                                                      frcFactory: frcFactory,
                                                       filmQueueService: filmQueueService
         )
         let detailVC = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
