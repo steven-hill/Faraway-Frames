@@ -29,26 +29,6 @@ struct PersistenceHelper {
         return filmToBeSaved
     }
     
-    static func makeMockUpNextFRC(context: NSManagedObjectContext) -> NSFetchedResultsController<FilmMO> {
-        let mockUpNextFRC = NSFetchedResultsController(
-            fetchRequest: FilmMO.upNextFetchRequest(),
-            managedObjectContext: context,
-            sectionNameKeyPath: nil,
-            cacheName: nil
-        )
-        return mockUpNextFRC
-    }
-    
-    static func makeMockWatchedFRC(context: NSManagedObjectContext) -> NSFetchedResultsController<FilmMO> {
-        let mockWatchedFRC = NSFetchedResultsController(
-            fetchRequest: FilmMO.watchedFetchRequest(),
-            managedObjectContext: context,
-            sectionNameKeyPath: nil,
-            cacheName: nil
-        )
-        return mockWatchedFRC
-    }
-    
     /// Used in tests involving Core Data operations error handling.
     nonisolated static var errorScenarios: [(systemError: Error, expectedReason: PersistenceFailureReason)] {
         [

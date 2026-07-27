@@ -94,7 +94,8 @@ struct HomeViewModelTests {
         let throwingController = ThrowingFetchedResultsController(context: context, errorToThrow: scenario.systemError)
         let sut = HomeViewModel(
             upNextFRC: throwingController,
-            watchedFRC: throwingController, imageLoader: MockImageLoader(),
+            watchedFRC: throwingController,
+            imageLoader: MockImageLoader(),
             filmQueueService: filmQueueService
         )
         let delegateSpy = HomeViewModelDelegateSpy()
@@ -201,8 +202,9 @@ struct HomeViewModelTests {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let saver = ThrowingSaver(errorToThrow: scenario.systemError)
         let context = testPersistenceController.viewContext
-        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
-        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
+        let mockFRCFactory = MockFRCFactory()
+        let mockUpNextFRC = mockFRCFactory.makeHomeUpNextFRC(context: context)
+        let mockWatchedFRC = mockFRCFactory.makeHomeWatchedFRC(context: context)
         let filmQueueService = FilmQueueService(context: context, saver: saver)
         let sut = HomeViewModel(
             upNextFRC: mockUpNextFRC,
@@ -238,8 +240,9 @@ struct HomeViewModelTests {
         )
         _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
         try? context.save()
-        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
-        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
+        let mockFRCFactory = MockFRCFactory()
+        let mockUpNextFRC = mockFRCFactory.makeHomeUpNextFRC(context: context)
+        let mockWatchedFRC = mockFRCFactory.makeHomeWatchedFRC(context: context)
         let filmQueueService = FilmQueueService(context: context, saver: saver)
         let sut = HomeViewModel(
             upNextFRC: mockUpNextFRC,
@@ -350,8 +353,9 @@ struct HomeViewModelTests {
     func homeViewModel_toggleFilmInQueue_whenFilmDoesNotExistInDatabase_doesNotThrowAndExitsCleanly() async {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
-        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
-        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
+        let mockFRCFactory = MockFRCFactory()
+        let mockUpNextFRC = mockFRCFactory.makeHomeUpNextFRC(context: context)
+        let mockWatchedFRC = mockFRCFactory.makeHomeWatchedFRC(context: context)
         let filmQueueService = FilmQueueService(context: context)
         let sut = HomeViewModel(
             upNextFRC: mockUpNextFRC,
@@ -427,8 +431,9 @@ struct HomeViewModelTests {
     private func makeSUTWithContext() -> (sut: HomeViewModel, context: NSManagedObjectContext) {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
-        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
-        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
+        let mockFRCFactory = MockFRCFactory()
+        let mockUpNextFRC = mockFRCFactory.makeHomeUpNextFRC(context: context)
+        let mockWatchedFRC = mockFRCFactory.makeHomeWatchedFRC(context: context)
         let filmQueueService = FilmQueueService(context: context)
         let sut = HomeViewModel(
             upNextFRC: mockUpNextFRC,
@@ -441,8 +446,9 @@ struct HomeViewModelTests {
     private func makeSUTWithImageLoader(shouldDownloadSucceed: Bool) -> (sut: HomeViewModel, mockImageLoader: MockImageLoader)  {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
-        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
-        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
+        let mockFRCFactory = MockFRCFactory()
+        let mockUpNextFRC = mockFRCFactory.makeHomeUpNextFRC(context: context)
+        let mockWatchedFRC = mockFRCFactory.makeHomeWatchedFRC(context: context)
         let mockImageLoader = MockImageLoader()
         mockImageLoader.shouldSucceed = shouldDownloadSucceed
         let filmQueueService = FilmQueueService(context: context)
@@ -467,29 +473,6 @@ struct HomeViewModelTests {
         func didReceiveError(_ error: HomeError) {
             self.didReceiveErrorCallCount += 1
             receivedError = error
-        }
-    }
-    
-    //MARK: - Throwing Fetched Results Controller
-    /// Used in test for `performFetches` failure.
-    final class ThrowingFetchedResultsController: NSFetchedResultsController<FilmMO> {
-        let errorToThrow: Error
-        
-        init(context: NSManagedObjectContext, errorToThrow: Error) {
-            self.errorToThrow = errorToThrow
-            
-            let validRequest = NSFetchRequest<FilmMO>(entityName: "FilmMO")
-            validRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
-            super.init(
-                fetchRequest: validRequest,
-                managedObjectContext: context,
-                sectionNameKeyPath: nil,
-                cacheName: nil
-            )
-        }
-        
-        override func performFetch() throws {
-            throw errorToThrow
         }
     }
 }

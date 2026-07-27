@@ -55,7 +55,8 @@ struct HomeCoordinatorTests {
         let sut = HomeCoordinator(navigationController: UINavigationController(),
                                   context: testPersistenceController.viewContext,
                                   imageLoader: MockImageLoader(),
-                                  filmQueueService: filmQueueService
+                                  filmQueueService: filmQueueService,
+                                  frcFactory: MockFRCFactory()
         )
         return sut
     }

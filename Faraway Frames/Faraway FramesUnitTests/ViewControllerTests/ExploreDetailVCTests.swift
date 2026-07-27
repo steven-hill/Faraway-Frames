@@ -205,6 +205,7 @@ struct ExploreDetailVCTests {
         let vm = FilmDetailViewModel(film: targetFilm,
                                      imageLoader: mockImageLoader,
                                      managedObjectContext: testPersistenceController.viewContext,
+                                     frcFactory: MockFRCFactory(),
                                      filmQueueService: filmQueueService)
         let sut = ExploreDetailVC(filmDetailViewModel: vm)
         let expectedError = FilmDetailError.addFailed(scenario.expectedReason)
@@ -233,6 +234,7 @@ struct ExploreDetailVCTests {
         let vm = FilmDetailViewModel(film: targetFilm,
                                      imageLoader: mockImageLoader,
                                      managedObjectContext: testPersistenceController.viewContext,
+                                     frcFactory: MockFRCFactory(),
                                      filmQueueService: filmQueueService)
         let sut = ExploreDetailVC(filmDetailViewModel: vm)
         await sut.filmDetailViewModel.updateStatus(for: targetFilm, queue: .upNext, action: .add)
@@ -265,6 +267,7 @@ struct ExploreDetailVCTests {
         let vm = FilmDetailViewModel(film: targetFilm,
                                       imageLoader: mockImageLoader,
                                       managedObjectContext: testPersistenceController.viewContext,
+                                      frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService)
         let sut = ExploreDetailVC(filmDetailViewModel: vm)
         sut.filmDetailViewModel.setFilm(targetFilm)
@@ -296,6 +299,7 @@ struct ExploreDetailVCTests {
         let vm = FilmDetailViewModel(film: targetFilm,
                                       imageLoader: mockImageLoader,
                                       managedObjectContext: testPersistenceController.viewContext,
+                                      frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService)
         let displayModel = FilmDetailViewModel.FilmDetailDisplayModel(film: targetFilm)
         let sut = ExploreDetailVC(filmDetailViewModel: vm)
@@ -449,6 +453,7 @@ struct ExploreDetailVCTests {
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
         let filmDetailViewModel = FilmDetailViewModel(imageLoader: mockImageLoader,
                                                       managedObjectContext: testPersistenceController.viewContext,
+                                                      frcFactory: MockFRCFactory(),
                                                       filmQueueService: filmQueueService,
                                                       )
         let sut = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
@@ -463,6 +468,7 @@ struct ExploreDetailVCTests {
         let filmDetailViewModel = FilmDetailViewModel(film: film,
                                                       imageLoader: mockImageLoader,
                                                       managedObjectContext: testPersistenceController.viewContext,
+                                                      frcFactory: MockFRCFactory(),
                                                       filmQueueService: filmQueueService)
         let sut = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
         return sut
@@ -475,6 +481,7 @@ struct ExploreDetailVCTests {
         let filmDetailViewModel = FilmDetailViewModel(film: film,
                                                       imageLoader: MockImageLoader(),
                                                       managedObjectContext: testPersistenceController.viewContext,
+                                                      frcFactory: MockFRCFactory(),
                                                       filmQueueService: spyFQS)
         let sut = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
         sut.loadViewIfNeeded()

@@ -112,7 +112,8 @@ struct ExploreSplitViewCoordinatorTests {
                                               context: testPersistenceController.viewContext,
                                               filmQueueService: filmQueueService,
                                               filmSyncService: filmSyncService,
-                                              exploreSplitVC: exploreSplitVCSpy)
+                                              exploreSplitVC: exploreSplitVCSpy,
+                                              frcFactory: MockFRCFactory())
         return (sut, exploreSplitVCSpy)
     }
     
@@ -125,7 +126,8 @@ struct ExploreSplitViewCoordinatorTests {
                                            context: testPersistenceController.viewContext,
                                            filmQueueService: filmQueueService,
                                            filmSyncService: filmSyncService,
-                                           exploreSplitVC: spy)
+                                           exploreSplitVC: spy,
+                                           frcFactory: MockFRCFactory())
     }
     
     // MARK: - ExploreSplitVC Spies

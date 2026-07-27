@@ -15,6 +15,7 @@ final class FilmDetailViewModel: NSObject {
     enum FilmDetailState: Equatable {
         case noFilmSelected
         case content(displayModel: FilmDetailDisplayModel, image: UIImage? = nil)
+        case fetchFailure
         case error(FilmDetailError, Film, FilmQueue)
     }
     
@@ -22,6 +23,7 @@ final class FilmDetailViewModel: NSObject {
     private let imageLoader: ImageLoader
     private let managedObjectContext: NSManagedObjectContext
     private(set) var detailFRC: NSFetchedResultsController<FilmMO>?
+    private let frcFactory: FilmDetailFRCFactory
     private let filmQueueService: FilmQueueServiceProtocol
     private(set) var imageLoadTask: Task<Void, Never>?
     private(set) var currentState: FilmDetailState = .noFilmSelected {
@@ -37,9 +39,11 @@ final class FilmDetailViewModel: NSObject {
     init(film: Film? = nil,
         imageLoader: ImageLoader,
         managedObjectContext: NSManagedObjectContext,
+        frcFactory: FilmDetailFRCFactory,
         filmQueueService: FilmQueueServiceProtocol) {
         self.imageLoader = imageLoader
         self.managedObjectContext = managedObjectContext
+        self.frcFactory = frcFactory
         self.filmQueueService = filmQueueService
         super.init()
         if let film {
@@ -67,24 +71,19 @@ final class FilmDetailViewModel: NSObject {
         let displayModel = FilmDetailDisplayModel(film: film)
         currentState = .content(displayModel: displayModel)
         getMovieBanner(for: film, displayModel: displayModel)
-        setupFetchedResultsController(for: film)
+        setupFRCAndPerformFetch(for: film)
     }
     
-    private func setupFetchedResultsController(for film: Film) {
-        let request = FilmMO.exploreDetailFetchRequest(using: film.id)
-        let frc = NSFetchedResultsController(fetchRequest: request,
-                                             managedObjectContext: managedObjectContext,
-                                             sectionNameKeyPath: nil,
-                                             cacheName: nil
-        )
+    private func setupFRCAndPerformFetch(for film: Film) {
+        let frc = frcFactory.makeFilmDetailFRC(for: film.id,
+                                               context: managedObjectContext)
         frc.delegate = self
         self.detailFRC = frc
         
         do {
             try frc.performFetch()
         } catch {
-        // TODO: - Implement error handling.
-            print("error: \(error.localizedDescription)")
+            currentState = .fetchFailure
         }
     }
     
@@ -94,6 +93,8 @@ final class FilmDetailViewModel: NSObject {
             delegate?.didUpdateWithEmptyState()
         case .content(_,_):
             delegate?.didUpdateFilmDetails()
+        case .fetchFailure:
+            delegate?.didReceiveError()
         case .error:
             delegate?.didReceiveError()
         }
