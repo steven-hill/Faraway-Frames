@@ -80,11 +80,11 @@ struct FilmDetailViewModelTests {
         let testPersistenceController = try PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
         let filmQueueService = FilmQueueService(context: context)
-        let throwingController = ThrowingFetchedResultsController(context: context,
-                                                                  errorToThrow: scenario.systemError)
+        let stubFactory = ThrowingFRCFactoryStub(errorToThrow: scenario.systemError)
         let mockImageLoader = MockImageLoader()
         let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
                                       managedObjectContext: context,
+                                      frcFactory: stubFactory,
                                       filmQueueService: filmQueueService)
         let delegateSpy = FilmDetailViewModelSpy()
         sut.delegate = delegateSpy
@@ -115,6 +115,14 @@ struct FilmDetailViewModelTests {
         
         override func performFetch() throws {
             throw errorToThrow
+        }
+    }
+    
+    struct ThrowingFRCFactoryStub: FilmDetailFRCFactory {
+        let errorToThrow: Error
+        
+        func makeFilmDetailFRC(for filmID: String, context: NSManagedObjectContext) -> NSFetchedResultsController<FilmMO> {
+            return ThrowingFetchedResultsController(context: context, errorToThrow: errorToThrow)
         }
     }
     
