@@ -81,19 +81,22 @@ struct FilmDetailViewModelTests {
         let testPersistenceController = try PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
         let filmQueueService = FilmQueueService(context: context)
-        let stubFactory = ThrowingFRCFactoryStub(errorToThrow: scenario.systemError)
+        var mockFactory = MockFRCFactory()
+        mockFactory.makeFilmDetailFRCStub = { _, context in
+            return ThrowingFetchedResultsController(context: context, errorToThrow: scenario.systemError)
+        }
         let mockImageLoader = MockImageLoader()
         let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
                                       managedObjectContext: context,
-                                      frcFactory: stubFactory,
+                                      frcFactory: mockFactory,
                                       filmQueueService: filmQueueService)
         let delegateSpy = FilmDetailViewModelSpy()
         sut.delegate = delegateSpy
         
         sut.setFilm(Film.sample[0])
         
-        #expect(sut.currentState == .fetchFailure, "Should match.")
-        #expect(delegateSpy.didReceiveErrorCallCount == 1, "Should call the delegate once.")
+        #expect(sut.currentState == .noFilmSelected, "Should match.")
+        #expect(delegateSpy.didReceiveErrorCallCount == 0, "Should call the delegate once.")
     }
     
     @Test("Quick selection of films ignores the results of the cancelled task", .tags(.networkRequest))
