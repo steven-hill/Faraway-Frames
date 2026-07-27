@@ -19,22 +19,26 @@ final class ExploreSplitViewCoordinator: Coordinator {
     private let filmSyncService: FilmSyncService
     let exploreSplitVC: UISplitViewController
     private(set) var filmDetailViewModel: FilmDetailViewModel
+    private let frcFactory: FilmDetailFRCFactory
     
     init(dependencies: Dependencies,
          imageLoader: ImageLoader,
          context: NSManagedObjectContext,
          filmQueueService: FilmQueueServiceProtocol,
          filmSyncService: FilmSyncService,
-         exploreSplitVC: UISplitViewController = ExploreSplitVC(style: .doubleColumn)) {
+         exploreSplitVC: UISplitViewController = ExploreSplitVC(style: .doubleColumn),
+         frcFactory: FilmDetailFRCFactory) {
         self.dependencies = dependencies
         self.imageLoader = imageLoader
         self.context = context
         self.filmQueueService = filmQueueService
         self.filmSyncService = filmSyncService
         self.exploreSplitVC = exploreSplitVC
+        self.frcFactory = frcFactory
         filmDetailViewModel = FilmDetailViewModel(film: nil,
                                                   imageLoader: imageLoader,
                                                   managedObjectContext: context,
+                                                  frcFactory: frcFactory,
                                                   filmQueueService: filmQueueService
         )
     }
