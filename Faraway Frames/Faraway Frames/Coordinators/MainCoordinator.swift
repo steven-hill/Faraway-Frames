@@ -15,8 +15,11 @@ final class MainCoordinator: Coordinator {
     let dependencies: Dependencies
     let persistenceController: PersistenceControlling
     let tabBarController = TabBarController()
+    let frcFactory = FRCFactory()
     
-    init(window: WindowProtocol, dependencies: Dependencies, persistenceController: PersistenceControlling) {
+    init(window: WindowProtocol,
+         dependencies: Dependencies,
+         persistenceController: PersistenceControlling) {
         self.window = window
         self.dependencies = dependencies
         self.persistenceController = persistenceController
@@ -31,7 +34,8 @@ final class MainCoordinator: Coordinator {
         let homeCoordinator = HomeCoordinator(navigationController: UINavigationController(),
                                               context: managedObjectContext,
                                               imageLoader: imageLoader,
-                                              filmQueueService: filmQueueService)
+                                              filmQueueService: filmQueueService,
+                                              frcFactory: frcFactory)
         homeCoordinator.start()
         childCoordinators.append(homeCoordinator)
         
@@ -39,7 +43,8 @@ final class MainCoordinator: Coordinator {
                                                                       imageLoader: imageLoader,
                                                                       context: managedObjectContext,
                                                                       filmQueueService: filmQueueService,
-                                                                      filmSyncService: filmSyncService)
+                                                                      filmSyncService: filmSyncService,
+                                                                      frcFactory: frcFactory)
         exploreSplitViewCoordinator.start()
         childCoordinators.append(exploreSplitViewCoordinator)
         
