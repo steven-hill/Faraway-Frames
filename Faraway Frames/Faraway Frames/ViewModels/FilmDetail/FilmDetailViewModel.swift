@@ -15,6 +15,7 @@ final class FilmDetailViewModel: NSObject {
     enum FilmDetailState: Equatable {
         case noFilmSelected
         case content(displayModel: FilmDetailDisplayModel, image: UIImage? = nil)
+        case fetchFailure
         case error(FilmDetailError, Film, FilmQueue)
     }
     
@@ -84,6 +85,7 @@ final class FilmDetailViewModel: NSObject {
             try frc.performFetch()
         } catch {
         // TODO: - Implement error handling.
+            currentState = .fetchFailure
             print("error: \(error.localizedDescription)")
         }
     }
@@ -94,6 +96,8 @@ final class FilmDetailViewModel: NSObject {
             delegate?.didUpdateWithEmptyState()
         case .content(_,_):
             delegate?.didUpdateFilmDetails()
+        case .fetchFailure:
+            delegate?.didReceiveError()
         case .error:
             delegate?.didReceiveError()
         }

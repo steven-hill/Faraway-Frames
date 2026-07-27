@@ -48,6 +48,8 @@ struct FilmDetailViewModelTests {
         case .content(let displayModel, _):
             #expect(displayModel.title == film.title, "Should match.")
             #expect(displayModel.visualOriginalTitles == "\(film.originalTitle)\n\(film.originalTitleRomanised)", "Should match.")
+        case .fetchFailure:
+            Issue.record("Expected state to be `.content`, but it was `.fetchFailure`.")
         case .error(_, _, _):
             Issue.record("Expected state to be `.content`, but it was `.error`.")
         }
@@ -65,6 +67,55 @@ struct FilmDetailViewModelTests {
         #expect(sut.currentState == .noFilmSelected, "Should update the state to `.noFilmSelected` when film is nil.")
         #expect(sut.filmWasUpdated == false, "Should still be false.")
         #expect((sut.detailFRC == nil), "Should be nil.")
+    }
+    
+    @Test("When `detailFRC` encounters an error fetching film, error should be handled by updating `currentState` and calling the delegate",
+          (.tags(.persistence)),
+          arguments: PersistenceHelper.errorScenarios
+    )
+    func filmDetailViewModel_performFetches_whenThereIsAnError_setsCorrectFailureState(
+        for scenario: (systemError: Error,
+                       expectedReason: PersistenceFailureReason)
+    ) throws {
+        let testPersistenceController = try PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let filmQueueService = FilmQueueService(context: context)
+        let throwingController = ThrowingFetchedResultsController(context: context,
+                                                                  errorToThrow: scenario.systemError)
+        let mockImageLoader = MockImageLoader()
+        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
+                                      managedObjectContext: context,
+                                      filmQueueService: filmQueueService)
+        let delegateSpy = FilmDetailViewModelSpy()
+        sut.delegate = delegateSpy
+        
+        sut.setFilm(Film.sample[0])
+        
+        #expect(sut.currentState == .fetchFailure, "Should match.")
+        #expect(delegateSpy.didReceiveErrorCallCount == 1, "Should call the delegate once.")
+    }
+    
+    //MARK: - Throwing Fetched Results Controller
+    /// Used in test for `performFetch` failure.
+    final class ThrowingFetchedResultsController: NSFetchedResultsController<FilmMO> {
+        let errorToThrow: Error
+        
+        init(context: NSManagedObjectContext, errorToThrow: Error) {
+            self.errorToThrow = errorToThrow
+            
+            let validRequest = NSFetchRequest<FilmMO>(entityName: "FilmMO")
+            validRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+            super.init(
+                fetchRequest: validRequest,
+                managedObjectContext: context,
+                sectionNameKeyPath: nil,
+                cacheName: nil
+            )
+        }
+        
+        override func performFetch() throws {
+            throw errorToThrow
+        }
     }
     
     @Test("Quick selection of films ignores the results of the cancelled task", .tags(.networkRequest))
@@ -554,6 +605,8 @@ struct FilmDetailViewModelTests {
         case .content(let displayModel, _):
             #expect(displayModel.title == film.title, "Should match.")
             #expect(displayModel.visualOriginalTitles == "\(film.originalTitle)\n\(film.originalTitleRomanised)", "Should match.")
+        case .fetchFailure:
+            Issue.record("Expected state to be `.content`, but it was `.fetchFailure`.")
         case .error(_, _, _):
             Issue.record("Expected state to be `.content`, but it was `.error`.")
         }

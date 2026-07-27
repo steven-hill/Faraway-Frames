@@ -128,6 +128,9 @@ final class ExploreDetailVC: UIViewController {
             self.isUpNext = displayModel.isUpNext
             self.isWatched = displayModel.isWatched
             updatedFilm = displayModel.film
+        case .fetchFailure:
+            // TODO: - Implement error config.
+            print("error")
         case .error(let error, let film, let queue):
             config = createErrorConfig(error: error, film: film, queue: queue)
             navigationItem.hidesBackButton = true
