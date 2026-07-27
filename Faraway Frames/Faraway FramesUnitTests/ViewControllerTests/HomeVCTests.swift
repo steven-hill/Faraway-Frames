@@ -311,8 +311,9 @@ struct HomeVCTests {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
         let filmQueueService = FilmQueueService(context: context)
-        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
-        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
+        let mockFRCFactory = MockFRCFactory()
+        let mockUpNextFRC = mockFRCFactory.makeHomeUpNextFRC(context: context)
+        let mockWatchedFRC = mockFRCFactory.makeHomeWatchedFRC(context: context)
         let homeViewModel = HomeViewModel(upNextFRC: mockUpNextFRC,
                                           watchedFRC: mockWatchedFRC,
                                           imageLoader: MockImageLoader(),
@@ -325,8 +326,9 @@ struct HomeVCTests {
                                                           entity: NSEntityDescription) {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
-        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
-        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
+        let mockFRCFactory = MockFRCFactory()
+        let mockUpNextFRC = mockFRCFactory.makeHomeUpNextFRC(context: context)
+        let mockWatchedFRC = mockFRCFactory.makeHomeWatchedFRC(context: context)
         let filmQueueService = FilmQueueService(context: context)
         let homeVM = HomeViewModel(
             upNextFRC: mockUpNextFRC,
@@ -346,8 +348,9 @@ struct HomeVCTests {
                                                                    entity: NSEntityDescription) {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
-        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
-        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
+        let mockFRCFactory = MockFRCFactory()
+        let mockUpNextFRC = mockFRCFactory.makeHomeUpNextFRC(context: context)
+        let mockWatchedFRC = mockFRCFactory.makeHomeWatchedFRC(context: context)
         let mockImageLoader = MockImageLoader()
         mockImageLoader.shouldSucceed = false
         let filmQueueService = FilmQueueService(context: context)
@@ -370,8 +373,9 @@ struct HomeVCTests {
                                                 entity: NSEntityDescription) {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
-        let mockUpNextFRC = PersistenceHelper.makeMockUpNextFRC(context: context)
-        let mockWatchedFRC = PersistenceHelper.makeMockWatchedFRC(context: context)
+        let mockFRCFactory = MockFRCFactory()
+        let mockUpNextFRC = mockFRCFactory.makeHomeUpNextFRC(context: context)
+        let mockWatchedFRC = mockFRCFactory.makeHomeWatchedFRC(context: context)
         let filmQueueService = FilmQueueService(context: context)
         let homeVM = HomeViewModel(
             upNextFRC: mockUpNextFRC,
