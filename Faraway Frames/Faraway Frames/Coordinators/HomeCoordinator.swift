@@ -30,7 +30,6 @@ final class HomeCoordinator: Coordinator {
     func start() {
         let upNextFRC = frcFactory.makeHomeUpNextFRC(context: context)
         let watchedFRC = frcFactory.makeHomeWatchedFRC(context: context)
-        
         let homeViewModel = HomeViewModel(
             upNextFRC: upNextFRC,
             watchedFRC: watchedFRC,
