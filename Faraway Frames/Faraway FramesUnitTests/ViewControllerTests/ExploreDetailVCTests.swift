@@ -130,6 +130,46 @@ struct ExploreDetailVCTests {
         #expect(sut.title == nil, "Should be nil.")
     }
     
+    @Test("VC creates error configuration for fetch film failure",
+          .tags(.persistence),
+          arguments: PersistenceHelper.errorScenarios
+    )
+    func exploreDetailVC_createFetchFailureConfig_whenPerformFetchFailsOnViewModel_createsConfiguration(
+        scenario: (systemError: Error,
+                   expectedReason: PersistenceFailureReason)
+    ) async throws {
+        let sut = try makeSUTWithFetchFailureFRC(scenario: scenario)
+        
+        sut.filmDetailViewModel.setFilm(Film.sample[0])
+        
+        let state = UIContentUnavailableConfigurationState(traitCollection: sut.traitCollection)
+        sut.updateContentUnavailableConfiguration(using: state)
+        let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
+        
+        #expect(config != nil, "Should not be nil.")
+        #expect(config?.button.title != nil, "Should have a title.")
+    }
+    
+    @Test("Tapping `ok` button on fetch failure config reloads film content and updates VM's `currentState`",
+          .tags(.persistence),
+          arguments: PersistenceHelper.errorScenarios
+    )
+    func exploreDetailVC_tapOkButtonOnFetchFailureConfig_reloadsFilmContentAndUpdatesState(
+        scenario: (systemError: Error,
+                   expectedReason: PersistenceFailureReason)
+    ) async throws {
+        let sut = try makeSUTWithFetchFailureFRC(scenario: scenario)
+        sut.filmDetailViewModel.setFilm(Film.sample[0])
+        let state = UIContentUnavailableConfigurationState(traitCollection: sut.traitCollection)
+        sut.updateContentUnavailableConfiguration(using: state)
+        let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
+        
+        config?.buttonProperties.primaryAction?.performWithSender(nil, target: nil)
+        sut.view.layoutIfNeeded()
+        
+        #expect(sut.contentUnavailableConfiguration == nil, "Should be nil because VC is displaying film content again.")
+    }
+    
     @Test func exploreDetailVC_didUpdateFilmDetails_notifiesContentUnavailableConfigurationToUpdateAndSetsUpdatedFilm() {
         let sut = makeSUTWithFilm()
         sut.loadViewIfNeeded()
@@ -472,6 +512,23 @@ struct ExploreDetailVCTests {
                                                       filmQueueService: filmQueueService)
         let sut = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
         return sut
+    }
+    
+    private func makeSUTWithFetchFailureFRC(scenario: (systemError: Error,
+                                                       expectedReason: PersistenceFailureReason)) throws -> ExploreDetailVC {
+        let testPersistenceController = try PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let filmQueueService = FilmQueueService(context: context)
+        var mockFactory = MockFRCFactory()
+        mockFactory.makeFilmDetailFRCStub = { _, context in
+            return ThrowingFetchedResultsController(context: context, errorToThrow: scenario.systemError)
+        }
+        let mockImageLoader = MockImageLoader()
+        let vm = FilmDetailViewModel(imageLoader: mockImageLoader,
+                                     managedObjectContext: context,
+                                     frcFactory: mockFactory,
+                                     filmQueueService: filmQueueService)
+        return ExploreDetailVC(filmDetailViewModel: vm)
     }
     
     private func makeSUTWithFilmAndFilmQueueServiceSpy() -> (vc: ExploreDetailVC, spyFQS: FilmQueueServiceSpy) {

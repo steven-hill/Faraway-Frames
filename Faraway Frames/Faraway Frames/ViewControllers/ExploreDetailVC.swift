@@ -128,9 +128,11 @@ final class ExploreDetailVC: UIViewController {
             self.isUpNext = displayModel.isUpNext
             self.isWatched = displayModel.isWatched
             updatedFilm = displayModel.film
-        case .fetchFailure:
-            // TODO: - Implement error config.
-            print("error")
+        case .fetchFailure(let error, let film):
+            config = createFetchFailureConfig(error: error, film: film)
+            navigationItem.hidesBackButton = true
+            contentView.isHidden = true
+            buttonsContainer.isHidden = true
         case .error(let error, let film, let queue):
             config = createErrorConfig(error: error, film: film, queue: queue)
             navigationItem.hidesBackButton = true
@@ -164,6 +166,22 @@ final class ExploreDetailVC: UIViewController {
             producer: displayModel.producer,
             accessibilityLabelText: displayModel.creditsAccessibilityLabel
         )
+    }
+    
+    private func createFetchFailureConfig(error: FilmDetailError, film: Film) -> UIContentUnavailableConfiguration {
+        var config = UIContentUnavailableConfiguration.empty()
+        config.text = "\(error.localizedDescription)"
+        config.secondaryText = "\(error.secondaryText)"
+        config.image = SFSymbols.exclamationMarkTriangle
+        config.imageProperties.tintColor = .systemRed
+        config.button = .prominentGlass()
+        config.button.title = "Ok"
+        config.buttonProperties.primaryAction = UIAction { [weak self] _ in
+            guard let self else { return }
+            filmDetailViewModel.returnToFilmContent(film: film)
+            self.setNeedsUpdateContentUnavailableConfiguration()
+        }
+        return config
     }
     
     private func createErrorConfig(error: FilmDetailError, film: Film, queue: FilmQueue) -> UIContentUnavailableConfiguration {
