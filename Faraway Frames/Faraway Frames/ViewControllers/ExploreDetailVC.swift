@@ -128,8 +128,8 @@ final class ExploreDetailVC: UIViewController {
             self.isUpNext = displayModel.isUpNext
             self.isWatched = displayModel.isWatched
             updatedFilm = displayModel.film
-        case .fetchFailure:
-            config = createFetchFailureConfig()
+        case .fetchFailure(let error):
+            config = createFetchFailureConfig(error: error)
             navigationItem.hidesBackButton = true
             contentView.isHidden = true
             buttonsContainer.isHidden = true
@@ -168,10 +168,10 @@ final class ExploreDetailVC: UIViewController {
         )
     }
     
-    private func createFetchFailureConfig() -> UIContentUnavailableConfiguration {
+    private func createFetchFailureConfig(error: FilmDetailError) -> UIContentUnavailableConfiguration {
         var config = UIContentUnavailableConfiguration.empty()
-        config.text = "Failed to sync film with database."
-        config.secondaryText = "Please try again later."
+        config.text = "\(error.localizedDescription)"
+        config.secondaryText = "\(error.secondaryText)"
         config.image = SFSymbols.exclamationMarkTriangle
         config.imageProperties.tintColor = .systemRed
         config.button = .prominentGlass()

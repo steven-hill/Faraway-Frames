@@ -92,10 +92,11 @@ struct FilmDetailViewModelTests {
                                       filmQueueService: filmQueueService)
         let delegateSpy = FilmDetailViewModelSpy()
         sut.delegate = delegateSpy
+        let expectedError = FilmDetailError.fetchFailed(scenario.expectedReason)
         
         sut.setFilm(Film.sample[0])
         
-        #expect(sut.currentState == .fetchFailure, "Should be `.fetchFailure`.")
+        #expect(sut.currentState == .fetchFailure(expectedError), "Should be `.fetchFailure`.")
         #expect(delegateSpy.didReceiveErrorCallCount == 1, "Should call the delegate once.")
     }
     

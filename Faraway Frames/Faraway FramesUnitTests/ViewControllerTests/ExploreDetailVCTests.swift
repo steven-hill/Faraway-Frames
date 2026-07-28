@@ -158,7 +158,6 @@ struct ExploreDetailVCTests {
         sut.updateContentUnavailableConfiguration(using: state)
         let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
         
-        #expect(sut.filmDetailViewModel.currentState == .fetchFailure, "This config is for fetch failure.")
         #expect(config != nil, "Should not be nil.")
         #expect(config?.button.title != nil, "Should have a title.")
     }
