@@ -23,5 +23,7 @@ public class FilmMO: NSManagedObject {
     @NSManaged public var rottenTomatoesScore: String?
     @NSManaged public var url: String?
     @NSManaged public nonisolated var isUpNext: Bool
+    @NSManaged public var dateAddedToUpNext: Date?
+    @NSManaged public var dateAddedToWatched: Date?
     @NSManaged public nonisolated var isWatched: Bool
 }

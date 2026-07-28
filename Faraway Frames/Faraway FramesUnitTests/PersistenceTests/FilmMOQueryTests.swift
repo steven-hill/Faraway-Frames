@@ -16,7 +16,7 @@ struct FilmMOQueryTests {
         let request = FilmMO.upNextFetchRequest()
         
         #expect(request.entityName == "FilmMO", "Should target the FilmMO table.")
-        #expect(request.sortDescriptors?.first?.key == "title", "Should sort rows by their title.")
+        #expect(request.sortDescriptors?.first?.key == "dateAddedToUpNext", "Should sort rows by date added.")
         #expect(request.predicate?.predicateFormat == "isUpNext == 1", "Predicate must filter strictly for active true status.")
     }
     
@@ -25,7 +25,7 @@ struct FilmMOQueryTests {
         let request = FilmMO.watchedFetchRequest()
         
         #expect(request.entityName == "FilmMO", "Should target the FilmMO table.")
-        #expect(request.sortDescriptors?.first?.key == "title", "Should sort rows by their title.")
+        #expect(request.sortDescriptors?.first?.key == "dateAddedToWatched", "Should sort rows by date added.")
         #expect(request.predicate?.predicateFormat == "isWatched == 1", "Predicate must filter strictly for active true status.")
     }
     
