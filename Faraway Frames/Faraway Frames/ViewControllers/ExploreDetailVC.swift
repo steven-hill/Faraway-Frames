@@ -129,8 +129,10 @@ final class ExploreDetailVC: UIViewController {
             self.isWatched = displayModel.isWatched
             updatedFilm = displayModel.film
         case .fetchFailure:
-            // TODO: - Implement error config.
-            print("error")
+            config = createFetchFailureConfig()
+            navigationItem.hidesBackButton = true
+            contentView.isHidden = true
+            buttonsContainer.isHidden = true
         case .error(let error, let film, let queue):
             config = createErrorConfig(error: error, film: film, queue: queue)
             navigationItem.hidesBackButton = true
@@ -172,7 +174,6 @@ final class ExploreDetailVC: UIViewController {
         config.secondaryText = "Please try again later."
         config.image = SFSymbols.exclamationMarkTriangle
         config.imageProperties.tintColor = .systemRed
-        
         config.button = .prominentGlass()
         config.button.title = "Ok"
         return config
