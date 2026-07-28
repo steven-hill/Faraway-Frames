@@ -135,22 +135,10 @@ struct ExploreDetailVCTests {
           arguments: PersistenceHelper.errorScenarios
     )
     func exploreDetailVC_createFetchFailureConfig_whenPerformFetchFailsOnViewModel_createsConfiguration(
-    scenario: (systemError: Error,
-               expectedReason: PersistenceFailureReason)
+        scenario: (systemError: Error,
+                   expectedReason: PersistenceFailureReason)
     ) async throws {
-        let testPersistenceController = try PersistenceController(inMemory: true)
-        let context = testPersistenceController.viewContext
-        let filmQueueService = FilmQueueService(context: context)
-        var mockFactory = MockFRCFactory()
-        mockFactory.makeFilmDetailFRCStub = { _, context in
-            return ThrowingFetchedResultsController(context: context, errorToThrow: scenario.systemError)
-        }
-        let mockImageLoader = MockImageLoader()
-        let vm = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                      managedObjectContext: context,
-                                      frcFactory: mockFactory,
-                                      filmQueueService: filmQueueService)
-        let sut = ExploreDetailVC(filmDetailViewModel: vm)
+        let sut = try makeSUTWithFetchFailureFRC(scenario: scenario)
         
         sut.filmDetailViewModel.setFilm(Film.sample[0])
         
@@ -167,22 +155,10 @@ struct ExploreDetailVCTests {
           arguments: PersistenceHelper.errorScenarios
     )
     func exploreDetailVC_tapOkButtonOnFetchFailureConfig_reloadsFilmContentAndUpdatesState(
-    scenario: (systemError: Error,
-               expectedReason: PersistenceFailureReason)
+        scenario: (systemError: Error,
+                   expectedReason: PersistenceFailureReason)
     ) async throws {
-        let testPersistenceController = try PersistenceController(inMemory: true)
-        let context = testPersistenceController.viewContext
-        let filmQueueService = FilmQueueService(context: context)
-        var mockFactory = MockFRCFactory()
-        mockFactory.makeFilmDetailFRCStub = { _, context in
-            return ThrowingFetchedResultsController(context: context, errorToThrow: scenario.systemError)
-        }
-        let mockImageLoader = MockImageLoader()
-        let vm = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                      managedObjectContext: context,
-                                      frcFactory: mockFactory,
-                                      filmQueueService: filmQueueService)
-        let sut = ExploreDetailVC(filmDetailViewModel: vm)
+        let sut = try makeSUTWithFetchFailureFRC(scenario: scenario)
         sut.filmDetailViewModel.setFilm(Film.sample[0])
         let state = UIContentUnavailableConfigurationState(traitCollection: sut.traitCollection)
         sut.updateContentUnavailableConfiguration(using: state)
@@ -190,7 +166,7 @@ struct ExploreDetailVCTests {
         
         config?.buttonProperties.primaryAction?.performWithSender(nil, target: nil)
         sut.view.layoutIfNeeded()
- 
+        
         #expect(sut.contentUnavailableConfiguration == nil, "Should be nil because VC is displaying film content again.")
     }
     
@@ -536,6 +512,23 @@ struct ExploreDetailVCTests {
                                                       filmQueueService: filmQueueService)
         let sut = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
         return sut
+    }
+    
+    private func makeSUTWithFetchFailureFRC(scenario: (systemError: Error,
+                                                       expectedReason: PersistenceFailureReason)) throws -> ExploreDetailVC {
+        let testPersistenceController = try PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let filmQueueService = FilmQueueService(context: context)
+        var mockFactory = MockFRCFactory()
+        mockFactory.makeFilmDetailFRCStub = { _, context in
+            return ThrowingFetchedResultsController(context: context, errorToThrow: scenario.systemError)
+        }
+        let mockImageLoader = MockImageLoader()
+        let vm = FilmDetailViewModel(imageLoader: mockImageLoader,
+                                     managedObjectContext: context,
+                                     frcFactory: mockFactory,
+                                     filmQueueService: filmQueueService)
+        return ExploreDetailVC(filmDetailViewModel: vm)
     }
     
     private func makeSUTWithFilmAndFilmQueueServiceSpy() -> (vc: ExploreDetailVC, spyFQS: FilmQueueServiceSpy) {
