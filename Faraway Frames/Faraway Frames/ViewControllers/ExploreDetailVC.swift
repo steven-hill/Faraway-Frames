@@ -166,6 +166,18 @@ final class ExploreDetailVC: UIViewController {
         )
     }
     
+    private func createFetchFailureConfig() -> UIContentUnavailableConfiguration {
+        var config = UIContentUnavailableConfiguration.empty()
+        config.text = "Failed to sync film with database."
+        config.secondaryText = "Please try again later."
+        config.image = SFSymbols.exclamationMarkTriangle
+        config.imageProperties.tintColor = .systemRed
+        
+        config.button = .prominentGlass()
+        config.button.title = "Ok"
+        return config
+    }
+    
     private func createErrorConfig(error: FilmDetailError, film: Film, queue: FilmQueue) -> UIContentUnavailableConfiguration {
         var config = UIContentUnavailableConfiguration.empty()
         config.text = "\(error.localizedDescription)"

@@ -161,7 +161,6 @@ struct ExploreDetailVCTests {
         #expect(sut.filmDetailViewModel.currentState == .fetchFailure, "")
         #expect(config != nil, "Should not be nil.")
         #expect(config?.button.title != nil, "Should have a title.")
-        #expect(config?.secondaryButton.title != nil, "Should have a title.")
     }
     
     @Test func exploreDetailVC_didUpdateFilmDetails_notifiesContentUnavailableConfigurationToUpdateAndSetsUpdatedFilm() {
