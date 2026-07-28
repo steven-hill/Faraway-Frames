@@ -73,6 +73,7 @@ struct FilmQueueServiceTests {
         
         #expect(fetchedFilms[0].isWatched == true, "Should be true.")
         #expect(fetchedFilms[0].id == film.id, "Should match.")
+        #expect(fetchedFilms[0].dateAddedToWatched != nil, "Timestamp should be set.")
         #expect(result == true, "Should be true.")
     }
     
@@ -87,6 +88,7 @@ struct FilmQueueServiceTests {
         let fetchedFilms = fetchFilmsFromDatabase(film: film, testPersistenceController: testPersistenceController)
         
         #expect(fetchedFilms[0].isWatched == false, "Should be false.")
+        #expect(fetchedFilms[0].dateAddedToWatched == nil, "Timestamp should be set to nil.")
         #expect(result == true, "Should be true.")
     }
     
