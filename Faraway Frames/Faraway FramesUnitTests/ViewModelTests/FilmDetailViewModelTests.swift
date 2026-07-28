@@ -93,10 +93,12 @@ struct FilmDetailViewModelTests {
         let delegateSpy = FilmDetailViewModelSpy()
         sut.delegate = delegateSpy
         let expectedError = FilmDetailError.fetchFailed(scenario.expectedReason)
+        let film = Film.sample[0]
         
-        sut.setFilm(Film.sample[0])
+        sut.setFilm(film)
         
-        #expect(sut.currentState == .fetchFailure(expectedError), "Should be `.fetchFailure`.")
+        #expect(sut.shouldRetrySetFilmWithoutSync == true, "Should be set to true.")
+        #expect(sut.currentState == .fetchFailure(expectedError, film), "Should be `.fetchFailure`.")
         #expect(delegateSpy.didReceiveErrorCallCount == 1, "Should call the delegate once.")
     }
     

@@ -128,8 +128,8 @@ final class ExploreDetailVC: UIViewController {
             self.isUpNext = displayModel.isUpNext
             self.isWatched = displayModel.isWatched
             updatedFilm = displayModel.film
-        case .fetchFailure(let error):
-            config = createFetchFailureConfig(error: error)
+        case .fetchFailure(let error, let film):
+            config = createFetchFailureConfig(error: error, film: film)
             navigationItem.hidesBackButton = true
             contentView.isHidden = true
             buttonsContainer.isHidden = true
@@ -168,7 +168,7 @@ final class ExploreDetailVC: UIViewController {
         )
     }
     
-    private func createFetchFailureConfig(error: FilmDetailError) -> UIContentUnavailableConfiguration {
+    private func createFetchFailureConfig(error: FilmDetailError, film: Film) -> UIContentUnavailableConfiguration {
         var config = UIContentUnavailableConfiguration.empty()
         config.text = "\(error.localizedDescription)"
         config.secondaryText = "\(error.secondaryText)"
@@ -176,6 +176,11 @@ final class ExploreDetailVC: UIViewController {
         config.imageProperties.tintColor = .systemRed
         config.button = .prominentGlass()
         config.button.title = "Ok"
+        config.buttonProperties.primaryAction = UIAction { [weak self] _ in
+            guard let self else { return }
+            filmDetailViewModel.returnToFilmContent(film: film)
+            self.setNeedsUpdateContentUnavailableConfiguration()
+        }
         return config
     }
     

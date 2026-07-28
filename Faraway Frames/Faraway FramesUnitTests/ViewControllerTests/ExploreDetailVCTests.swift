@@ -162,6 +162,38 @@ struct ExploreDetailVCTests {
         #expect(config?.button.title != nil, "Should have a title.")
     }
     
+    @Test("Tapping `ok` button on fetch failure config reloads film content and updates VM's `currentState`",
+          .tags(.persistence),
+          arguments: PersistenceHelper.errorScenarios
+    )
+    func exploreDetailVC_tapOkButtonOnFetchFailureConfig_reloadsFilmContentAndUpdatesState(
+    scenario: (systemError: Error,
+               expectedReason: PersistenceFailureReason)
+    ) async throws {
+        let testPersistenceController = try PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let filmQueueService = FilmQueueService(context: context)
+        var mockFactory = MockFRCFactory()
+        mockFactory.makeFilmDetailFRCStub = { _, context in
+            return ThrowingFetchedResultsController(context: context, errorToThrow: scenario.systemError)
+        }
+        let mockImageLoader = MockImageLoader()
+        let vm = FilmDetailViewModel(imageLoader: mockImageLoader,
+                                      managedObjectContext: context,
+                                      frcFactory: mockFactory,
+                                      filmQueueService: filmQueueService)
+        let sut = ExploreDetailVC(filmDetailViewModel: vm)
+        sut.filmDetailViewModel.setFilm(Film.sample[0])
+        let state = UIContentUnavailableConfigurationState(traitCollection: sut.traitCollection)
+        sut.updateContentUnavailableConfiguration(using: state)
+        let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
+        
+        config?.buttonProperties.primaryAction?.performWithSender(nil, target: nil)
+        sut.view.layoutIfNeeded()
+ 
+        #expect(sut.contentUnavailableConfiguration == nil, "Should be nil because VC is displaying film content again.")
+    }
+    
     @Test func exploreDetailVC_didUpdateFilmDetails_notifiesContentUnavailableConfigurationToUpdateAndSetsUpdatedFilm() {
         let sut = makeSUTWithFilm()
         sut.loadViewIfNeeded()

@@ -15,7 +15,7 @@ final class FilmDetailViewModel: NSObject {
     enum FilmDetailState: Equatable {
         case noFilmSelected
         case content(displayModel: FilmDetailDisplayModel, image: UIImage? = nil)
-        case fetchFailure(FilmDetailError)
+        case fetchFailure(FilmDetailError, Film)
         case error(FilmDetailError, Film, FilmQueue)
     }
     
@@ -34,6 +34,7 @@ final class FilmDetailViewModel: NSObject {
     weak var delegate: FilmDetailViewModelDelegate?
     private(set) var attemptingToUpdateFilm = false
     private(set) var filmWasUpdated = false
+    private(set) var shouldRetrySetFilmWithoutSync = false
     
     // MARK: - Initialisation
     init(film: Film? = nil,
@@ -71,7 +72,9 @@ final class FilmDetailViewModel: NSObject {
         let displayModel = FilmDetailDisplayModel(film: film)
         currentState = .content(displayModel: displayModel)
         getMovieBanner(for: film, displayModel: displayModel)
-        setupFRCAndPerformFetch(for: film)
+        if shouldRetrySetFilmWithoutSync == false {
+            setupFRCAndPerformFetch(for: film)
+        }
     }
     
     private func setupFRCAndPerformFetch(for film: Film) {
@@ -83,9 +86,10 @@ final class FilmDetailViewModel: NSObject {
         do {
             try frc.performFetch()
         } catch {
+            shouldRetrySetFilmWithoutSync = true
             let reason = PersistenceFailureReason(from: error)
             let filmDetailError = FilmDetailError.fetchFailed(reason)
-            currentState = .fetchFailure(filmDetailError)
+            currentState = .fetchFailure(filmDetailError, film)
         }
     }
     
