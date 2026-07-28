@@ -22,11 +22,9 @@ extension FilmMO {
     }
     
     static func exploreDetailFetchRequest(using filmID: String) -> NSFetchRequest<FilmMO> {
-        return createFetchRequest(
-            sortKey: "title",
-            predicate: NSPredicate(format: "id == %@", filmID),
-            ascending: true
-        )
+        return createFetchRequest(sortKey: "title",
+                                  predicate: NSPredicate(format: "id == %@", filmID),
+                                  ascending: true)
     }
     
     // MARK: - Helper
