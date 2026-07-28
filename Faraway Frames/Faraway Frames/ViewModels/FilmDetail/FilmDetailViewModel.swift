@@ -15,7 +15,7 @@ final class FilmDetailViewModel: NSObject {
     enum FilmDetailState: Equatable {
         case noFilmSelected
         case content(displayModel: FilmDetailDisplayModel, image: UIImage? = nil)
-        case fetchFailure
+        case fetchFailure(FilmDetailError)
         case error(FilmDetailError, Film, FilmQueue)
     }
     
@@ -83,7 +83,9 @@ final class FilmDetailViewModel: NSObject {
         do {
             try frc.performFetch()
         } catch {
-            currentState = .fetchFailure
+            let reason = PersistenceFailureReason(from: error)
+            let filmDetailError = FilmDetailError.fetchFailed(reason)
+            currentState = .fetchFailure(filmDetailError)
         }
     }
     
