@@ -17,7 +17,10 @@ extension FilmMO {
     }
     
     static func watchedFetchRequest() -> NSFetchRequest<FilmMO> {
-        return baseFetchRequest(predicate: NSPredicate(format: "isWatched == YES"))
+        let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
+        request.sortDescriptors = [NSSortDescriptor(key: "dateAddedToWatched", ascending: true)]
+        request.predicate = NSPredicate(format: "isWatched == YES")
+        return request
     }
     
     static func exploreDetailFetchRequest(using filmID: String) -> NSFetchRequest<FilmMO> {
