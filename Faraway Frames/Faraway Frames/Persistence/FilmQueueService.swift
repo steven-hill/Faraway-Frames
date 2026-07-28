@@ -38,6 +38,7 @@ final class FilmQueueService: FilmQueueServiceProtocol {
             case (.upNext, .remove):
                 statusChanged = filmMO.isUpNext
                 filmMO.isUpNext = false
+                filmMO.dateAddedToUpNext = nil
             case (.watched, .add):
                 statusChanged = !filmMO.isWatched
                 filmMO.isWatched = true
