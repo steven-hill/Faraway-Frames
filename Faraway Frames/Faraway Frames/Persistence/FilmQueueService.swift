@@ -34,6 +34,7 @@ final class FilmQueueService: FilmQueueServiceProtocol {
             case (.upNext, .add):
                 statusChanged = !filmMO.isUpNext
                 filmMO.isUpNext = true
+                filmMO.dateAddedToUpNext = Date()
             case (.upNext, .remove):
                 statusChanged = filmMO.isUpNext
                 filmMO.isUpNext = false
