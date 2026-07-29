@@ -23,6 +23,7 @@ final class HomeVC: UIViewController {
     private var headerRegistration: UICollectionView.SupplementaryRegistration<SegmentedControlHeaderView>!
     private var filmCellRegistration: UICollectionView.CellRegistration<FilmGridCell, Film>!
     private var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
+    private(set) var emptyStateView = UIContentUnavailableView(configuration: .empty())
     
     // MARK: - Initialisation
     init(homeViewModel: HomeViewModel) {
@@ -252,7 +253,8 @@ final class HomeVC: UIViewController {
         if films.isEmpty {
             showEmptyState(for: activeSection)
         } else {
-            contentUnavailableConfiguration = nil
+            emptyStateView.isHidden = true
+            emptyStateView.isAccessibilityElement = false
         }
     }
     
@@ -273,7 +275,24 @@ final class HomeVC: UIViewController {
         case .watched:
             config.secondaryText = "Films added to Watched appear here"
         }
-        contentUnavailableConfiguration = config
+        emptyStateView.configuration = config
+        emptyStateView.isHidden = false
+        emptyStateView.isAccessibilityElement = true
+        emptyStateView.accessibilityLabel = [
+            config.text,
+            config.secondaryText
+        ]
+        .compactMap { $0 }
+        .joined(separator: ". ")
+        emptyStateView.accessibilityTraits = [.staticText]
+        
+        view.addSubview(emptyStateView)
+        emptyStateView.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            emptyStateView.centerXAnchor.constraint(equalTo: collectionView.centerXAnchor),
+            emptyStateView.centerYAnchor.constraint(equalTo: collectionView.centerYAnchor)
+        ])
     }
     
     // MARK: - Segmented Control Action

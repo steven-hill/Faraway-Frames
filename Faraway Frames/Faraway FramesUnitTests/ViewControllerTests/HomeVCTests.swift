@@ -71,18 +71,17 @@ struct HomeVCTests {
         #expect(header != nil, "Should not be nil.")
     }
 
-    @Test("Empty state is displayed when `Up Next` segment is empty.")
+    @Test("Empty state view is displayed when `Up Next` segment is empty.")
     func homeVC_whenUpNextIsEmpty_displaysUpNextEmptyState() async {
         let sut = makeSUT()
         
         sut.loadViewIfNeeded()
         
-        let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
-        #expect(config != nil, "Should be displaying content unavailable view for Up Next films.")
+        #expect(sut.emptyStateView.isHidden == false, "Should display empty state view.")
         #expect(sut.films.isEmpty, "Should be empty.")
     }
     
-    @Test("Empty state is displayed when `Watched` segment is empty.")
+    @Test("Empty state view is displayed when `Watched` segment is empty.")
     func homeVC_whenWatchedIsEmpty_displaysWatchedEmptyState() async {
         let sut = makeSUT()
         sut.loadViewIfNeeded()
@@ -93,25 +92,23 @@ struct HomeVCTests {
         header?.segmentedControl.selectedSegmentIndex = 1
         header?.segmentedControl.sendActions(for: .valueChanged)
         
-        let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
-        #expect(config != nil, "Should be displaying content unavailable view.")
+        #expect(sut.emptyStateView.isHidden == false, "Should display empty state view.")
         #expect(sut.films.isEmpty, "Should be empty.")
     }
     
-    @Test("Films added to `Up Next` appear in `Up Next` segment")
+    @Test("Film added to `Up Next` appears in `Up Next` segment")
     func homeVC_whenFilmWasAddedToUpNext_onInit_displaysInUpNext() throws {
         let (sut, context, entity) = try makeSUTWithContextAndEntity()
         _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
         try context.save()
         sut.loadViewIfNeeded()
         
-        let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
-        #expect(config == nil, "Should be displaying Up Next films, not `contentUnavailableConfiguration`.")
+        #expect(sut.emptyStateView.isHidden, "Empty state view should be hidden.")
         #expect(sut.films.count == 1, "Should be one film.")
         #expect(sut.films[0].id == Film.sample[0].id, "Should be the film that was added.")
     }
     
-    @Test("Films added to `Watched` appear in `Watched` segment")
+    @Test("Film added to `Watched` appears in `Watched` segment")
     func homeVC_whenFilmWasAddedToWatched_onInit_displaysInWatched() async throws {
         let (sut, context, entity) = try makeSUTWithContextAndEntity()
         _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: false, isWatched: true)
@@ -124,8 +121,7 @@ struct HomeVCTests {
         header?.segmentedControl.selectedSegmentIndex = 1
         header?.segmentedControl.sendActions(for: .valueChanged)
         
-        let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
-        #expect(config == nil, "Should be displaying Watched films, not `contentUnavailableConfiguration`.")
+        #expect(sut.emptyStateView.isHidden, "Empty state view should be hidden.")
         #expect(sut.films.count == 1, "Should be one film.")
         #expect(sut.films[0].id == Film.sample[0].id, "Should be the film that was added.")
     }
@@ -133,17 +129,32 @@ struct HomeVCTests {
     @Test("When segment changes, snapshot swaps sections to show correct films in their respective segments")
     func homeVC_whenUpNextAndWatchedHaveFilms_onInit_displaysFilmsInCorrectSegments() async throws {
         let (sut, context, entity) = try makeSUTWithContextAndEntity()
-        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
-        _ = PersistenceHelper.makeFilmMO(with: Film.sample[1], entity: entity, context: context, isUpNext: true, isWatched: false)
-        _ = PersistenceHelper.makeFilmMO(with: Film.sample[2], entity: entity, context: context, isUpNext: false, isWatched: true)
+        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0],
+                                         entity: entity,
+                                         context: context,
+                                         isUpNext: true,
+                                         isWatched: false)
+        try context.save()
+        
+        _ = PersistenceHelper.makeFilmMO(with: Film.sample[1],
+                                         entity: entity,
+                                         context: context,
+                                         isUpNext: true,
+                                         isWatched: false)
+        try context.save()
+        
+        _ = PersistenceHelper.makeFilmMO(with: Film.sample[2],
+                                         entity: entity,
+                                         context: context,
+                                         isUpNext: false,
+                                         isWatched: true)
         try context.save()
         
         sut.loadViewIfNeeded()
         await Task.yield()
         sut.collectionView.layoutIfNeeded()
-        
-        let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
-        #expect(config == nil, "Should be displaying Up Next films, not `contentUnavailableConfiguration`.")
+
+        #expect(sut.emptyStateView.isHidden, "Empty state view should be hidden.")
         #expect(sut.films.count == 2, "Should have two films.")
         #expect(sut.films[0].id == Film.sample[0].id, "Should be the first film that was added.")
         #expect(sut.films[1].id == Film.sample[1].id, "Should be the second film that was added.")
@@ -152,7 +163,7 @@ struct HomeVCTests {
         header?.segmentedControl.selectedSegmentIndex = 1
         header?.segmentedControl.sendActions(for: .valueChanged)
         
-        #expect(config == nil, "Should be displaying Watched films, not `contentUnavailableConfiguration`.")
+        #expect(sut.emptyStateView.isHidden, "Empty state view should be hidden.")
         #expect(sut.films.count == 1, "Should have one film.")
         #expect(sut.films[0].id == Film.sample[2].id, "Should be the third film that was added.")
     }
