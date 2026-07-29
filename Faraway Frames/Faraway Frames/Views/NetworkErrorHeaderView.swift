@@ -20,6 +20,7 @@ final class NetworkErrorHeaderView: UICollectionReusableView {
         view.backgroundColor = .systemOrange.withAlphaComponent(0.15)
         view.layer.cornerRadius = 8
         view.layer.masksToBounds = true
+        view.isAccessibilityElement = true
         return view
     }()
     
@@ -56,6 +57,12 @@ final class NetworkErrorHeaderView: UICollectionReusableView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         addSubview(containerView)
+        containerView.accessibilityLabel = [
+            titleLabel.text,
+            descriptionLabel.text
+        ]
+            .compactMap { $0 }
+            .joined(separator: ". ")
         containerView.addSubview(textStackView)
         textStackView.addArrangedSubview(titleLabel)
         textStackView.addArrangedSubview(descriptionLabel)
