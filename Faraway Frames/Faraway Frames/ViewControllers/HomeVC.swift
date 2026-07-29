@@ -268,7 +268,7 @@ final class HomeVC: UIViewController {
     private func showEmptyState(for section: Section) {
         var config = UIContentUnavailableConfiguration.empty()
         config.image = SFSymbols.movieClapper
-        config.text = "No Films Added Yet"
+        config.text = "Empty Queue"
         switch section {
         case .upNext:
             config.secondaryText = "Films added to Up Next appear here"
