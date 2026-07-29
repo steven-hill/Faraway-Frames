@@ -101,17 +101,23 @@ final class ExploreDetailVC: UIViewController {
         setupScrollView()
         addSubviews()
         setupConstraints()
-        registerForTraitChanges([UITraitHorizontalSizeClass.self]) {
-            (self: Self, previousTraitCollection: UITraitCollection) in
+        registerForTraitChanges([UITraitHorizontalSizeClass.self,
+                                 UITraitPreferredContentSizeCategory.self]) { (self: Self, previousTraitCollection: UITraitCollection) in
             self.updateLayoutForTraits()
         }
         updateLayoutForTraits()
     }
     
     private func updateLayoutForTraits() {
-        creditsContainer.axis = (traitCollection.horizontalSizeClass == .regular) ? .horizontal : .vertical
-        creditsContainer.distribution = (traitCollection.horizontalSizeClass == .regular) ? .fillEqually : .fill
-        buttonsContainer.axis = (traitCollection.horizontalSizeClass == .regular) ? .horizontal: .vertical
+        let isRegularHorizontalSizeClass = traitCollection.horizontalSizeClass == .regular
+        let isAccessibilityText = traitCollection.preferredContentSizeCategory.isAccessibilityCategory
+        creditsContainer.axis = isRegularHorizontalSizeClass ? .horizontal : .vertical
+        creditsContainer.distribution = isRegularHorizontalSizeClass ? .fillEqually : .fill
+        if isRegularHorizontalSizeClass && isAccessibilityText {
+            buttonsContainer.axis = .vertical
+        } else {
+            buttonsContainer.axis = isRegularHorizontalSizeClass ? .horizontal : .vertical
+        }
     }
     
     override func updateContentUnavailableConfiguration(using state: UIContentUnavailableConfigurationState) {
