@@ -17,6 +17,7 @@ final class FilmGridCell: UICollectionViewCell {
         imageView.layer.cornerRadius = 8
         imageView.clipsToBounds = true
         imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.accessibilityIdentifier = "Film_Grid_Cell_Poster"
         return imageView
     }()
     
@@ -27,6 +28,8 @@ final class FilmGridCell: UICollectionViewCell {
         label.numberOfLines = 0
         label.textColor = .label
         label.translatesAutoresizingMaskIntoConstraints = false
+        label.accessibilityIdentifier = "Film_Grid_Cell_Title"
+        label.accessibilityTraits = .button
         return label
     }()
     
