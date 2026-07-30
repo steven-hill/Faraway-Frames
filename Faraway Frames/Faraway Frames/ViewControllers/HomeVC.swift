@@ -254,16 +254,13 @@ final class HomeVC: UIViewController {
         switch homeViewModel.currentState {
         case .failure(let error):
             showErrorView(for: activeSection, error: error)
-            emptyStateView.isHidden = true
-            emptyStateView.isAccessibilityElement = false
+            hideEmptyStateView()
         case .idle, .fetchedObjects:
-            databaseErrorView.isHidden = true
-            databaseErrorView.isAccessibilityElement = false
+            hideDatabaseErrorView()
             if films.isEmpty {
                 showEmptyState(for: activeSection)
             } else {
-                emptyStateView.isHidden = true
-                emptyStateView.isAccessibilityElement = false
+                hideEmptyStateView()
             }
         }
     }
@@ -321,6 +318,16 @@ final class HomeVC: UIViewController {
             stateView.centerXAnchor.constraint(equalTo: collectionView.centerXAnchor),
             stateView.centerYAnchor.constraint(equalTo: collectionView.centerYAnchor)
         ])
+    }
+    
+    private func hideDatabaseErrorView() {
+        databaseErrorView.isHidden = true
+        databaseErrorView.isAccessibilityElement = false
+    }
+    
+    private func hideEmptyStateView() {
+        emptyStateView.isHidden = true
+        emptyStateView.isAccessibilityElement = false
     }
     
     // MARK: - Segmented Control Action
