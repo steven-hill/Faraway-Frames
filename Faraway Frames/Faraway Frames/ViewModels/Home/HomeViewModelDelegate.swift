@@ -8,6 +8,5 @@
 import Foundation
 
 protocol HomeViewModelDelegate: AnyObject {
-    func filmsDidChange()
-    func didReceiveError(_ error: HomeError)
+    func homeViewModelDidUpdate(_ viewModel: HomeViewModel)
 }
