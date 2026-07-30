@@ -196,6 +196,32 @@ struct HomeVCTests {
         #expect(sut.films[0].isWatched == true, "Should be true.")
     }
     
+    @Test("If there is an error fetching films from database, error view is shown",
+          (.tags(.persistence)),
+          arguments: PersistenceHelper.errorScenarios
+    )
+    func homeVC_whenfetchRequestResultsInError_showsErrorView(for scenario: (systemError: Error,
+                                                                             expectedReason: PersistenceFailureReason)
+    ) throws {
+        let testPersistenceController = try PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let filmQueueService = FilmQueueService(context: context)
+        let throwingController = ThrowingFetchedResultsController(context: context, errorToThrow: scenario.systemError)
+        let vm = HomeViewModel(
+            upNextFRC: throwingController,
+            watchedFRC: throwingController,
+            imageLoader: MockImageLoader(),
+            filmQueueService: filmQueueService
+        )
+        let sut = HomeVC(homeViewModel: vm)
+        let expectedError = HomeError.fetchFailed(scenario.expectedReason)
+        let expectedState = HomeViewModel.HomeState.failure(expectedError)
+        
+        sut.loadViewIfNeeded()
+        
+        #expect(sut.databaseErrorView != nil, "Should present an error view when fetch fails.")
+    }
+    
     @Test("Collection view updates layout when device is rotated to landscape.")
     func homeVC_transitionLayout_recreatesCompositionalLayoutWithNewWidth() {
         let sut = makeSUT()
