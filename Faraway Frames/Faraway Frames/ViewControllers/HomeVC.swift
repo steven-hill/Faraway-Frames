@@ -177,7 +177,7 @@ final class HomeVC: UIViewController {
                     item: filmID
                 )
             }
-                  
+            
             guard let section = Section(rawValue: segmentedControlIndex) else {
                 return collectionView.dequeueConfiguredReusableCell(
                     using: filmCellRegistration,
@@ -185,7 +185,7 @@ final class HomeVC: UIViewController {
                     item: Film.placeholder
                 )
             }
-
+            
             let film: Film?
             switch section {
             case .upNext:
@@ -209,7 +209,7 @@ final class HomeVC: UIViewController {
                 item: film
             )
         }
-
+        
         dataSource.supplementaryViewProvider = { [weak self] collectionView, _, indexPath in
             guard let self = self else { return nil }
             return collectionView.dequeueConfiguredReusableSupplementary(
@@ -330,11 +330,7 @@ final class HomeVC: UIViewController {
 
 // MARK: - Home View Model Delegate
 extension HomeVC: HomeViewModelDelegate {
-    func filmsDidChange() {
-        updateSnapshot()
-    }
-    
-    func didReceiveError(_ error: HomeError) {
+    func homeViewModelDidUpdate() {
         updateSnapshot()
     }
 }
