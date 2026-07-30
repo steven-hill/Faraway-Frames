@@ -200,7 +200,7 @@ struct HomeVCTests {
           (.tags(.persistence)),
           arguments: PersistenceHelper.errorScenarios
     )
-    func homeVC_whenfetchRequestResultsInError_showsErrorView(for scenario: (systemError: Error,
+    func homeVC_whenfetchRequestFails_showsErrorView(for scenario: (systemError: Error,
                                                                              expectedReason: PersistenceFailureReason)
     ) throws {
         let testPersistenceController = try PersistenceController(inMemory: true)
@@ -214,12 +214,11 @@ struct HomeVCTests {
             filmQueueService: filmQueueService
         )
         let sut = HomeVC(homeViewModel: vm)
-        let expectedError = HomeError.fetchFailed(scenario.expectedReason)
-        let expectedState = HomeViewModel.HomeState.failure(expectedError)
         
         sut.loadViewIfNeeded()
         
-        #expect(sut.databaseErrorView != nil, "Should present an error view when fetch fails.")
+        #expect(sut.databaseErrorView.isHidden == false, "Should present an error view when fetch fails.")
+        #expect(sut.films.isEmpty, "Should have no films because fetch failed.")
     }
     
     @Test("Collection view updates layout when device is rotated to landscape.")

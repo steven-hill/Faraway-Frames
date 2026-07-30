@@ -24,6 +24,7 @@ final class HomeVC: UIViewController {
     private var filmCellRegistration: UICollectionView.CellRegistration<FilmGridCell, Film>!
     private var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
     private(set) var emptyStateView = UIContentUnavailableView(configuration: .empty())
+    private(set) var databaseErrorView = UIContentUnavailableView(configuration: .empty())
     
     // MARK: - Initialisation
     init(homeViewModel: HomeViewModel) {
@@ -250,6 +251,13 @@ final class HomeVC: UIViewController {
         snapshot.appendItems(films.map(\.id), toSection: activeSection)
         dataSource.apply(snapshot, animatingDifferences: true)
         
+        if case .failure(let error) = homeViewModel.currentState {
+            showErrorView(for: activeSection, error: error)
+        } else {
+            databaseErrorView.isHidden = true
+            databaseErrorView.isAccessibilityElement = false
+        }
+        
         if films.isEmpty {
             showEmptyState(for: activeSection)
         } else {
@@ -263,6 +271,32 @@ final class HomeVC: UIViewController {
         case .upNext:  return homeViewModel.upNextFilms
         case .watched: return homeViewModel.watchedFilms
         }
+    }
+    
+    private func showErrorView(for section: Section, error: HomeError) {
+        var config = UIContentUnavailableConfiguration.empty()
+        config.image = SFSymbols.exclamationMarkTriangle
+        config.text = error.localizedDescription
+        config.secondaryText = error.secondaryText
+        
+        databaseErrorView.configuration = config
+        databaseErrorView.isHidden = false
+        databaseErrorView.isAccessibilityElement = true
+        databaseErrorView.accessibilityLabel = [
+            config.text,
+            config.secondaryText
+        ]
+        .compactMap { $0 }
+        .joined(separator: ". ")
+        databaseErrorView.accessibilityTraits = [.staticText]
+        
+        view.addSubview(databaseErrorView)
+        databaseErrorView.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            databaseErrorView.centerXAnchor.constraint(equalTo: collectionView.centerXAnchor),
+            databaseErrorView.centerYAnchor.constraint(equalTo: collectionView.centerYAnchor)
+        ])
     }
     
     private func showEmptyState(for section: Section) {
