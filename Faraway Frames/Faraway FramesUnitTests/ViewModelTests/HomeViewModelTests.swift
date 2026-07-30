@@ -462,17 +462,10 @@ struct HomeViewModelTests {
     
     //MARK: - Home View Model Delegate Spy
     final class HomeViewModelDelegateSpy: HomeViewModelDelegate {
-        var filmsDidChangeCallCount: Int = 0
-        var didReceiveErrorCallCount: Int = 0
-        var receivedError: HomeError?
+        var didUpdateCallCount: Int = 0
         
-        func filmsDidChange() {
-            self.filmsDidChangeCallCount += 1
-        }
-        
-        func didReceiveError(_ error: HomeError) {
-            self.didReceiveErrorCallCount += 1
-            receivedError = error
+        func homeViewModelDidUpdate(_ viewModel: HomeViewModel) {
+            didUpdateCallCount += 1
         }
     }
 }
