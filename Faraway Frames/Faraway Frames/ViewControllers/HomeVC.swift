@@ -335,6 +335,7 @@ extension HomeVC: HomeViewModelDelegate {
     }
     
     func didReceiveError(_ error: HomeError) {
+        updateSnapshot()
     }
 }
 
