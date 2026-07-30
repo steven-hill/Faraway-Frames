@@ -216,9 +216,11 @@ struct HomeVCTests {
         let sut = HomeVC(homeViewModel: vm)
         
         sut.loadViewIfNeeded()
+        let expectedHomeError = HomeError.fetchFailed(scenario.expectedReason)
         
-        #expect(sut.databaseErrorView.isHidden == false, "Should present an error view when fetch fails.")
         #expect(sut.films.isEmpty, "Should have no films because fetch failed.")
+        #expect(sut.databaseErrorView.isHidden == false, "Should present an error view when fetch fails.")
+        #expect(sut.homeViewModel.currentState == .failure(expectedHomeError), "The view model state must match the expected persistence failure scenario exactly.")
     }
     
     @Test("Collection view updates layout when device is rotated to landscape.")
