@@ -44,7 +44,7 @@ struct HomeViewModelTests {
         
         sut.performFetches()
         
-        #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
+        #expect(delegateSpy.didUpdateCallCount == 1, "Should call the delegate once.")
         #expect(sut.upNextFilms.count == 1, "Should be one.")
         let filmUpNext = try #require(sut.upNextFilms.first, "Should contain a film.")
         #expect(filmUpNext.id == Film.sample[0].id, "Should be equal.")
@@ -63,7 +63,7 @@ struct HomeViewModelTests {
         
         sut.performFetches()
         
-        #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
+        #expect(delegateSpy.didUpdateCallCount == 1, "Should call the delegate once.")
         #expect(sut.upNextFilms.isEmpty == true, "Should be empty.")
         #expect(sut.watchedFilms.isEmpty == true, "Should be empty.")
     }
@@ -77,7 +77,7 @@ struct HomeViewModelTests {
         
         sut.controllerDidChangeContent(dummyController)
         
-        #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
+        #expect(delegateSpy.didUpdateCallCount == 1, "Should call the delegate once.")
     }
     
     @Test("`performFetches` should handle errors by updating `currentState` and calling the delegate",
@@ -106,8 +106,7 @@ struct HomeViewModelTests {
         sut.performFetches()
         
         #expect(sut.currentState == expectedState, "Should match.")
-        #expect(delegateSpy.didReceiveErrorCallCount == 1, "Should call the delegate once.")
-        #expect(delegateSpy.receivedError == expectedError, "Should match.")
+        #expect(delegateSpy.didUpdateCallCount == 1, "Should call the delegate once.")
     }
     
     @Test("Image loading request returns fallback image when URL is invalid")
@@ -173,7 +172,7 @@ struct HomeViewModelTests {
         await sut.toggleFilmInQueue(film: targetFilm, queue: .upNext, action: .add)
         sut.performFetches()
         
-        #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
+        #expect(delegateSpy.didUpdateCallCount == 1, "Should call the delegate once.")
         #expect(sut.upNextFilms.count == 1, "Should be one.")
     }
     
@@ -187,7 +186,7 @@ struct HomeViewModelTests {
         await sut.toggleFilmInQueue(film: targetFilm, queue: .watched, action: .add)
         sut.performFetches()
         
-        #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
+        #expect(delegateSpy.didUpdateCallCount == 1, "Should call the delegate once.")
         #expect(sut.watchedFilms.count == 1, "Should be one.")
     }
     
@@ -217,8 +216,7 @@ struct HomeViewModelTests {
         
         await sut.toggleFilmInQueue(film: Film.sample[0], queue: .upNext, action: .add)
         
-        #expect(delegateSpy.didReceiveErrorCallCount == 1, "Should have called delegate method once on add failure.")
-        #expect(delegateSpy.receivedError == expectedError, "Delegate should receive matching add error context case.")
+        #expect(delegateSpy.didUpdateCallCount == 1, "Should call the delegate once.")
         #expect(sut.currentState == .failure(expectedError), "ViewModel state should transition to match the add failure signature.")
     }
     
@@ -256,12 +254,11 @@ struct HomeViewModelTests {
         
         await sut.toggleFilmInQueue(film: sampleFilm, queue: .upNext, action: .remove)
         
-        #expect(delegateSpy.didReceiveErrorCallCount == 1, "Should have called delegate method once on removal failure.")
-        #expect(delegateSpy.receivedError == expectedError, "Delegate should receive matching removal error context case.")
+        #expect(delegateSpy.didUpdateCallCount == 1, "Should call the delegate once.")
         #expect(sut.currentState == .failure(expectedError), "ViewModel state should transition to match the delete failure signature.")
     }
 
-    @Test("Removing film from upNext when it's not in watched should remove it from database entirely", (.tags(.persistence)))
+    @Test("Removing film from upNext when it's not in watched should remove it from database entirely, and call delegate", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_whenFilmInUpNextButNotInWatchedIsRemoved_deletesItFromDatabase() async throws {
         let (sut, context) = makeSUTWithContext()
         let delegateSpy = HomeViewModelDelegateSpy()
@@ -280,10 +277,10 @@ struct HomeViewModelTests {
         
         #expect(sut.upNextFilms.isEmpty, "Should be empty.")
         #expect(sut.watchedFilms.isEmpty, "Should be empty.")
-        #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
+        #expect(delegateSpy.didUpdateCallCount == 1, "Should call the delegate once.")
     }
     
-    @Test("Removing film from upNext when it's in watched should only flip upNext flag", (.tags(.persistence)))
+    @Test("Removing film from upNext when it's in watched should only flip upNext flag, and call delegate", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_whenFilmIsInUpNextAndInWatched_shouldFlipFlag() async throws {
         let (sut, context) = makeSUTWithContext()
         let delegateSpy = HomeViewModelDelegateSpy()
@@ -302,10 +299,10 @@ struct HomeViewModelTests {
         
         #expect(sut.upNextFilms.isEmpty, "Should be empty.")
         #expect(sut.watchedFilms.count == 1, "Should still have one in watched.")
-        #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
+        #expect(delegateSpy.didUpdateCallCount == 1, "Should call the delegate once.")
     }
     
-    @Test("Removing film from watched when it's not in upNext removes film from database entirely", (.tags(.persistence)))
+    @Test("Removing film from watched when it's not in upNext removes film from database entirely, and calls delegate", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_whenFilmInWatchedAndNotInUpNext_deletesFilmFromDatabase() async throws {
         let (sut, context) = makeSUTWithContext()
         let delegateSpy = HomeViewModelDelegateSpy()
@@ -324,10 +321,10 @@ struct HomeViewModelTests {
         
         #expect(sut.upNextFilms.isEmpty, "Should be empty.")
         #expect(sut.watchedFilms.isEmpty, "Should be empty.")
-        #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
+        #expect(delegateSpy.didUpdateCallCount == 1, "Should call the delegate once.")
     }
     
-    @Test("Removing film from watched when it is in upNext removes film from watched only", (.tags(.persistence)))
+    @Test("Removing film from watched when it is in upNext removes film from watched only, and calls delegate", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_whenFilmInBothWatchedAndInUpNext_deletesFilmFromWatched() async throws {
         let (sut, context) = makeSUTWithContext()
         let delegateSpy = HomeViewModelDelegateSpy()
@@ -346,10 +343,10 @@ struct HomeViewModelTests {
         
         #expect(sut.upNextFilms.count == 1, "Should still have one in upNext.")
         #expect(sut.watchedFilms.isEmpty, "Should be empty.")
-        #expect(delegateSpy.filmsDidChangeCallCount == 1, "Should call the delegate once.")
+        #expect(delegateSpy.didUpdateCallCount == 1, "Should call the delegate once.")
     }
     
-    @Test("`toggleFilmInQueue` doesn't throw error, and exits silently via guard when film does not exist in database", (.tags(.persistence)))
+    @Test("`toggleFilmInQueue` doesn't throw error or call delegate, but exits silently via guard when film does not exist in database", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_whenFilmDoesNotExistInDatabase_doesNotThrowAndExitsCleanly() async {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
@@ -367,7 +364,7 @@ struct HomeViewModelTests {
         
         await sut.toggleFilmInQueue(film: Film.sample[0], queue: .upNext, action: .remove)
         
-        #expect(delegateSpy.didReceiveErrorCallCount == 0, "Should not call delegate method.")
+        #expect(delegateSpy.didUpdateCallCount == 0, "Should not call delegate method.")
     }
     
     @Test("Up Next film lookup returns film when it exists in array")
