@@ -78,6 +78,7 @@ struct HomeVCTests {
         sut.loadViewIfNeeded()
         
         #expect(sut.emptyStateView.isHidden == false, "Should display empty state view.")
+        #expect(sut.databaseErrorView.isHidden, "Database error view should be hidden.")
         #expect(sut.films.isEmpty, "Should be empty.")
     }
     
@@ -93,6 +94,7 @@ struct HomeVCTests {
         header?.segmentedControl.sendActions(for: .valueChanged)
         
         #expect(sut.emptyStateView.isHidden == false, "Should display empty state view.")
+        #expect(sut.databaseErrorView.isHidden, "Database error view should be hidden.")
         #expect(sut.films.isEmpty, "Should be empty.")
     }
     
@@ -104,6 +106,7 @@ struct HomeVCTests {
         sut.loadViewIfNeeded()
         
         #expect(sut.emptyStateView.isHidden, "Empty state view should be hidden.")
+        #expect(sut.databaseErrorView.isHidden, "Database error view should be hidden.")
         #expect(sut.films.count == 1, "Should be one film.")
         #expect(sut.films[0].id == Film.sample[0].id, "Should be the film that was added.")
     }
@@ -122,6 +125,7 @@ struct HomeVCTests {
         header?.segmentedControl.sendActions(for: .valueChanged)
         
         #expect(sut.emptyStateView.isHidden, "Empty state view should be hidden.")
+        #expect(sut.databaseErrorView.isHidden, "Database error view should be hidden.")
         #expect(sut.films.count == 1, "Should be one film.")
         #expect(sut.films[0].id == Film.sample[0].id, "Should be the film that was added.")
     }
@@ -155,6 +159,7 @@ struct HomeVCTests {
         sut.collectionView.layoutIfNeeded()
 
         #expect(sut.emptyStateView.isHidden, "Empty state view should be hidden.")
+        #expect(sut.databaseErrorView.isHidden, "Database error view should be hidden.")
         #expect(sut.films.count == 2, "Should have two films.")
         #expect(sut.films[0].id == Film.sample[0].id, "Should be the first film that was added.")
         #expect(sut.films[1].id == Film.sample[1].id, "Should be the second film that was added.")
@@ -164,6 +169,7 @@ struct HomeVCTests {
         header?.segmentedControl.sendActions(for: .valueChanged)
         
         #expect(sut.emptyStateView.isHidden, "Empty state view should be hidden.")
+        #expect(sut.databaseErrorView.isHidden, "Database error view should be hidden.")
         #expect(sut.films.count == 1, "Should have one film.")
         #expect(sut.films[0].id == Film.sample[2].id, "Should be the third film that was added.")
     }
@@ -220,6 +226,7 @@ struct HomeVCTests {
         
         #expect(sut.films.isEmpty, "Should have no films because fetch failed.")
         #expect(sut.databaseErrorView.isHidden == false, "Should present an error view when fetch fails.")
+        #expect(sut.emptyStateView.isHidden, "Empty state view should be hidden.")
         #expect(sut.homeViewModel.currentState == .failure(expectedHomeError), "The view model state must match the expected persistence failure scenario exactly.")
     }
     
