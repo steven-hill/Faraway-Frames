@@ -461,7 +461,7 @@ struct HomeViewModelTests {
     final class HomeViewModelDelegateSpy: HomeViewModelDelegate {
         var didUpdateCallCount: Int = 0
         
-        func homeViewModelDidUpdate(_ viewModel: HomeViewModel) {
+        func homeViewModelDidUpdate() {
             didUpdateCallCount += 1
         }
     }

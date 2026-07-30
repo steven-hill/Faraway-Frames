@@ -8,5 +8,5 @@
 import Foundation
 
 protocol HomeViewModelDelegate: AnyObject {
-    func homeViewModelDidUpdate(_ viewModel: HomeViewModel)
+    func homeViewModelDidUpdate()
 }
