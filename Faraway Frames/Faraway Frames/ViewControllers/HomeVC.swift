@@ -274,58 +274,50 @@ final class HomeVC: UIViewController {
     }
     
     private func showErrorView(for section: Section, error: HomeError) {
-        var config = UIContentUnavailableConfiguration.empty()
-        config.image = SFSymbols.exclamationMarkTriangle
-        config.text = error.localizedDescription
-        config.secondaryText = error.secondaryText
-        
-        databaseErrorView.configuration = config
-        databaseErrorView.isHidden = false
-        databaseErrorView.isAccessibilityElement = true
-        databaseErrorView.accessibilityLabel = [
-            config.text,
-            config.secondaryText
-        ]
-        .compactMap { $0 }
-        .joined(separator: ". ")
-        databaseErrorView.accessibilityTraits = [.staticText]
-        
-        view.addSubview(databaseErrorView)
-        databaseErrorView.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            databaseErrorView.centerXAnchor.constraint(equalTo: collectionView.centerXAnchor),
-            databaseErrorView.centerYAnchor.constraint(equalTo: collectionView.centerYAnchor)
-        ])
+        updateStateView(
+            databaseErrorView,
+            image: SFSymbols.exclamationMarkTriangle,
+            text: error.localizedDescription,
+            secondaryText: error.secondaryText)
     }
     
     private func showEmptyState(for section: Section) {
-        var config = UIContentUnavailableConfiguration.empty()
-        config.image = SFSymbols.movieClapper
-        config.text = "Empty Queue"
+        let secondaryText: String
         switch section {
         case .upNext:
-            config.secondaryText = "Films added to Up Next appear here"
+            secondaryText = "Films added to Up Next appear here"
         case .watched:
-            config.secondaryText = "Films added to Watched appear here"
+            secondaryText = "Films added to Watched appear here"
         }
-        emptyStateView.configuration = config
-        emptyStateView.isHidden = false
-        emptyStateView.isAccessibilityElement = true
-        emptyStateView.accessibilityLabel = [
-            config.text,
-            config.secondaryText
-        ]
-        .compactMap { $0 }
-        .joined(separator: ". ")
-        emptyStateView.accessibilityTraits = [.staticText]
-        
-        view.addSubview(emptyStateView)
-        emptyStateView.translatesAutoresizingMaskIntoConstraints = false
+        updateStateView(emptyStateView,
+                        image: SFSymbols.movieClapper,
+                        text: "Empty Queue",
+                        secondaryText: secondaryText)
+    }
+    
+    private func updateStateView(
+        _ stateView: UIContentUnavailableView,
+        image: UIImage?,
+        text: String?,
+        secondaryText: String?
+    ) {
+        var config = UIContentUnavailableConfiguration.empty()
+        config.image = image
+        config.text = text
+        config.secondaryText = secondaryText
+        stateView.configuration = config
+        stateView.isAccessibilityElement = true
+        stateView.accessibilityTraits = [.staticText]
+        stateView.accessibilityLabel = [text, secondaryText]
+            .compactMap { $0 }
+            .joined(separator: ". ")
+        view.addSubview(stateView)
+        stateView.translatesAutoresizingMaskIntoConstraints = false
+        stateView.isHidden = false
         
         NSLayoutConstraint.activate([
-            emptyStateView.centerXAnchor.constraint(equalTo: collectionView.centerXAnchor),
-            emptyStateView.centerYAnchor.constraint(equalTo: collectionView.centerYAnchor)
+            stateView.centerXAnchor.constraint(equalTo: collectionView.centerXAnchor),
+            stateView.centerYAnchor.constraint(equalTo: collectionView.centerYAnchor)
         ])
     }
     
