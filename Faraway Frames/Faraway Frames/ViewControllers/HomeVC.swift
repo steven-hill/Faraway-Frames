@@ -251,18 +251,20 @@ final class HomeVC: UIViewController {
         snapshot.appendItems(films.map(\.id), toSection: activeSection)
         dataSource.apply(snapshot, animatingDifferences: true)
         
-        if case .failure(let error) = homeViewModel.currentState {
+        switch homeViewModel.currentState {
+        case .failure(let error):
             showErrorView(for: activeSection, error: error)
-        } else {
-            databaseErrorView.isHidden = true
-            databaseErrorView.isAccessibilityElement = false
-        }
-        
-        if films.isEmpty {
-            showEmptyState(for: activeSection)
-        } else {
             emptyStateView.isHidden = true
             emptyStateView.isAccessibilityElement = false
+        case .idle, .fetchedObjects:
+            databaseErrorView.isHidden = true
+            databaseErrorView.isAccessibilityElement = false
+            if films.isEmpty {
+                showEmptyState(for: activeSection)
+            } else {
+                emptyStateView.isHidden = true
+                emptyStateView.isAccessibilityElement = false
+            }
         }
     }
     
