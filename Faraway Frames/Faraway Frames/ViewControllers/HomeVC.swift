@@ -24,6 +24,7 @@ final class HomeVC: UIViewController {
     private var filmCellRegistration: UICollectionView.CellRegistration<FilmGridCell, Film>!
     private var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
     private(set) var emptyStateView = UIContentUnavailableView(configuration: .empty())
+    private(set) var databaseErrorView = UIContentUnavailableView(configuration: .empty())
     
     // MARK: - Initialisation
     init(homeViewModel: HomeViewModel) {
@@ -176,7 +177,7 @@ final class HomeVC: UIViewController {
                     item: filmID
                 )
             }
-                  
+            
             guard let section = Section(rawValue: segmentedControlIndex) else {
                 return collectionView.dequeueConfiguredReusableCell(
                     using: filmCellRegistration,
@@ -184,7 +185,7 @@ final class HomeVC: UIViewController {
                     item: Film.placeholder
                 )
             }
-
+            
             let film: Film?
             switch section {
             case .upNext:
@@ -208,7 +209,7 @@ final class HomeVC: UIViewController {
                 item: film
             )
         }
-
+        
         dataSource.supplementaryViewProvider = { [weak self] collectionView, _, indexPath in
             guard let self = self else { return nil }
             return collectionView.dequeueConfiguredReusableSupplementary(
@@ -250,11 +251,17 @@ final class HomeVC: UIViewController {
         snapshot.appendItems(films.map(\.id), toSection: activeSection)
         dataSource.apply(snapshot, animatingDifferences: true)
         
-        if films.isEmpty {
-            showEmptyState(for: activeSection)
-        } else {
-            emptyStateView.isHidden = true
-            emptyStateView.isAccessibilityElement = false
+        switch homeViewModel.currentState {
+        case .failure(let error):
+            showErrorView(for: activeSection, error: error)
+            hideEmptyStateView()
+        case .idle, .fetchedObjects:
+            hideDatabaseErrorView()
+            if films.isEmpty {
+                showEmptyState(for: activeSection)
+            } else {
+                hideEmptyStateView()
+            }
         }
     }
     
@@ -265,34 +272,62 @@ final class HomeVC: UIViewController {
         }
     }
     
+    private func showErrorView(for section: Section, error: HomeError) {
+        updateStateView(
+            databaseErrorView,
+            image: SFSymbols.exclamationMarkTriangle,
+            text: error.localizedDescription,
+            secondaryText: error.secondaryText)
+    }
+    
     private func showEmptyState(for section: Section) {
-        var config = UIContentUnavailableConfiguration.empty()
-        config.image = SFSymbols.movieClapper
-        config.text = "Empty Queue"
+        let secondaryText: String
         switch section {
         case .upNext:
-            config.secondaryText = "Films added to Up Next appear here"
+            secondaryText = "Films added to Up Next appear here"
         case .watched:
-            config.secondaryText = "Films added to Watched appear here"
+            secondaryText = "Films added to Watched appear here"
         }
-        emptyStateView.configuration = config
-        emptyStateView.isHidden = false
-        emptyStateView.isAccessibilityElement = true
-        emptyStateView.accessibilityLabel = [
-            config.text,
-            config.secondaryText
-        ]
-        .compactMap { $0 }
-        .joined(separator: ". ")
-        emptyStateView.accessibilityTraits = [.staticText]
-        
-        view.addSubview(emptyStateView)
-        emptyStateView.translatesAutoresizingMaskIntoConstraints = false
+        updateStateView(emptyStateView,
+                        image: SFSymbols.movieClapper,
+                        text: "Empty Queue",
+                        secondaryText: secondaryText)
+    }
+    
+    private func updateStateView(
+        _ stateView: UIContentUnavailableView,
+        image: UIImage?,
+        text: String?,
+        secondaryText: String?
+    ) {
+        var config = UIContentUnavailableConfiguration.empty()
+        config.image = image
+        config.text = text
+        config.secondaryText = secondaryText
+        stateView.configuration = config
+        stateView.isAccessibilityElement = true
+        stateView.accessibilityTraits = [.staticText]
+        stateView.accessibilityLabel = [text, secondaryText]
+            .compactMap { $0 }
+            .joined(separator: ". ")
+        view.addSubview(stateView)
+        stateView.translatesAutoresizingMaskIntoConstraints = false
+        stateView.isHidden = false
         
         NSLayoutConstraint.activate([
-            emptyStateView.centerXAnchor.constraint(equalTo: collectionView.centerXAnchor),
-            emptyStateView.centerYAnchor.constraint(equalTo: collectionView.centerYAnchor)
+            stateView.centerXAnchor.constraint(equalTo: collectionView.centerXAnchor),
+            stateView.centerYAnchor.constraint(equalTo: collectionView.centerYAnchor)
         ])
+    }
+    
+    private func hideDatabaseErrorView() {
+        databaseErrorView.isHidden = true
+        databaseErrorView.isAccessibilityElement = false
+    }
+    
+    private func hideEmptyStateView() {
+        emptyStateView.isHidden = true
+        emptyStateView.isAccessibilityElement = false
     }
     
     // MARK: - Segmented Control Action
@@ -304,11 +339,8 @@ final class HomeVC: UIViewController {
 
 // MARK: - Home View Model Delegate
 extension HomeVC: HomeViewModelDelegate {
-    func filmsDidChange() {
+    func homeViewModelDidUpdate() {
         updateSnapshot()
-    }
-    
-    func didReceiveError(_ error: HomeError) {
     }
 }
 
