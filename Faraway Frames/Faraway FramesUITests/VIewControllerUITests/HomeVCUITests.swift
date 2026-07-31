@@ -31,6 +31,21 @@ final class HomeVCUITests: XCTestCase {
         
         XCTAssertTrue(title.exists, "Should have a title.")
     }
+    
+    func test_homeVC_hasSegmentedControl_withCorrectSetup_andTapChangesSelection() {
+        let segmentedControl = app.segmentedControls.element
+        let numberOfSegments = segmentedControl.buttons.count
+        
+        XCTAssertTrue(segmentedControl.exists, "Should exist.")
+        XCTAssertTrue(segmentedControl.isHittable, "Should be hittable.")
+        XCTAssertTrue(numberOfSegments == 2, "Should have two segments.")
+        XCTAssertTrue(segmentedControl.buttons["Up Next"].isSelected, "Should be selected by default.")
+        XCTAssertFalse(segmentedControl.buttons["Watched"].isSelected, "Should not be selected by default.")
+        
+        segmentedControl.buttons["Watched"].tap()
+        XCTAssertFalse(segmentedControl.buttons["Up Next"].isSelected, "Should not be selected now.")
+        XCTAssertTrue(segmentedControl.buttons["Watched"].isSelected, "Should be selected now.")
+    }
 
     func test_homeVC_hasCollectionView() {
         let collectionView = app.collectionViews.element
