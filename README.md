@@ -21,11 +21,11 @@
 ### Technical details
 - MVVM + Coordinator.
 - UIKit.
-- Networking with network-first, local fallback strategy:
+- Networking layer with network-first, local fallback strategy:
   - async/await with `URLSession` for network requests.
   - `NSCache` and `URLCache` for caching of network responses.
-  - save data from API to `FileManager` to aid offline support, and provide local data in case of any network error.
-- Persistence layer uses `CoreData` with `NSFetchedResultsController`, allowing users to keep track of films they want to watch next or have finished watching.
+  - data from API saved to `FileManager` to aid offline support, and provide local data in case of any network error.
+- Persistence layer uses `CoreData` with `NSFetchedResultsController`, allowing users to keep track of films they want to watch next and/or have finished watching.
 - The testing frameworks used are Swift Testing and XCTest, and the project is built with TDD.
 - Includes accessibility support for Dynamic Type and VoiceOver.
 
