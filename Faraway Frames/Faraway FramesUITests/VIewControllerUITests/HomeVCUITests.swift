@@ -31,10 +31,36 @@ final class HomeVCUITests: XCTestCase {
         
         XCTAssertTrue(title.exists, "Should have a title.")
     }
+    
+    func test_homeVC_hasSegmentedControl_withCorrectSetup_andTapChangesSelection() {
+        let segmentedControl = app.segmentedControls["Header_Segmented_Control"]
+        let numberOfSegments = segmentedControl.buttons.count
+        
+        XCTAssertTrue(segmentedControl.exists, "Should exist.")
+        XCTAssertTrue(segmentedControl.isHittable, "Should be hittable.")
+        XCTAssertTrue(numberOfSegments == 2, "Should have two segments.")
+        
+        let upNextSegment = segmentedControl.buttons.element(boundBy: 0)
+        let watchedSegment = segmentedControl.buttons.element(boundBy: 1)
+        XCTAssertTrue(upNextSegment.isSelected, "Should be selected by default.")
+        
+        watchedSegment.tap()
+        XCTAssertTrue(watchedSegment.isSelected, "Should be selected now.")
+    }
 
     func test_homeVC_hasCollectionView() {
         let collectionView = app.collectionViews.element
         
         XCTAssertTrue(collectionView.exists, "Should exist.")
+    }
+    
+    func test_homeVC_whenNoFilmsAreInDatabase_showsEmptyStateViewForBothSegments() {
+        let segmentedControl = app.segmentedControls["Header_Segmented_Control"]
+        let emptyStateView = app.staticTexts["HomeVC_EmptyStateView"]
+        XCTAssertTrue(emptyStateView.exists, "Should exist.")
+        
+        let watchedSegment = segmentedControl.buttons.element(boundBy: 1)
+        watchedSegment.tap()
+        XCTAssertTrue(emptyStateView.exists, "Should exist.")
     }
 }

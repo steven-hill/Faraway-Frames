@@ -19,6 +19,7 @@ final class SegmentedControlHeaderView: UICollectionReusableView {
         let control = UISegmentedControl(items: ["Up Next", "Watched"])
         control.selectedSegmentIndex = 0
         control.translatesAutoresizingMaskIntoConstraints = false
+        control.accessibilityIdentifier = "Header_Segmented_Control"
         return control
     }()
     

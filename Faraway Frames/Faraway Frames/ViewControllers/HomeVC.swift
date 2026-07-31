@@ -277,7 +277,9 @@ final class HomeVC: UIViewController {
             databaseErrorView,
             image: SFSymbols.exclamationMarkTriangle,
             text: error.localizedDescription,
-            secondaryText: error.secondaryText)
+            secondaryText: error.secondaryText,
+            accessibilityIdentifier: "HomeVC_ErrorView"
+        )
     }
     
     private func showEmptyState(for section: Section) {
@@ -291,14 +293,17 @@ final class HomeVC: UIViewController {
         updateStateView(emptyStateView,
                         image: SFSymbols.movieClapper,
                         text: "Empty Queue",
-                        secondaryText: secondaryText)
+                        secondaryText: secondaryText,
+                        accessibilityIdentifier: "HomeVC_EmptyStateView"
+        )
     }
     
     private func updateStateView(
         _ stateView: UIContentUnavailableView,
         image: UIImage?,
         text: String?,
-        secondaryText: String?
+        secondaryText: String?,
+        accessibilityIdentifier: String
     ) {
         var config = UIContentUnavailableConfiguration.empty()
         config.image = image
@@ -310,6 +315,7 @@ final class HomeVC: UIViewController {
         stateView.accessibilityLabel = [text, secondaryText]
             .compactMap { $0 }
             .joined(separator: ". ")
+        stateView.accessibilityIdentifier = accessibilityIdentifier
         view.addSubview(stateView)
         stateView.translatesAutoresizingMaskIntoConstraints = false
         stateView.isHidden = false
