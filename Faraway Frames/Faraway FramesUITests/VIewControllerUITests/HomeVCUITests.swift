@@ -54,9 +54,13 @@ final class HomeVCUITests: XCTestCase {
         XCTAssertTrue(collectionView.exists, "Should exist.")
     }
     
-    func test_homeVC_whenNoFilmsAreInDatabase_showEmptyStateView() {
+    func test_homeVC_whenNoFilmsAreInDatabase_showsEmptyStateViewForBothSegments() {
+        let segmentedControl = app.segmentedControls["Header_Segmented_Control"]
         let emptyStateView = app.staticTexts["HomeVC_EmptyStateView"]
+        XCTAssertTrue(emptyStateView.exists, "Should exist.")
         
+        let watchedSegment = segmentedControl.buttons.element(boundBy: 1)
+        watchedSegment.tap()
         XCTAssertTrue(emptyStateView.exists, "Should exist.")
     }
 }
