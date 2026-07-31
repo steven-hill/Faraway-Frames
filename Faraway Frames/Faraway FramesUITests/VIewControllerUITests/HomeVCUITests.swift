@@ -33,7 +33,7 @@ final class HomeVCUITests: XCTestCase {
     }
     
     func test_homeVC_hasSegmentedControl_withCorrectSetup_andTapChangesSelection() {
-        let segmentedControl = app.segmentedControls.element
+        let segmentedControl = app.segmentedControls["Header_Segmented_Control"]
         let numberOfSegments = segmentedControl.buttons.count
         
         XCTAssertTrue(segmentedControl.exists, "Should exist.")
