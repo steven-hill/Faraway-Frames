@@ -52,4 +52,10 @@ final class HomeVCUITests: XCTestCase {
         
         XCTAssertTrue(collectionView.exists, "Should exist.")
     }
+    
+    func test_homeVC_whenNoFilmsAreInDatabase_showEmptyStateView() {
+        let emptyStateView = app.staticTexts["HomeVC_EmptyStateView"]
+        
+        XCTAssertTrue(emptyStateView.exists, "Should exist.")
+    }
 }
