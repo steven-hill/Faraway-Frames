@@ -27,7 +27,7 @@ final class EmptySearchResultsView: UIView {
     
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.font = .preferredFont(forTextStyle: .subheadline)
+        label.font = .preferredFont(forTextStyle: .headline)
         label.adjustsFontForContentSizeCategory = true
         label.textColor = .label
         label.textAlignment = .center
@@ -39,7 +39,7 @@ final class EmptySearchResultsView: UIView {
     
     private let secondaryLabel: UILabel = {
         let label = UILabel()
-        label.font = .preferredFont(forTextStyle: .caption1)
+        label.font = .preferredFont(forTextStyle: .subheadline)
         label.adjustsFontForContentSizeCategory = true
         label.textColor = .secondaryLabel
         label.textAlignment = .center

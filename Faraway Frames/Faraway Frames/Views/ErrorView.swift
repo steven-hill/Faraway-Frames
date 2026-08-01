@@ -27,7 +27,7 @@ final class ErrorView: UIView {
     
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.font = .preferredFont(forTextStyle: .subheadline)
+        label.font = .preferredFont(forTextStyle: .headline)
         label.adjustsFontForContentSizeCategory = true
         label.textColor = .label
         label.textAlignment = .center
@@ -39,7 +39,7 @@ final class ErrorView: UIView {
     
     private let secondaryLabel: UILabel = {
         let label = UILabel()
-        label.font = .preferredFont(forTextStyle: .caption1)
+        label.font = .preferredFont(forTextStyle: .subheadline)
         label.adjustsFontForContentSizeCategory = true
         label.textColor = .secondaryLabel
         label.textAlignment = .center
@@ -49,10 +49,12 @@ final class ErrorView: UIView {
     }()
     
     let retryButton: UIButton = {
-        var configuration = UIButton.Configuration.prominentGlass()
+        var configuration = UIButton.Configuration.filled()
         configuration.title = "Retry"
-        configuration.cornerStyle = .capsule
-        configuration.background.backgroundColor = .systemGray6
+        configuration.baseBackgroundColor = .secondarySystemBackground
+        configuration.baseForegroundColor = .label
+        configuration.background.cornerRadius = 10
+        configuration.titleAlignment = .center
         
         let button = UIButton(configuration: configuration)
         button.tintColor = .label
