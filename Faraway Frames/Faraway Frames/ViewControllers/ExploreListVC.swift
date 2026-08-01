@@ -184,7 +184,6 @@ final class ExploreListVC: UIViewController {
             newStateView = loadingView
         }
         
-        self.contentUnavailableConfiguration = config
         self.collectionView.isHidden = collectionViewIsHidden
         self.searchController.searchBar.isEnabled = searchBarIsEnabled
     }
@@ -192,22 +191,6 @@ final class ExploreListVC: UIViewController {
     @objc private func retryButtonTapped() {
         self.viewModel.retryLoadingAllFilms()
         self.updateViewHierarchyForCurrentState()
-    }
-    
-    private func createErrorConfig(error: APIError) -> UIContentUnavailableConfiguration {
-        var config = UIContentUnavailableConfiguration.empty()
-        config.text = "Error loading films"
-        config.secondaryText = "\(error.localizedDescription)"
-        config.image = SFSymbols.exclamationMarkTriangle
-        config.imageProperties.tintColor = .systemRed
-        config.button = .prominentGlass()
-        config.button.title = "Retry"
-        config.buttonProperties.primaryAction = UIAction { [weak self] _ in
-            guard let self else { return }
-            self.viewModel.retryLoadingAllFilms()
-            self.setNeedsUpdateContentUnavailableConfiguration()
-        }
-        return config
     }
     
     //MARK: - Search Controller
