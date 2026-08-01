@@ -63,10 +63,41 @@ final class EmptySearchResultsView: UIView {
         super.init(frame: frame)
         self.translatesAutoresizingMaskIntoConstraints = false
         setupLayout()
+        setupTraitObservations()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    // MARK: - View Lifecycle
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        if window != nil {
+            updateLayoutForTraits()
+        }
+    }
+    
+    // MARK: - Reactive Trait Updates
+    private func setupTraitObservations() {
+        registerForTraitChanges([
+            UITraitVerticalSizeClass.self,
+            UITraitPreferredContentSizeCategory.self
+        ]) { (self: Self, previousTraitCollection: UITraitCollection) in
+            self.updateLayoutForTraits()
+        }
+    }
+    
+    private func updateLayoutForTraits() {
+        let isVerticallyCompact = traitCollection.verticalSizeClass == .compact
+        let isAccessibilitySize = traitCollection.preferredContentSizeCategory.isAccessibilityCategory
+        if isVerticallyCompact && isAccessibilitySize {
+            iconImageView.isHidden = true
+            stackView.spacing = 6
+        } else {
+            iconImageView.isHidden = false
+            stackView.spacing = 12
+        }
     }
     
     // MARK: - Layout Configuration

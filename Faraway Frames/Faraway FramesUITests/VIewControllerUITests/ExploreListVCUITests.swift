@@ -225,6 +225,31 @@ final class ExploreListVCUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Empty_Search_Results_Secondary_Label"].exists, "Should show secondary text.")
     }
     
+    func test_exploreListVC_emptySearchResultsView_adaptsLayoutToLandscapeOrientationAndLargeAccessibilityTextSizes() {
+        XCUIDevice.shared.orientation = .landscapeLeft
+        app = XCUIApplication()
+        app.launchArguments = ["-UITesting",
+                               "-UITestingMockNetworkSuccess"]
+        app.launchArguments += [
+                "-UIPreferredContentSizeCategoryName",
+                UIContentSizeCategory.accessibilityExtraExtraExtraLarge.rawValue
+        ]
+        app.launch()
+        NavigationHelper.navigateToExploreTab(app: app)
+        
+        _ = setUpSearchTextFieldAndEnterText("Invalid query")
+        let collectionView = app.collectionViews.element
+        let emptySearchResultsContainer = app.otherElements["ExploreListVC_EmptySearchResultsView"]
+        
+        XCTAssertFalse(collectionView.exists, "Collection view should be hidden.")
+        XCTAssertTrue(emptySearchResultsContainer.exists, "Should show container view.")
+        XCTAssertFalse(emptySearchResultsContainer.images["Empty_Search_Results_Icon_Image"].isHittable, "Should show icon.")
+        XCTAssertTrue(app.staticTexts["Empty_Search_Results_Title_Label"].exists, "Should show primary text.")
+        XCTAssertTrue(app.staticTexts["Empty_Search_Results_Secondary_Label"].exists, "Should show secondary text.")
+        
+        XCUIDevice.shared.orientation = .portrait
+    }
+    
     func test_exploreListVC_searchTextField_searchQueryisEmpty_isDisabled() {
         launchAppForNetworkSuccessCase()
         
