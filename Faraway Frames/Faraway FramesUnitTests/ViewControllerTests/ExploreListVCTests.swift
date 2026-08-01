@@ -21,6 +21,14 @@ struct ExploreListVCTests {
         #expect(sut.view != nil, "Should not be nil.")
     }
     
+    @Test func exploreListVC_stateContainerView_onInit_isNil() {
+        let sut = makeSUT()
+        
+        sut.loadViewIfNeeded()
+        
+        #expect(sut.currentStateView == nil, "Should be nil on init.")
+    }
+    
     @Test func exploreListVC_isInsideANavigationController() {
         let sut = makeSUT()
         _ = UINavigationController(rootViewController: sut)

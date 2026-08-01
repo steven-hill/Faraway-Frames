@@ -19,6 +19,7 @@ final class ExploreListVC: UIViewController {
     private(set) var filmLookup: [String: Film] = [:]
     let viewModel: FilmsListViewModel
     lazy var collectionView = UICollectionView()
+    private(set) var currentStateView: UIView?
     private let cellConfigurator: FilmRowCellConfigurator
     private var headerRegistration: UICollectionView.SupplementaryRegistration<NetworkErrorHeaderView>!
     private var filmCellRegistration: UICollectionView.CellRegistration<FilmRowCell, Film>!
