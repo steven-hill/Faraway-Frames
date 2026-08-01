@@ -71,7 +71,7 @@ final class ErrorView: UIView {
     }()
     
     // MARK: - Initialiser
-    init(error: Error) {
+    init(error: APIError) {
         super.init(frame: .zero)
         self.translatesAutoresizingMaskIntoConstraints = false
         self.secondaryLabel.text = error.localizedDescription

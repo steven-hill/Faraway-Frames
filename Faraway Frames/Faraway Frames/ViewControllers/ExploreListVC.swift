@@ -174,7 +174,10 @@ final class ExploreListVC: UIViewController {
             newStateView = emptySearchResultsView
             searchBarIsEnabled = true
         case .error(let error):
-            config = createErrorConfig(error: error)
+            let errorView = ErrorView(error: error)
+            errorView.accessibilityIdentifier = "ExploreListVC_ErrorView"
+            errorView.retryButton.addTarget(self, action: #selector(retryButtonTapped), for: .touchUpInside)
+            newStateView = errorView
         case .retrying:
             let loadingView = LoadingView(message: "Retrying...")
             loadingView.accessibilityIdentifier = "ExploreListVC_LoadingView"
@@ -184,6 +187,11 @@ final class ExploreListVC: UIViewController {
         self.contentUnavailableConfiguration = config
         self.collectionView.isHidden = collectionViewIsHidden
         self.searchController.searchBar.isEnabled = searchBarIsEnabled
+    }
+    
+    @objc private func retryButtonTapped() {
+        self.viewModel.retryLoadingAllFilms()
+        self.updateViewHierarchyForCurrentState()
     }
     
     private func createErrorConfig(error: APIError) -> UIContentUnavailableConfiguration {
