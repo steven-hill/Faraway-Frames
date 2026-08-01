@@ -153,9 +153,11 @@ final class ExploreListVC: UIViewController {
     }
     
     private func updateViewHierarchyForCurrentState() {
-        var config: UIContentUnavailableConfiguration? = nil
         var collectionViewIsHidden = true
         var searchBarIsEnabled = false
+        currentStateView?.removeFromSuperview()
+        currentStateView = nil
+        
         switch viewModel.currentState {
         case .idle, .loadingAllFilms:
             config = createLoadingConfig(with: "Fetching films...")
