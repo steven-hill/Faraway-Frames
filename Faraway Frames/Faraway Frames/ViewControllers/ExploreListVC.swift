@@ -152,7 +152,7 @@ final class ExploreListVC: UIViewController {
         }
     }
     
-    override func updateContentUnavailableConfiguration(using state: UIContentUnavailableConfigurationState) {
+    private func updateViewHierarchyForCurrentState() {
         var config: UIContentUnavailableConfiguration? = nil
         var collectionViewIsHidden = true
         var searchBarIsEnabled = false
