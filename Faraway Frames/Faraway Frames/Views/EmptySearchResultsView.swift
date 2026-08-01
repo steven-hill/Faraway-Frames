@@ -112,7 +112,7 @@ final class EmptySearchResultsView: UIView {
             iconImageView.heightAnchor.constraint(equalToConstant: Layout.iconImageViewSize),
             
             stackView.centerXAnchor.constraint(equalTo: centerXAnchor),
-            stackView.centerYAnchor.constraint(equalTo: centerYAnchor),
+            stackView.centerYAnchor.constraint(equalTo: centerYAnchor, constant: 10),
             stackView.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: Layout.stackViewHorizontalSpacing),
             stackView.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -Layout.stackViewHorizontalSpacing)
         ])
