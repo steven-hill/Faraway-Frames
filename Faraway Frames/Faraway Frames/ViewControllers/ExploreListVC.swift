@@ -165,9 +165,9 @@ final class ExploreListVC: UIViewController {
             loadingView.accessibilityIdentifier = "ExploreListVC_LoadingView"
             newStateView = loadingView
         case .content(isUsingArchivedData: false), .content(isUsingArchivedData: true):
-            config = nil
             collectionViewIsHidden = false
             searchBarIsEnabled = true
+            newStateView = nil
         case .emptySearchResults:
             config = createEmptySearchResultsConfig()
             searchBarIsEnabled = true
