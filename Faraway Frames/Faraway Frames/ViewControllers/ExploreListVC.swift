@@ -184,13 +184,6 @@ final class ExploreListVC: UIViewController {
         self.searchController.searchBar.isEnabled = searchBarIsEnabled
     }
     
-    private func createLoadingConfig(with text: String) -> UIContentUnavailableConfiguration {
-        var config = UIContentUnavailableConfiguration.loading()
-        config.text = text
-        config.textProperties.color = .systemGray
-        return config
-    }
-    
     private func createEmptySearchResultsConfig() -> UIContentUnavailableConfiguration {
         var searchConfig = UIContentUnavailableConfiguration.search()
         searchConfig.text = "No Results"
