@@ -157,6 +157,7 @@ final class ExploreListVC: UIViewController {
         var searchBarIsEnabled = false
         currentStateView?.removeFromSuperview()
         currentStateView = nil
+        let newStateView: UIView?
         
         switch viewModel.currentState {
         case .idle, .loadingAllFilms:
