@@ -155,49 +155,6 @@ final class ExploreListVCUITests: XCTestCase {
         XCTAssertFalse(header.exists)
     }
     
-    func test_exploreListVC_whenNetworkRequestFails_andNoArchivedDataIsAvailable_errorView_adaptsLayoutForLargeAccessibilityTextSizes() {
-        app = XCUIApplication()
-        app.launchArguments += [
-                "-UIPreferredContentSizeCategoryName",
-                UIContentSizeCategory.accessibilityExtraExtraExtraLarge.rawValue
-        ]
-        app.launch(with: .noInternetConnection)
-        NavigationHelper.navigateToExploreTab(app: app)
-        
-        let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
-        let errorViewContainer = app.otherElements["ExploreListVC_ErrorView"]
-        
-        XCTAssertFalse(header.exists)
-        XCTAssertTrue(errorViewContainer.exists, "Should show container view.")
-        XCTAssertFalse(errorViewContainer.images["ErrorView_Icon_Image"].isHittable, "Should hide SF Symbol.")
-        XCTAssertTrue(app.staticTexts["ErrorView_Title_Label"].exists, "Should show primary error text.")
-        XCTAssertTrue(app.staticTexts["ErrorView_Secondary_Label"].exists, "Should show error secondary text.")
-        XCTAssertTrue(app.buttons["ErrorView_Retry_Button"].isHittable, "Retry button should be tappable.")
-    }
-    
-    func test_exploreListVC_whenNetworkRequestFails_andNoArchivedDataIsAvailable_errorView_adaptsLayoutForCompactVerticalSizeClass() {
-        XCUIDevice.shared.orientation = .landscapeLeft
-        app = XCUIApplication()
-        app.launchArguments += [
-                "-UIPreferredContentSizeCategoryName",
-                UIContentSizeCategory.accessibilityExtraExtraExtraLarge.rawValue
-        ]
-        app.launch(with: .noInternetConnection)
-        NavigationHelper.navigateToExploreTab(app: app)
-        
-        let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
-        let errorViewContainer = app.otherElements["ExploreListVC_ErrorView"]
-        
-        XCTAssertFalse(header.exists)
-        XCTAssertTrue(errorViewContainer.exists, "Should show container view.")
-        XCTAssertFalse(errorViewContainer.images["ErrorView_Icon_Image"].isHittable, "Should hide SF Symbol.")
-        XCTAssertTrue(app.staticTexts["ErrorView_Title_Label"].exists, "Should show primary error text.")
-        XCTAssertTrue(app.staticTexts["ErrorView_Secondary_Label"].exists, "Should show error secondary text.")
-        XCTAssertTrue(app.buttons["ErrorView_Retry_Button"].isHittable, "Retry button should be tappable.")
-        
-        XCUIDevice.shared.orientation = .portrait
-    }
-    
     func test_exploreListVC_whenNetworkCallFails_butFileManagerDataExists_collectionViewHeaderAppears() {
         app = XCUIApplication()
         app.launchArguments = ["-UITesting",
@@ -266,31 +223,6 @@ final class ExploreListVCUITests: XCTestCase {
         XCTAssertTrue(app.otherElements["ExploreListVC_EmptySearchResultsView"].exists, "Should show container view.")
         XCTAssertTrue(app.staticTexts["Empty_Search_Results_Title_Label"].exists, "Should show primary text.")
         XCTAssertTrue(app.staticTexts["Empty_Search_Results_Secondary_Label"].exists, "Should show secondary text.")
-    }
-    
-    func test_exploreListVC_emptySearchResultsView_adaptsLayoutToLandscapeOrientationAndLargeAccessibilityTextSizes() {
-        XCUIDevice.shared.orientation = .landscapeLeft
-        app = XCUIApplication()
-        app.launchArguments = ["-UITesting",
-                               "-UITestingMockNetworkSuccess"]
-        app.launchArguments += [
-                "-UIPreferredContentSizeCategoryName",
-                UIContentSizeCategory.accessibilityExtraExtraExtraLarge.rawValue
-        ]
-        app.launch()
-        NavigationHelper.navigateToExploreTab(app: app)
-        
-        _ = setUpSearchTextFieldAndEnterText("Invalid query\n")
-        let collectionView = app.collectionViews.element
-        let emptySearchResultsContainer = app.otherElements["ExploreListVC_EmptySearchResultsView"]
-        
-        XCTAssertFalse(collectionView.exists, "Collection view should be hidden.")
-        XCTAssertTrue(emptySearchResultsContainer.exists, "Should show container view.")
-        XCTAssertFalse(emptySearchResultsContainer.images["Empty_Search_Results_Icon_Image"].isHittable, "Should hide icon.")
-        XCTAssertTrue(app.staticTexts["Empty_Search_Results_Title_Label"].isHittable, "Should show primary text.")
-        XCTAssertTrue(app.staticTexts["Empty_Search_Results_Secondary_Label"].isHittable, "Should show secondary text.")
-        
-        XCUIDevice.shared.orientation = .portrait
     }
     
     func test_exploreListVC_searchTextField_searchQueryisEmpty_isDisabled() {

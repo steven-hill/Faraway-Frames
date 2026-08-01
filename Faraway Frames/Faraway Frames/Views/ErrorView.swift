@@ -84,50 +84,43 @@ final class ErrorView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: - View Lifecycle
-    override func didMoveToWindow() {
-        super.didMoveToWindow()
-        if window != nil {
-            updateLayoutForTraits()
-        }
-    }
-    
-    // MARK: - Reactive Trait Updates
-    private func setupTraitObservations() {
-        registerForTraitChanges([
-            UITraitVerticalSizeClass.self,
-            UITraitPreferredContentSizeCategory.self
-        ]) { (self: Self, previousTraitCollection: UITraitCollection) in
-            self.updateLayoutForTraits()
-        }
-    }
-    
-    private func updateLayoutForTraits() {
-        let isVerticallyCompact = traitCollection.verticalSizeClass == .compact
-        let isAccessibilitySize = traitCollection.preferredContentSizeCategory.isAccessibilityCategory
-        if isVerticallyCompact || isAccessibilitySize {
-            iconImageView.isHidden = true
-        } else {
-            iconImageView.isHidden = false
-        }
-    }
-    
     // MARK: - Layout Configuration
     private func setupLayout() {
+        let scrollView = UIScrollView()
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.showsVerticalScrollIndicator = true
+        
+        let contentView = UIView()
+        contentView.translatesAutoresizingMaskIntoConstraints = false
+        
         stackView.addArrangedSubview(iconImageView)
         stackView.addArrangedSubview(titleLabel)
         stackView.addArrangedSubview(secondaryLabel)
         stackView.addArrangedSubview(retryButton)
-        addSubview(stackView)
+        
+        contentView.addSubview(stackView)
+        scrollView.addSubview(contentView)
+        addSubview(scrollView)
         
         NSLayoutConstraint.activate([
-            iconImageView.widthAnchor.constraint(equalToConstant: Layout.iconImageViewSize),
-            iconImageView.heightAnchor.constraint(equalToConstant: Layout.iconImageViewSize),
+            scrollView.topAnchor.constraint(equalTo: topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: bottomAnchor),
             
-            stackView.centerXAnchor.constraint(equalTo: centerXAnchor),
-            stackView.centerYAnchor.constraint(equalTo: centerYAnchor),
-            stackView.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: Layout.stackViewHorizontalSpacing),
-            stackView.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -Layout.stackViewHorizontalSpacing)
+            contentView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
+            contentView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
+            
+            stackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Layout.stackViewHorizontalSpacing),
+            stackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Layout.stackViewHorizontalSpacing),
+            stackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 24),
+            stackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -100),
+            
+            iconImageView.widthAnchor.constraint(equalToConstant: Layout.iconImageViewSize),
+            iconImageView.heightAnchor.constraint(equalToConstant: Layout.iconImageViewSize)
         ])
     }
 }

@@ -187,8 +187,9 @@ final class ExploreListVC: UIViewController {
         if let stateView = newStateView {
             view.addSubview(stateView)
             currentStateView = stateView
+            let topAnchor = stateView is LoadingView ? view.topAnchor : view.safeAreaLayoutGuide.topAnchor
             NSLayoutConstraint.activate([
-                stateView.topAnchor.constraint(equalTo: view.topAnchor),
+                stateView.topAnchor.constraint(equalTo: topAnchor),
                 stateView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
                 stateView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
                 stateView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
