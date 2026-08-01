@@ -72,7 +72,7 @@ struct ExploreListVCTests {
         
         #expect(sut.films.count == 22, "VC's film should contain 22 films.")
         #expect(sut.viewModel.currentState == .content(isUsingArchivedData: false), "Should set the state to .content.")
-        #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
+        #expect(sut.currentStateView == nil, "Should be nil.")
         #expect(sut.collectionView.isHidden == false)
         #expect(sut.searchController.searchBar.isEnabled == true)
     }
@@ -92,12 +92,10 @@ struct ExploreListVCTests {
         
         sut.loadViewIfNeeded()
         await sut.viewModel.getAllFilms()
-        
-        sut.setNeedsUpdateContentUnavailableConfiguration()
-        sut.view.layoutIfNeeded()
-        
+            
+        let errorView = sut.currentStateView as? ErrorView
+        #expect(errorView != nil, "An ErrorView should have been added to the view hierarchy.")
         #expect(sut.viewModel.currentState == .error(expectedError), "Should set the state to .error.")
-        #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil.")
     }
     
     @Test(.tags(.networkRequest))
@@ -121,33 +119,32 @@ struct ExploreListVCTests {
         
         #expect(mockService.fetchWasCalled == true, "Should call fetchAllFilms once.")
     }
-    
+
     @Test("ExploreListVC shows retry button title for all API errors, and when tapped, starts retrying network request",
-        .tags(.networkRequest),
+          .tags(.networkRequest),
           arguments: [
-        APIError.noInternetConnection,
-        APIError.networkConnectionLost,
-        APIError.networkTimeout,
-        APIError.invalidURL,
-        APIError.invalidResponse,
-        APIError.serverError(statusCode: 500),
-        APIError.decodingError(""),
-        APIError.unknown
-    ])
+              APIError.noInternetConnection,
+              APIError.networkConnectionLost,
+              APIError.networkTimeout,
+              APIError.invalidURL,
+              APIError.invalidResponse,
+              APIError.serverError(statusCode: 500),
+              APIError.decodingError(""),
+              APIError.unknown
+          ])
     func exploreListVC_forAllErrors_showsRetryButtonTitle_andWhenTappedStartsRetrying(expectedError: APIError) async {
         let sut = makeSUTForNetworkFailure(error: expectedError)
         sut.loadViewIfNeeded()
         
         await sut.viewModel.getAllFilms()
-        let state = UIContentUnavailableConfigurationState(traitCollection: sut.traitCollection)
-        sut.updateContentUnavailableConfiguration(using: state)
-        let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
+
+        let errorView = sut.currentStateView as? ErrorView
+        #expect(errorView != nil, "An ErrorView should have been added to the view hierarchy.")
         
-        #expect(config != nil, "Should not be nil.")
-        #expect(config?.button.title != nil, "Should have a title.")
+        let retryButton = errorView?.retryButton
+        #expect(retryButton?.configuration?.title != nil, "The retry button title should be set.")
         
-        config?.buttonProperties.primaryAction?.performWithSender(nil, target: nil)
-        
+        retryButton?.sendActions(for: .touchUpInside)
         #expect(sut.viewModel.currentState == .retrying, "Should be set to `.retrying`.")
         #expect(sut.viewModel.refreshTask != nil, "Should start a new `refreshTask`.")
     }
@@ -262,31 +259,18 @@ struct ExploreListVCTests {
     }
     
     @Test(.tags(.search))
-    func exploreListVC_didFailToMatchResults_updatesContentUnavailableConfiguration() {
+    func exploreListVC_whenThereAreNoSearchResults_showsEmptySearchResultsView() async {
         let sut = makeSUTForNetworkSuccess()
-        sut.loadViewIfNeeded()
-        
-        sut.didFailToMatchResults()
-        sut.setNeedsUpdateContentUnavailableConfiguration()
-        sut.view.layoutIfNeeded()
-        
-        #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil.")
-    }
-    
-    @Test(.tags(.search))
-    func exploreListVC_whenThereAreNoSearchResults_showsEmptySearchResultsConfig() async {
-        let sut = makeSUTForNetworkSuccess()
-        
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
+
         sut.searchController.searchBar.text = "No results found"
         sut.updateSearchResults(for: sut.searchController)
-        
-        sut.setNeedsUpdateContentUnavailableConfiguration()
         sut.view.layoutIfNeeded()
         
-        #expect(sut.viewModel.currentState == .emptySearchResults, "Should set the state to .emptySearchResults.")
-        #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil.")
+        let emptySearchResultsView = sut.currentStateView as? EmptySearchResultsView
+        #expect(emptySearchResultsView != nil, "An `EmptySearchResultsView` should have been added to the view hierarchy.")
+        #expect(sut.viewModel.currentState == .emptySearchResults, "Should set the state to `.emptySearchResults`.")
     }
     
     @Test(.tags(.search))
