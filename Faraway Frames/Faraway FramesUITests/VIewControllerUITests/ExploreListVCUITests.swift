@@ -155,6 +155,49 @@ final class ExploreListVCUITests: XCTestCase {
         XCTAssertFalse(header.exists)
     }
     
+    func test_exploreListVC_whenNetworkRequestFails_andNoArchivedDataIsAvailable_errorView_adaptsLayoutForLargeAccessibilityTextSizes() {
+        app = XCUIApplication()
+        app.launchArguments += [
+                "-UIPreferredContentSizeCategoryName",
+                UIContentSizeCategory.accessibilityExtraExtraExtraLarge.rawValue
+        ]
+        app.launch(with: .noInternetConnection)
+        NavigationHelper.navigateToExploreTab(app: app)
+        
+        let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
+        let errorViewContainer = app.otherElements["ExploreListVC_ErrorView"]
+        
+        XCTAssertFalse(header.exists)
+        XCTAssertTrue(errorViewContainer.exists, "Should show container view.")
+        XCTAssertFalse(errorViewContainer.images["ErrorView_Icon_Image"].isHittable, "Should hide SF Symbol.")
+        XCTAssertTrue(app.staticTexts["ErrorView_Title_Label"].exists, "Should show primary error text.")
+        XCTAssertTrue(app.staticTexts["ErrorView_Secondary_Label"].exists, "Should show error secondary text.")
+        XCTAssertTrue(app.buttons["ErrorView_Retry_Button"].isHittable, "Retry button should be tappable.")
+    }
+    
+    func test_exploreListVC_whenNetworkRequestFails_andNoArchivedDataIsAvailable_errorView_adaptsLayoutForCompactVerticalSizeClass() {
+        XCUIDevice.shared.orientation = .landscapeLeft
+        app = XCUIApplication()
+        app.launchArguments += [
+                "-UIPreferredContentSizeCategoryName",
+                UIContentSizeCategory.accessibilityExtraExtraExtraLarge.rawValue
+        ]
+        app.launch(with: .noInternetConnection)
+        NavigationHelper.navigateToExploreTab(app: app)
+        
+        let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
+        let errorViewContainer = app.otherElements["ExploreListVC_ErrorView"]
+        
+        XCTAssertFalse(header.exists)
+        XCTAssertTrue(errorViewContainer.exists, "Should show container view.")
+        XCTAssertFalse(errorViewContainer.images["ErrorView_Icon_Image"].isHittable, "Should hide SF Symbol.")
+        XCTAssertTrue(app.staticTexts["ErrorView_Title_Label"].exists, "Should show primary error text.")
+        XCTAssertTrue(app.staticTexts["ErrorView_Secondary_Label"].exists, "Should show error secondary text.")
+        XCTAssertTrue(app.buttons["ErrorView_Retry_Button"].isHittable, "Retry button should be tappable.")
+        
+        XCUIDevice.shared.orientation = .portrait
+    }
+    
     func test_exploreListVC_whenNetworkCallFails_butFileManagerDataExists_collectionViewHeaderAppears() {
         app = XCUIApplication()
         app.launchArguments = ["-UITesting",
