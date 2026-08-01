@@ -184,6 +184,17 @@ final class ExploreListVC: UIViewController {
             newStateView = loadingView
         }
         
+        if let stateView = newStateView {
+            view.addSubview(stateView)
+            currentStateView = stateView
+            NSLayoutConstraint.activate([
+                stateView.topAnchor.constraint(equalTo: view.topAnchor),
+                stateView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                stateView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                stateView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            ])
+        }
+        
         self.collectionView.isHidden = collectionViewIsHidden
         self.searchController.searchBar.isEnabled = searchBarIsEnabled
     }
