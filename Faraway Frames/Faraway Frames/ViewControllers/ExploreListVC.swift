@@ -245,19 +245,20 @@ extension ExploreListVC: FilmsListViewModelDelegate {
         snapshot.appendSections([.main])
         snapshot.appendItems(filmIds, toSection: .main)
         dataSource.apply(snapshot, animatingDifferences: true)
+        updateViewHierarchyForCurrentState()
     }
     
     func didFailToLoadFilms() {
         collectionView.refreshControl?.endRefreshing()
-        setNeedsUpdateContentUnavailableConfiguration()
+        updateViewHierarchyForCurrentState()
     }
     
     func didRetry() {
-        setNeedsUpdateContentUnavailableConfiguration()
+        updateViewHierarchyForCurrentState()
     }
     
     func didFailToMatchResults() {
-        setNeedsUpdateContentUnavailableConfiguration()
+        updateViewHierarchyForCurrentState()
     }
     
     func didRequestVoiceOverAnnouncement(with message: String) {
