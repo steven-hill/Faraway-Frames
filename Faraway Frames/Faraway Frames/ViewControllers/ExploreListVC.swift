@@ -169,7 +169,9 @@ final class ExploreListVC: UIViewController {
             searchBarIsEnabled = true
             newStateView = nil
         case .emptySearchResults:
-            config = createEmptySearchResultsConfig()
+            let emptySearchResultsView = EmptySearchResultsView()
+            emptySearchResultsView.accessibilityIdentifier = "ExploreListVC_EmptySearchResultsView"
+            newStateView = emptySearchResultsView
             searchBarIsEnabled = true
         case .error(let error):
             config = createErrorConfig(error: error)
@@ -182,13 +184,6 @@ final class ExploreListVC: UIViewController {
         self.contentUnavailableConfiguration = config
         self.collectionView.isHidden = collectionViewIsHidden
         self.searchController.searchBar.isEnabled = searchBarIsEnabled
-    }
-    
-    private func createEmptySearchResultsConfig() -> UIContentUnavailableConfiguration {
-        var searchConfig = UIContentUnavailableConfiguration.search()
-        searchConfig.text = "No Results"
-        searchConfig.secondaryText = "Try a different search term."
-        return searchConfig
     }
     
     private func createErrorConfig(error: APIError) -> UIContentUnavailableConfiguration {
