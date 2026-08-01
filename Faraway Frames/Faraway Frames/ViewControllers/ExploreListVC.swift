@@ -246,6 +246,10 @@ extension ExploreListVC: UICollectionViewDelegate {
 
 // MARK: - Films List View Model Delegate
 extension ExploreListVC: FilmsListViewModelDelegate {
+    func didStartLoadingFilms() {
+        updateViewHierarchyForCurrentState()
+    }
+    
     func didUpdateFilms(_ films: [Film]) {
         self.films = films
         let filmIds = films.map({ $0.id })
