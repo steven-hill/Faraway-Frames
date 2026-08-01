@@ -64,6 +64,29 @@ struct ExploreListVCTests {
     }
     
     @Test(.tags(.networkRequest))
+    func exploreListVC_whenLoadingAllFilms_showsLoadingView() async {
+        let mockFilmsListService = MockFilmsListService()
+        let imageLoader = MockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
+        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
+        let mockAccessibilityService = MockAccessibilityService()
+        let sut = ExploreListVC(viewModel: filmsListViewModel,
+                                cellConfigurator: mockCellConfigurator,
+                                accessibilityService: mockAccessibilityService)
+        mockFilmsListService.shouldPauseForLoadingStateTest = true
+        
+        sut.loadViewIfNeeded()
+        await Task.yield()
+        sut.view.layoutIfNeeded()
+        
+        let loadingView = sut.currentStateView as? LoadingView
+        #expect(loadingView != nil, "A `LoadingView` should have been added to the view hierarchy.")
+        #expect(sut.viewModel.currentState == .loadingAllFilms, "State should be `.loadingAllFilms`.")
+    }
+    
+    @Test(.tags(.networkRequest))
     func exploreListVC_canUpdateFilmsArraySuccessfullyAndUpdateUI() async {
         let sut = makeSUTForNetworkSuccess()
         
@@ -135,7 +158,6 @@ struct ExploreListVCTests {
     func exploreListVC_forAllErrors_showsRetryButtonTitle_andWhenTappedStartsRetrying(expectedError: APIError) async {
         let sut = makeSUTForNetworkFailure(error: expectedError)
         sut.loadViewIfNeeded()
-        
         await sut.viewModel.getAllFilms()
 
         let errorView = sut.currentStateView as? ErrorView
@@ -145,6 +167,9 @@ struct ExploreListVCTests {
         #expect(retryButton?.configuration?.title != nil, "The retry button title should be set.")
         
         retryButton?.sendActions(for: .touchUpInside)
+        
+        let loadingView = sut.currentStateView as? LoadingView
+        #expect(loadingView != nil, "Should be showing loading view.")
         #expect(sut.viewModel.currentState == .retrying, "Should be set to `.retrying`.")
         #expect(sut.viewModel.refreshTask != nil, "Should start a new `refreshTask`.")
     }
@@ -475,8 +500,11 @@ struct ExploreListVCTests {
         
         sut.loadViewIfNeeded()
         sut.collectionView.refreshControl?.sendActions(for: .valueChanged)
+        
+        let loadingView = sut.currentStateView as? LoadingView
+        #expect(loadingView != nil, "Should be showing loading view.")
         #expect(sut.viewModel.currentState == .retrying, "Should be set to `.retrying`.")
-        #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
+        
         await sut.viewModel.refreshTask?.value
         
         #expect(mockService.fetchWasCalled == true, "Should call fetchAllFilms.")
