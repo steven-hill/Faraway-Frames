@@ -188,6 +188,26 @@ struct ExploreListVCTests {
         #expect(sut.loadTask == nil, "Should be nil.")
     }
     
+    @Test("Transitioning out of a `FFStateView` removes it from memory and subviews")
+    func exploreListVC_updateViewHierarchyForCurrentState_forStateViewTransitions_cleansUpPreviousView() async {
+        let sut = makeSUTForNetworkSuccess()
+        sut.loadViewIfNeeded()
+        await sut.loadTask?.value
+        
+        sut.searchController.searchBar.text = "No results found"
+        sut.updateSearchResults(for: sut.searchController)
+        sut.view.layoutIfNeeded()
+        
+        let emptySearchResultsView = sut.currentStateView as? FFStateView
+        #expect(emptySearchResultsView != nil, "An `FFStateView` should have been added to the view hierarchy.")
+        
+        sut.searchBarCancelButtonClicked(sut.searchController.searchBar)
+        
+        #expect(sut.currentStateView == nil, "Should now be nil because the collection view is now on screen.")
+        let remainingFFStateViews = sut.view.subviews.filter { $0 is FFStateView }
+        #expect(remainingFFStateViews.isEmpty, "`FFStateView` should be completely removed from the view hierarchy.")
+    }
+
     @Test func exploreListVC_didUpdateFilms_updatesCollectionViewItemCount() {
         let sut = makeSUTForDataSource()
         
@@ -372,7 +392,9 @@ struct ExploreListVCTests {
         #expect(sut.searchController.searchBar.isEnabled == true, "Should be true.")
     }
     
-    @Test("ExploreListVC search bar is not enabled for all API errors", .tags(.search), arguments: [
+    @Test("ExploreListVC search bar is not enabled for all API errors",
+        .tags(.search),
+          arguments: [
         APIError.noInternetConnection,
         APIError.networkConnectionLost,
         APIError.networkTimeout,
