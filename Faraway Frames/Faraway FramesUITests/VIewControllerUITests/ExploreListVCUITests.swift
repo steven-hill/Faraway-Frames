@@ -221,8 +221,8 @@ final class ExploreListVCUITests: XCTestCase {
         
         XCTAssertFalse(collectionView.exists, "Collection view should be hidden.")
         XCTAssertTrue(app.otherElements["ExploreListVC_EmptySearchResultsView"].exists, "Should show container view.")
-        XCTAssertTrue(app.staticTexts["Empty_Search_Results_Title_Label"].exists, "Should show primary text.")
-        XCTAssertTrue(app.staticTexts["Empty_Search_Results_Secondary_Label"].exists, "Should show secondary text.")
+        XCTAssertTrue(app.staticTexts["ExploreListVC_EmptySearchResultsView_Title_Label"].exists, "Should show primary text.")
+        XCTAssertTrue(app.staticTexts["ExploreListVC_EmptySearchResultsView_Secondary_Label"].exists, "Should show secondary text.")
     }
     
     func test_exploreListVC_searchTextField_searchQueryisEmpty_isDisabled() {
