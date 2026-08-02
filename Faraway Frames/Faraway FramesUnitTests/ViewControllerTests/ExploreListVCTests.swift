@@ -304,6 +304,10 @@ struct ExploreListVCTests {
         
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
+        sut.searchController.searchBar.text = "Cas"
+        sut.updateSearchResults(for: sut.searchController)
+        #expect(sut.films.count == 2, "Search should find two films.")
+        
         sut.searchBarCancelButtonClicked(sut.searchController.searchBar)
         
         #expect(sut.films.count == 22, "Should have an array of all films.")
