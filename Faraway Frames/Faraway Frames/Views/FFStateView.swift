@@ -13,7 +13,6 @@ final class FFStateView: UIView {
     private enum Layout {
         static let stackViewHorizontalSpacing: CGFloat = 32
         static let iconImageViewSize: CGFloat = 50
-        static let maxButtonWidth: CGFloat = 120
     }
     
     // MARK: - UI Components
@@ -146,7 +145,6 @@ final class FFStateView: UIView {
             retryButton.topAnchor.constraint(equalTo: buttonContainer.topAnchor),
             retryButton.bottomAnchor.constraint(equalTo: buttonContainer.bottomAnchor),
             retryButton.centerXAnchor.constraint(equalTo: buttonContainer.centerXAnchor),
-            retryButton.widthAnchor.constraint(equalToConstant: Layout.maxButtonWidth)
         ])
     }
 }
