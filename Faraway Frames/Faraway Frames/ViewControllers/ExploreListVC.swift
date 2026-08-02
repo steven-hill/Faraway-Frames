@@ -169,8 +169,11 @@ final class ExploreListVC: UIViewController {
             searchBarIsEnabled = true
             newStateView = nil
         case .emptySearchResults:
-            let emptySearchResultsView = EmptySearchResultsView()
-            emptySearchResultsView.accessibilityIdentifier = "ExploreListVC_EmptySearchResultsView"
+            let emptySearchResultsView = FFStateView(image: UIImage(systemName: "magnifyingglass"),
+                                                     imageTintColor: .systemGray,
+                                                     title: "No Results",
+                                                     secondaryText: "Try a different search term.",
+                                                     accessibilityIdentifier: "ExploreListVC_EmptySearchResultsView")
             newStateView = emptySearchResultsView
             searchBarIsEnabled = true
         case .error(let error):

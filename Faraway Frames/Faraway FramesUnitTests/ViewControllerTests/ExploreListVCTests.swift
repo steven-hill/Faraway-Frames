@@ -293,8 +293,8 @@ struct ExploreListVCTests {
         sut.updateSearchResults(for: sut.searchController)
         sut.view.layoutIfNeeded()
         
-        let emptySearchResultsView = sut.currentStateView as? EmptySearchResultsView
-        #expect(emptySearchResultsView != nil, "An `EmptySearchResultsView` should have been added to the view hierarchy.")
+        let emptySearchResultsView = sut.currentStateView as? FFStateView
+        #expect(emptySearchResultsView != nil, "An `FFStateView` should have been added to the view hierarchy.")
         #expect(sut.viewModel.currentState == .emptySearchResults, "Should set the state to `.emptySearchResults`.")
     }
     
