@@ -53,13 +53,15 @@ struct FilmsListViewModelUnitTests {
         #expect(mockService.fetchWasCalled == true, "The service should be told to fetch films.")
     }
     
-    @Test("ViewModel has correct `currentState` during network request", .tags(.networkRequest))
-    func filmsListViewModel_getAllFilms_duringNetworkRequest_currentStateIsLoadingAllFilms() async {
+    @Test("ViewModel has correct `currentState` during network request, and calls delgate", .tags(.networkRequest))
+    func filmsListViewModel_getAllFilms_duringNetworkRequest_currentStateIsLoadingAllFilmsAndDelegateIsCalled() async {
         let mockService = MockFilmsListService()
         let mockImageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
         let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader, filmSyncService: filmSyncService)
+        let delegateSpy = FilmsListViewModelDelegateSpy()
+        sut.delegate = delegateSpy
         mockService.shouldPauseForLoadingStateTest = true
         
         let task = Task {
@@ -68,6 +70,7 @@ struct FilmsListViewModelUnitTests {
         await Task.yield()
         
         #expect(sut.currentState == .loadingAllFilms)
+        #expect(delegateSpy.didStartLoadingFilmsCallCount == 1, "Should call delegate method once.")
         task.cancel()
     }
     
@@ -489,6 +492,7 @@ struct FilmsListViewModelUnitTests {
     final class FilmsListViewModelDelegateSpy: FilmsListViewModelDelegate {
         var didRequestVoiceOverAnnouncement = false
         var capturedMessage: String?
+        var didStartLoadingFilmsCallCount = 0
         var didUpdateFilmsCallCount = 0
         var didFailToLoadFilmsCallCount = 0
         var didRetryCallCount = 0
@@ -497,6 +501,10 @@ struct FilmsListViewModelUnitTests {
         func didRequestVoiceOverAnnouncement(with message: String) {
             didRequestVoiceOverAnnouncement = true
             capturedMessage = message
+        }
+        
+        func didStartLoadingFilms() {
+            didStartLoadingFilmsCallCount += 1
         }
 
         func didUpdateFilms(_ films: [Film]) {

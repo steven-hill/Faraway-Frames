@@ -19,6 +19,7 @@ final class ExploreListVC: UIViewController {
     private(set) var filmLookup: [String: Film] = [:]
     let viewModel: FilmsListViewModel
     lazy var collectionView = UICollectionView()
+    private(set) var currentStateView: UIView?
     private let cellConfigurator: FilmRowCellConfigurator
     private var headerRegistration: UICollectionView.SupplementaryRegistration<NetworkErrorHeaderView>!
     private var filmCellRegistration: UICollectionView.CellRegistration<FilmRowCell, Film>!
@@ -151,59 +152,64 @@ final class ExploreListVC: UIViewController {
         }
     }
     
-    override func updateContentUnavailableConfiguration(using state: UIContentUnavailableConfigurationState) {
-        var config: UIContentUnavailableConfiguration? = nil
+    private func updateViewHierarchyForCurrentState() {
         var collectionViewIsHidden = true
         var searchBarIsEnabled = false
+        currentStateView?.removeFromSuperview()
+        currentStateView = nil
+        let newStateView: UIView?
+        
         switch viewModel.currentState {
         case .idle, .loadingAllFilms:
-            config = createLoadingConfig(with: "Fetching films...")
+            let loadingView = LoadingView(message: "Fetching films...")
+            loadingView.accessibilityIdentifier = "ExploreListVC_LoadingView"
+            newStateView = loadingView
         case .content(isUsingArchivedData: false), .content(isUsingArchivedData: true):
-            config = nil
             collectionViewIsHidden = false
             searchBarIsEnabled = true
+            newStateView = nil
         case .emptySearchResults:
-            config = createEmptySearchResultsConfig()
+            let emptySearchResultsView = FFStateView(image: UIImage(systemName: "magnifyingglass"),
+                                                     imageTintColor: .systemGray,
+                                                     title: "No Results",
+                                                     secondaryText: "Try a different search term.",
+                                                     accessibilityIdentifier: "ExploreListVC_EmptySearchResultsView")
+            newStateView = emptySearchResultsView
             searchBarIsEnabled = true
         case .error(let error):
-            config = createErrorConfig(error: error)
+            let errorView = FFStateView(image: SFSymbols.exclamationMarkTriangle,
+                                        imageTintColor: .systemRed,
+                                        title: "Error loading films",
+                                        secondaryText: error.localizedDescription,
+                                        buttonTitle: "Retry",
+                                        accessibilityIdentifier: "ExploreListVC_ErrorView")
+            errorView.retryButton.addTarget(self, action: #selector(retryButtonTapped), for: .touchUpInside)
+            newStateView = errorView
         case .retrying:
-            config = createLoadingConfig(with: "Retrying...")
+            let loadingView = LoadingView(message: "Retrying...")
+            loadingView.accessibilityIdentifier = "ExploreListVC_LoadingView"
+            newStateView = loadingView
         }
         
-        self.contentUnavailableConfiguration = config
+        if let stateView = newStateView {
+            view.addSubview(stateView)
+            currentStateView = stateView
+            let topAnchor = stateView is LoadingView ? view.topAnchor : view.safeAreaLayoutGuide.topAnchor
+            NSLayoutConstraint.activate([
+                stateView.topAnchor.constraint(equalTo: topAnchor),
+                stateView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                stateView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                stateView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            ])
+        }
+        
         self.collectionView.isHidden = collectionViewIsHidden
         self.searchController.searchBar.isEnabled = searchBarIsEnabled
     }
     
-    private func createLoadingConfig(with text: String) -> UIContentUnavailableConfiguration {
-        var config = UIContentUnavailableConfiguration.loading()
-        config.text = text
-        config.textProperties.color = .systemGray
-        return config
-    }
-    
-    private func createEmptySearchResultsConfig() -> UIContentUnavailableConfiguration {
-        var searchConfig = UIContentUnavailableConfiguration.search()
-        searchConfig.text = "No Results"
-        searchConfig.secondaryText = "Try a different search term."
-        return searchConfig
-    }
-    
-    private func createErrorConfig(error: APIError) -> UIContentUnavailableConfiguration {
-        var config = UIContentUnavailableConfiguration.empty()
-        config.text = "Error loading films"
-        config.secondaryText = "\(error.localizedDescription)"
-        config.image = SFSymbols.exclamationMarkTriangle
-        config.imageProperties.tintColor = .systemRed
-        config.button = .prominentGlass()
-        config.button.title = "Retry"
-        config.buttonProperties.primaryAction = UIAction { [weak self] _ in
-            guard let self else { return }
-            self.viewModel.retryLoadingAllFilms()
-            self.setNeedsUpdateContentUnavailableConfiguration()
-        }
-        return config
+    @objc private func retryButtonTapped() {
+        self.viewModel.retryLoadingAllFilms()
+        self.updateViewHierarchyForCurrentState()
     }
     
     //MARK: - Search Controller
@@ -248,6 +254,10 @@ extension ExploreListVC: UICollectionViewDelegate {
 
 // MARK: - Films List View Model Delegate
 extension ExploreListVC: FilmsListViewModelDelegate {
+    func didStartLoadingFilms() {
+        updateViewHierarchyForCurrentState()
+    }
+    
     func didUpdateFilms(_ films: [Film]) {
         self.films = films
         let filmIds = films.map({ $0.id })
@@ -258,19 +268,20 @@ extension ExploreListVC: FilmsListViewModelDelegate {
         snapshot.appendSections([.main])
         snapshot.appendItems(filmIds, toSection: .main)
         dataSource.apply(snapshot, animatingDifferences: true)
+        updateViewHierarchyForCurrentState()
     }
     
     func didFailToLoadFilms() {
         collectionView.refreshControl?.endRefreshing()
-        setNeedsUpdateContentUnavailableConfiguration()
+        updateViewHierarchyForCurrentState()
     }
     
     func didRetry() {
-        setNeedsUpdateContentUnavailableConfiguration()
+        updateViewHierarchyForCurrentState()
     }
     
     func didFailToMatchResults() {
-        setNeedsUpdateContentUnavailableConfiguration()
+        updateViewHierarchyForCurrentState()
     }
     
     func didRequestVoiceOverAnnouncement(with message: String) {

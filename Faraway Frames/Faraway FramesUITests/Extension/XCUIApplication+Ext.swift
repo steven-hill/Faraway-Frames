@@ -9,7 +9,7 @@ import XCTest
 
 extension XCUIApplication {
     func launch(with error: UITestNetworkError) {
-        self.launchArguments = ["-UITesting",
+        self.launchArguments += ["-UITesting",
                                 "-UITestingMockNetworkFailure"]
         
         switch error {
