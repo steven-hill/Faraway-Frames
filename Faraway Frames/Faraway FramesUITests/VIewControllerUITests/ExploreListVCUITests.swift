@@ -66,9 +66,9 @@ final class ExploreListVCUITests: XCTestCase {
         
         XCTAssertFalse(header.exists)
         XCTAssertTrue(app.otherElements["ExploreListVC_ErrorView"].exists, "Should show container view.")
-        XCTAssertTrue(app.staticTexts["ErrorView_Title_Label"].exists, "Should show primary error text.")
-        XCTAssertTrue(app.staticTexts["ErrorView_Secondary_Label"].exists, "Should show error secondary text.")
-        XCTAssertTrue(app.buttons["ErrorView_Retry_Button"].isHittable, "Retry button should be tappable.")
+        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Title_Label"].exists, "Should show primary error text.")
+        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Secondary_Label"].exists, "Should show error secondary text.")
+        XCTAssertTrue(app.buttons["ExploreListVC_ErrorView_Retry_Button"].isHittable, "Retry button should be tappable.")
     }
     
     func test_exploreListVC_whenNetworkConnectionIsLostAndNoArchivedDataIsAvailable_showsErrorMessageAndRetryButton() {
@@ -78,9 +78,9 @@ final class ExploreListVCUITests: XCTestCase {
         
         XCTAssertFalse(header.exists)
         XCTAssertTrue(app.otherElements["ExploreListVC_ErrorView"].exists, "Should show container view.")
-        XCTAssertTrue(app.staticTexts["ErrorView_Title_Label"].exists, "Should show primary error text.")
-        XCTAssertTrue(app.staticTexts["ErrorView_Secondary_Label"].exists, "Should show error secondary text.")
-        XCTAssertTrue(app.buttons["ErrorView_Retry_Button"].isHittable, "Retry button should be tappable.")
+        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Title_Label"].exists, "Should show primary error text.")
+        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Secondary_Label"].exists, "Should show error secondary text.")
+        XCTAssertTrue(app.buttons["ExploreListVC_ErrorView_Retry_Button"].isHittable, "Retry button should be tappable.")
     }
     
     func test_exploreListVC_whenNetworkRequestTimesOutAndNoArchivedDataIsAvailable_showsErrorMessageAndRetryButton() {
@@ -89,9 +89,9 @@ final class ExploreListVCUITests: XCTestCase {
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
         
         XCTAssertTrue(app.otherElements["ExploreListVC_ErrorView"].exists, "Should show container view.")
-        XCTAssertTrue(app.staticTexts["ErrorView_Title_Label"].exists, "Should show primary error text.")
-        XCTAssertTrue(app.staticTexts["ErrorView_Secondary_Label"].exists, "Should show error secondary text.")
-        XCTAssertTrue(app.buttons["ErrorView_Retry_Button"].isHittable, "Retry button should be tappable.")
+        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Title_Label"].exists, "Should show primary error text.")
+        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Secondary_Label"].exists, "Should show error secondary text.")
+        XCTAssertTrue(app.buttons["ExploreListVC_ErrorView_Retry_Button"].isHittable, "Retry button should be tappable.")
         XCTAssertFalse(header.exists)
     }
     
@@ -101,9 +101,9 @@ final class ExploreListVCUITests: XCTestCase {
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
         
         XCTAssertTrue(app.otherElements["ExploreListVC_ErrorView"].exists, "Should show container view.")
-        XCTAssertTrue(app.staticTexts["ErrorView_Title_Label"].exists, "Should show primary error text.")
-        XCTAssertTrue(app.staticTexts["ErrorView_Secondary_Label"].exists, "Should show error secondary text.")
-        XCTAssertTrue(app.buttons["ErrorView_Retry_Button"].isHittable, "Retry button should be tappable.")
+        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Title_Label"].exists, "Should show primary error text.")
+        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Secondary_Label"].exists, "Should show error secondary text.")
+        XCTAssertTrue(app.buttons["ExploreListVC_ErrorView_Retry_Button"].isHittable, "Retry button should be tappable.")
         XCTAssertFalse(header.exists)
     }
     
@@ -113,9 +113,9 @@ final class ExploreListVCUITests: XCTestCase {
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
         
         XCTAssertTrue(app.otherElements["ExploreListVC_ErrorView"].exists, "Should show container view.")
-        XCTAssertTrue(app.staticTexts["ErrorView_Title_Label"].exists, "Should show primary error text.")
-        XCTAssertTrue(app.staticTexts["ErrorView_Secondary_Label"].exists, "Should show error secondary text.")
-        XCTAssertTrue(app.buttons["ErrorView_Retry_Button"].isHittable, "Retry button should be tappable.")
+        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Title_Label"].exists, "Should show primary error text.")
+        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Secondary_Label"].exists, "Should show error secondary text.")
+        XCTAssertTrue(app.buttons["ExploreListVC_ErrorView_Retry_Button"].isHittable, "Retry button should be tappable.")
         XCTAssertFalse(header.exists)
     }
     
@@ -125,9 +125,9 @@ final class ExploreListVCUITests: XCTestCase {
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
         
         XCTAssertTrue(app.otherElements["ExploreListVC_ErrorView"].exists, "Should show container view.")
-        XCTAssertTrue(app.staticTexts["ErrorView_Title_Label"].exists, "Should show primary error text.")
-        XCTAssertTrue(app.staticTexts["ErrorView_Secondary_Label"].exists, "Should show error secondary text.")
-        XCTAssertTrue(app.buttons["ErrorView_Retry_Button"].isHittable, "Retry button should be tappable.")
+        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Title_Label"].exists, "Should show primary error text.")
+        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Secondary_Label"].exists, "Should show error secondary text.")
+        XCTAssertTrue(app.buttons["ExploreListVC_ErrorView_Retry_Button"].isHittable, "Retry button should be tappable.")
         XCTAssertFalse(header.exists)
     }
     
@@ -137,9 +137,9 @@ final class ExploreListVCUITests: XCTestCase {
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
         
         XCTAssertTrue(app.otherElements["ExploreListVC_ErrorView"].exists, "Should show container view.")
-        XCTAssertTrue(app.staticTexts["ErrorView_Title_Label"].exists, "Should show primary error text.")
-        XCTAssertTrue(app.staticTexts["ErrorView_Secondary_Label"].exists, "Should show error secondary text.")
-        XCTAssertTrue(app.buttons["ErrorView_Retry_Button"].isHittable, "Retry button should be tappable.")
+        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Title_Label"].exists, "Should show primary error text.")
+        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Secondary_Label"].exists, "Should show error secondary text.")
+        XCTAssertTrue(app.buttons["ExploreListVC_ErrorView_Retry_Button"].isHittable, "Retry button should be tappable.")
         XCTAssertFalse(header.exists)
     }
     
@@ -149,9 +149,9 @@ final class ExploreListVCUITests: XCTestCase {
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
         
         XCTAssertTrue(app.otherElements["ExploreListVC_ErrorView"].exists, "Should show container view.")
-        XCTAssertTrue(app.staticTexts["ErrorView_Title_Label"].exists, "Should show primary error text.")
-        XCTAssertTrue(app.staticTexts["ErrorView_Secondary_Label"].exists, "Should show error secondary text.")
-        XCTAssertTrue(app.buttons["ErrorView_Retry_Button"].isHittable, "Retry button should be tappable.")
+        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Title_Label"].exists, "Should show primary error text.")
+        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Secondary_Label"].exists, "Should show error secondary text.")
+        XCTAssertTrue(app.buttons["ExploreListVC_ErrorView_Retry_Button"].isHittable, "Retry button should be tappable.")
         XCTAssertFalse(header.exists)
     }
     

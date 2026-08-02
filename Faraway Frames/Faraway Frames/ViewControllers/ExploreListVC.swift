@@ -177,8 +177,12 @@ final class ExploreListVC: UIViewController {
             newStateView = emptySearchResultsView
             searchBarIsEnabled = true
         case .error(let error):
-            let errorView = ErrorView(error: error)
-            errorView.accessibilityIdentifier = "ExploreListVC_ErrorView"
+            let errorView = FFStateView(image: SFSymbols.exclamationMarkTriangle,
+                                        imageTintColor: .systemRed,
+                                        title: "Error loading films",
+                                        secondaryText: error.localizedDescription,
+                                        buttonTitle: "Retry",
+                                        accessibilityIdentifier: "ExploreListVC_ErrorView")
             errorView.retryButton.addTarget(self, action: #selector(retryButtonTapped), for: .touchUpInside)
             newStateView = errorView
         case .retrying:

@@ -116,8 +116,8 @@ struct ExploreListVCTests {
         sut.loadViewIfNeeded()
         await sut.viewModel.getAllFilms()
             
-        let errorView = sut.currentStateView as? ErrorView
-        #expect(errorView != nil, "An ErrorView should have been added to the view hierarchy.")
+        let errorView = sut.currentStateView as? FFStateView
+        #expect(errorView != nil, "A `FFStateView` should have been added to the view hierarchy.")
         #expect(sut.viewModel.currentState == .error(expectedError), "Should set the state to .error.")
     }
     
@@ -160,8 +160,8 @@ struct ExploreListVCTests {
         sut.loadViewIfNeeded()
         await sut.viewModel.getAllFilms()
 
-        let errorView = sut.currentStateView as? ErrorView
-        #expect(errorView != nil, "An ErrorView should have been added to the view hierarchy.")
+        let errorView = sut.currentStateView as? FFStateView
+        #expect(errorView != nil, "A `FFStateView` should have been added to the view hierarchy.")
         
         let retryButton = errorView?.retryButton
         #expect(retryButton?.configuration?.title != nil, "The retry button title should be set.")
