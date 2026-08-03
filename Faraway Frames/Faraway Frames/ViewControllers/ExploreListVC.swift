@@ -108,7 +108,6 @@ final class ExploreListVC: UIViewController {
         filmCellRegistration = UICollectionView.CellRegistration<FilmRowCell, Film> { [weak self] (cell, _, film) in
             guard let self else { return }
             cellConfigurator.configure(cell, with: film)
-            setNeedsUpdateContentUnavailableConfiguration()
         }
     }
     
@@ -234,7 +233,6 @@ final class ExploreListVC: UIViewController {
         refreshControl.addAction(UIAction { [weak self] _ in
             guard let self else { return }
             self.viewModel.retryLoadingAllFilms()
-            setNeedsUpdateContentUnavailableConfiguration()
         }, for: .valueChanged)
         collectionView.refreshControl = refreshControl
     }
