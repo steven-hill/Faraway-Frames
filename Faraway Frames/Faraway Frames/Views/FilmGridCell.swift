@@ -69,9 +69,7 @@ final class FilmGridCell: UICollectionViewCell {
     }
     
     func updateImage(_ image: UIImage) {
-        UIView.transition(with: posterImageView, duration: 0.2, options: .transitionCrossDissolve) {
-            self.posterImageView.image = image
-        }
+        self.posterImageView.image = image
     }
     
     // MARK: - Prepare For Reuse
