@@ -215,18 +215,6 @@ struct HomeVCTests {
         #expect(sut.homeViewModel.currentState == .failure(expectedHomeError), "The view model state must match the expected persistence failure scenario exactly.")
     }
     
-    @Test("Collection view updates layout when device is rotated to landscape.")
-    func homeVC_transitionLayout_recreatesCompositionalLayoutWithNewWidth() {
-        let sut = makeSUT()
-        sut.loadViewIfNeeded()
-        let initialLayout = sut.collectionView.collectionViewLayout
-        
-        sut.transitionLayout()
-        let updatedLayout = sut.collectionView.collectionViewLayout
-        
-        #expect(updatedLayout !== initialLayout, "Should instantiate a fresh layout object on size shifts.")
-    }
-    
     @Test("`LayoutMetrics` calculates number of columns for different size classes correctly")
     func homeVC_layoutMetricsColumnCount_returnsCorrectNumberOfColumns() {
         let iPhonePortraitNumberOfColumns = HomeVC.LayoutMetrics.columnCount(horizontal: .compact, vertical: .regular)

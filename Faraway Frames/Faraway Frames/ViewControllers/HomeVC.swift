@@ -59,14 +59,8 @@ final class HomeVC: UIViewController {
         super.viewWillTransition(to: size, with: coordinator)
         coordinator.animate(alongsideTransition: { [weak self] _ in
             guard let self = self else { return }
-            transitionLayout()
+            collectionView.collectionViewLayout.invalidateLayout()
         })
-    }
-    
-    func transitionLayout() {
-        collectionView.collectionViewLayout.invalidateLayout()
-        let freshLayout = createLayout()
-        collectionView.setCollectionViewLayout(freshLayout, animated: true)
     }
     
     private func configureSegmentedControl() {
@@ -112,6 +106,7 @@ final class HomeVC: UIViewController {
     }
     
     private func createLayout() -> UICollectionViewLayout {
+        print("create layout called")
         return UICollectionViewCompositionalLayout { (_, layoutEnvironment) -> NSCollectionLayoutSection? in
             let hSizeClass = layoutEnvironment.traitCollection.horizontalSizeClass
             let vSizeClass = layoutEnvironment.traitCollection.verticalSizeClass
