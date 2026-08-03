@@ -293,6 +293,8 @@ final class HomeVC: UIViewController {
         stateView.isHidden = false
         
         NSLayoutConstraint.activate([
+            stateView.leadingAnchor.constraint(equalTo: collectionView.leadingAnchor),
+            stateView.trailingAnchor.constraint(equalTo: collectionView.trailingAnchor),
             stateView.centerXAnchor.constraint(equalTo: collectionView.centerXAnchor),
             stateView.centerYAnchor.constraint(equalTo: collectionView.centerYAnchor)
         ])
