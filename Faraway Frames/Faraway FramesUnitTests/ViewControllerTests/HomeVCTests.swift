@@ -60,17 +60,6 @@ struct HomeVCTests {
         #expect(itemCount == 1, "Should be 1 item in the collection view.")
     }
     
-    @Test("Supplementary View Provider dequeues the segmented control header type")
-    func homeVC_collectionView_hasSegmentedControlAsHeaderView() async {
-        let sut = makeSUT()
-        sut.loadViewIfNeeded()
-        await Task.yield()
-        sut.collectionView.layoutIfNeeded()
-        
-        let header = getHeader(sut: sut)
-        #expect(header != nil, "Should not be nil.")
-    }
-
     @Test("Empty state view is displayed when `Up Next` segment is empty.")
     func homeVC_whenUpNextIsEmpty_displaysUpNextEmptyState() async {
         let sut = makeSUT()
@@ -89,9 +78,8 @@ struct HomeVCTests {
         await Task.yield()
         sut.collectionView.layoutIfNeeded()
         
-        let header = getHeader(sut: sut)
-        header?.segmentedControl.selectedSegmentIndex = 1
-        header?.segmentedControl.sendActions(for: .valueChanged)
+        selectSegment(at: 1,
+                      in: sut.segmentedControl)
         
         #expect(sut.emptyStateView.isHidden == false, "Should display empty state view.")
         #expect(sut.databaseErrorView.isHidden, "Database error view should be hidden.")
@@ -120,9 +108,8 @@ struct HomeVCTests {
         await Task.yield()
         sut.collectionView.layoutIfNeeded()
         
-        let header = getHeader(sut: sut)
-        header?.segmentedControl.selectedSegmentIndex = 1
-        header?.segmentedControl.sendActions(for: .valueChanged)
+        selectSegment(at: 1,
+                      in: sut.segmentedControl)
         
         #expect(sut.emptyStateView.isHidden, "Empty state view should be hidden.")
         #expect(sut.databaseErrorView.isHidden, "Database error view should be hidden.")
@@ -164,9 +151,8 @@ struct HomeVCTests {
         #expect(sut.films[0].id == Film.sample[0].id, "Should be the first film that was added.")
         #expect(sut.films[1].id == Film.sample[1].id, "Should be the second film that was added.")
         
-        let header = getHeader(sut: sut)
-        header?.segmentedControl.selectedSegmentIndex = 1
-        header?.segmentedControl.sendActions(for: .valueChanged)
+        selectSegment(at: 1,
+                      in: sut.segmentedControl)
         
         #expect(sut.emptyStateView.isHidden, "Empty state view should be hidden.")
         #expect(sut.databaseErrorView.isHidden, "Database error view should be hidden.")
@@ -191,9 +177,8 @@ struct HomeVCTests {
         #expect(sut.films[0].isUpNext == true, "Should be true.")
         #expect(sut.films[0].isWatched == true, "Should be true.")
         
-        let header = getHeader(sut: sut)
-        header?.segmentedControl.selectedSegmentIndex = 1
-        header?.segmentedControl.sendActions(for: .valueChanged)
+        selectSegment(at: 1,
+                      in: sut.segmentedControl)
         
         #expect(config == nil, "Should be displaying Watched films, not `contentUnavailableConfiguration`.")
         #expect(sut.films.count == 1, "Should have one film.")
@@ -228,18 +213,6 @@ struct HomeVCTests {
         #expect(sut.databaseErrorView.isHidden == false, "Should present an error view when fetch fails.")
         #expect(sut.emptyStateView.isHidden, "Empty state view should be hidden.")
         #expect(sut.homeViewModel.currentState == .failure(expectedHomeError), "The view model state must match the expected persistence failure scenario exactly.")
-    }
-    
-    @Test("Collection view updates layout when device is rotated to landscape.")
-    func homeVC_transitionLayout_recreatesCompositionalLayoutWithNewWidth() {
-        let sut = makeSUT()
-        sut.loadViewIfNeeded()
-        let initialLayout = sut.collectionView.collectionViewLayout
-        
-        sut.transitionLayout(toWidth: 852)
-        let updatedLayout = sut.collectionView.collectionViewLayout
-        
-        #expect(updatedLayout !== initialLayout, "Should instantiate a fresh layout object on size shifts.")
     }
     
     @Test("`LayoutMetrics` calculates number of columns for different size classes correctly")
@@ -340,9 +313,8 @@ struct HomeVCTests {
         sut.loadViewIfNeeded()
         sut.collectionView.layoutIfNeeded()
         await Task.yield()
-        let header = getHeader(sut: sut)
-        header?.segmentedControl.selectedSegmentIndex = 1
-        header?.segmentedControl.sendActions(for: .valueChanged)
+        selectSegment(at: 1,
+                      in: sut.segmentedControl)
     
         let targetIndexPath = IndexPath(item: 0, section: 0)
         sut.collectionView.delegate?.collectionView?(sut.collectionView, didSelectItemAt: targetIndexPath)
@@ -437,12 +409,11 @@ struct HomeVCTests {
         return (sut, context, spyDelegate, entity)
     }
     
-    //MARK: - Collection View Header Helper
-    private func getHeader(sut: HomeVC) -> SegmentedControlHeaderView? {
-        let indexPath = IndexPath(item: 0, section: 0)
-        let kind = UICollectionView.elementKindSectionHeader
-        let header = sut.collectionView.supplementaryView(forElementKind: kind, at: indexPath) as? SegmentedControlHeaderView
-        return header
+    //MARK: - Segmented Control Helper Method
+    private func selectSegment(at index: Int,
+                               in segmentedControl: UISegmentedControl) {
+        segmentedControl.selectedSegmentIndex = index
+        segmentedControl.sendActions(for: .valueChanged)
     }
     
     //MARK: - Home View Model Coordinator Delegate Spy

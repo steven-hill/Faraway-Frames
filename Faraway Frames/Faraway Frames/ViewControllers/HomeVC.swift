@@ -19,8 +19,14 @@ final class HomeVC: UIViewController {
     private(set) var films: [Film] = []
     private(set) var segmentedControlIndex = 0
     let homeViewModel: HomeViewModel
+    let segmentedControl: UISegmentedControl = {
+        let control = UISegmentedControl(items: ["Up Next", "Watched"])
+        control.selectedSegmentIndex = 0
+        control.translatesAutoresizingMaskIntoConstraints = false
+        control.accessibilityIdentifier = "HomeVC_Segmented_Control"
+        return control
+    }()
     lazy var collectionView = UICollectionView()
-    private var headerRegistration: UICollectionView.SupplementaryRegistration<SegmentedControlHeaderView>!
     private var filmCellRegistration: UICollectionView.CellRegistration<FilmGridCell, Film>!
     private var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
     private(set) var emptyStateView = UIContentUnavailableView(configuration: .empty())
@@ -42,35 +48,38 @@ final class HomeVC: UIViewController {
         navigationItem.largeTitleDisplayMode = CurrentDevice.isIPhone ? .inline : .automatic
         title = "Home"
         homeViewModel.delegate = self
+        configureSegmentedControl()
         configureCollectionView()
-        configureSupplementaryRegistration()
         configureCellRegistration()
         configureDataSource()
         homeViewModel.performFetches()
-        registerForTraitChanges([UITraitHorizontalSizeClass.self, UITraitVerticalSizeClass.self]) { [weak self] (vc: Self, previousTraitCollection: UITraitCollection) in
-            guard let self = self else { return }
-            transitionLayout(toWidth: self.view.bounds.width)
-        }
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         coordinator.animate(alongsideTransition: { [weak self] _ in
             guard let self = self else { return }
-            transitionLayout(toWidth: size.width)
+            collectionView.collectionViewLayout.invalidateLayout()
         })
     }
     
-    func transitionLayout(toWidth width: CGFloat) {
-        collectionView.collectionViewLayout.invalidateLayout()
-        let freshLayout = createLayout(for: width)
-        collectionView.setCollectionViewLayout(freshLayout, animated: true)
+    private func configureSegmentedControl() {
+        view.addSubview(segmentedControl)
+        segmentedControl.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
+        segmentedControl.selectedSegmentIndex = segmentedControlIndex
+        
+        NSLayoutConstraint.activate([
+            segmentedControl.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
+            segmentedControl.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 8),
+            segmentedControl.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -8),
+            segmentedControl.heightAnchor.constraint(equalToConstant: 44),
+        ])
     }
     
     private func configureCollectionView() {
         collectionView = UICollectionView(
             frame: .zero,
-            collectionViewLayout: createLayout(for: view.bounds.width)
+            collectionViewLayout: createLayout()
         )
         collectionView.delegate = self
         collectionView.translatesAutoresizingMaskIntoConstraints = false
@@ -80,19 +89,9 @@ final class HomeVC: UIViewController {
         NSLayoutConstraint.activate([
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            collectionView.topAnchor.constraint(equalTo: view.topAnchor),
+            collectionView.topAnchor.constraint(equalTo: segmentedControl.bottomAnchor, constant: 8),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
-    }
-    
-    private func configureSupplementaryRegistration() {
-        headerRegistration = UICollectionView.SupplementaryRegistration<SegmentedControlHeaderView>(
-            elementKind: UICollectionView.elementKindSectionHeader
-        ) { [weak self] headerView, _, _ in
-            guard let self = self else { return }
-            headerView.segmentedControl.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
-            headerView.segmentedControl.selectedSegmentIndex = segmentedControlIndex
-        }
     }
     
     private func configureCellRegistration() {
@@ -106,63 +105,45 @@ final class HomeVC: UIViewController {
         }
     }
     
-    private func createLayout(for width: CGFloat) -> UICollectionViewLayout {
-        let hSizeClass = traitCollection.horizontalSizeClass
-        let vSizeClass = traitCollection.verticalSizeClass
-        
-        let numberOfColumns = LayoutMetrics.columnCount(horizontal: hSizeClass, vertical: vSizeClass)
-        let itemFraction = 1.0 / CGFloat(numberOfColumns)
-        
-        // Lower the baseline estimate for compact vertical size classes
-        let baselineEstimate: CGFloat = (vSizeClass == .compact) ? 140.0 : 180.0
-        
-        let itemSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(itemFraction),
-            heightDimension: .estimated(baselineEstimate)
-        )
-        let item = NSCollectionLayoutItem(layoutSize: itemSize)
-        
-        item.contentInsets = NSDirectionalEdgeInsets(
-            top: 0,
-            leading: LayoutMetrics.uniformSpacing,
-            bottom: 0,
-            trailing: LayoutMetrics.uniformSpacing
-        )
-        
-        item.edgeSpacing = NSCollectionLayoutEdgeSpacing(
-            leading: nil,
-            top: .fixed(LayoutMetrics.halfSpacing),
-            trailing: nil,
-            bottom: .fixed(LayoutMetrics.halfSpacing)
-        )
-        
-        let groupSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(1.0),
-            heightDimension: .estimated(baselineEstimate)
-        )
-        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
-        
-        let section = NSCollectionLayoutSection(group: group)
-        section.contentInsets = NSDirectionalEdgeInsets(
-            top: LayoutMetrics.halfSpacing,
-            leading: LayoutMetrics.uniformSpacing,
-            bottom: LayoutMetrics.uniformSpacing,
-            trailing: LayoutMetrics.uniformSpacing
-        )
-        
-        let headerSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(1.0),
-            heightDimension: .absolute(52)
-        )
-        
-        let sectionHeader = NSCollectionLayoutBoundarySupplementaryItem(
-            layoutSize: headerSize,
-            elementKind: UICollectionView.elementKindSectionHeader,
-            alignment: .top)
-        sectionHeader.pinToVisibleBounds = false
-        
-        section.boundarySupplementaryItems = [sectionHeader]
-        return UICollectionViewCompositionalLayout(section: section)
+    private func createLayout() -> UICollectionViewLayout {
+        print("create layout called")
+        return UICollectionViewCompositionalLayout { (_, layoutEnvironment) -> NSCollectionLayoutSection? in
+            let hSizeClass = layoutEnvironment.traitCollection.horizontalSizeClass
+            let vSizeClass = layoutEnvironment.traitCollection.verticalSizeClass
+            
+            let numberOfColumns = LayoutMetrics.columnCount(horizontal: hSizeClass, vertical: vSizeClass)
+            let itemFraction = 1.0 / CGFloat(numberOfColumns)
+            
+            // Lower the baseline estimate for compact vertical size classes
+            let baselineEstimate: CGFloat = (vSizeClass == .compact) ? 140.0 : 180.0
+            
+            let itemSize = NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(itemFraction),
+                heightDimension: .estimated(baselineEstimate)
+            )
+            let item = NSCollectionLayoutItem(layoutSize: itemSize)
+            
+            item.contentInsets = NSDirectionalEdgeInsets(
+                top: 0,
+                leading: LayoutMetrics.uniformSpacing,
+                bottom: 0,
+                trailing: LayoutMetrics.uniformSpacing
+            )
+            
+            item.edgeSpacing = NSCollectionLayoutEdgeSpacing(
+                leading: nil,
+                top: .fixed(LayoutMetrics.halfSpacing),
+                trailing: nil,
+                bottom: .fixed(LayoutMetrics.halfSpacing)
+            )
+            
+            let groupSize = NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1.0),
+                heightDimension: .estimated(baselineEstimate)
+            )
+            let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
+            return NSCollectionLayoutSection(group: group)
+        }
     }
     
     // MARK: - Data Source Configuration
@@ -207,14 +188,6 @@ final class HomeVC: UIViewController {
                 using: filmCellRegistration,
                 for: indexPath,
                 item: film
-            )
-        }
-        
-        dataSource.supplementaryViewProvider = { [weak self] collectionView, _, indexPath in
-            guard let self = self else { return nil }
-            return collectionView.dequeueConfiguredReusableSupplementary(
-                using: headerRegistration,
-                for: indexPath
             )
         }
     }
