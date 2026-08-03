@@ -53,13 +53,6 @@ final class HomeVC: UIViewController {
         configureCellRegistration()
         configureDataSource()
         homeViewModel.performFetches()
-        registerForTraitChanges([
-            UITraitHorizontalSizeClass.self,
-            UITraitVerticalSizeClass.self
-        ]) { [weak self] (vc: Self, previousTraitCollection: UITraitCollection) in
-            guard let self = self else { return }
-            transitionLayout()
-        }
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
