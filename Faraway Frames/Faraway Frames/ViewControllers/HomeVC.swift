@@ -53,7 +53,10 @@ final class HomeVC: UIViewController {
         configureCellRegistration()
         configureDataSource()
         homeViewModel.performFetches()
-        registerForTraitChanges([UITraitHorizontalSizeClass.self, UITraitVerticalSizeClass.self]) { [weak self] (vc: Self, previousTraitCollection: UITraitCollection) in
+        registerForTraitChanges([
+            UITraitHorizontalSizeClass.self,
+            UITraitVerticalSizeClass.self
+        ]) { [weak self] (vc: Self, previousTraitCollection: UITraitCollection) in
             guard let self = self else { return }
             transitionLayout(toWidth: self.view.bounds.width)
         }
@@ -69,7 +72,7 @@ final class HomeVC: UIViewController {
     
     func transitionLayout(toWidth width: CGFloat) {
         collectionView.collectionViewLayout.invalidateLayout()
-        let freshLayout = createLayout(for: width)
+        let freshLayout = createLayout()
         collectionView.setCollectionViewLayout(freshLayout, animated: true)
     }
     
@@ -89,7 +92,7 @@ final class HomeVC: UIViewController {
     private func configureCollectionView() {
         collectionView = UICollectionView(
             frame: .zero,
-            collectionViewLayout: createLayout(for: view.bounds.width)
+            collectionViewLayout: createLayout()
         )
         collectionView.delegate = self
         collectionView.translatesAutoresizingMaskIntoConstraints = false
@@ -115,63 +118,44 @@ final class HomeVC: UIViewController {
         }
     }
     
-    private func createLayout(for width: CGFloat) -> UICollectionViewLayout {
-        let hSizeClass = traitCollection.horizontalSizeClass
-        let vSizeClass = traitCollection.verticalSizeClass
-        
-        let numberOfColumns = LayoutMetrics.columnCount(horizontal: hSizeClass, vertical: vSizeClass)
-        let itemFraction = 1.0 / CGFloat(numberOfColumns)
-        
-        // Lower the baseline estimate for compact vertical size classes
-        let baselineEstimate: CGFloat = (vSizeClass == .compact) ? 140.0 : 180.0
-        
-        let itemSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(itemFraction),
-            heightDimension: .estimated(baselineEstimate)
-        )
-        let item = NSCollectionLayoutItem(layoutSize: itemSize)
-        
-        item.contentInsets = NSDirectionalEdgeInsets(
-            top: 0,
-            leading: LayoutMetrics.uniformSpacing,
-            bottom: 0,
-            trailing: LayoutMetrics.uniformSpacing
-        )
-        
-        item.edgeSpacing = NSCollectionLayoutEdgeSpacing(
-            leading: nil,
-            top: .fixed(LayoutMetrics.halfSpacing),
-            trailing: nil,
-            bottom: .fixed(LayoutMetrics.halfSpacing)
-        )
-        
-        let groupSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(1.0),
-            heightDimension: .estimated(baselineEstimate)
-        )
-        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
-        
-        let section = NSCollectionLayoutSection(group: group)
-        section.contentInsets = NSDirectionalEdgeInsets(
-            top: LayoutMetrics.halfSpacing,
-            leading: LayoutMetrics.uniformSpacing,
-            bottom: LayoutMetrics.uniformSpacing,
-            trailing: LayoutMetrics.uniformSpacing
-        )
-        
-        let headerSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(1.0),
-            heightDimension: .absolute(52)
-        )
-        
-        let sectionHeader = NSCollectionLayoutBoundarySupplementaryItem(
-            layoutSize: headerSize,
-            elementKind: UICollectionView.elementKindSectionHeader,
-            alignment: .top)
-        sectionHeader.pinToVisibleBounds = false
-        
-        section.boundarySupplementaryItems = [sectionHeader]
-        return UICollectionViewCompositionalLayout(section: section)
+    private func createLayout() -> UICollectionViewLayout {
+        return UICollectionViewCompositionalLayout { (_, layoutEnvironment) -> NSCollectionLayoutSection? in
+            let hSizeClass = layoutEnvironment.traitCollection.horizontalSizeClass
+            let vSizeClass = layoutEnvironment.traitCollection.verticalSizeClass
+            
+            let numberOfColumns = LayoutMetrics.columnCount(horizontal: hSizeClass, vertical: vSizeClass)
+            let itemFraction = 1.0 / CGFloat(numberOfColumns)
+            
+            // Lower the baseline estimate for compact vertical size classes
+            let baselineEstimate: CGFloat = (vSizeClass == .compact) ? 140.0 : 180.0
+            
+            let itemSize = NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(itemFraction),
+                heightDimension: .estimated(baselineEstimate)
+            )
+            let item = NSCollectionLayoutItem(layoutSize: itemSize)
+            
+            item.contentInsets = NSDirectionalEdgeInsets(
+                top: 0,
+                leading: LayoutMetrics.uniformSpacing,
+                bottom: 0,
+                trailing: LayoutMetrics.uniformSpacing
+            )
+            
+            item.edgeSpacing = NSCollectionLayoutEdgeSpacing(
+                leading: nil,
+                top: .fixed(LayoutMetrics.halfSpacing),
+                trailing: nil,
+                bottom: .fixed(LayoutMetrics.halfSpacing)
+            )
+            
+            let groupSize = NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1.0),
+                heightDimension: .estimated(baselineEstimate)
+            )
+            let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
+            return NSCollectionLayoutSection(group: group)
+        }
     }
     
     // MARK: - Data Source Configuration
