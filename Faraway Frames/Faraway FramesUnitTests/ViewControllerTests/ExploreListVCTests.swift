@@ -410,7 +410,6 @@ struct ExploreListVCTests {
         sut.loadViewIfNeeded()
         await sut.viewModel.getAllFilms()
         
-        sut.setNeedsUpdateContentUnavailableConfiguration()
         sut.view.layoutIfNeeded()
         
         #expect(sut.searchController.searchBar.isEnabled == false, "Should be false.")
