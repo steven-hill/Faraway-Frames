@@ -106,7 +106,6 @@ final class HomeVC: UIViewController {
     }
     
     private func createLayout() -> UICollectionViewLayout {
-        print("create layout called")
         return UICollectionViewCompositionalLayout { (_, layoutEnvironment) -> NSCollectionLayoutSection? in
             let hSizeClass = layoutEnvironment.traitCollection.horizontalSizeClass
             let vSizeClass = layoutEnvironment.traitCollection.verticalSizeClass
