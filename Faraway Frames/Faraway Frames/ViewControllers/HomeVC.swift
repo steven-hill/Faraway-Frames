@@ -58,7 +58,7 @@ final class HomeVC: UIViewController {
             UITraitVerticalSizeClass.self
         ]) { [weak self] (vc: Self, previousTraitCollection: UITraitCollection) in
             guard let self = self else { return }
-            transitionLayout(toWidth: self.view.bounds.width)
+            transitionLayout()
         }
     }
     
@@ -66,11 +66,11 @@ final class HomeVC: UIViewController {
         super.viewWillTransition(to: size, with: coordinator)
         coordinator.animate(alongsideTransition: { [weak self] _ in
             guard let self = self else { return }
-            transitionLayout(toWidth: size.width)
+            transitionLayout()
         })
     }
     
-    func transitionLayout(toWidth width: CGFloat) {
+    func transitionLayout() {
         collectionView.collectionViewLayout.invalidateLayout()
         let freshLayout = createLayout()
         collectionView.setCollectionViewLayout(freshLayout, animated: true)
