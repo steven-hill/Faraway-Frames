@@ -19,6 +19,13 @@ final class HomeVC: UIViewController {
     private(set) var films: [Film] = []
     private(set) var segmentedControlIndex = 0
     let homeViewModel: HomeViewModel
+    let segmentedControl: UISegmentedControl = {
+        let control = UISegmentedControl(items: ["Up Next", "Watched"])
+        control.selectedSegmentIndex = 0
+        control.translatesAutoresizingMaskIntoConstraints = false
+        control.accessibilityIdentifier = "Header_Segmented_Control"
+        return control
+    }()
     lazy var collectionView = UICollectionView()
     private var filmCellRegistration: UICollectionView.CellRegistration<FilmGridCell, Film>!
     private var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
@@ -41,6 +48,7 @@ final class HomeVC: UIViewController {
         navigationItem.largeTitleDisplayMode = CurrentDevice.isIPhone ? .inline : .automatic
         title = "Home"
         homeViewModel.delegate = self
+        configureSegmentedControl()
         configureCollectionView()
         configureCellRegistration()
         configureDataSource()
@@ -63,6 +71,19 @@ final class HomeVC: UIViewController {
         collectionView.collectionViewLayout.invalidateLayout()
         let freshLayout = createLayout(for: width)
         collectionView.setCollectionViewLayout(freshLayout, animated: true)
+    }
+    
+    private func configureSegmentedControl() {
+        view.addSubview(segmentedControl)
+        segmentedControl.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
+        segmentedControl.selectedSegmentIndex = segmentedControlIndex
+        
+        NSLayoutConstraint.activate([
+            segmentedControl.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
+            segmentedControl.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 8),
+            segmentedControl.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -8),
+            segmentedControl.heightAnchor.constraint(equalToConstant: 44),
+        ])
     }
     
     private func configureCollectionView() {
