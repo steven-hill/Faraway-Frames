@@ -35,7 +35,7 @@ final class HomeVCUITests: XCTestCase {
     }
     
     func test_homeVC_hasSegmentedControl_withCorrectSetup_andTapChangesSelection() {
-        let segmentedControl = app.segmentedControls["Header_Segmented_Control"]
+        let segmentedControl = app.segmentedControls["HomeVC_Segmented_Control"]
         let numberOfSegments = segmentedControl.buttons.count
         
         XCTAssertTrue(segmentedControl.exists, "Should exist.")
@@ -51,7 +51,7 @@ final class HomeVCUITests: XCTestCase {
     }
     
     func test_homeVC_segmentedControl_whenSelectedSegmentChangedAndDeviceRotatedToLandscape_bothSegmentsAreHittable() {
-        let segmentedControl = app.segmentedControls["Header_Segmented_Control"]
+        let segmentedControl = app.segmentedControls["HomeVC_Segmented_Control"]
         
         XCTAssertTrue(segmentedControl.isHittable, "Should be hittable.")
         
@@ -82,7 +82,7 @@ final class HomeVCUITests: XCTestCase {
     }
     
     func test_homeVC_whenNoFilmsAreInDatabase_showsEmptyStateViewForBothSegments() {
-        let segmentedControl = app.segmentedControls["Header_Segmented_Control"]
+        let segmentedControl = app.segmentedControls["HomeVC_Segmented_Control"]
         let emptyStateView = app.staticTexts["HomeVC_EmptyStateView"]
         XCTAssertTrue(emptyStateView.exists, "Should exist.")
         

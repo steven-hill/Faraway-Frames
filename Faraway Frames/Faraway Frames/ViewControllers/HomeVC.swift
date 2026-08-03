@@ -23,7 +23,7 @@ final class HomeVC: UIViewController {
         let control = UISegmentedControl(items: ["Up Next", "Watched"])
         control.selectedSegmentIndex = 0
         control.translatesAutoresizingMaskIntoConstraints = false
-        control.accessibilityIdentifier = "Header_Segmented_Control"
+        control.accessibilityIdentifier = "HomeVC_Segmented_Control"
         return control
     }()
     lazy var collectionView = UICollectionView()
