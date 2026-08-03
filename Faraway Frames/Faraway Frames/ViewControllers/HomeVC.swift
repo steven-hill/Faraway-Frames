@@ -20,7 +20,6 @@ final class HomeVC: UIViewController {
     private(set) var segmentedControlIndex = 0
     let homeViewModel: HomeViewModel
     lazy var collectionView = UICollectionView()
-    private var headerRegistration: UICollectionView.SupplementaryRegistration<SegmentedControlHeaderView>!
     private var filmCellRegistration: UICollectionView.CellRegistration<FilmGridCell, Film>!
     private var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
     private(set) var emptyStateView = UIContentUnavailableView(configuration: .empty())
@@ -43,7 +42,6 @@ final class HomeVC: UIViewController {
         title = "Home"
         homeViewModel.delegate = self
         configureCollectionView()
-        configureSupplementaryRegistration()
         configureCellRegistration()
         configureDataSource()
         homeViewModel.performFetches()
@@ -83,16 +81,6 @@ final class HomeVC: UIViewController {
             collectionView.topAnchor.constraint(equalTo: view.topAnchor),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
-    }
-    
-    private func configureSupplementaryRegistration() {
-        headerRegistration = UICollectionView.SupplementaryRegistration<SegmentedControlHeaderView>(
-            elementKind: UICollectionView.elementKindSectionHeader
-        ) { [weak self] headerView, _, _ in
-            guard let self = self else { return }
-            headerView.segmentedControl.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
-            headerView.segmentedControl.selectedSegmentIndex = segmentedControlIndex
-        }
     }
     
     private func configureCellRegistration() {
@@ -207,14 +195,6 @@ final class HomeVC: UIViewController {
                 using: filmCellRegistration,
                 for: indexPath,
                 item: film
-            )
-        }
-        
-        dataSource.supplementaryViewProvider = { [weak self] collectionView, _, indexPath in
-            guard let self = self else { return nil }
-            return collectionView.dequeueConfiguredReusableSupplementary(
-                using: headerRegistration,
-                for: indexPath
             )
         }
     }
