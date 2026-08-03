@@ -677,7 +677,7 @@ struct ExploreListVCTests {
         let (sut, mockAccessibilityService) = await makeSUTForVOTests(voiceOverIsOn: true)
         
         sut.didRequestVoiceOverAnnouncement(with: "Test Announcement")
-        try await Task.sleep(nanoseconds: 600_000_000)
+        await mockAccessibilityService.waitForNotification()
         
         #expect(mockAccessibilityService.postedNotification == .announcement, "The notification should be for an announcement.")
         #expect(mockAccessibilityService.postedArgument as? String == "Test Announcement", "Should match the call's input.")
@@ -692,7 +692,7 @@ struct ExploreListVCTests {
         sut.didRequestVoiceOverAnnouncement(with: "First Message")
         let firstTask = sut.voiceOverAnnouncementTask
         sut.didRequestVoiceOverAnnouncement(with: "Second Message")
-        try await Task.sleep(nanoseconds: 600_000_000)
+        await mockAccessibilityService.waitForNotification()
         
         #expect(firstTask?.isCancelled == true, "Should have cancelled the first task.")
         #expect(mockAccessibilityService.postedArgument as? String == "Second Message", "Should match input of second call.")
