@@ -13,12 +13,14 @@ final class HomeVCUITests: XCTestCase {
 
     override func setUpWithError() throws {
         app = XCUIApplication()
+        XCUIDevice.shared.orientation = .portrait
         app.launchArguments.append("-UITesting")
         app.launch()
         continueAfterFailure = false
     }
 
     override func tearDownWithError() throws {
+        XCUIDevice.shared.orientation = .portrait
         app = nil
     }
     
@@ -46,6 +48,31 @@ final class HomeVCUITests: XCTestCase {
         
         watchedSegment.tap()
         XCTAssertTrue(watchedSegment.isSelected, "Should be selected now.")
+    }
+    
+    func test_homeVC_segmentedControl_whenSelectedSegmentChangedAndDeviceRotatesToLandscape_bothSegmentsAreHittable() {
+        let segmentedControl = app.segmentedControls["Header_Segmented_Control"]
+        
+        XCTAssertTrue(segmentedControl.isHittable, "Should be hittable.")
+        
+        let upNextSegment = segmentedControl.buttons.element(boundBy: 0)
+        let watchedSegment = segmentedControl.buttons.element(boundBy: 1)
+        
+        watchedSegment.tap()
+        XCTAssertTrue(watchedSegment.isSelected, "Should be selected now.")
+        
+        XCUIDevice.shared.orientation = .landscapeLeft
+        
+        upNextSegment.tap()
+        XCTAssertTrue(upNextSegment.isSelected, "Should be selected now.")
+    
+        watchedSegment.tap()
+        XCTAssertTrue(watchedSegment.isSelected, "Should be selected now.")
+        
+        upNextSegment.tap()
+        XCTAssertTrue(upNextSegment.isSelected, "Should be selected now.")
+        
+        XCUIDevice.shared.orientation = .portrait
     }
 
     func test_homeVC_hasCollectionView() {
