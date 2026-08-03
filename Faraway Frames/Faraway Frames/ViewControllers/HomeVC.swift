@@ -99,7 +99,7 @@ final class HomeVC: UIViewController {
         NSLayoutConstraint.activate([
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            collectionView.topAnchor.constraint(equalTo: view.topAnchor),
+            collectionView.topAnchor.constraint(equalTo: segmentedControl.bottomAnchor, constant: 8),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
