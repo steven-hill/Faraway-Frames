@@ -50,7 +50,7 @@ final class HomeVCUITests: XCTestCase {
         XCTAssertTrue(watchedSegment.isSelected, "Should be selected now.")
     }
     
-    func test_homeVC_segmentedControl_whenSelectedSegmentChangedAndDeviceRotatesToLandscape_bothSegmentsAreHittable() {
+    func test_homeVC_segmentedControl_whenSelectedSegmentChangedAndDeviceRotatedToLandscape_bothSegmentsAreHittable() {
         let segmentedControl = app.segmentedControls["Header_Segmented_Control"]
         
         XCTAssertTrue(segmentedControl.isHittable, "Should be hittable.")
