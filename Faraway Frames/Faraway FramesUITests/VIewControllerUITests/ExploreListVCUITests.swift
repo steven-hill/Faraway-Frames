@@ -239,7 +239,7 @@ final class ExploreListVCUITests: XCTestCase {
         XCTAssertEqual(collectionView.cells.count, 1, "Should have one film in search results.")
     }
     
-    func test_exploreListVC_searchTextField_withInValidSearchQuery_showsNoSearchResults() {
+    func test_exploreListVC_searchTextField_withInvalidSearchQuery_showsNoSearchResults() {
         launchAppForNetworkSuccessCase()
         
         _ = setUpSearchTextFieldAndEnterText("Invalid query")
@@ -248,9 +248,8 @@ final class ExploreListVCUITests: XCTestCase {
 
         XCTAssertFalse(collectionView.exists, "Collection view should be hidden.")
         XCTAssertTrue(emptySearchResultsContainer.exists, "Should show container view.")
-        XCTAssertTrue(emptySearchResultsContainer.images["ExploreListVC_EmptySearchResultsView_Icon_Image"].isHittable, "Should show icon.")
         XCTAssertTrue(app.staticTexts["ExploreListVC_EmptySearchResultsView_Title_Label"].exists, "Should show primary text.")
-        XCTAssertTrue(app.staticTexts["ExploreListVC_EmptySearchResultsView_Secondary_Label"].exists, "Should show secondary text.")
+        XCTAssertFalse(app.staticTexts["ExploreListVC_EmptySearchResultsView_Secondary_Label"].exists, "Should not show secondary text.")
     }
     
     func test_exploreListVC_searchTextField_searchQueryisEmpty_isDisabled() {
@@ -282,7 +281,7 @@ final class ExploreListVCUITests: XCTestCase {
         }
     }
     
-    func test_exploreListVC_FFStateView_searchResults_adaptsLayoutToLandscapeOrientationAndLargeAccessibilityTextSizes() {
+    func test_exploreListVC_FFStateView_whenSearchResultsAreEmpty_adaptsLayoutToLandscapeOrientationAndLargeAccessibilityTextSizes() {
         XCUIDevice.shared.orientation = .landscapeLeft
         app = XCUIApplication()
         app.launchArguments = ["-UITesting",
@@ -300,9 +299,8 @@ final class ExploreListVCUITests: XCTestCase {
         
         XCTAssertFalse(collectionView.exists, "Collection view should be hidden.")
         XCTAssertTrue(emptySearchResultsContainer.exists, "Should show container view.")
-        XCTAssertTrue(emptySearchResultsContainer.images["ExploreListVC_EmptySearchResultsView_Icon_Image"].isHittable, "Should show icon.")
         XCTAssertTrue(app.staticTexts["ExploreListVC_EmptySearchResultsView_Title_Label"].isHittable, "Should show primary text.")
-        XCTAssertTrue(app.staticTexts["ExploreListVC_EmptySearchResultsView_Secondary_Label"].isHittable, "Should show secondary text.")
+        XCTAssertFalse(app.staticTexts["ExploreListVC_EmptySearchResultsView_Secondary_Label"].exists, "Should not show secondary text.")
         
         XCUIDevice.shared.orientation = .portrait
     }

@@ -12,16 +12,9 @@ final class FFStateView: UIView {
     // MARK: - Layout Constants
     private enum Layout {
         static let stackViewHorizontalSpacing: CGFloat = 32
-        static let iconImageViewSize: CGFloat = 50
     }
     
     // MARK: - UI Components
-    private let iconImageView: UIImageView = {
-        let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFit
-        return imageView
-    }()
-    
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.font = .preferredFont(forTextStyle: .headline)
@@ -67,8 +60,6 @@ final class FFStateView: UIView {
     
     // MARK: - Initialisation
     init(
-        image: UIImage?,
-        imageTintColor: UIColor,
         title: String,
         secondaryText: String?,
         buttonTitle: String? = nil,
@@ -77,8 +68,6 @@ final class FFStateView: UIView {
         super.init(frame: .zero)
         self.translatesAutoresizingMaskIntoConstraints = false
         
-        self.iconImageView.image = image
-        self.iconImageView.tintColor = imageTintColor
         self.titleLabel.text = title
         self.secondaryLabel.text = secondaryText
         
@@ -88,7 +77,6 @@ final class FFStateView: UIView {
         }
         
         self.accessibilityIdentifier = "\(accessibilityIdentifier)"
-        self.iconImageView.accessibilityIdentifier = "\(accessibilityIdentifier)_Icon_Image"
         self.titleLabel.accessibilityIdentifier = "\(accessibilityIdentifier)_Title_Label"
         self.secondaryLabel.accessibilityIdentifier = "\(accessibilityIdentifier)_Secondary_Label"
         self.retryButton.accessibilityIdentifier = "\(accessibilityIdentifier)_Retry_Button"
@@ -109,7 +97,6 @@ final class FFStateView: UIView {
         let contentView = UIView()
         contentView.translatesAutoresizingMaskIntoConstraints = false
         
-        stackView.addArrangedSubview(iconImageView)
         stackView.addArrangedSubview(titleLabel)
         stackView.addArrangedSubview(secondaryLabel)
         
@@ -138,10 +125,7 @@ final class FFStateView: UIView {
             stackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Layout.stackViewHorizontalSpacing),
             stackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 24),
             stackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -100),
-            
-            iconImageView.widthAnchor.constraint(equalToConstant: Layout.iconImageViewSize),
-            iconImageView.heightAnchor.constraint(equalToConstant: Layout.iconImageViewSize),
-            
+                        
             retryButton.topAnchor.constraint(equalTo: buttonContainer.topAnchor),
             retryButton.bottomAnchor.constraint(equalTo: buttonContainer.bottomAnchor),
             retryButton.centerXAnchor.constraint(equalTo: buttonContainer.centerXAnchor),
