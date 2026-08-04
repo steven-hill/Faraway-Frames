@@ -66,10 +66,12 @@ final class ExploreListVCUITests: XCTestCase {
         
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
         let alert = app.alerts.firstMatch
+        let button = alert.buttons.firstMatch
 
         XCTAssertFalse(header.exists, "Should not be visible.")
         XCTAssertTrue(alert.exists, "Should exist.")
-        XCTAssertTrue(alert.isHittable, "Should be able to be tapped.")
+        XCTAssertTrue(button.exists, "Should exist.")
+        XCTAssertTrue(button.isHittable, "Should be able to be tapped.")
     }
     
     func test_exploreListVC_whenNetworkConnectionIsLostAndNoArchivedDataIsAvailable_presentsAlert() {
@@ -77,10 +79,12 @@ final class ExploreListVCUITests: XCTestCase {
         
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
         let alert = app.alerts.firstMatch
-        
+        let button = alert.buttons.firstMatch
+
         XCTAssertFalse(header.exists, "Should not be visible.")
         XCTAssertTrue(alert.exists, "Should exist.")
-        XCTAssertTrue(alert.isHittable, "Should be able to be tapped.")
+        XCTAssertTrue(button.exists, "Should exist.")
+        XCTAssertTrue(button.isHittable, "Should be able to be tapped.")
     }
     
     func test_exploreListVC_whenNetworkRequestTimesOutAndNoArchivedDataIsAvailable_presentsAlert() {
@@ -88,10 +92,12 @@ final class ExploreListVCUITests: XCTestCase {
         
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
         let alert = app.alerts.firstMatch
-        
+        let button = alert.buttons.firstMatch
+
         XCTAssertFalse(header.exists, "Should not be visible.")
         XCTAssertTrue(alert.exists, "Should exist.")
-        XCTAssertTrue(alert.isHittable, "Should be able to be tapped.")
+        XCTAssertTrue(button.exists, "Should exist.")
+        XCTAssertTrue(button.isHittable, "Should be able to be tapped.")
     }
     
     func test_exploreListVC_whenURLIsInvalidAndNoArchivedDataIsAvailable_presentsAlert() {
@@ -99,10 +105,12 @@ final class ExploreListVCUITests: XCTestCase {
         
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
         let alert = app.alerts.firstMatch
-        
+        let button = alert.buttons.firstMatch
+
         XCTAssertFalse(header.exists, "Should not be visible.")
         XCTAssertTrue(alert.exists, "Should exist.")
-        XCTAssertTrue(alert.isHittable, "Should be able to be tapped.")
+        XCTAssertTrue(button.exists, "Should exist.")
+        XCTAssertTrue(button.isHittable, "Should be able to be tapped.")
     }
     
     func test_exploreListVC_whenResponseIsInvalidAndNoArchivedDataIsAvailable_presentsAlert() {
@@ -110,10 +118,12 @@ final class ExploreListVCUITests: XCTestCase {
         
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
         let alert = app.alerts.firstMatch
-        
+        let button = alert.buttons.firstMatch
+
         XCTAssertFalse(header.exists, "Should not be visible.")
         XCTAssertTrue(alert.exists, "Should exist.")
-        XCTAssertTrue(alert.isHittable, "Should be able to be tapped.")
+        XCTAssertTrue(button.exists, "Should exist.")
+        XCTAssertTrue(button.isHittable, "Should be able to be tapped.")
     }
     
     func test_exploreListVC_whenServerReturns500ErrorAndNoArchivedDataIsAvailable_presentsAlert() {
@@ -121,10 +131,12 @@ final class ExploreListVCUITests: XCTestCase {
         
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
         let alert = app.alerts.firstMatch
-        
+        let button = alert.buttons.firstMatch
+
         XCTAssertFalse(header.exists, "Should not be visible.")
         XCTAssertTrue(alert.exists, "Should exist.")
-        XCTAssertTrue(alert.isHittable, "Should be able to be tapped.")
+        XCTAssertTrue(button.exists, "Should exist.")
+        XCTAssertTrue(button.isHittable, "Should be able to be tapped.")
     }
     
     func test_exploreListVC_forDecodingErrorAndNoArchivedDataIsAvailable_presentsAlert() {
@@ -132,10 +144,12 @@ final class ExploreListVCUITests: XCTestCase {
         
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
         let alert = app.alerts.firstMatch
-        
+        let button = alert.buttons.firstMatch
+
         XCTAssertFalse(header.exists, "Should not be visible.")
         XCTAssertTrue(alert.exists, "Should exist.")
-        XCTAssertTrue(alert.isHittable, "Should be able to be tapped.")
+        XCTAssertTrue(button.exists, "Should exist.")
+        XCTAssertTrue(button.isHittable, "Should be able to be tapped.")
     }
     
     func test_exploreListVC_forUnknownErrorAndNoArchivedDataIsAvailable_presentsAlert() {
@@ -143,10 +157,12 @@ final class ExploreListVCUITests: XCTestCase {
         
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
         let alert = app.alerts.firstMatch
-        
+        let button = alert.buttons.firstMatch
+
         XCTAssertFalse(header.exists, "Should not be visible.")
         XCTAssertTrue(alert.exists, "Should exist.")
-        XCTAssertTrue(alert.isHittable, "Should be able to be tapped.")
+        XCTAssertTrue(button.exists, "Should exist.")
+        XCTAssertTrue(button.isHittable, "Should be able to be tapped.")
     }
     
     func test_exploreListVC_whenNetworkCallFails_butFileManagerDataExists_collectionViewHeaderAppears() {
