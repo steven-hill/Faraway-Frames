@@ -114,17 +114,18 @@ struct ExploreListVCTests {
     ])
     func exploreListVC_showsAlertForAllErrors(expectedError: APIError) async throws {
         let sut = makeSUTForNetworkFailure(error: expectedError)
+        let mockPresenter = MockAlertPresenter()
+        sut.alertPresenter = mockPresenter
         sut.loadViewIfNeeded()
 
         await sut.viewModel.getAllFilms()
         
-        let alert = try #require(sut.presentedViewController as? UIAlertController)
-        #expect(alert.title != nil, "Should not be nil.")
-        #expect(alert.message == expectedError.localizedDescription, "Should match expected error.")
-        #expect(alert.preferredStyle == .alert, "Should be alert.")
-        #expect(alert.actions.count == 1, "Should have one.")
+        #expect(mockPresenter.alert.title != nil, "Should not be nil.")
+        #expect(mockPresenter.alert.message == expectedError.localizedDescription, "Should match expected error.")
+        #expect(mockPresenter.alert.preferredStyle == .alert, "Should be alert.")
+        #expect(mockPresenter.alert.actions.count == 1, "Should have one.")
         
-        let retryAction = alert.actions.first
+        let retryAction = mockPresenter.alert.actions.first
         #expect(retryAction?.title != nil, "Should not be nil.")
         #expect(retryAction?.style == .default, "Should be default.")
         #expect(sut.currentStateView != nil, "Should be nil.")
