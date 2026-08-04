@@ -100,7 +100,9 @@ struct ExploreListVCTests {
         #expect(sut.searchController.searchBar.isEnabled == true)
     }
     
-    @Test("ExploreListVC shows error view for all API errors", .tags(.networkRequest), arguments: [
+    @Test("ExploreListVC shows alert for all API errors when no archived data exists",
+        .tags(.networkRequest),
+          arguments: [
         APIError.noInternetConnection,
         APIError.networkConnectionLost,
         APIError.networkTimeout,
@@ -110,14 +112,22 @@ struct ExploreListVCTests {
         APIError.decodingError(""),
         APIError.unknown
     ])
-    func exploreListVC_showsErrorViewForAllErrors(expectedError: APIError) async {
+    func exploreListVC_showsAlertForAllErrors(expectedError: APIError) async throws {
         let sut = makeSUTForNetworkFailure(error: expectedError)
-        
         sut.loadViewIfNeeded()
+
         await sut.viewModel.getAllFilms()
-            
-        let errorView = sut.currentStateView as? FFStateView
-        #expect(errorView != nil, "A `FFStateView` should have been added to the view hierarchy.")
+        
+        let alert = try #require(sut.presentedViewController as? UIAlertController)
+        #expect(alert.title != nil, "Should not be nil.")
+        #expect(alert.message == expectedError.localizedDescription, "Should match expected error.")
+        #expect(alert.preferredStyle == .alert, "Should be alert.")
+        #expect(alert.actions.count == 1, "Should have one.")
+        
+        let retryAction = alert.actions.first
+        #expect(retryAction?.title != nil, "Should not be nil.")
+        #expect(retryAction?.style == .default, "Should be default.")
+        #expect(sut.currentStateView != nil, "Should be nil.")
         #expect(sut.viewModel.currentState == .error(expectedError), "Should set the state to .error.")
     }
     
