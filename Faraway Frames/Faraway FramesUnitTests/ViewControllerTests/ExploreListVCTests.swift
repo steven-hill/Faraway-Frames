@@ -100,7 +100,9 @@ struct ExploreListVCTests {
         #expect(sut.searchController.searchBar.isEnabled == true)
     }
     
-    @Test("ExploreListVC shows error view for all API errors", .tags(.networkRequest), arguments: [
+    @Test("ExploreListVC shows alert for all API errors when no archived data exists",
+        .tags(.networkRequest),
+          arguments: [
         APIError.noInternetConnection,
         APIError.networkConnectionLost,
         APIError.networkTimeout,
@@ -110,18 +112,28 @@ struct ExploreListVCTests {
         APIError.decodingError(""),
         APIError.unknown
     ])
-    func exploreListVC_showsErrorViewForAllErrors(expectedError: APIError) async {
+    func exploreListVC_showsAlertForAllErrors(expectedError: APIError) async throws {
         let sut = makeSUTForNetworkFailure(error: expectedError)
-        
+        let mockPresenter = MockAlertPresenter()
+        sut.alertPresenter = mockPresenter
         sut.loadViewIfNeeded()
+
         await sut.viewModel.getAllFilms()
-            
-        let errorView = sut.currentStateView as? FFStateView
-        #expect(errorView != nil, "A `FFStateView` should have been added to the view hierarchy.")
-        #expect(sut.viewModel.currentState == .error(expectedError), "Should set the state to .error.")
+        
+        #expect(mockPresenter.presentedAlert?.title != nil, "Should not be nil.")
+        #expect(mockPresenter.presentedAlert?.message == expectedError.localizedDescription, "Should match `expectedError`.")
+        #expect(mockPresenter.presentedAlert?.preferredStyle == .alert, "Should be alert.")
+        #expect(mockPresenter.presentedAlert?.actions.count == 1, "Should have one.")
+        
+        let retryAction = mockPresenter.presentedAlert?.actions.first
+        #expect(retryAction?.title != nil, "Should not be nil.")
+        #expect(retryAction?.style == .default, "Should be `.default`.")
+        #expect(sut.currentStateView == nil, "Should be nil.")
+        #expect(sut.viewModel.currentState == .error(expectedError), "Should be set to .`error`.")
     }
     
-    @Test(.tags(.networkRequest))
+    @Test("ExploreListVC can retry network call from alert",
+          .tags(.networkRequest))
     func exploreListVC_retry_callsFetchAllFilms() async {
         let mockService = MockFilmsListService()
         let imageLoader = MockImageLoader()
@@ -135,43 +147,17 @@ struct ExploreListVCTests {
         let sut = ExploreListVC(viewModel: filmsListViewModel,
                                 cellConfigurator: mockCellConfigurator,
                                 accessibilityService: mockAccessibilityService)
-        
         sut.loadViewIfNeeded()
-        sut.viewModel.retryLoadingAllFilms()
-        await sut.viewModel.refreshTask?.value
         
-        #expect(mockService.fetchWasCalled == true, "Should call fetchAllFilms once.")
-    }
-
-    @Test("ExploreListVC shows retry button title for all API errors, and when tapped, starts retrying network request",
-          .tags(.networkRequest),
-          arguments: [
-              APIError.noInternetConnection,
-              APIError.networkConnectionLost,
-              APIError.networkTimeout,
-              APIError.invalidURL,
-              APIError.invalidResponse,
-              APIError.serverError(statusCode: 500),
-              APIError.decodingError(""),
-              APIError.unknown
-          ])
-    func exploreListVC_forAllErrors_showsRetryButtonTitle_andWhenTappedStartsRetrying(expectedError: APIError) async {
-        let sut = makeSUTForNetworkFailure(error: expectedError)
-        sut.loadViewIfNeeded()
-        await sut.viewModel.getAllFilms()
-
-        let errorView = sut.currentStateView as? FFStateView
-        #expect(errorView != nil, "A `FFStateView` should have been added to the view hierarchy.")
-        
-        let retryButton = errorView?.retryButton
-        #expect(retryButton?.configuration?.title != nil, "The retry button title should be set.")
-        
-        retryButton?.sendActions(for: .touchUpInside)
+        sut.retryButtonTapped()
         
         let loadingView = sut.currentStateView as? LoadingView
         #expect(loadingView != nil, "Should be showing loading view.")
         #expect(sut.viewModel.currentState == .retrying, "Should be set to `.retrying`.")
         #expect(sut.viewModel.refreshTask != nil, "Should start a new `refreshTask`.")
+        
+        await sut.viewModel.refreshTask?.value
+        #expect(mockService.fetchWasCalled == true, "Should call fetchAllFilms once.")
     }
     
     @Test(.tags(.networkRequest))
