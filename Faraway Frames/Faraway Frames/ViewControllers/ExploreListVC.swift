@@ -168,17 +168,13 @@ final class ExploreListVC: UIViewController {
             searchBarIsEnabled = true
             newStateView = nil
         case .emptySearchResults:
-            let emptySearchResultsView = FFStateView(image: UIImage(systemName: "magnifyingglass"),
-                                                     imageTintColor: .systemGray,
-                                                     title: "No Results",
-                                                     secondaryText: "Try a different search term.",
+            let emptySearchResultsView = FFStateView(title: "No Results Found",
+                                                     secondaryText: nil,
                                                      accessibilityIdentifier: "ExploreListVC_EmptySearchResultsView")
             newStateView = emptySearchResultsView
             searchBarIsEnabled = true
         case .error(let error):
-            let errorView = FFStateView(image: SFSymbols.exclamationMarkTriangle,
-                                        imageTintColor: .systemRed,
-                                        title: "Error loading films",
+            let errorView = FFStateView(title: "Error loading films",
                                         secondaryText: error.localizedDescription,
                                         buttonTitle: "Retry",
                                         accessibilityIdentifier: "ExploreListVC_ErrorView")
