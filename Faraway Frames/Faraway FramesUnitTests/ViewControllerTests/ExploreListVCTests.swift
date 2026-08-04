@@ -132,15 +132,6 @@ struct ExploreListVCTests {
         #expect(sut.viewModel.currentState == .error(expectedError), "Should be set to .`error`.")
     }
     
-    final class MockAlertPresenter: AlertPresenting {
-        private(set) var presentedAlert: UIAlertController?
-        
-        func present(_ alert: UIAlertController,
-                     from viewController: UIViewController) {
-            presentedAlert = alert
-        }
-    }
-    
     @Test("ExploreListVC can retry network call from alert",
           .tags(.networkRequest))
     func exploreListVC_retry_callsFetchAllFilms() async {
