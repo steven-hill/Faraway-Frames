@@ -28,6 +28,7 @@ final class ExploreListVC: UIViewController {
     private(set) var loadTask: Task<Void, Never>?
     private let accessibilityService: AccessibilityService
     private(set) var voiceOverAnnouncementTask: Task<Void, Never>?
+    private(set) var alertPresenter: AlertPresenting = AlertPresenter()
     
     // MARK: - Initialisation
     init(viewModel: FilmsListViewModel,
