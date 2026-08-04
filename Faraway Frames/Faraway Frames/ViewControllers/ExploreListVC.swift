@@ -219,7 +219,7 @@ final class ExploreListVC: UIViewController {
         searchController.searchBar.searchTextField.font = .preferredFont(forTextStyle: .title3)
         searchController.searchBar.searchTextField.accessibilityIdentifier = "ExploreListVC_SearchBar_SearchField"
         navigationItem.searchController = searchController
-        navigationItem.hidesSearchBarWhenScrolling = false
+        navigationItem.hidesSearchBarWhenScrolling = true
     }
     
     func resetFilmsToAllFilms() {
