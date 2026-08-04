@@ -61,100 +61,92 @@ final class ExploreListVCUITests: XCTestCase {
         XCTAssertFalse(collectionView.isHittable, "Should be off screen.")
     }
     
-    func test_exploreListVC_whenNotConnectedToInternetAndNoArchivedDataIsAvailable_showsErrorMessageAndRetryButton() {
+    func test_exploreListVC_whenNotConnectedToInternetAndNoArchivedDataIsAvailable_presentsAlert() {
         launchAppForNetworkFailureCase(with: .noInternetConnection)
         
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
-        
-        XCTAssertFalse(header.exists)
-        XCTAssertTrue(app.otherElements["ExploreListVC_ErrorView"].exists, "Should show container view.")
-        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Title_Label"].exists, "Should show primary error text.")
-        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Secondary_Label"].exists, "Should show error secondary text.")
-        XCTAssertTrue(app.buttons["ExploreListVC_ErrorView_Retry_Button"].isHittable, "Retry button should be tappable.")
+        let alert = app.alerts.firstMatch
+
+        XCTAssertFalse(header.exists, "Should not be visible.")
+        XCTAssertTrue(alert.exists, "Should exist.")
+        XCTAssertTrue(alert.isHittable, "Should be able to be tapped.")
     }
     
-    func test_exploreListVC_whenNetworkConnectionIsLostAndNoArchivedDataIsAvailable_showsErrorMessageAndRetryButton() {
+    func test_exploreListVC_whenNetworkConnectionIsLostAndNoArchivedDataIsAvailable_presentsAlert() {
         launchAppForNetworkFailureCase(with: .networkConnectionLost)
         
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
+        let alert = app.alerts.firstMatch
         
-        XCTAssertFalse(header.exists)
-        XCTAssertTrue(app.otherElements["ExploreListVC_ErrorView"].exists, "Should show container view.")
-        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Title_Label"].exists, "Should show primary error text.")
-        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Secondary_Label"].exists, "Should show error secondary text.")
-        XCTAssertTrue(app.buttons["ExploreListVC_ErrorView_Retry_Button"].isHittable, "Retry button should be tappable.")
+        XCTAssertFalse(header.exists, "Should not be visible.")
+        XCTAssertTrue(alert.exists, "Should exist.")
+        XCTAssertTrue(alert.isHittable, "Should be able to be tapped.")
     }
     
-    func test_exploreListVC_whenNetworkRequestTimesOutAndNoArchivedDataIsAvailable_showsErrorMessageAndRetryButton() {
+    func test_exploreListVC_whenNetworkRequestTimesOutAndNoArchivedDataIsAvailable_presentsAlert() {
         launchAppForNetworkFailureCase(with: .networkTimeout)
         
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
+        let alert = app.alerts.firstMatch
         
-        XCTAssertTrue(app.otherElements["ExploreListVC_ErrorView"].exists, "Should show container view.")
-        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Title_Label"].exists, "Should show primary error text.")
-        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Secondary_Label"].exists, "Should show error secondary text.")
-        XCTAssertTrue(app.buttons["ExploreListVC_ErrorView_Retry_Button"].isHittable, "Retry button should be tappable.")
-        XCTAssertFalse(header.exists)
+        XCTAssertFalse(header.exists, "Should not be visible.")
+        XCTAssertTrue(alert.exists, "Should exist.")
+        XCTAssertTrue(alert.isHittable, "Should be able to be tapped.")
     }
     
-    func test_exploreListVC_whenURLIsInvalidAndNoArchivedDataIsAvailable_showsErrorMessageAndRetryButton() {
+    func test_exploreListVC_whenURLIsInvalidAndNoArchivedDataIsAvailable_presentsAlert() {
         launchAppForNetworkFailureCase(with: .invalidURL)
         
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
+        let alert = app.alerts.firstMatch
         
-        XCTAssertTrue(app.otherElements["ExploreListVC_ErrorView"].exists, "Should show container view.")
-        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Title_Label"].exists, "Should show primary error text.")
-        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Secondary_Label"].exists, "Should show error secondary text.")
-        XCTAssertTrue(app.buttons["ExploreListVC_ErrorView_Retry_Button"].isHittable, "Retry button should be tappable.")
-        XCTAssertFalse(header.exists)
+        XCTAssertFalse(header.exists, "Should not be visible.")
+        XCTAssertTrue(alert.exists, "Should exist.")
+        XCTAssertTrue(alert.isHittable, "Should be able to be tapped.")
     }
     
-    func test_exploreListVC_whenResponseIsInvalidAndNoArchivedDataIsAvailable_showsErrorMessageAndRetryButton() {
+    func test_exploreListVC_whenResponseIsInvalidAndNoArchivedDataIsAvailable_presentsAlert() {
         launchAppForNetworkFailureCase(with: .invalidResponse)
         
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
+        let alert = app.alerts.firstMatch
         
-        XCTAssertTrue(app.otherElements["ExploreListVC_ErrorView"].exists, "Should show container view.")
-        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Title_Label"].exists, "Should show primary error text.")
-        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Secondary_Label"].exists, "Should show error secondary text.")
-        XCTAssertTrue(app.buttons["ExploreListVC_ErrorView_Retry_Button"].isHittable, "Retry button should be tappable.")
-        XCTAssertFalse(header.exists)
+        XCTAssertFalse(header.exists, "Should not be visible.")
+        XCTAssertTrue(alert.exists, "Should exist.")
+        XCTAssertTrue(alert.isHittable, "Should be able to be tapped.")
     }
     
-    func test_exploreListVC_whenServerReturns500ErrorAndNoArchivedDataIsAvailable_showsErrorMessageAndRetryButton() {
+    func test_exploreListVC_whenServerReturns500ErrorAndNoArchivedDataIsAvailable_presentsAlert() {
         launchAppForNetworkFailureCase(with: .serverError(statusCode: 500))
         
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
+        let alert = app.alerts.firstMatch
         
-        XCTAssertTrue(app.otherElements["ExploreListVC_ErrorView"].exists, "Should show container view.")
-        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Title_Label"].exists, "Should show primary error text.")
-        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Secondary_Label"].exists, "Should show error secondary text.")
-        XCTAssertTrue(app.buttons["ExploreListVC_ErrorView_Retry_Button"].isHittable, "Retry button should be tappable.")
-        XCTAssertFalse(header.exists)
+        XCTAssertFalse(header.exists, "Should not be visible.")
+        XCTAssertTrue(alert.exists, "Should exist.")
+        XCTAssertTrue(alert.isHittable, "Should be able to be tapped.")
     }
     
-    func test_exploreListVC_forDecodingErrorAndNoArchivedDataIsAvailable_showsErrorMessageAndRetryButton() {
+    func test_exploreListVC_forDecodingErrorAndNoArchivedDataIsAvailable_presentsAlert() {
         launchAppForNetworkFailureCase(with: .decodingError)
         
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
+        let alert = app.alerts.firstMatch
         
-        XCTAssertTrue(app.otherElements["ExploreListVC_ErrorView"].exists, "Should show container view.")
-        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Title_Label"].exists, "Should show primary error text.")
-        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Secondary_Label"].exists, "Should show error secondary text.")
-        XCTAssertTrue(app.buttons["ExploreListVC_ErrorView_Retry_Button"].isHittable, "Retry button should be tappable.")
-        XCTAssertFalse(header.exists)
+        XCTAssertFalse(header.exists, "Should not be visible.")
+        XCTAssertTrue(alert.exists, "Should exist.")
+        XCTAssertTrue(alert.isHittable, "Should be able to be tapped.")
     }
     
-    func test_exploreListVC_forUnknownErrorAndNoArchivedDataIsAvailable_showsErrorMessageAndRetryButton() {
+    func test_exploreListVC_forUnknownErrorAndNoArchivedDataIsAvailable_presentsAlert() {
         launchAppForNetworkFailureCase(with: .unknown)
         
         let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
+        let alert = app.alerts.firstMatch
         
-        XCTAssertTrue(app.otherElements["ExploreListVC_ErrorView"].exists, "Should show container view.")
-        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Title_Label"].exists, "Should show primary error text.")
-        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Secondary_Label"].exists, "Should show error secondary text.")
-        XCTAssertTrue(app.buttons["ExploreListVC_ErrorView_Retry_Button"].isHittable, "Retry button should be tappable.")
-        XCTAssertFalse(header.exists)
+        XCTAssertFalse(header.exists, "Should not be visible.")
+        XCTAssertTrue(alert.exists, "Should exist.")
+        XCTAssertTrue(alert.isHittable, "Should be able to be tapped.")
     }
     
     func test_exploreListVC_whenNetworkCallFails_butFileManagerDataExists_collectionViewHeaderAppears() {
@@ -166,30 +158,6 @@ final class ExploreListVCUITests: XCTestCase {
         let header = app.otherElements["Network_Error_Header_View"]
         
         XCTAssertTrue(header.waitForExistence(timeout: 1))
-    }
-    
-    func test_exploreListVC_whenNetworkRequestFails_andNoArchivedDataIsAvailable_FFStateView_adaptsLayoutForCompactVerticalSizeClassAndLargestAccessibilityTextSize() {
-        XCUIDevice.shared.orientation = .landscapeLeft
-        app = XCUIApplication()
-        app.launchArguments += [
-            "-UIPreferredContentSizeCategoryName",
-            UIContentSizeCategory.accessibilityExtraExtraExtraLarge.rawValue
-        ]
-        app.launch(with: .noInternetConnection)
-        NavigationHelper.navigateToExploreTab(app: app)
-        
-        let header = app.collectionViews.staticTexts["Network_Error_Reusable_View"]
-        let errorViewContainer = app.otherElements["ExploreListVC_ErrorView"]
-        
-        XCTAssertFalse(header.exists)
-        XCTAssertTrue(errorViewContainer.exists, "Should show container view.")
-        XCTAssertTrue(errorViewContainer.images["ExploreListVC_ErrorView_Icon_Image"].isHittable, "Should show SF Symbol.")
-        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Title_Label"].isHittable, "Should show primary error text.")
-        errorViewContainer.swipeUp()
-        XCTAssertTrue(app.staticTexts["ExploreListVC_ErrorView_Secondary_Label"].exists, "Should show error secondary text.")
-        XCTAssertTrue(app.buttons["ExploreListVC_ErrorView_Retry_Button"].isHittable, "Retry button should be tappable.")
-        
-        XCUIDevice.shared.orientation = .portrait
     }
     
     func test_exploreListVC_searchTextField_initialState() {
@@ -260,12 +228,12 @@ final class ExploreListVCUITests: XCTestCase {
         XCTAssertFalse(app.buttons["Search"].firstMatch.isEnabled, "Should be disabled.")
     }
     
-    func test_exploreListVC_searchTextField_whenNetworkCallFails_isDisabled() {
+    func test_exploreListVC_whenNetworkFailureAlertIsPresented_searchTextField_isDisabled() {
         launchAppForNetworkFailureCase(with: .unknown)
         let searchTextField = app.searchFields["ExploreListVC_SearchBar_SearchField"]
         
         XCTAssertTrue(searchTextField.exists, "Should exist.")
-        XCTAssertTrue(searchTextField.isHittable, "Should be able to be tapped.")
+        XCTAssertFalse(searchTextField.isHittable, "Should be able to be tapped.")
         XCTAssertFalse(searchTextField.isEnabled, "Should be disabled.")
         XCTAssertNotNil(searchTextField.placeholderValue, "Should have a placeholder.")
     }
