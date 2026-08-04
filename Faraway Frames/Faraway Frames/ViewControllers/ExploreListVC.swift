@@ -28,7 +28,7 @@ final class ExploreListVC: UIViewController {
     private(set) var loadTask: Task<Void, Never>?
     private let accessibilityService: AccessibilityService
     private(set) var voiceOverAnnouncementTask: Task<Void, Never>?
-    private(set) var alertPresenter: AlertPresenting = AlertPresenter()
+    var alertPresenter: AlertPresenting = AlertPresenter()
     
     // MARK: - Initialisation
     init(viewModel: FilmsListViewModel,
@@ -175,12 +175,17 @@ final class ExploreListVC: UIViewController {
             newStateView = emptySearchResultsView
             searchBarIsEnabled = true
         case .error(let error):
-            let errorView = FFStateView(title: "Error loading films",
-                                        secondaryText: error.localizedDescription,
-                                        buttonTitle: "Retry",
-                                        accessibilityIdentifier: "ExploreListVC_ErrorView")
-            errorView.retryButton.addTarget(self, action: #selector(retryButtonTapped), for: .touchUpInside)
-            newStateView = errorView
+            let alert = UIAlertController(
+                title: "Error loading films",
+                message: error.localizedDescription,
+                preferredStyle: .alert
+            )
+            let retryAction = UIAlertAction(title: "Retry", style: .default) { [weak self] _ in
+                self?.retryButtonTapped()
+            }
+            alert.addAction(retryAction)
+            alertPresenter.present(alert, from: self)
+            newStateView = nil
         case .retrying:
             let loadingView = LoadingView(message: "Retrying...")
             loadingView.accessibilityIdentifier = "ExploreListVC_LoadingView"
@@ -203,9 +208,9 @@ final class ExploreListVC: UIViewController {
         self.searchController.searchBar.isEnabled = searchBarIsEnabled
     }
     
-    @objc private func retryButtonTapped() {
-        self.viewModel.retryLoadingAllFilms()
-        self.updateViewHierarchyForCurrentState()
+    func retryButtonTapped() {
+        viewModel.retryLoadingAllFilms()
+        updateViewHierarchyForCurrentState()
     }
     
     //MARK: - Search Controller
