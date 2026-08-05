@@ -92,6 +92,21 @@ final class HomeVCUITests: XCTestCase {
         XCTAssertTrue(emptyStateView.exists, "Should exist.")
     }
     
+    func test_homeVC_whenFetchingFilmFromDatabaseIsSuccessful_showsCellInCollectionView() {
+        app = XCUIApplication()
+        app.launchArguments = ["-UITesting",
+                               "-UITestingMockPersistenceData"]
+        app.launch()
+
+        let collectionView = app.collectionViews.element
+        
+        XCTAssertTrue(collectionView.exists, "Should exist.")
+        XCTAssertEqual(collectionView.cells.count, 1, "Should have one cell (one film in database).")
+        XCTAssertTrue(collectionView.cells.firstMatch.isHittable, "Should be able to be tapped.")
+        XCTAssertTrue(collectionView.cells.images["Film_Grid_Cell_Poster"].exists, "Cells should have an image.")
+        XCTAssertTrue(collectionView.cells.buttons["Film_Grid_Cell_Title"].exists, "Cells should have a text label.")
+    }
+    
     func test_homeVC_whenFetchingFilmsFromDatabaseResultsInError_showsAlert() {
         app = XCUIApplication()
         app.launch(with: .fetchFromDatabaseError)
