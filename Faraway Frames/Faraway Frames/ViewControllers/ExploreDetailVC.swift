@@ -19,6 +19,7 @@ final class ExploreDetailVC: UIViewController {
     weak var delegate: FilmDetailViewControllerDelegate?
     let filmDetailViewModel: FilmDetailViewModel
     private(set) var updatedFilm: Film? = nil
+    var alertPresenter: AlertPresenting = AlertPresenter()
     private var movieBannerHeightConstraint: NSLayoutConstraint?
     private var contentViewLeadingConstraint: NSLayoutConstraint?
     private var contentViewTrailingConstraint: NSLayoutConstraint?
@@ -135,7 +136,18 @@ final class ExploreDetailVC: UIViewController {
             self.isWatched = displayModel.isWatched
             updatedFilm = displayModel.film
         case .fetchFailure(let error, let film):
-            config = createFetchFailureConfig(error: error, film: film)
+            let alert = UIAlertController(
+                title: error.localizedDescription,
+                message: error.secondaryText,
+                preferredStyle: .alert
+            )
+            let retryAction = UIAlertAction(title: "Ok", style: .default) { [weak self] _ in
+                guard let self else { return }
+                filmDetailViewModel.returnToFilmContent(film: film)
+                self.setNeedsUpdateContentUnavailableConfiguration()
+            }
+            alert.addAction(retryAction)
+            alertPresenter.present(alert, from: self)
             navigationItem.hidesBackButton = true
             contentView.isHidden = true
             buttonsContainer.isHidden = true
@@ -172,22 +184,6 @@ final class ExploreDetailVC: UIViewController {
             producer: displayModel.producer,
             accessibilityLabelText: displayModel.creditsAccessibilityLabel
         )
-    }
-    
-    private func createFetchFailureConfig(error: FilmDetailError, film: Film) -> UIContentUnavailableConfiguration {
-        var config = UIContentUnavailableConfiguration.empty()
-        config.text = "\(error.localizedDescription)"
-        config.secondaryText = "\(error.secondaryText)"
-        config.image = SFSymbols.exclamationMarkTriangle
-        config.imageProperties.tintColor = .systemRed
-        config.button = .prominentGlass()
-        config.button.title = "Ok"
-        config.buttonProperties.primaryAction = UIAction { [weak self] _ in
-            guard let self else { return }
-            filmDetailViewModel.returnToFilmContent(film: film)
-            self.setNeedsUpdateContentUnavailableConfiguration()
-        }
-        return config
     }
     
     private func createErrorConfig(error: FilmDetailError, film: Film, queue: FilmQueue) -> UIContentUnavailableConfiguration {

@@ -185,7 +185,7 @@ struct HomeVCTests {
           (.tags(.persistence)),
           arguments: PersistenceHelper.errorScenarios
     )
-    func homeVC_whenfetchRequestFails_showsAlert(for scenario: (systemError: Error,
+    func homeVC_whenfetchRequestFails_showsAlert(for scenario: (systemError: CocoaError,
                                                                              expectedReason: PersistenceFailureReason)
     ) throws {
         let testPersistenceController = try PersistenceController(inMemory: true)

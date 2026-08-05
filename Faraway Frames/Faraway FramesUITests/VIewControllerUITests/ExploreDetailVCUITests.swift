@@ -92,11 +92,21 @@ final class ExploreDetailVCUITests: XCTestCase {
         XCTAssertEqual(changedResult, .completed, "The button label did not change to 'Remove from Watched' after tap.")
     }
     
+    func test_exploreDetailVC_whenFetchFails_showsAlert() {
+        launchAppForFetchError(with: .fetchFromDatabaseError)
+        tapFirstCollectionViewCell()
+        
+        let alert = app.alerts.firstMatch
+        let button = alert.buttons.firstMatch
+
+        XCTAssertTrue(alert.exists, "Should exist.")
+        XCTAssertTrue(alert.staticTexts.count == 2, "Should have 2 static texts.")
+        XCTAssertTrue(button.exists, "Should exist.")
+        XCTAssertTrue(button.isHittable, "Should be able to be tapped.")
+    }
+    
     func test_exploreDetailVC_whenAddingFilmButDiskIsFull_showsCorrectErrorMessage() {
-        app = XCUIApplication()
-        XCUIDevice.shared.orientation = .portrait
-        app.launch(with: .addToQueueDiskFull)
-        NavigationHelper.navigateToExploreTab(app: app)
+        launchAppForSaveError(with: .addToQueueDiskFull)
         revealButtons()
         
         let watchedButton = app.buttons["ExploreDetailVC_WatchedButton"]
@@ -112,10 +122,7 @@ final class ExploreDetailVCUITests: XCTestCase {
     }
     
     func test_exploreDetailVC_whenAddingFilmResultsInDatabaseError_showsCorrectErrorMessage() {
-        app = XCUIApplication()
-        XCUIDevice.shared.orientation = .portrait
-        app.launch(with: .addToQueueDatabaseError)
-        NavigationHelper.navigateToExploreTab(app: app)
+        launchAppForSaveError(with: .addToQueueDatabaseError)
         revealButtons()
         
         let watchedButton = app.buttons["ExploreDetailVC_WatchedButton"]
@@ -131,10 +138,7 @@ final class ExploreDetailVCUITests: XCTestCase {
     }
     
     func test_exploreDetailVC_whenRemovingFilmResultsInDatabaseError_showsCorrectErrorMessage() {
-        app = XCUIApplication()
-        XCUIDevice.shared.orientation = .portrait
-        app.launch(with: .deleteFromQueueDatabaseError)
-        NavigationHelper.navigateToExploreTab(app: app)
+        launchAppForSaveError(with: .deleteFromQueueDatabaseError)
         revealButtons()
         
         let upNextButton = app.buttons["ExploreDetailVC_UpNextButton"]
@@ -159,12 +163,45 @@ final class ExploreDetailVCUITests: XCTestCase {
         NavigationHelper.navigateToExploreTab(app: app)
     }
     
+    private func launchAppForFetchError(with persistenceError: UITestPersistenceError) {
+        app = XCUIApplication()
+        app.launchArguments = ["-UITesting",
+                                "-UITestingMockNetworkSuccess",
+                                "-UITestingExploreDetailVCPersistenceLoadError"
+                                ]
+        guard persistenceError == .fetchFromDatabaseError else { return }
+        app.launchEnvironment["MOCK_CD_FAILURE_REASON"] = "databaseError"
+        app.launch()
+        NavigationHelper.navigateToExploreTab(app: app)
+    }
+    
     private func launchAppWithPersistenceData() {
         app = XCUIApplication()
         app.launchArguments = ["-UITesting",
                                "-UITestingMockNetworkSuccess",
                                "-UITestingMockPersistenceData"]
         XCUIDevice.shared.orientation = .portrait
+        app.launch()
+        NavigationHelper.navigateToExploreTab(app: app)
+    }
+    
+    private func launchAppForSaveError(with persistenceError: UITestPersistenceError) {
+        app = XCUIApplication()
+        app.launchArguments = ["-UITesting",
+                                "-UITestingMockNetworkSuccess",
+                                "-UITestingMockPersistenceData",
+                                "-UITestingPersistenceSaveError"]
+        
+        switch persistenceError {
+        case .addToQueueDiskFull:
+            app.launchEnvironment["MOCK_CD_FAILURE_REASON"] = "diskFull"
+        case .addToQueueDatabaseError:
+            app.launchEnvironment["MOCK_CD_FAILURE_REASON"] = "databaseError"
+        case .deleteFromQueueDatabaseError:
+            app.launchEnvironment["MOCK_CD_FAILURE_REASON"] = "databaseError"
+        case .fetchFromDatabaseError:
+            app.launchEnvironment["MOCK_CD_FAILURE_REASON"] = "databaseError"
+        }
         app.launch()
         NavigationHelper.navigateToExploreTab(app: app)
     }

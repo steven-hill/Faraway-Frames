@@ -103,9 +103,7 @@ final class HomeVCUITests: XCTestCase {
     }
     
     func test_homeVC_whenFetchingFilmsFromDatabaseResultsInError_showsAlert() {
-        app = XCUIApplication()
-        app.launch(with: .fetchFromDatabaseError)
-        
+        launchAppForFetchFailure(with: .fetchFromDatabaseError)
         let alert = app.alerts.firstMatch
         let button = alert.buttons.firstMatch
 
@@ -115,11 +113,20 @@ final class HomeVCUITests: XCTestCase {
         XCTAssertTrue(button.isHittable, "Should be able to be tapped.")
     }
     
-    // MARK: - Helper method
+    // MARK: - Helper methods
     private func launchApp() {
         app = XCUIApplication()
         XCUIDevice.shared.orientation = .portrait
         app.launchArguments.append("-UITesting")
+        app.launch()
+    }
+    
+    private func launchAppForFetchFailure(with persistenceError: UITestPersistenceError) {
+        app = XCUIApplication()
+        app.launchArguments = ["-UITesting",
+                                "-UITestingHomeVCPersistenceLoadError"]
+        guard persistenceError == .fetchFromDatabaseError else { return }
+        app.launchEnvironment["MOCK_CD_FAILURE_REASON"] = "databaseError"
         app.launch()
     }
 }

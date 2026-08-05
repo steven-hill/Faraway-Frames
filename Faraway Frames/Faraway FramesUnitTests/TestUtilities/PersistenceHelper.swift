@@ -30,14 +30,14 @@ struct PersistenceHelper {
     }
     
     /// Used in tests involving Core Data operations error handling.
-    nonisolated static var errorScenarios: [(systemError: Error, expectedReason: PersistenceFailureReason)] {
+    nonisolated static var errorScenarios: [(systemError: CocoaError,
+                                             expectedReason: PersistenceFailureReason)] {
         [
             (CocoaError(.fileWriteOutOfSpace), .diskFull),
             (CocoaError(.persistentStoreOpen), .databaseError),
             (CocoaError(.managedObjectReferentialIntegrity), .databaseError),
             (CocoaError(.persistentStoreTypeMismatch), .databaseError),
-            (CocoaError(.fileNoSuchFile), .databaseError),
-            (UnknownError(), .unknown("Unknown error."))
+            (CocoaError(.fileNoSuchFile), .databaseError)
         ]
     }
 }

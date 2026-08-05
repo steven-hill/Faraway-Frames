@@ -7,7 +7,7 @@
 
 import Foundation
 
-/// Used in error scenarios for Core Data save failures.
-struct UnknownError: Error, LocalizedError {
+/// Used in error scenarios for Core Data operations failure.
+struct UnknownError: Error, LocalizedError, Sendable {
     var errorDescription: String? { "Unknown error." }
 }
