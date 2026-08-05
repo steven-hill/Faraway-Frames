@@ -265,16 +265,20 @@ extension FilmDetailViewModel: NSFetchedResultsControllerDelegate {
 // MARK: - Extension for setting up UI tests
 private extension FilmDetailViewModel {
     private func throwErrorForUITests() throws {
-        let env = ProcessInfo.processInfo.environment
-        if ProcessInfo.processInfo.isUITestingPersistenceSaveError {
-            let failureReason = env["MOCK_CD_FAILURE_REASON"]
-            let mappedReason: CocoaError.Code = (failureReason == "diskFull") ? .fileWriteOutOfSpace : .persistentStoreOpen
-            throw CocoaError(mappedReason)
+        let processInfo = ProcessInfo.processInfo
+        let isSaveError = processInfo.isUITestingPersistenceSaveError
+        let isLoadError = processInfo.isUITestingExploreDetailVCPersistenceLoadError
+        guard isSaveError || isLoadError else { return }
+        
+        let failureReason = processInfo.environment["MOCK_CD_FAILURE_REASON"]
+        let errorCode: CocoaError.Code
+        
+        if isSaveError {
+            errorCode = (failureReason == "diskFull") ? .fileWriteOutOfSpace : .persistentStoreOpen
+        } else { // Must be isLoadError due to the guard check above
+            errorCode = (failureReason == "databaseError") ? .coreData : .persistentStoreOpen
         }
-        if ProcessInfo.processInfo.isUITestingExploreDetailVCPersistenceLoadError {
-            let failureReason = env["MOCK_CD_FAILURE_REASON"]
-            let mappedReason: CocoaError.Code = (failureReason == "databaseError") ? .coreData : .persistentStoreOpen
-            throw CocoaError(mappedReason)
-        }
+        
+        throw CocoaError(errorCode)
     }
 }
