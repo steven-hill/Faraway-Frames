@@ -48,6 +48,10 @@ final class HomeViewModel: NSObject {
     // MARK: - Methods
     func performFetches() {
         do {
+            #if DEBUG
+            try throwErrorForUITests()
+            #endif
+            
             try upNextFRC.performFetch()
             try watchedFRC.performFetch()
             currentState = .fetchedObjects
@@ -126,5 +130,17 @@ extension HomeViewModel: NSFetchedResultsControllerDelegate {
             currentState = .fetchedObjects
         }
         delegate?.homeViewModelDidUpdate()
+    }
+}
+
+// MARK: - Extension for setting up UI tests
+private extension HomeViewModel {
+    private func throwErrorForUITests() throws {
+        let env = ProcessInfo.processInfo.environment
+        if ProcessInfo.processInfo.isUITestingPersistenceLoadError {
+            let failureReason = env["MOCK_CD_FAILURE_REASON"]
+            let mappedReason: CocoaError.Code = (failureReason == "databaseError") ? .coreData : .persistentStoreOpen
+            throw CocoaError(mappedReason)
+        }
     }
 }

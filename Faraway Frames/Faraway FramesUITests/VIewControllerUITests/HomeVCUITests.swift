@@ -90,4 +90,17 @@ final class HomeVCUITests: XCTestCase {
         watchedSegment.tap()
         XCTAssertTrue(emptyStateView.exists, "Should exist.")
     }
+    
+    func test_homeVC_whenFetchingFilmsFromDatabaseResultsInError_showsAlert() {
+        app = XCUIApplication()
+        app.launch(with: .fetchFromDatabaseError)
+        
+        let alert = app.alerts.firstMatch
+        let button = alert.buttons.firstMatch
+
+        XCTAssertTrue(alert.exists, "Should exist.")
+        XCTAssertTrue(alert.staticTexts.count == 2, "Should have 2 static texts.")
+        XCTAssertTrue(button.exists, "Should exist.")
+        XCTAssertTrue(button.isHittable, "Should be able to be tapped.")
+    }
 }
