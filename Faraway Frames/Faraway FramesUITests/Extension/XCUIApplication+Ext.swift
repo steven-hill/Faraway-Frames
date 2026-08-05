@@ -33,33 +33,4 @@ extension XCUIApplication {
         }
         self.launch()
     }
-    
-    func launchExploreDetailVCForSaveError(with persistenceError: UITestPersistenceError) {
-        self.launchArguments = ["-UITesting",
-                                "-UITestingMockNetworkSuccess",
-                                "-UITestingMockPersistenceData",
-                                "-UITestingPersistenceSaveError"]
-        
-        switch persistenceError {
-        case .addToQueueDiskFull:
-            self.launchEnvironment["MOCK_CD_FAILURE_REASON"] = "diskFull"
-        case .addToQueueDatabaseError:
-            self.launchEnvironment["MOCK_CD_FAILURE_REASON"] = "databaseError"
-        case .deleteFromQueueDatabaseError:
-            self.launchEnvironment["MOCK_CD_FAILURE_REASON"] = "databaseError"
-        case .fetchFromDatabaseError:
-            self.launchEnvironment["MOCK_CD_FAILURE_REASON"] = "databaseError"
-        }
-        self.launch()
-    }
-    
-    func launchExploreDetailVCForFetchError(with persistenceError: UITestPersistenceError) {
-        self.launchArguments = ["-UITesting",
-                                "-UITestingMockNetworkSuccess",
-                                "-UITestingExploreDetailVCPersistenceLoadError"
-                                ]
-        guard persistenceError == .fetchFromDatabaseError else { return }
-        self.launchEnvironment["MOCK_CD_FAILURE_REASON"] = "databaseError"
-        self.launch()
-    }
 }
