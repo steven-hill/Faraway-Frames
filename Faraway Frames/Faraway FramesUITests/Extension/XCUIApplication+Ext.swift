@@ -38,7 +38,8 @@ extension XCUIApplication {
         self.launchArguments = ["-UITesting",
                                 "-UITestingMockNetworkSuccess",
                                 "-UITestingMockPersistenceData",
-                                "-UITestingPersistenceSaveError"]
+                                "-UITestingPersistenceSaveError",
+                                "-UITestingPersistenceLoadError"]
         
         switch persistenceError {
         case .addToQueueDiskFull:
@@ -46,6 +47,8 @@ extension XCUIApplication {
         case .addToQueueDatabaseError:
             self.launchEnvironment["MOCK_CD_FAILURE_REASON"] = "databaseError"
         case .deleteFromQueueDatabaseError:
+            self.launchEnvironment["MOCK_CD_FAILURE_REASON"] = "databaseError"
+        case .fetchFromDatabaseError:
             self.launchEnvironment["MOCK_CD_FAILURE_REASON"] = "databaseError"
         }
         self.launch()

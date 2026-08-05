@@ -26,4 +26,7 @@ extension ProcessInfo {
     var isUITestingPersistenceSaveError: Bool {
         arguments.contains(LaunchArguments.uiTestingPersistenceSaveError)
     }
+    var isUITestingPersistenceLoadError: Bool {
+        arguments.contains(LaunchArguments.uiTestingPersistenceLoadError)
+    }
 }
