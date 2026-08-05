@@ -70,6 +70,7 @@ final class ExploreListVCUITests: XCTestCase {
 
         XCTAssertFalse(header.exists, "Should not be visible.")
         XCTAssertTrue(alert.exists, "Should exist.")
+        XCTAssertTrue(alert.staticTexts.count == 2, "Should have 2 static texts.")
         XCTAssertTrue(button.exists, "Should exist.")
         XCTAssertTrue(button.isHittable, "Should be able to be tapped.")
     }
@@ -83,6 +84,7 @@ final class ExploreListVCUITests: XCTestCase {
 
         XCTAssertFalse(header.exists, "Should not be visible.")
         XCTAssertTrue(alert.exists, "Should exist.")
+        XCTAssertTrue(alert.staticTexts.count == 2, "Should have 2 static texts.")
         XCTAssertTrue(button.exists, "Should exist.")
         XCTAssertTrue(button.isHittable, "Should be able to be tapped.")
     }
@@ -96,6 +98,7 @@ final class ExploreListVCUITests: XCTestCase {
 
         XCTAssertFalse(header.exists, "Should not be visible.")
         XCTAssertTrue(alert.exists, "Should exist.")
+        XCTAssertTrue(alert.staticTexts.count == 2, "Should have 2 static texts.")
         XCTAssertTrue(button.exists, "Should exist.")
         XCTAssertTrue(button.isHittable, "Should be able to be tapped.")
     }
@@ -109,6 +112,7 @@ final class ExploreListVCUITests: XCTestCase {
 
         XCTAssertFalse(header.exists, "Should not be visible.")
         XCTAssertTrue(alert.exists, "Should exist.")
+        XCTAssertTrue(alert.staticTexts.count == 2, "Should have 2 static texts.")
         XCTAssertTrue(button.exists, "Should exist.")
         XCTAssertTrue(button.isHittable, "Should be able to be tapped.")
     }
@@ -122,6 +126,7 @@ final class ExploreListVCUITests: XCTestCase {
 
         XCTAssertFalse(header.exists, "Should not be visible.")
         XCTAssertTrue(alert.exists, "Should exist.")
+        XCTAssertTrue(alert.staticTexts.count == 2, "Should have 2 static texts.")
         XCTAssertTrue(button.exists, "Should exist.")
         XCTAssertTrue(button.isHittable, "Should be able to be tapped.")
     }
@@ -135,6 +140,7 @@ final class ExploreListVCUITests: XCTestCase {
 
         XCTAssertFalse(header.exists, "Should not be visible.")
         XCTAssertTrue(alert.exists, "Should exist.")
+        XCTAssertTrue(alert.staticTexts.count == 2, "Should have 2 static texts.")
         XCTAssertTrue(button.exists, "Should exist.")
         XCTAssertTrue(button.isHittable, "Should be able to be tapped.")
     }
@@ -148,6 +154,7 @@ final class ExploreListVCUITests: XCTestCase {
 
         XCTAssertFalse(header.exists, "Should not be visible.")
         XCTAssertTrue(alert.exists, "Should exist.")
+        XCTAssertTrue(alert.staticTexts.count == 2, "Should have 2 static texts.")
         XCTAssertTrue(button.exists, "Should exist.")
         XCTAssertTrue(button.isHittable, "Should be able to be tapped.")
     }
@@ -161,6 +168,7 @@ final class ExploreListVCUITests: XCTestCase {
 
         XCTAssertFalse(header.exists, "Should not be visible.")
         XCTAssertTrue(alert.exists, "Should exist.")
+        XCTAssertTrue(alert.staticTexts.count == 2, "Should have 2 static texts.")
         XCTAssertTrue(button.exists, "Should exist.")
         XCTAssertTrue(button.isHittable, "Should be able to be tapped.")
     }
