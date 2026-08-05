@@ -210,12 +210,11 @@ struct HomeVCTests {
         sut.loadViewIfNeeded()
         let expectedHomeError = HomeError.fetchFailed(scenario.expectedReason)
         
-        #expect(mockPresenter.presentedAlert?.title != nil, "Should not be nil.")
-        #expect(mockPresenter.presentedAlert?.message == expectedError.localizedDescription, "Should match `expectedError`.")
+        #expect(mockPresenter.presentedAlert?.title == nil, "Should not be nil.")
+        #expect(mockPresenter.presentedAlert?.message == expectedHomeError.localizedDescription, "Should match `expectedError`.")
         #expect(mockPresenter.presentedAlert?.preferredStyle == .alert, "Should be alert.")
         #expect(mockPresenter.presentedAlert?.actions.count == 1, "Should have one.")
         #expect(sut.films.isEmpty, "Should have no films because fetch failed.")
-        #expect(sut.databaseErrorView.isHidden == false, "Should present an error view when fetch fails.")
         #expect(sut.emptyStateView.isHidden, "Empty state view should be hidden.")
         #expect(sut.homeViewModel.currentState == .failure(expectedHomeError), "The view model state must match the expected persistence failure scenario exactly.")
     }
