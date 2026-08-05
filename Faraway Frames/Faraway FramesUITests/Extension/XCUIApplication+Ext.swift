@@ -37,7 +37,6 @@ extension XCUIApplication {
     func launch(with persistenceError: UITestPersistenceError) {
         self.launchArguments = ["-UITesting",
                                 "-UITestingMockNetworkSuccess",
-                                //"-UITestingMockPersistenceData",
                                 "-UITestingPersistenceSaveError",
                                 "-UITestingPersistenceLoadError"]
         
