@@ -186,22 +186,6 @@ final class ExploreDetailVC: UIViewController {
         )
     }
     
-//    private func createFetchFailureConfig(error: FilmDetailError, film: Film) -> UIContentUnavailableConfiguration {
-//        var config = UIContentUnavailableConfiguration.empty()
-//        config.text = "\(error.localizedDescription)"
-//        config.secondaryText = "\(error.secondaryText)"
-//        config.image = SFSymbols.exclamationMarkTriangle
-//        config.imageProperties.tintColor = .systemRed
-//        config.button = .prominentGlass()
-//        config.button.title = "Ok"
-//        config.buttonProperties.primaryAction = UIAction { [weak self] _ in
-//            guard let self else { return }
-//            filmDetailViewModel.returnToFilmContent(film: film)
-//            self.setNeedsUpdateContentUnavailableConfiguration()
-//        }
-//        return config
-//    }
-    
     private func createErrorConfig(error: FilmDetailError, film: Film, queue: FilmQueue) -> UIContentUnavailableConfiguration {
         var config = UIContentUnavailableConfiguration.empty()
         config.text = "\(error.localizedDescription)"
