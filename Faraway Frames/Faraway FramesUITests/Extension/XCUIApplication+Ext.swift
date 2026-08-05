@@ -34,14 +34,6 @@ extension XCUIApplication {
         self.launch()
     }
     
-    func launchHomeVC(with persistenceError: UITestPersistenceError) {
-        self.launchArguments = ["-UITesting",
-                                "-UITestingHomeVCPersistenceLoadError"]
-        guard persistenceError == .fetchFromDatabaseError else { return }
-        self.launchEnvironment["MOCK_CD_FAILURE_REASON"] = "databaseError"
-        self.launch()
-    }
-    
     func launchExploreDetailVCForSaveError(with persistenceError: UITestPersistenceError) {
         self.launchArguments = ["-UITesting",
                                 "-UITestingMockNetworkSuccess",
