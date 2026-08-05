@@ -67,7 +67,6 @@ struct HomeVCTests {
         sut.loadViewIfNeeded()
         
         #expect(sut.emptyStateView.isHidden == false, "Should display empty state view.")
-        #expect(sut.databaseErrorView.isHidden, "Database error view should be hidden.")
         #expect(sut.films.isEmpty, "Should be empty.")
     }
     
@@ -82,7 +81,6 @@ struct HomeVCTests {
                       in: sut.segmentedControl)
         
         #expect(sut.emptyStateView.isHidden == false, "Should display empty state view.")
-        #expect(sut.databaseErrorView.isHidden, "Database error view should be hidden.")
         #expect(sut.films.isEmpty, "Should be empty.")
     }
     
@@ -94,7 +92,6 @@ struct HomeVCTests {
         sut.loadViewIfNeeded()
         
         #expect(sut.emptyStateView.isHidden, "Empty state view should be hidden.")
-        #expect(sut.databaseErrorView.isHidden, "Database error view should be hidden.")
         #expect(sut.films.count == 1, "Should be one film.")
         #expect(sut.films[0].id == Film.sample[0].id, "Should be the film that was added.")
     }
@@ -112,7 +109,6 @@ struct HomeVCTests {
                       in: sut.segmentedControl)
         
         #expect(sut.emptyStateView.isHidden, "Empty state view should be hidden.")
-        #expect(sut.databaseErrorView.isHidden, "Database error view should be hidden.")
         #expect(sut.films.count == 1, "Should be one film.")
         #expect(sut.films[0].id == Film.sample[0].id, "Should be the film that was added.")
     }
@@ -146,7 +142,6 @@ struct HomeVCTests {
         sut.collectionView.layoutIfNeeded()
 
         #expect(sut.emptyStateView.isHidden, "Empty state view should be hidden.")
-        #expect(sut.databaseErrorView.isHidden, "Database error view should be hidden.")
         #expect(sut.films.count == 2, "Should have two films.")
         #expect(sut.films[0].id == Film.sample[0].id, "Should be the first film that was added.")
         #expect(sut.films[1].id == Film.sample[1].id, "Should be the second film that was added.")
@@ -155,7 +150,6 @@ struct HomeVCTests {
                       in: sut.segmentedControl)
         
         #expect(sut.emptyStateView.isHidden, "Empty state view should be hidden.")
-        #expect(sut.databaseErrorView.isHidden, "Database error view should be hidden.")
         #expect(sut.films.count == 1, "Should have one film.")
         #expect(sut.films[0].id == Film.sample[2].id, "Should be the third film that was added.")
     }
@@ -187,11 +181,11 @@ struct HomeVCTests {
         #expect(sut.films[0].isWatched == true, "Should be true.")
     }
     
-    @Test("If there is an error fetching films from database, error view is shown",
+    @Test("If there is an error fetching films from database, alert is shown",
           (.tags(.persistence)),
           arguments: PersistenceHelper.errorScenarios
     )
-    func homeVC_whenfetchRequestFails_showsErrorView(for scenario: (systemError: Error,
+    func homeVC_whenfetchRequestFails_showsAlert(for scenario: (systemError: Error,
                                                                              expectedReason: PersistenceFailureReason)
     ) throws {
         let testPersistenceController = try PersistenceController(inMemory: true)
@@ -205,12 +199,16 @@ struct HomeVCTests {
             filmQueueService: filmQueueService
         )
         let sut = HomeVC(homeViewModel: vm)
-        
+        let mockPresenter = MockAlertPresenter()
+        sut.alertPresenter = mockPresenter
         sut.loadViewIfNeeded()
         let expectedHomeError = HomeError.fetchFailed(scenario.expectedReason)
         
+        #expect(mockPresenter.presentedAlert?.title == expectedHomeError.localizedDescription, "Should match `expectedError`.")
+        #expect(mockPresenter.presentedAlert?.message == expectedHomeError.secondaryText, "Should match `expectedError`.")
+        #expect(mockPresenter.presentedAlert?.preferredStyle == .alert, "Should be alert.")
+        #expect(mockPresenter.presentedAlert?.actions.count == 1, "Should have one.")
         #expect(sut.films.isEmpty, "Should have no films because fetch failed.")
-        #expect(sut.databaseErrorView.isHidden == false, "Should present an error view when fetch fails.")
         #expect(sut.emptyStateView.isHidden, "Empty state view should be hidden.")
         #expect(sut.homeViewModel.currentState == .failure(expectedHomeError), "The view model state must match the expected persistence failure scenario exactly.")
     }

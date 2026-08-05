@@ -30,7 +30,7 @@ final class HomeVC: UIViewController {
     private var filmCellRegistration: UICollectionView.CellRegistration<FilmGridCell, Film>!
     private var dataSource: UICollectionViewDiffableDataSource<Section, Film.ID>!
     private(set) var emptyStateView = UIContentUnavailableView(configuration: .empty())
-    private(set) var databaseErrorView = UIContentUnavailableView(configuration: .empty())
+    var alertPresenter: AlertPresenting = AlertPresenter()
     
     // MARK: - Initialisation
     init(homeViewModel: HomeViewModel) {
@@ -225,10 +225,15 @@ final class HomeVC: UIViewController {
         
         switch homeViewModel.currentState {
         case .failure(let error):
-            showErrorView(for: activeSection, error: error)
+            let alert = UIAlertController(
+                title: error.localizedDescription,
+                message: error.secondaryText,
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            alertPresenter.present(alert, from: self)
             hideEmptyStateView()
         case .idle, .fetchedObjects:
-            hideDatabaseErrorView()
             if films.isEmpty {
                 showEmptyState(for: activeSection)
             } else {
@@ -242,16 +247,6 @@ final class HomeVC: UIViewController {
         case .upNext:  return homeViewModel.upNextFilms
         case .watched: return homeViewModel.watchedFilms
         }
-    }
-    
-    private func showErrorView(for section: Section, error: HomeError) {
-        updateStateView(
-            databaseErrorView,
-            image: SFSymbols.exclamationMarkTriangle,
-            text: error.localizedDescription,
-            secondaryText: error.secondaryText,
-            accessibilityIdentifier: "HomeVC_ErrorView"
-        )
     }
     
     private func showEmptyState(for section: Section) {
@@ -298,11 +293,6 @@ final class HomeVC: UIViewController {
             stateView.centerXAnchor.constraint(equalTo: collectionView.centerXAnchor),
             stateView.centerYAnchor.constraint(equalTo: collectionView.centerYAnchor)
         ])
-    }
-    
-    private func hideDatabaseErrorView() {
-        databaseErrorView.isHidden = true
-        databaseErrorView.isAccessibilityElement = false
     }
     
     private func hideEmptyStateView() {

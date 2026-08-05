@@ -12,10 +12,6 @@ final class HomeVCUITests: XCTestCase {
     private var app: XCUIApplication!
 
     override func setUpWithError() throws {
-        app = XCUIApplication()
-        XCUIDevice.shared.orientation = .portrait
-        app.launchArguments.append("-UITesting")
-        app.launch()
         continueAfterFailure = false
     }
 
@@ -25,6 +21,7 @@ final class HomeVCUITests: XCTestCase {
     }
     
     func test_homeVC_hasTitle() throws {
+        launchApp()
         guard CurrentDevice.isIPhone else {
             throw XCTSkip("iPhone-only test")
         }
@@ -35,6 +32,7 @@ final class HomeVCUITests: XCTestCase {
     }
     
     func test_homeVC_hasSegmentedControl_withCorrectSetup_andTapChangesSelection() {
+        launchApp()
         let segmentedControl = app.segmentedControls["HomeVC_Segmented_Control"]
         let numberOfSegments = segmentedControl.buttons.count
         
@@ -51,6 +49,7 @@ final class HomeVCUITests: XCTestCase {
     }
     
     func test_homeVC_segmentedControl_whenSelectedSegmentChangedAndDeviceRotatedToLandscape_bothSegmentsAreHittable() {
+        launchApp()
         let segmentedControl = app.segmentedControls["HomeVC_Segmented_Control"]
         
         XCTAssertTrue(segmentedControl.isHittable, "Should be hittable.")
@@ -76,12 +75,14 @@ final class HomeVCUITests: XCTestCase {
     }
 
     func test_homeVC_hasCollectionView() {
+        launchApp()
         let collectionView = app.collectionViews.element
         
         XCTAssertTrue(collectionView.exists, "Should exist.")
     }
     
     func test_homeVC_whenNoFilmsAreInDatabase_showsEmptyStateViewForBothSegments() {
+        launchApp()
         let segmentedControl = app.segmentedControls["HomeVC_Segmented_Control"]
         let emptyStateView = app.staticTexts["HomeVC_EmptyStateView"]
         XCTAssertTrue(emptyStateView.exists, "Should exist.")
@@ -89,5 +90,26 @@ final class HomeVCUITests: XCTestCase {
         let watchedSegment = segmentedControl.buttons.element(boundBy: 1)
         watchedSegment.tap()
         XCTAssertTrue(emptyStateView.exists, "Should exist.")
+    }
+    
+    func test_homeVC_whenFetchingFilmsFromDatabaseResultsInError_showsAlert() {
+        app = XCUIApplication()
+        app.launch(with: .fetchFromDatabaseError)
+        
+        let alert = app.alerts.firstMatch
+        let button = alert.buttons.firstMatch
+
+        XCTAssertTrue(alert.exists, "Should exist.")
+        XCTAssertTrue(alert.staticTexts.count == 2, "Should have 2 static texts.")
+        XCTAssertTrue(button.exists, "Should exist.")
+        XCTAssertTrue(button.isHittable, "Should be able to be tapped.")
+    }
+    
+    // MARK: - Helper method
+    private func launchApp() {
+        app = XCUIApplication()
+        XCUIDevice.shared.orientation = .portrait
+        app.launchArguments.append("-UITesting")
+        app.launch()
     }
 }
