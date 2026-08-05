@@ -178,24 +178,33 @@ struct ExploreDetailVCTests {
         #expect(mockPresenter.presentedAlert?.actions.count == 1, "Should have one.")
     }
 
-    @Test("Tapping `ok` button on fetch failure config reloads film content and updates VM's `currentState`",
+    @Test("Tapping `Ok` button on fetch failure alert reloads film content and updates VM's `currentState`",
           .tags(.persistence),
           arguments: PersistenceHelper.errorScenarios
     )
-    func exploreDetailVC_tapOkButtonOnFetchFailureConfig_reloadsFilmContentAndUpdatesState(
-        scenario: (systemError: Error,
+    func exploreDetailVC_tapOkButtonOnFetchFailureAlert_reloadsFilmContentAndUpdatesState(
+        scenario: (systemError: CocoaError,
                    expectedReason: PersistenceFailureReason)
     ) async throws {
+        let film = Film.sample[0]
         let sut = try makeSUTWithFetchFailureFRC(throwing: scenario.systemError)
-        sut.filmDetailViewModel.setFilm(Film.sample[0])
-        let state = UIContentUnavailableConfigurationState(traitCollection: sut.traitCollection)
-        sut.updateContentUnavailableConfiguration(using: state)
-        let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
-        
-        config?.buttonProperties.primaryAction?.performWithSender(nil, target: nil)
+        sut.filmDetailViewModel.setFilm(film)
         sut.view.layoutIfNeeded()
         
-        #expect(sut.contentUnavailableConfiguration == nil, "Should be nil because VC is displaying film content again.")
+        // Simulates tapping 'Ok' button.
+        sut.filmDetailViewModel.returnToFilmContent(film: film)
+        
+        switch sut.filmDetailViewModel.currentState {
+        case .noFilmSelected:
+            Issue.record("Expected state to be `.content`, but it was `.noFilmSelected`.")
+        case .content(let displayModel, _):
+            #expect(displayModel.title == film.title, "Should match.")
+            #expect(displayModel.visualOriginalTitles == "\(film.originalTitle)\n\(film.originalTitleRomanised)", "Should match.")
+        case .fetchFailure:
+            Issue.record("Expected state to be `.content`, but it was `.fetchFailure`.")
+        case .error(_, _, _):
+            Issue.record("Expected state to be `.content`, but it was `.error`.")
+        }
     }
     
     @Test func exploreDetailVC_didUpdateFilmDetails_notifiesContentUnavailableConfigurationToUpdateAndSetsUpdatedFilm() {
