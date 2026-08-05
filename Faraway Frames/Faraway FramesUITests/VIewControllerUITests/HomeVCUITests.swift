@@ -73,18 +73,13 @@ final class HomeVCUITests: XCTestCase {
         
         XCUIDevice.shared.orientation = .portrait
     }
-
-    func test_homeVC_hasCollectionView() {
-        launchApp()
-        let collectionView = app.collectionViews.element
-        
-        XCTAssertTrue(collectionView.exists, "Should exist.")
-    }
     
     func test_homeVC_whenNoFilmsAreInDatabase_showsEmptyStateViewForBothSegments() {
         launchApp()
         let segmentedControl = app.segmentedControls["HomeVC_Segmented_Control"]
+        let collectionView = app.collectionViews.element
         let emptyStateView = app.staticTexts["HomeVC_EmptyStateView"]
+        XCTAssertTrue(collectionView.exists, "Should exist.")
         XCTAssertTrue(emptyStateView.exists, "Should exist.")
         
         let watchedSegment = segmentedControl.buttons.element(boundBy: 1)
