@@ -130,15 +130,17 @@ struct ExploreDetailVCTests {
         #expect(sut.title == nil, "Should be nil.")
     }
     
-    @Test("VC creates error configuration for fetch film failure",
+    @Test("Alert is presented for fetch film failure",
           .tags(.persistence),
           arguments: PersistenceHelper.errorScenarios
     )
-    func exploreDetailVC_createFetchFailureConfig_whenPerformFetchFailsOnViewModel_createsConfiguration(
+    func exploreDetailVC_whenPerformFetchFailsOnViewModel_presentsAlert(
         scenario: (systemError: Error,
                    expectedReason: PersistenceFailureReason)
     ) async throws {
         let sut = try makeSUTWithFetchFailureFRC(scenario: scenario)
+        let mockPresenter = MockAlertPresenter()
+        sut.alertPresenter = mockPresenter
         
         sut.filmDetailViewModel.setFilm(Film.sample[0])
         
@@ -146,8 +148,11 @@ struct ExploreDetailVCTests {
         sut.updateContentUnavailableConfiguration(using: state)
         let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
         
-        #expect(config != nil, "Should not be nil.")
-        #expect(config?.button.title != nil, "Should have a title.")
+        #expect(config == nil, "Should be nil.")
+        #expect(mockPresenter.presentedAlert?.title == scenario.systemError.localizedDescription, "Should match the system error passed in.")
+        #expect(mockPresenter.presentedAlert?.message == scenario.expectedReason.message, "Should match the expected reason passed in.")
+        #expect(mockPresenter.presentedAlert?.preferredStyle == .alert, "Should be alert.")
+        #expect(mockPresenter.presentedAlert?.actions.count == 1, "Should have one.")
     }
     
     @Test("Tapping `ok` button on fetch failure config reloads film content and updates VM's `currentState`",
