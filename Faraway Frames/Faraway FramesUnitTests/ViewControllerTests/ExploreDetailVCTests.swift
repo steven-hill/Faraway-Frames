@@ -135,10 +135,10 @@ struct ExploreDetailVCTests {
           arguments: PersistenceHelper.errorScenarios
     )
     func exploreDetailVC_whenPerformFetchFailsOnViewModel_presentsAlert(
-        scenario: (systemError: Error,
+        scenario: (systemError: CocoaError,
                    expectedReason: PersistenceFailureReason)
     ) async throws {
-        let sut = try makeSUTWithFetchFailureFRC(scenario: scenario)
+        let sut = try makeSUTWithFetchFailureFRC(throwing: scenario.systemError)
         let mockPresenter = MockAlertPresenter()
         sut.alertPresenter = mockPresenter
         
@@ -147,14 +147,37 @@ struct ExploreDetailVCTests {
         let state = UIContentUnavailableConfigurationState(traitCollection: sut.traitCollection)
         sut.updateContentUnavailableConfiguration(using: state)
         let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
+        let expectedError = FilmDetailError.fetchFailed(scenario.expectedReason)
         
         #expect(config == nil, "Should be nil.")
-        #expect(mockPresenter.presentedAlert?.title == scenario.systemError.localizedDescription, "Should match the system error passed in.")
+        #expect(mockPresenter.presentedAlert?.title == expectedError.localizedDescription, "Should match the expected error passed in.")
         #expect(mockPresenter.presentedAlert?.message == scenario.expectedReason.message, "Should match the expected reason passed in.")
         #expect(mockPresenter.presentedAlert?.preferredStyle == .alert, "Should be alert.")
         #expect(mockPresenter.presentedAlert?.actions.count == 1, "Should have one.")
     }
     
+    @Test("Fetch failure alert handles an unknown error gracefully by displaying its description", .tags(.persistence))
+    func exploreDetailVC_whenUnknownErrorOccursInFetchFailure_presentsAlert() async throws {
+        let unknownError = UnknownError()
+        let sut = try makeSUTWithFetchFailureFRC(throwing: unknownError)
+        let mockPresenter = MockAlertPresenter()
+        sut.alertPresenter = mockPresenter
+        
+        sut.filmDetailViewModel.setFilm(Film.sample[0])
+        
+        let state = UIContentUnavailableConfigurationState(traitCollection: sut.traitCollection)
+        sut.updateContentUnavailableConfiguration(using: state)
+        let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
+        let expectedError = FilmDetailError.fetchFailed(.unknown(unknownError.localizedDescription))
+        let expectedReason = PersistenceFailureReason.unknown(unknownError.localizedDescription)
+        
+        #expect(config == nil, "Should be nil.")
+        #expect(mockPresenter.presentedAlert?.title == expectedError.localizedDescription, "Should match the expected error passed in.")
+        #expect(mockPresenter.presentedAlert?.message == expectedReason.message, "Should match the expected reason passed in.")
+        #expect(mockPresenter.presentedAlert?.preferredStyle == .alert, "Should be alert.")
+        #expect(mockPresenter.presentedAlert?.actions.count == 1, "Should have one.")
+    }
+
     @Test("Tapping `ok` button on fetch failure config reloads film content and updates VM's `currentState`",
           .tags(.persistence),
           arguments: PersistenceHelper.errorScenarios
@@ -163,7 +186,7 @@ struct ExploreDetailVCTests {
         scenario: (systemError: Error,
                    expectedReason: PersistenceFailureReason)
     ) async throws {
-        let sut = try makeSUTWithFetchFailureFRC(scenario: scenario)
+        let sut = try makeSUTWithFetchFailureFRC(throwing: scenario.systemError)
         sut.filmDetailViewModel.setFilm(Film.sample[0])
         let state = UIContentUnavailableConfigurationState(traitCollection: sut.traitCollection)
         sut.updateContentUnavailableConfiguration(using: state)
@@ -519,14 +542,13 @@ struct ExploreDetailVCTests {
         return sut
     }
     
-    private func makeSUTWithFetchFailureFRC(scenario: (systemError: Error,
-                                                       expectedReason: PersistenceFailureReason)) throws -> ExploreDetailVC {
+    private func makeSUTWithFetchFailureFRC(throwing error: Error) throws -> ExploreDetailVC {
         let testPersistenceController = try PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
         let filmQueueService = FilmQueueService(context: context)
         var mockFactory = MockFRCFactory()
         mockFactory.makeFilmDetailFRCStub = { _, context in
-            return ThrowingFetchedResultsController(context: context, errorToThrow: scenario.systemError)
+            return ThrowingFetchedResultsController(context: context, errorToThrow: error)
         }
         let mockImageLoader = MockImageLoader()
         let vm = FilmDetailViewModel(imageLoader: mockImageLoader,
