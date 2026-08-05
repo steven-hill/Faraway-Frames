@@ -92,10 +92,25 @@ final class ExploreDetailVCUITests: XCTestCase {
         XCTAssertEqual(changedResult, .completed, "The button label did not change to 'Remove from Watched' after tap.")
     }
     
+    func test_exploreDetailVC_whenFetchFails_showsAlert() {
+        app = XCUIApplication()
+        app.launchExploreDetailVCForFetchError(with: .fetchFromDatabaseError)
+        NavigationHelper.navigateToExploreTab(app: app)
+        tapFirstCollectionViewCell()
+        
+        let alert = app.alerts.firstMatch
+        let button = alert.buttons.firstMatch
+
+        XCTAssertTrue(alert.exists, "Should exist.")
+        XCTAssertTrue(alert.staticTexts.count == 2, "Should have 2 static texts.")
+        XCTAssertTrue(button.exists, "Should exist.")
+        XCTAssertTrue(button.isHittable, "Should be able to be tapped.")
+    }
+    
     func test_exploreDetailVC_whenAddingFilmButDiskIsFull_showsCorrectErrorMessage() {
         app = XCUIApplication()
         XCUIDevice.shared.orientation = .portrait
-        app.launch(with: .addToQueueDiskFull)
+        app.launchExploreDetailVCForSaveError(with: .addToQueueDiskFull)
         NavigationHelper.navigateToExploreTab(app: app)
         revealButtons()
         
@@ -114,7 +129,7 @@ final class ExploreDetailVCUITests: XCTestCase {
     func test_exploreDetailVC_whenAddingFilmResultsInDatabaseError_showsCorrectErrorMessage() {
         app = XCUIApplication()
         XCUIDevice.shared.orientation = .portrait
-        app.launch(with: .addToQueueDatabaseError)
+        app.launchExploreDetailVCForSaveError(with: .addToQueueDatabaseError)
         NavigationHelper.navigateToExploreTab(app: app)
         revealButtons()
         
@@ -133,7 +148,7 @@ final class ExploreDetailVCUITests: XCTestCase {
     func test_exploreDetailVC_whenRemovingFilmResultsInDatabaseError_showsCorrectErrorMessage() {
         app = XCUIApplication()
         XCUIDevice.shared.orientation = .portrait
-        app.launch(with: .deleteFromQueueDatabaseError)
+        app.launchExploreDetailVCForSaveError(with: .deleteFromQueueDatabaseError)
         NavigationHelper.navigateToExploreTab(app: app)
         revealButtons()
         

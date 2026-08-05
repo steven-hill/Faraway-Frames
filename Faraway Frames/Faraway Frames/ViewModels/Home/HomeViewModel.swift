@@ -137,7 +137,7 @@ extension HomeViewModel: NSFetchedResultsControllerDelegate {
 private extension HomeViewModel {
     private func throwErrorForUITests() throws {
         let env = ProcessInfo.processInfo.environment
-        if ProcessInfo.processInfo.isUITestingPersistenceLoadError {
+        if ProcessInfo.processInfo.isUITestingHomeVCPersistenceLoadError {
             let failureReason = env["MOCK_CD_FAILURE_REASON"]
             let mappedReason: CocoaError.Code = (failureReason == "databaseError") ? .coreData : .persistentStoreOpen
             throw CocoaError(mappedReason)

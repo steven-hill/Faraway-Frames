@@ -104,7 +104,7 @@ final class HomeVCUITests: XCTestCase {
     
     func test_homeVC_whenFetchingFilmsFromDatabaseResultsInError_showsAlert() {
         app = XCUIApplication()
-        app.launch(with: .fetchFromDatabaseError)
+        app.launchHomeVC(with: .fetchFromDatabaseError)
         
         let alert = app.alerts.firstMatch
         let button = alert.buttons.firstMatch

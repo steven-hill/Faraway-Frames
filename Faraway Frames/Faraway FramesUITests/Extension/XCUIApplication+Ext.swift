@@ -34,11 +34,19 @@ extension XCUIApplication {
         self.launch()
     }
     
-    func launch(with persistenceError: UITestPersistenceError) {
+    func launchHomeVC(with persistenceError: UITestPersistenceError) {
+        self.launchArguments = ["-UITesting",
+                                "-UITestingHomeVCPersistenceLoadError"]
+        guard persistenceError == .fetchFromDatabaseError else { return }
+        self.launchEnvironment["MOCK_CD_FAILURE_REASON"] = "databaseError"
+        self.launch()
+    }
+    
+    func launchExploreDetailVCForSaveError(with persistenceError: UITestPersistenceError) {
         self.launchArguments = ["-UITesting",
                                 "-UITestingMockNetworkSuccess",
-                                "-UITestingPersistenceSaveError",
-                                "-UITestingPersistenceLoadError"]
+                                "-UITestingMockPersistenceData",
+                                "-UITestingPersistenceSaveError"]
         
         switch persistenceError {
         case .addToQueueDiskFull:
@@ -50,6 +58,16 @@ extension XCUIApplication {
         case .fetchFromDatabaseError:
             self.launchEnvironment["MOCK_CD_FAILURE_REASON"] = "databaseError"
         }
+        self.launch()
+    }
+    
+    func launchExploreDetailVCForFetchError(with persistenceError: UITestPersistenceError) {
+        self.launchArguments = ["-UITesting",
+                                "-UITestingMockNetworkSuccess",
+                                "-UITestingExploreDetailVCPersistenceLoadError"
+                                ]
+        guard persistenceError == .fetchFromDatabaseError else { return }
+        self.launchEnvironment["MOCK_CD_FAILURE_REASON"] = "databaseError"
         self.launch()
     }
 }

@@ -84,6 +84,10 @@ final class FilmDetailViewModel: NSObject {
         self.detailFRC = frc
         
         do {
+            #if DEBUG
+            try throwErrorForUITests()
+            #endif
+            
             try frc.performFetch()
         } catch {
             shouldRetrySetFilmWithoutSync = true
@@ -265,6 +269,11 @@ private extension FilmDetailViewModel {
         if ProcessInfo.processInfo.isUITestingPersistenceSaveError {
             let failureReason = env["MOCK_CD_FAILURE_REASON"]
             let mappedReason: CocoaError.Code = (failureReason == "diskFull") ? .fileWriteOutOfSpace : .persistentStoreOpen
+            throw CocoaError(mappedReason)
+        }
+        if ProcessInfo.processInfo.isUITestingExploreDetailVCPersistenceLoadError {
+            let failureReason = env["MOCK_CD_FAILURE_REASON"]
+            let mappedReason: CocoaError.Code = (failureReason == "databaseError") ? .coreData : .persistentStoreOpen
             throw CocoaError(mappedReason)
         }
     }
