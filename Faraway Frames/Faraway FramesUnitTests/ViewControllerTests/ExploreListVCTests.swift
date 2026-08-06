@@ -120,12 +120,11 @@ struct ExploreListVCTests {
 
         await sut.viewModel.getAllFilms()
         
-        #expect(mockPresenter.presentedAlert?.title != nil, "Should not be nil.")
-        #expect(mockPresenter.presentedAlert?.message == expectedError.localizedDescription, "Should match `expectedError`.")
-        #expect(mockPresenter.presentedAlert?.preferredStyle == .alert, "Should be alert.")
-        #expect(mockPresenter.presentedAlert?.actions.count == 1, "Should have one.")
+        #expect(mockPresenter.capturedTitle != nil, "Should not be nil.")
+        #expect(mockPresenter.capturedMessage == expectedError.localizedDescription, "Should match `expectedError`.")
+        #expect(mockPresenter.capturedActions.count == 1, "Should have one.")
         
-        let retryAction = mockPresenter.presentedAlert?.actions.first
+        let retryAction = mockPresenter.capturedActions.first
         #expect(retryAction?.title != nil, "Should not be nil.")
         #expect(retryAction?.style == .default, "Should be `.default`.")
         #expect(sut.currentStateView == nil, "Should be nil.")

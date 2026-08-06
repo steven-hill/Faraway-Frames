@@ -225,13 +225,13 @@ final class HomeVC: UIViewController {
         
         switch homeViewModel.currentState {
         case .failure(let error):
-            let alert = UIAlertController(
-                title: error.localizedDescription,
-                message: error.secondaryText,
-                preferredStyle: .alert
-            )
-            alert.addAction(UIAlertAction(title: "OK", style: .default))
-            alertPresenter.present(alert, from: self)
+            let okAction = AlertAction(title: "OK",
+                                       style: .default,
+                                       handler: nil)
+            alertPresenter.presentAlert(title: error.localizedDescription,
+                                        message: error.secondaryText,
+                                        actions: [okAction],
+                                        from: self)
             hideEmptyStateView()
         case .idle, .fetchedObjects:
             if films.isEmpty {
