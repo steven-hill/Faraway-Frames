@@ -154,37 +154,6 @@ final class ExploreDetailVC: UIViewController {
             accessibilityLabelText: displayModel.creditsAccessibilityLabel
         )
     }
-    
-    private func createErrorConfig(error: FilmDetailError, film: Film, queue: FilmQueue) -> UIContentUnavailableConfiguration {
-        var config = UIContentUnavailableConfiguration.empty()
-        config.text = "\(error.localizedDescription)"
-        config.secondaryText = "\(error.secondaryText)"
-        config.image = SFSymbols.exclamationMarkTriangle
-        config.imageProperties.tintColor = .systemRed
-        
-        config.button = .prominentGlass()
-        config.button.title = "Retry"
-        config.buttonProperties.primaryAction = UIAction { [weak self] _ in
-            guard let self else { return }
-            let reason = PersistenceFailureReason(from: error)
-            let action: QueueAction = error == .addFailed(reason) ? .add : .remove
-            Task {
-                await filmDetailViewModel.updateStatus(for: film, queue: queue, action: action)
-            }
-            self.setNeedsUpdateContentUnavailableConfiguration()
-        }
-        
-        config.secondaryButton = .plain()
-        config.secondaryButton.title = "Cancel"
-        config.secondaryButtonProperties.primaryAction = UIAction { [weak self] _ in
-            guard let self else { return }
-            let button = queue == .upNext ? upNextButton : watchedButton
-            setButtonEnabled(true, button: button)
-            filmDetailViewModel.returnToFilmContent(film: film)
-            self.setNeedsUpdateContentUnavailableConfiguration()
-        }
-        return config
-    }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
