@@ -204,7 +204,7 @@ final class ExploreDetailVC: UIViewController {
         contentView.addSubview(buttonsContainer)
     }
     
-    // MARK: - Empty State and Content Methods
+    // MARK: - Empty State, and Content Methods
     private func createEmptyState() -> UIContentUnavailableConfiguration {
         var config = UIContentUnavailableConfiguration.empty()
         config.image = SFSymbols.movieClapper
