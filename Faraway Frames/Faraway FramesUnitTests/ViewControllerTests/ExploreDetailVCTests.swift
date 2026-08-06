@@ -396,20 +396,19 @@ struct ExploreDetailVCTests {
         #expect(sut.filmDetailViewModel.filmWasUpdated == false, "Should be false because update status failed.")
     }
     
-    @Test("Integration test to check that the label successfully receives the text from ViewModel.")
+    @Test("Integration test to check that the label successfully receives the text from ViewModel and sets the correct accessibility label for VoiceOver.")
     func exploreDetailVC_createContent_successfullyBindsAccessibilityPropertiesToLabel() {
         let sut = makeSUTWithFilm()
-        
         sut.loadViewIfNeeded()
-        sut.setNeedsUpdateContentUnavailableConfiguration()
-        sut.updateContentUnavailableConfiguration(using: sut.contentUnavailableConfigurationState)
+        
+        sut.didUpdateFilmDetails()
+        
         let targetIdentifier = "ExploreDetailVC_OriginalTitlesLabel"
         let foundLabel = sut.view.findView(withIdentifier: targetIdentifier) as? UILabel        
         guard let label = foundLabel else {
             Issue.record("Could not find a UILabel with accessibilityIdentifier: '\(targetIdentifier)'.")
             return
         }
-        
         let expectedPrefix = "Original title: "
         #expect(label.accessibilityAttributedLabel?.string == "\(expectedPrefix)\(Film.sample[0].originalTitle)")
     }
