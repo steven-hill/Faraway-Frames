@@ -128,32 +128,6 @@ final class ExploreDetailVC: UIViewController {
         }
         self.contentUnavailableConfiguration = config
     }
-    
-    private func createEmptyState() -> UIContentUnavailableConfiguration {
-        var config = UIContentUnavailableConfiguration.empty()
-        config.image = SFSymbols.movieClapper
-        config.text = "No Film Selected"
-        config.secondaryText = "Select a film from the list for more details."
-        return config
-    }
-    
-    private func createContent(displayModel: FilmDetailViewModel.FilmDetailDisplayModel, image: UIImage?) {
-        movieBanner.image = image
-        movieBanner.contentMode = (movieBanner.image == SFSymbols.movieClapper) ? .scaleAspectFit : .scaleAspectFill
-        titleLabel.text = displayModel.title
-        originalTitlesLabel.text = displayModel.visualOriginalTitles
-        originalTitlesLabel.accessibilityAttributedLabel = displayModel.spokenJapaneseTitle
-        releaseDateAndRunningTimeLabel.text = displayModel.releaseYearAndDurationText
-        releaseDateAndRunningTimeLabel.accessibilityLabel = displayModel.releaseYearAndDurationAccessibilityLabel
-        synopsisHeaderLabel.text = displayModel.synopsisTitle
-        synopsisLabel.text = displayModel.synopsisDescription
-        rottenTomatoesScoreLabel.attributedText = displayModel.rottenTomatoesScoreText
-        creditsContainer.configure(
-            withDirector: displayModel.director,
-            producer: displayModel.producer,
-            accessibilityLabelText: displayModel.creditsAccessibilityLabel
-        )
-    }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
@@ -228,6 +202,33 @@ final class ExploreDetailVC: UIViewController {
         contentView.addSubview(rottenTomatoesScoreLabel)
         contentView.addSubview(creditsContainer)
         contentView.addSubview(buttonsContainer)
+    }
+    
+    // MARK: - Empty State and Content Methods
+    private func createEmptyState() -> UIContentUnavailableConfiguration {
+        var config = UIContentUnavailableConfiguration.empty()
+        config.image = SFSymbols.movieClapper
+        config.text = "No Film Selected"
+        config.secondaryText = "Select a film from the list for more details."
+        return config
+    }
+    
+    private func createContent(displayModel: FilmDetailViewModel.FilmDetailDisplayModel, image: UIImage?) {
+        movieBanner.image = image
+        movieBanner.contentMode = (movieBanner.image == SFSymbols.movieClapper) ? .scaleAspectFit : .scaleAspectFill
+        titleLabel.text = displayModel.title
+        originalTitlesLabel.text = displayModel.visualOriginalTitles
+        originalTitlesLabel.accessibilityAttributedLabel = displayModel.spokenJapaneseTitle
+        releaseDateAndRunningTimeLabel.text = displayModel.releaseYearAndDurationText
+        releaseDateAndRunningTimeLabel.accessibilityLabel = displayModel.releaseYearAndDurationAccessibilityLabel
+        synopsisHeaderLabel.text = displayModel.synopsisTitle
+        synopsisLabel.text = displayModel.synopsisDescription
+        rottenTomatoesScoreLabel.attributedText = displayModel.rottenTomatoesScoreText
+        creditsContainer.configure(
+            withDirector: displayModel.director,
+            producer: displayModel.producer,
+            accessibilityLabelText: displayModel.creditsAccessibilityLabel
+        )
     }
     
     // MARK: - Buttons UI Updates
