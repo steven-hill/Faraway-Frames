@@ -94,16 +94,7 @@ struct ExploreDetailVCTests {
         #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
     }
     
-    @Test func exploreDetailVC_viewDidLoad_whenFilmIsNil_contentUnavailableConfiguration_isNil() {
-        let sut = makeSUTWhenFilmIsNil()
-        
-        sut.loadViewIfNeeded()
-        sut.setNeedsUpdateContentUnavailableConfiguration()
-        
-        #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
-    }
-    
-    @Test func exploreDetailVC_viewDidLoad_whenFilmIsNil_displaysEmptyState() {
+    @Test func exploreDetailVC_viewDidLoad_whenFilmIsNil_displaysEmptyState_andContentUnavailableConfiguration_isNil() {
         let sut = makeSUTWhenFilmIsNil()
         
         sut.loadViewIfNeeded()
