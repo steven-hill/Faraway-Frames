@@ -8,11 +8,8 @@
 import UIKit
 
 protocol AlertPresenting {
-    func present(_ alert: UIAlertController,
-                 from viewController: UIViewController)
     func presentAlert(title: String?,
                       message: String?,
                       actions: [AlertAction],
                       from viewController: UIViewController)
-    
 }
