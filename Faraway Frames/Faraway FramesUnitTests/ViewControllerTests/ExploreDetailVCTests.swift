@@ -292,15 +292,15 @@ struct ExploreDetailVCTests {
         sut.view.layoutIfNeeded()
 
         #expect(sut.filmDetailViewModel.currentState == .error(expectedError, targetFilm, .upNext), "Should be in the error state.")
-        #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil.")
+        #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
     }
     
-    @Test("VC creates configuration for the error state",
+    @Test("VC presents alert when there is an error adding or removing a film",
           .tags(.persistence),
           arguments: PersistenceHelper.errorScenarios
     )
-    func exploreDetailVC_createErrorConfig_createsConfiguration(
-    scenario: (systemError: Error,
+    func exploreDetailVC_whenUpdatingStateFails_presentsAlert(
+    scenario: (systemError: CocoaError,
                expectedReason: PersistenceFailureReason)
     ) async {
         let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
@@ -314,21 +314,26 @@ struct ExploreDetailVCTests {
                                      frcFactory: MockFRCFactory(),
                                      filmQueueService: filmQueueService)
         let sut = ExploreDetailVC(filmDetailViewModel: vm)
-        await sut.filmDetailViewModel.updateStatus(for: targetFilm, queue: .upNext, action: .add)
+        let mockPresenter = MockAlertPresenter()
+        sut.alertPresenter = mockPresenter
+        await sut.filmDetailViewModel.updateStatus(for: targetFilm,
+                                                   queue: .upNext,
+                                                   action: .add)
 
         sut.didReceiveError()
         sut.view.layoutIfNeeded()
-        
+        let expectedError = FilmDetailError.addFailed(scenario.expectedReason)
         let state = UIContentUnavailableConfigurationState(traitCollection: sut.traitCollection)
         sut.updateContentUnavailableConfiguration(using: state)
         let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
         
-        #expect(config != nil, "Should not be nil.")
-        #expect(config?.button.title != nil, "Should have a title.")
-        #expect(config?.secondaryButton.title != nil, "Should have a title.")
+        #expect(config == nil, "Should not be nil.")
+        #expect(mockPresenter.capturedTitle == expectedError.localizedDescription, "Should match the expected error passed in.")
+        #expect(mockPresenter.capturedMessage == scenario.expectedReason.message, "Should match the expected reason passed in.")
+        #expect(mockPresenter.capturedActions.count == 2, "Should have two.")
     }
     
-    @Test("Tapping `Retry` button on error config calls VM's updateStatus method again and sets `attemptingUpdate` flag to true",
+    @Test("Tapping `Retry` button on alert calls VM's `updateStatus` method again and sets `attemptingUpdate` flag to true",
           .tags(.persistence),
           arguments: PersistenceHelper.errorScenarios
     )
@@ -347,16 +352,19 @@ struct ExploreDetailVCTests {
                                       frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService)
         let sut = ExploreDetailVC(filmDetailViewModel: vm)
+        let mockPresenter = MockAlertPresenter()
+        sut.alertPresenter = mockPresenter
         sut.filmDetailViewModel.setFilm(targetFilm)
         await sut.filmDetailViewModel.updateStatus(for: targetFilm, queue: .upNext, action: .add)
         sut.didReceiveError()
         sut.view.layoutIfNeeded()
-        let state = UIContentUnavailableConfigurationState(traitCollection: sut.traitCollection)
-        sut.updateContentUnavailableConfiguration(using: state)
-        let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
         
-        config?.buttonProperties.primaryAction?.performWithSender(nil, target: nil)
-
+        guard let retryAction = mockPresenter.capturedActions.first(where: { $0.title == "Retry" }) else {
+            Issue.record("Retry action was not configured on the alert")
+            return
+        }
+        retryAction.handler?(retryAction)
+        
         #expect(vm.attemptingToUpdateFilm == true, "Should be true because `updateStatus` was called from the retry button.")
     }
     
@@ -380,16 +388,18 @@ struct ExploreDetailVCTests {
                                       filmQueueService: filmQueueService)
         let displayModel = FilmDetailViewModel.FilmDetailDisplayModel(film: targetFilm)
         let sut = ExploreDetailVC(filmDetailViewModel: vm)
+        let mockPresenter = MockAlertPresenter()
+        sut.alertPresenter = mockPresenter
         sut.filmDetailViewModel.setFilm(targetFilm)
         await sut.filmDetailViewModel.updateStatus(for: targetFilm, queue: .upNext, action: .add)
         sut.didReceiveError()
         sut.view.layoutIfNeeded()        
-        let state = UIContentUnavailableConfigurationState(traitCollection: sut.traitCollection)
-        sut.updateContentUnavailableConfiguration(using: state)
-        let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
-        
-        config?.secondaryButtonProperties.primaryAction?.performWithSender(nil, target: nil)
-        sut.view.layoutIfNeeded()
+
+        guard let cancelAction = mockPresenter.capturedActions.first(where: { $0.title == "Cancel" }) else {
+            Issue.record("Cancel action was not configured on the alert")
+            return
+        }
+        cancelAction.handler?(cancelAction)
         
         #expect(sut.upNextButton.isEnabled == true, "Button should be enabled again.")
         #expect(vm.currentState == .content(displayModel: displayModel, image: nil), "Should have returned to content state (note: image is nil because mockImageLoader didn't load image in test setup).")

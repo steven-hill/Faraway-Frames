@@ -152,7 +152,24 @@ final class ExploreDetailVC: UIViewController {
             contentView.isHidden = true
             buttonsContainer.isHidden = true
         case .error(let error, let film, let queue):
-            config = createErrorConfig(error: error, film: film, queue: queue)
+            let retryAction = AlertAction(title: "Retry", style: .default) { [weak self] _ in
+                guard let self else { return }
+                let reason = PersistenceFailureReason(from: error)
+                let action: QueueAction = error == .addFailed(reason) ? .add : .remove
+                Task {
+                    await self.filmDetailViewModel.updateStatus(for: film, queue: queue, action: action)
+                }
+            }
+            let cancelAction = AlertAction(title: "Cancel", style: .cancel) { [weak self] _ in
+                guard let self else { return }
+                let button = queue == .upNext ? self.upNextButton : self.watchedButton
+                self.setButtonEnabled(true, button: button)
+                self.filmDetailViewModel.returnToFilmContent(film: film)
+            }
+            alertPresenter.presentAlert(title: error.localizedDescription,
+                                        message: error.secondaryText,
+                                        actions: [retryAction, cancelAction],
+                                        from: self)
             navigationItem.hidesBackButton = true
             contentView.isHidden = true
             buttonsContainer.isHidden = true
