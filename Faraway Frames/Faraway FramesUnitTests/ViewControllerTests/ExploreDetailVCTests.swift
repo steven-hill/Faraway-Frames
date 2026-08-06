@@ -426,10 +426,9 @@ struct ExploreDetailVCTests {
     
     @Test func exploreDetailVC_withFilm_buttonsContainerIsVisible() {
         let sut = makeSUTWithFilm()
-        
         sut.loadViewIfNeeded()
-        sut.setNeedsUpdateContentUnavailableConfiguration()
-        sut.updateContentUnavailableConfiguration(using: sut.contentUnavailableConfigurationState)
+        
+        sut.didUpdateFilmDetails()
         
         #expect(sut.view.findView(withIdentifier: "ExploreDetailVC_ButtonsContainer")?.isHidden == false,
                 "Buttons container must be visible when state is `.content`.")
