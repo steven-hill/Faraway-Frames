@@ -436,6 +436,8 @@ extension ExploreDetailVC: FilmDetailViewModelDelegate {
     }
     
     func didUpdateWithEmptyState() {
+        buttonsContainer.isHidden = true
+        contentView.isHidden = true
         setNeedsUpdateContentUnavailableConfiguration()
     }
     
