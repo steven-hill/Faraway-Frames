@@ -295,12 +295,12 @@ struct ExploreDetailVCTests {
         #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil.")
     }
     
-    @Test("VC creates configuration for the error state",
+    @Test("VC presents alert when there is an error adding or removing a film",
           .tags(.persistence),
           arguments: PersistenceHelper.errorScenarios
     )
-    func exploreDetailVC_createErrorConfig_createsConfiguration(
-    scenario: (systemError: Error,
+    func exploreDetailVC_whenUpdatingState_presentsAlert(
+    scenario: (systemError: CocoaError,
                expectedReason: PersistenceFailureReason)
     ) async {
         let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
@@ -314,11 +314,15 @@ struct ExploreDetailVCTests {
                                      frcFactory: MockFRCFactory(),
                                      filmQueueService: filmQueueService)
         let sut = ExploreDetailVC(filmDetailViewModel: vm)
-        await sut.filmDetailViewModel.updateStatus(for: targetFilm, queue: .upNext, action: .add)
+        let mockPresenter = MockAlertPresenter()
+        sut.alertPresenter = mockPresenter
+        await sut.filmDetailViewModel.updateStatus(for: targetFilm,
+                                                   queue: .upNext,
+                                                   action: .add)
 
         sut.didReceiveError()
         sut.view.layoutIfNeeded()
-        
+        let expectedError = FilmDetailError.addFailed(scenario.expectedReason)
         let state = UIContentUnavailableConfigurationState(traitCollection: sut.traitCollection)
         sut.updateContentUnavailableConfiguration(using: state)
         let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
@@ -326,6 +330,10 @@ struct ExploreDetailVCTests {
         #expect(config != nil, "Should not be nil.")
         #expect(config?.button.title != nil, "Should have a title.")
         #expect(config?.secondaryButton.title != nil, "Should have a title.")
+        #expect(mockPresenter.presentedAlert?.title == expectedError.localizedDescription, "Should match the expected error passed in.")
+        #expect(mockPresenter.presentedAlert?.message == scenario.expectedReason.message, "Should match the expected reason passed in.")
+        #expect(mockPresenter.presentedAlert?.preferredStyle == .alert, "Should be alert.")
+        #expect(mockPresenter.presentedAlert?.actions.count == 1, "Should have one.")
     }
     
     @Test("Tapping `Retry` button on error config calls VM's updateStatus method again and sets `attemptingUpdate` flag to true",
