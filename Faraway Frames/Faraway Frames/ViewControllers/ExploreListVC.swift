@@ -175,16 +175,13 @@ final class ExploreListVC: UIViewController {
             newStateView = emptySearchResultsView
             searchBarIsEnabled = true
         case .error(let error):
-            let alert = UIAlertController(
-                title: "Error loading films",
-                message: error.localizedDescription,
-                preferredStyle: .alert
-            )
-            let retryAction = UIAlertAction(title: "Retry", style: .default) { [weak self] _ in
+            let retryAction = AlertAction(title: "Retry", style: .default) { [weak self] _ in
                 self?.retryButtonTapped()
             }
-            alert.addAction(retryAction)
-            alertPresenter.present(alert, from: self)
+            alertPresenter.presentAlert(title: "Error loading films",
+                                        message: error.localizedDescription,
+                                        actions: [retryAction],
+                                        from: self)
             newStateView = nil
         case .retrying:
             let loadingView = LoadingView(message: "Retrying...")

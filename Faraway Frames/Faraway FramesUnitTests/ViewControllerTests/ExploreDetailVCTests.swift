@@ -150,10 +150,9 @@ struct ExploreDetailVCTests {
         let expectedError = FilmDetailError.fetchFailed(scenario.expectedReason)
         
         #expect(config == nil, "Should be nil.")
-        #expect(mockPresenter.presentedAlert?.title == expectedError.localizedDescription, "Should match the expected error passed in.")
-        #expect(mockPresenter.presentedAlert?.message == scenario.expectedReason.message, "Should match the expected reason passed in.")
-        #expect(mockPresenter.presentedAlert?.preferredStyle == .alert, "Should be alert.")
-        #expect(mockPresenter.presentedAlert?.actions.count == 1, "Should have one.")
+        #expect(mockPresenter.capturedTitle == expectedError.localizedDescription, "Should match the expected error passed in.")
+        #expect(mockPresenter.capturedMessage == scenario.expectedReason.message, "Should match the expected reason passed in.")
+        #expect(mockPresenter.capturedActions.count == 1, "Should have one.")
     }
     
     @Test("Fetch failure alert handles an unknown error gracefully by displaying its description", .tags(.persistence))
@@ -172,10 +171,9 @@ struct ExploreDetailVCTests {
         let expectedReason = PersistenceFailureReason.unknown(unknownError.localizedDescription)
         
         #expect(config == nil, "Should be nil.")
-        #expect(mockPresenter.presentedAlert?.title == expectedError.localizedDescription, "Should match the expected error passed in.")
-        #expect(mockPresenter.presentedAlert?.message == expectedReason.message, "Should match the expected reason passed in.")
-        #expect(mockPresenter.presentedAlert?.preferredStyle == .alert, "Should be alert.")
-        #expect(mockPresenter.presentedAlert?.actions.count == 1, "Should have one.")
+        #expect(mockPresenter.capturedTitle == expectedError.localizedDescription, "Should match the expected error passed in.")
+        #expect(mockPresenter.capturedMessage == expectedReason.message, "Should match the expected reason passed in.")
+        #expect(mockPresenter.capturedActions.count == 1, "Should have one.")
     }
 
     @Test("Tapping `Ok` button on fetch failure alert reloads film content and updates VM's `currentState`",
