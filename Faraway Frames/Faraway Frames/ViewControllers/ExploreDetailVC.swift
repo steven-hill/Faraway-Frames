@@ -152,12 +152,7 @@ final class ExploreDetailVC: UIViewController {
             contentView.isHidden = true
             buttonsContainer.isHidden = true
         case .error(let error, let film, let queue):
-            let alert = UIAlertController(
-                title: error.localizedDescription,
-                message: error.secondaryText,
-                preferredStyle: .alert
-            )
-            let retryAction = UIAlertAction(title: "Retry", style: .default) { [weak self] _ in
+            let retryAction = AlertAction(title: "Retry", style: .default) { [weak self] _ in
                 guard let self else { return }
                 let reason = PersistenceFailureReason(from: error)
                 let action: QueueAction = error == .addFailed(reason) ? .add : .remove
@@ -165,15 +160,16 @@ final class ExploreDetailVC: UIViewController {
                     await self.filmDetailViewModel.updateStatus(for: film, queue: queue, action: action)
                 }
             }
-            let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { [weak self] _ in
+            let cancelAction = AlertAction(title: "Cancel", style: .cancel) { [weak self] _ in
                 guard let self else { return }
                 let button = queue == .upNext ? self.upNextButton : self.watchedButton
                 self.setButtonEnabled(true, button: button)
                 self.filmDetailViewModel.returnToFilmContent(film: film)
             }
-            alert.addAction(retryAction)
-            alert.addAction(cancelAction)
-            alertPresenter.present(alert, from: self)
+            alertPresenter.presentAlert(title: error.localizedDescription,
+                                        message: error.secondaryText,
+                                        actions: [retryAction, cancelAction],
+                                        from: self)
             navigationItem.hidesBackButton = true
             contentView.isHidden = true
             buttonsContainer.isHidden = true
