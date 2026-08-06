@@ -152,7 +152,12 @@ final class ExploreDetailVC: UIViewController {
             contentView.isHidden = true
             buttonsContainer.isHidden = true
         case .error(let error, let film, let queue):
-            config = createErrorConfig(error: error, film: film, queue: queue)
+            let alert = UIAlertController(
+                title: error.localizedDescription,
+                message: error.secondaryText,
+                preferredStyle: .alert
+            )
+            alertPresenter.present(alert, from: self)
             navigationItem.hidesBackButton = true
             contentView.isHidden = true
             buttonsContainer.isHidden = true
