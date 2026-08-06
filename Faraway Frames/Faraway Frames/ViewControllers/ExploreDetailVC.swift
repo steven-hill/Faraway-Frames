@@ -136,14 +136,14 @@ final class ExploreDetailVC: UIViewController {
             self.isWatched = displayModel.isWatched
             updatedFilm = displayModel.film
         case .fetchFailure(let error, let film):
-            let retryAction = AlertAction(title: "Ok", style: .default) { [weak self] _ in
+            let okAction = AlertAction(title: "Ok", style: .default) { [weak self] _ in
                 guard let self else { return }
                 filmDetailViewModel.returnToFilmContent(film: film)
                 self.setNeedsUpdateContentUnavailableConfiguration()
             }
             alertPresenter.presentAlert(title: error.localizedDescription,
                                         message: error.secondaryText,
-                                        actions: [retryAction],
+                                        actions: [okAction],
                                         from: self)
             navigationItem.hidesBackButton = true
             contentView.isHidden = true

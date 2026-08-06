@@ -19,7 +19,7 @@ extension FilmDetailError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .fetchFailed:
-            return "Error fetching synced film"
+            return "Error syncing film"
         case .addFailed:
             return "Error adding film"
         case .removeFailed:
