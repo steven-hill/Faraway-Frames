@@ -123,112 +123,10 @@ final class ExploreDetailVC: UIViewController {
     
     override func updateContentUnavailableConfiguration(using state: UIContentUnavailableConfigurationState) {
         var config: UIContentUnavailableConfiguration? = nil
-        switch filmDetailViewModel.currentState {
-        case .noFilmSelected:
+        if case .noFilmSelected = filmDetailViewModel.currentState {
             config = createEmptyState()
-            buttonsContainer.isHidden = true
-        case .content(let displayModel, let image):
-            config = nil
-            createContent(displayModel: displayModel, image: image)
-            contentView.isHidden = false
-            buttonsContainer.isHidden = false
-            self.isUpNext = displayModel.isUpNext
-            self.isWatched = displayModel.isWatched
-            updatedFilm = displayModel.film
-        case .fetchFailure(let error, let film):
-            let okAction = AlertAction(title: "Ok", style: .default) { [weak self] _ in
-                guard let self else { return }
-                filmDetailViewModel.returnToFilmContent(film: film)
-                self.setNeedsUpdateContentUnavailableConfiguration()
-            }
-            alertPresenter.presentAlert(title: error.localizedDescription,
-                                        message: error.secondaryText,
-                                        actions: [okAction],
-                                        from: self)
-            navigationItem.hidesBackButton = true
-            contentView.isHidden = true
-            buttonsContainer.isHidden = true
-        case .error(let error, let film, let queue):
-            let retryAction = AlertAction(title: "Retry", style: .default) { [weak self] _ in
-                guard let self else { return }
-                let reason = PersistenceFailureReason(from: error)
-                let action: QueueAction = error == .addFailed(reason) ? .add : .remove
-                Task {
-                    await self.filmDetailViewModel.updateStatus(for: film, queue: queue, action: action)
-                }
-            }
-            let cancelAction = AlertAction(title: "Cancel", style: .cancel) { [weak self] _ in
-                guard let self else { return }
-                let button = queue == .upNext ? self.upNextButton : self.watchedButton
-                self.setButtonEnabled(true, button: button)
-                self.filmDetailViewModel.returnToFilmContent(film: film)
-            }
-            alertPresenter.presentAlert(title: error.localizedDescription,
-                                        message: error.secondaryText,
-                                        actions: [retryAction, cancelAction],
-                                        from: self)
-            navigationItem.hidesBackButton = true
-            contentView.isHidden = true
-            buttonsContainer.isHidden = true
         }
         self.contentUnavailableConfiguration = config
-    }
-    
-    private func createEmptyState() -> UIContentUnavailableConfiguration {
-        var config = UIContentUnavailableConfiguration.empty()
-        config.image = SFSymbols.movieClapper
-        config.text = "No Film Selected"
-        config.secondaryText = "Select a film from the list for more details."
-        return config
-    }
-    
-    private func createContent(displayModel: FilmDetailViewModel.FilmDetailDisplayModel, image: UIImage?) {
-        movieBanner.image = image
-        movieBanner.contentMode = (movieBanner.image == SFSymbols.movieClapper) ? .scaleAspectFit : .scaleAspectFill
-        titleLabel.text = displayModel.title
-        originalTitlesLabel.text = displayModel.visualOriginalTitles
-        originalTitlesLabel.accessibilityAttributedLabel = displayModel.spokenJapaneseTitle
-        releaseDateAndRunningTimeLabel.text = displayModel.releaseYearAndDurationText
-        releaseDateAndRunningTimeLabel.accessibilityLabel = displayModel.releaseYearAndDurationAccessibilityLabel
-        synopsisHeaderLabel.text = displayModel.synopsisTitle
-        synopsisLabel.text = displayModel.synopsisDescription
-        rottenTomatoesScoreLabel.attributedText = displayModel.rottenTomatoesScoreText
-        creditsContainer.configure(
-            withDirector: displayModel.director,
-            producer: displayModel.producer,
-            accessibilityLabelText: displayModel.creditsAccessibilityLabel
-        )
-    }
-    
-    private func createErrorConfig(error: FilmDetailError, film: Film, queue: FilmQueue) -> UIContentUnavailableConfiguration {
-        var config = UIContentUnavailableConfiguration.empty()
-        config.text = "\(error.localizedDescription)"
-        config.secondaryText = "\(error.secondaryText)"
-        config.image = SFSymbols.exclamationMarkTriangle
-        config.imageProperties.tintColor = .systemRed
-        
-        config.button = .prominentGlass()
-        config.button.title = "Retry"
-        config.buttonProperties.primaryAction = UIAction { [weak self] _ in
-            guard let self else { return }
-            let reason = PersistenceFailureReason(from: error)
-            let action: QueueAction = error == .addFailed(reason) ? .add : .remove
-            Task {
-                await filmDetailViewModel.updateStatus(for: film, queue: queue, action: action)
-            }
-            self.setNeedsUpdateContentUnavailableConfiguration()
-        }
-        
-        config.secondaryButton = .plain()
-        config.secondaryButton.title = "Cancel"
-        config.secondaryButtonProperties.primaryAction = UIAction { [weak self] _ in
-            guard let self else { return }
-            let button = queue == .upNext ? upNextButton : watchedButton
-            setButtonEnabled(true, button: button)
-            filmDetailViewModel.returnToFilmContent(film: film)
-            self.setNeedsUpdateContentUnavailableConfiguration()
-        }
-        return config
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -304,6 +202,33 @@ final class ExploreDetailVC: UIViewController {
         contentView.addSubview(rottenTomatoesScoreLabel)
         contentView.addSubview(creditsContainer)
         contentView.addSubview(buttonsContainer)
+    }
+    
+    // MARK: - Empty State, and Content Methods
+    private func createEmptyState() -> UIContentUnavailableConfiguration {
+        var config = UIContentUnavailableConfiguration.empty()
+        config.image = SFSymbols.movieClapper
+        config.text = "No Film Selected"
+        config.secondaryText = "Select a film from the list for more details."
+        return config
+    }
+    
+    private func createContent(displayModel: FilmDetailViewModel.FilmDetailDisplayModel, image: UIImage?) {
+        movieBanner.image = image
+        movieBanner.contentMode = (movieBanner.image == SFSymbols.movieClapper) ? .scaleAspectFit : .scaleAspectFill
+        titleLabel.text = displayModel.title
+        originalTitlesLabel.text = displayModel.visualOriginalTitles
+        originalTitlesLabel.accessibilityAttributedLabel = displayModel.spokenJapaneseTitle
+        releaseDateAndRunningTimeLabel.text = displayModel.releaseYearAndDurationText
+        releaseDateAndRunningTimeLabel.accessibilityLabel = displayModel.releaseYearAndDurationAccessibilityLabel
+        synopsisHeaderLabel.text = displayModel.synopsisTitle
+        synopsisLabel.text = displayModel.synopsisDescription
+        rottenTomatoesScoreLabel.attributedText = displayModel.rottenTomatoesScoreText
+        creditsContainer.configure(
+            withDirector: displayModel.director,
+            producer: displayModel.producer,
+            accessibilityLabelText: displayModel.creditsAccessibilityLabel
+        )
     }
     
     // MARK: - Buttons UI Updates
@@ -425,9 +350,19 @@ final class ExploreDetailVC: UIViewController {
 extension ExploreDetailVC: FilmDetailViewModelDelegate {
     func didUpdateFilmDetails() {
         setNeedsUpdateContentUnavailableConfiguration()
+        if case .content(let displayModel, let image) = filmDetailViewModel.currentState {
+            createContent(displayModel: displayModel, image: image)
+            contentView.isHidden = false
+            buttonsContainer.isHidden = false
+            self.isUpNext = displayModel.isUpNext
+            self.isWatched = displayModel.isWatched
+            updatedFilm = displayModel.film
+        }
     }
     
     func didUpdateWithEmptyState() {
+        buttonsContainer.isHidden = true
+        contentView.isHidden = true
         setNeedsUpdateContentUnavailableConfiguration()
     }
     
@@ -442,7 +377,45 @@ extension ExploreDetailVC: FilmDetailViewModelDelegate {
     }
     
     func didReceiveError() {
+        navigationItem.hidesBackButton = true
+        contentView.isHidden = true
+        buttonsContainer.isHidden = true
         setNeedsUpdateContentUnavailableConfiguration()
+        
+        switch filmDetailViewModel.currentState {
+        case .fetchFailure(let error, let film):
+            let okAction = AlertAction(title: "Ok", style: .default) { [weak self] _ in
+                guard let self else { return }
+                filmDetailViewModel.returnToFilmContent(film: film)
+            }
+            alertPresenter.presentAlert(title: error.localizedDescription,
+                                        message: error.secondaryText,
+                                        actions: [okAction],
+                                        from: self)
+            
+        case .error(let error, let film, let queue):
+            let retryAction = AlertAction(title: "Retry", style: .default) { [weak self] _ in
+                guard let self else { return }
+                let reason = PersistenceFailureReason(from: error)
+                let action: QueueAction = error == .addFailed(reason) ? .add : .remove
+                Task {
+                    await self.filmDetailViewModel.updateStatus(for: film, queue: queue, action: action)
+                }
+            }
+            let cancelAction = AlertAction(title: "Cancel", style: .cancel) { [weak self] _ in
+                guard let self else { return }
+                let button = queue == .upNext ? self.upNextButton : self.watchedButton
+                self.setButtonEnabled(true, button: button)
+                self.filmDetailViewModel.returnToFilmContent(film: film)
+            }
+            alertPresenter.presentAlert(title: error.localizedDescription,
+                                        message: error.secondaryText,
+                                        actions: [retryAction, cancelAction],
+                                        from: self)
+            
+        default:
+            break
+        }
     }
 }
 

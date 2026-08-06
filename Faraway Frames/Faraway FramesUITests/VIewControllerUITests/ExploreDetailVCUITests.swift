@@ -105,7 +105,7 @@ final class ExploreDetailVCUITests: XCTestCase {
         XCTAssertTrue(button.isHittable, "Should be able to be tapped.")
     }
     
-    func test_exploreDetailVC_whenAddingFilmButDiskIsFull_showsCorrectErrorMessage() {
+    func test_exploreDetailVC_whenAddingFilmButDiskIsFull_showsAlert() {
         launchAppForSaveError(with: .addToQueueDiskFull)
         revealButtons()
         
@@ -126,7 +126,7 @@ final class ExploreDetailVCUITests: XCTestCase {
         XCTAssertTrue(cancelButton.isHittable, "Should be able to be tapped.")
     }
     
-    func test_exploreDetailVC_whenAddingFilmResultsInDatabaseError_showsCorrectErrorMessage() {
+    func test_exploreDetailVC_whenAddingFilmResultsInDatabaseError_showsAlert() {
         launchAppForSaveError(with: .addToQueueDatabaseError)
         revealButtons()
         
@@ -147,7 +147,7 @@ final class ExploreDetailVCUITests: XCTestCase {
         XCTAssertTrue(cancelButton.isHittable, "Should be able to be tapped.")
     }
     
-    func test_exploreDetailVC_whenRemovingFilmResultsInDatabaseError_showsCorrectErrorMessage() {
+    func test_exploreDetailVC_whenRemovingFilmResultsInDatabaseError_showsAlert() {
         launchAppForSaveError(with: .deleteFromQueueDatabaseError)
         revealButtons()
         

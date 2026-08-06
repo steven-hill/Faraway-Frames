@@ -94,16 +94,7 @@ struct ExploreDetailVCTests {
         #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
     }
     
-    @Test func exploreDetailVC_viewDidLoad_whenFilmIsNil_contentUnavailableConfiguration_isNil() {
-        let sut = makeSUTWhenFilmIsNil()
-        
-        sut.loadViewIfNeeded()
-        sut.setNeedsUpdateContentUnavailableConfiguration()
-        
-        #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
-    }
-    
-    @Test func exploreDetailVC_viewDidLoad_whenFilmIsNil_displaysEmptyState() {
+    @Test func exploreDetailVC_viewDidLoad_whenFilmIsNil_displaysEmptyState_andContentUnavailableConfiguration_isNil() {
         let sut = makeSUTWhenFilmIsNil()
         
         sut.loadViewIfNeeded()
@@ -141,8 +132,9 @@ struct ExploreDetailVCTests {
         let sut = try makeSUTWithFetchFailureFRC(throwing: scenario.systemError)
         let mockPresenter = MockAlertPresenter()
         sut.alertPresenter = mockPresenter
-        
         sut.filmDetailViewModel.setFilm(Film.sample[0])
+        
+        sut.didReceiveError()
         
         let state = UIContentUnavailableConfigurationState(traitCollection: sut.traitCollection)
         sut.updateContentUnavailableConfiguration(using: state)
@@ -161,8 +153,9 @@ struct ExploreDetailVCTests {
         let sut = try makeSUTWithFetchFailureFRC(throwing: unknownError)
         let mockPresenter = MockAlertPresenter()
         sut.alertPresenter = mockPresenter
-        
         sut.filmDetailViewModel.setFilm(Film.sample[0])
+        
+        sut.didReceiveError()
         
         let state = UIContentUnavailableConfigurationState(traitCollection: sut.traitCollection)
         sut.updateContentUnavailableConfiguration(using: state)
@@ -405,20 +398,19 @@ struct ExploreDetailVCTests {
         #expect(sut.filmDetailViewModel.filmWasUpdated == false, "Should be false because update status failed.")
     }
     
-    @Test("Integration test to check that the label successfully receives the text from ViewModel.")
+    @Test("Integration test to check that the label successfully receives the text from ViewModel and sets the correct accessibility label for VoiceOver.")
     func exploreDetailVC_createContent_successfullyBindsAccessibilityPropertiesToLabel() {
         let sut = makeSUTWithFilm()
-        
         sut.loadViewIfNeeded()
-        sut.setNeedsUpdateContentUnavailableConfiguration()
-        sut.updateContentUnavailableConfiguration(using: sut.contentUnavailableConfigurationState)
+        
+        sut.didUpdateFilmDetails()
+        
         let targetIdentifier = "ExploreDetailVC_OriginalTitlesLabel"
         let foundLabel = sut.view.findView(withIdentifier: targetIdentifier) as? UILabel        
         guard let label = foundLabel else {
             Issue.record("Could not find a UILabel with accessibilityIdentifier: '\(targetIdentifier)'.")
             return
         }
-        
         let expectedPrefix = "Original title: "
         #expect(label.accessibilityAttributedLabel?.string == "\(expectedPrefix)\(Film.sample[0].originalTitle)")
     }
@@ -436,10 +428,9 @@ struct ExploreDetailVCTests {
     
     @Test func exploreDetailVC_withFilm_buttonsContainerIsVisible() {
         let sut = makeSUTWithFilm()
-        
         sut.loadViewIfNeeded()
-        sut.setNeedsUpdateContentUnavailableConfiguration()
-        sut.updateContentUnavailableConfiguration(using: sut.contentUnavailableConfigurationState)
+        
+        sut.didUpdateFilmDetails()
         
         #expect(sut.view.findView(withIdentifier: "ExploreDetailVC_ButtonsContainer")?.isHidden == false,
                 "Buttons container must be visible when state is `.content`.")
@@ -503,13 +494,13 @@ struct ExploreDetailVCTests {
         #expect(sut.upNextButton.isEnabled == true, "The button should be enabled.")
     }
     
-    @Test("`viewWillDisappear` calls delegate with the film when view model has changes", .tags(.persistence))
-    func exploreDetailVC_viewWillDisappear_whenHasChangesIsTrue_notifiesDelegate() async {
+    @Test("`viewWillDisappear` calls delegate with the film when the film is updated", .tags(.persistence))
+    func exploreDetailVC_viewWillDisappear_whenFilmWasUpdatedIsTrue_notifiesDelegate() async {
         let sut = makeSUTWithFilm()
         let delegateSpy = FilmDetailViewControllerDelegateSpy()
         sut.delegate = delegateSpy
         await sut.filmDetailViewModel.updateStatus(for: Film.sample[0], queue: .upNext, action: .add)
-        sut.updateContentUnavailableConfiguration(using: sut.contentUnavailableConfigurationState)
+        sut.didUpdateFilmDetails()
         
         sut.viewWillDisappear(false)
         
