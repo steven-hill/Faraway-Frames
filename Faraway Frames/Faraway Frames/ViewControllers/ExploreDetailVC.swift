@@ -425,6 +425,14 @@ final class ExploreDetailVC: UIViewController {
 extension ExploreDetailVC: FilmDetailViewModelDelegate {
     func didUpdateFilmDetails() {
         setNeedsUpdateContentUnavailableConfiguration()
+        if case .content(let displayModel, let image) = filmDetailViewModel.currentState {
+            createContent(displayModel: displayModel, image: image)
+            contentView.isHidden = false
+            buttonsContainer.isHidden = false
+            self.isUpNext = displayModel.isUpNext
+            self.isWatched = displayModel.isWatched
+            updatedFilm = displayModel.film
+        }
     }
     
     func didUpdateWithEmptyState() {
