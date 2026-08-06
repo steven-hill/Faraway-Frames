@@ -123,52 +123,8 @@ final class ExploreDetailVC: UIViewController {
     
     override func updateContentUnavailableConfiguration(using state: UIContentUnavailableConfigurationState) {
         var config: UIContentUnavailableConfiguration? = nil
-        switch filmDetailViewModel.currentState {
-        case .noFilmSelected:
+        if case .noFilmSelected = filmDetailViewModel.currentState {
             config = createEmptyState()
-            buttonsContainer.isHidden = true
-        case .content(let displayModel, let image):
-            config = nil
-            createContent(displayModel: displayModel, image: image)
-            contentView.isHidden = false
-            buttonsContainer.isHidden = false
-            self.isUpNext = displayModel.isUpNext
-            self.isWatched = displayModel.isWatched
-            updatedFilm = displayModel.film
-        case .fetchFailure(let error, let film):
-            let okAction = AlertAction(title: "Ok", style: .default) { [weak self] _ in
-                guard let self else { return }
-                filmDetailViewModel.returnToFilmContent(film: film)
-            }
-            alertPresenter.presentAlert(title: error.localizedDescription,
-                                        message: error.secondaryText,
-                                        actions: [okAction],
-                                        from: self)
-            navigationItem.hidesBackButton = true
-            contentView.isHidden = true
-            buttonsContainer.isHidden = true
-        case .error(let error, let film, let queue):
-            let retryAction = AlertAction(title: "Retry", style: .default) { [weak self] _ in
-                guard let self else { return }
-                let reason = PersistenceFailureReason(from: error)
-                let action: QueueAction = error == .addFailed(reason) ? .add : .remove
-                Task {
-                    await self.filmDetailViewModel.updateStatus(for: film, queue: queue, action: action)
-                }
-            }
-            let cancelAction = AlertAction(title: "Cancel", style: .cancel) { [weak self] _ in
-                guard let self else { return }
-                let button = queue == .upNext ? self.upNextButton : self.watchedButton
-                self.setButtonEnabled(true, button: button)
-                self.filmDetailViewModel.returnToFilmContent(film: film)
-            }
-            alertPresenter.presentAlert(title: error.localizedDescription,
-                                        message: error.secondaryText,
-                                        actions: [retryAction, cancelAction],
-                                        from: self)
-            navigationItem.hidesBackButton = true
-            contentView.isHidden = true
-            buttonsContainer.isHidden = true
         }
         self.contentUnavailableConfiguration = config
     }
