@@ -132,8 +132,9 @@ struct ExploreDetailVCTests {
         let sut = try makeSUTWithFetchFailureFRC(throwing: scenario.systemError)
         let mockPresenter = MockAlertPresenter()
         sut.alertPresenter = mockPresenter
-        
         sut.filmDetailViewModel.setFilm(Film.sample[0])
+        
+        sut.didReceiveError()
         
         let state = UIContentUnavailableConfigurationState(traitCollection: sut.traitCollection)
         sut.updateContentUnavailableConfiguration(using: state)
@@ -152,8 +153,9 @@ struct ExploreDetailVCTests {
         let sut = try makeSUTWithFetchFailureFRC(throwing: unknownError)
         let mockPresenter = MockAlertPresenter()
         sut.alertPresenter = mockPresenter
-        
         sut.filmDetailViewModel.setFilm(Film.sample[0])
+        
+        sut.didReceiveError()
         
         let state = UIContentUnavailableConfigurationState(traitCollection: sut.traitCollection)
         sut.updateContentUnavailableConfiguration(using: state)
