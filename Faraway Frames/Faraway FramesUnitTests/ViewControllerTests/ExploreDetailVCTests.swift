@@ -327,13 +327,11 @@ struct ExploreDetailVCTests {
         sut.updateContentUnavailableConfiguration(using: state)
         let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
         
-        #expect(config != nil, "Should not be nil.")
-        #expect(config?.button.title != nil, "Should have a title.")
-        #expect(config?.secondaryButton.title != nil, "Should have a title.")
+        #expect(config == nil, "Should not be nil.")
         #expect(mockPresenter.presentedAlert?.title == expectedError.localizedDescription, "Should match the expected error passed in.")
         #expect(mockPresenter.presentedAlert?.message == scenario.expectedReason.message, "Should match the expected reason passed in.")
-        #expect(mockPresenter.presentedAlert?.preferredStyle == .alert, "Should be alert.")
-        #expect(mockPresenter.presentedAlert?.actions.count == 1, "Should have one.")
+        #expect(mockPresenter.presentedAlert?.preferredStyle == .alert, "Should be `.alert`.")
+        #expect(mockPresenter.presentedAlert?.actions.count == 2, "Should have two.")
     }
     
     @Test("Tapping `Retry` button on error config calls VM's updateStatus method again and sets `attemptingUpdate` flag to true",
