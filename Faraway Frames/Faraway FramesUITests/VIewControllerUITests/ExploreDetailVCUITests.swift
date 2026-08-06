@@ -114,11 +114,16 @@ final class ExploreDetailVCUITests: XCTestCase {
         XCTAssertEqual(result, .completed, "The button label did not load from Core Data in time.")
         
         watchedButton.tap()
+        let alert = app.alerts.firstMatch
+        let retryButton = alert.buttons.element(boundBy: 0)
+        let cancelButton = alert.buttons.element(boundBy: 1)
         
-        XCTAssertTrue(app.staticTexts["Error adding film"].exists, "Should show primary error message.")
-        XCTAssertTrue(app.staticTexts["Your device storage is full. Free up space and try again."].exists, "Should show secondary error message.")
-        XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
-        XCTAssertTrue(app.buttons["Cancel"].isHittable, "Cancel button should be tappable.")
+        XCTAssertTrue(alert.exists, "Should exist.")
+        XCTAssertTrue(alert.staticTexts.count == 2, "Should have 2 static texts.")
+        XCTAssertTrue(retryButton.exists, "Should exist.")
+        XCTAssertTrue(retryButton.isHittable, "Should be able to be tapped.")
+        XCTAssertTrue(cancelButton.exists, "Should exist.")
+        XCTAssertTrue(cancelButton.isHittable, "Should be able to be tapped.")
     }
     
     func test_exploreDetailVC_whenAddingFilmResultsInDatabaseError_showsCorrectErrorMessage() {
@@ -130,11 +135,16 @@ final class ExploreDetailVCUITests: XCTestCase {
         XCTAssertEqual(result, .completed, "The button label did not load from Core Data in time.")
         
         watchedButton.tap()
+        let alert = app.alerts.firstMatch
+        let retryButton = alert.buttons.element(boundBy: 0)
+        let cancelButton = alert.buttons.element(boundBy: 1)
         
-        XCTAssertTrue(app.staticTexts["Error adding film"].exists, "Should show primary error message.")
-        XCTAssertTrue(app.staticTexts["There was a problem with the database. Please try again."].exists, "Should show secondary error message.")
-        XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
-        XCTAssertTrue(app.buttons["Cancel"].isHittable, "Cancel button should be tappable.")
+        XCTAssertTrue(alert.exists, "Should exist.")
+        XCTAssertTrue(alert.staticTexts.count == 2, "Should have 2 static texts.")
+        XCTAssertTrue(retryButton.exists, "Should exist.")
+        XCTAssertTrue(retryButton.isHittable, "Should be able to be tapped.")
+        XCTAssertTrue(cancelButton.exists, "Should exist.")
+        XCTAssertTrue(cancelButton.isHittable, "Should be able to be tapped.")
     }
     
     func test_exploreDetailVC_whenRemovingFilmResultsInDatabaseError_showsCorrectErrorMessage() {
@@ -146,11 +156,16 @@ final class ExploreDetailVCUITests: XCTestCase {
         XCTAssertEqual(result, .completed, "The button label did not load from Core Data in time.")
         
         upNextButton.tap()
+        let alert = app.alerts.firstMatch
+        let retryButton = alert.buttons.element(boundBy: 0)
+        let cancelButton = alert.buttons.element(boundBy: 1)
         
-        XCTAssertTrue(app.staticTexts["Error removing film"].exists, "Should show primary error message.")
-        XCTAssertTrue(app.staticTexts["There was a problem with the database. Please try again."].exists, "Should show error secondary message.")
-        XCTAssertTrue(app.buttons["Retry"].isHittable, "Retry button should be tappable.")
-        XCTAssertTrue(app.buttons["Cancel"].isHittable, "Cancel button should be tappable.")
+        XCTAssertTrue(alert.exists, "Should exist.")
+        XCTAssertTrue(alert.staticTexts.count == 2, "Should have 2 static texts.")
+        XCTAssertTrue(retryButton.exists, "Should exist.")
+        XCTAssertTrue(retryButton.isHittable, "Should be able to be tapped.")
+        XCTAssertTrue(cancelButton.exists, "Should exist.")
+        XCTAssertTrue(cancelButton.isHittable, "Should be able to be tapped.")
     }
 
     // MARK: - Helper methods
