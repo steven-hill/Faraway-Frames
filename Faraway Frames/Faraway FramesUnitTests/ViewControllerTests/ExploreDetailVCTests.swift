@@ -492,13 +492,13 @@ struct ExploreDetailVCTests {
         #expect(sut.upNextButton.isEnabled == true, "The button should be enabled.")
     }
     
-    @Test("`viewWillDisappear` calls delegate with the film when view model has changes", .tags(.persistence))
-    func exploreDetailVC_viewWillDisappear_whenHasChangesIsTrue_notifiesDelegate() async {
+    @Test("`viewWillDisappear` calls delegate with the film when the film is updated", .tags(.persistence))
+    func exploreDetailVC_viewWillDisappear_whenFilmWasUpdatedIsTrue_notifiesDelegate() async {
         let sut = makeSUTWithFilm()
         let delegateSpy = FilmDetailViewControllerDelegateSpy()
         sut.delegate = delegateSpy
         await sut.filmDetailViewModel.updateStatus(for: Film.sample[0], queue: .upNext, action: .add)
-        sut.updateContentUnavailableConfiguration(using: sut.contentUnavailableConfigurationState)
+        sut.didUpdateFilmDetails()
         
         sut.viewWillDisappear(false)
         
