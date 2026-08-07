@@ -166,6 +166,7 @@ final class ExploreListVC: UIViewController {
         }
     }
     
+    // MARK: - UI Updates
     private func updateViewHierarchyForCurrentState() {
         var collectionViewIsHidden = true
         var searchBarIsEnabled = false
@@ -219,6 +220,14 @@ final class ExploreListVC: UIViewController {
         
         self.collectionView.isHidden = collectionViewIsHidden
         self.searchController.searchBar.isEnabled = searchBarIsEnabled
+    }
+    
+    private func createLoadingView(with text: String) -> UIContentUnavailableConfiguration {
+        var config = UIContentUnavailableConfiguration.loading()
+        config.text = text
+        config.textProperties.font = .preferredFont(forTextStyle: .title1)
+        config.textProperties.color = .systemGray
+        return config
     }
     
     private func createEmptySearchResultsView() -> UIContentUnavailableConfiguration {
