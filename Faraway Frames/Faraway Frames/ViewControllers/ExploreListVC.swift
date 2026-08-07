@@ -213,6 +213,13 @@ final class ExploreListVC: UIViewController {
         self.searchController.searchBar.isEnabled = searchBarIsEnabled
     }
     
+    private func createEmptySearchResultsView() -> UIContentUnavailableConfiguration {
+        var config = UIContentUnavailableConfiguration.search()
+        config.text = "No Films Found"
+        config.secondaryText = "Check spelling or try another search."
+        return config
+    }
+    
     func retryButtonTapped() {
         viewModel.retryLoadingAllFilms()
         updateViewHierarchyForCurrentState()
