@@ -63,8 +63,13 @@ final class ExploreListVC: UIViewController {
     
     override func updateContentUnavailableConfiguration(using state: UIContentUnavailableConfigurationState) {
         var config: UIContentUnavailableConfiguration? = nil
-        if case .emptySearchResults = viewModel.currentState {
+        switch viewModel.currentState {
+        case .loadingAllFilms:
+            config = createLoadingView()
+        case .emptySearchResults:
             config = createEmptySearchResultsView()
+            config = createLoadingView()
+        default: break
         }
         self.contentUnavailableConfiguration = config
     }
