@@ -21,14 +21,6 @@ struct ExploreListVCTests {
         #expect(sut.view != nil, "Should not be nil.")
     }
     
-    @Test func exploreListVC_stateContainerView_onInit_isNil() {
-        let sut = makeSUT()
-        
-        sut.loadViewIfNeeded()
-        
-        #expect(sut.currentStateView == nil, "Should be nil on init.")
-    }
-    
     @Test func exploreListVC_isInsideANavigationController() {
         let sut = makeSUT()
         _ = UINavigationController(rootViewController: sut)
@@ -94,7 +86,7 @@ struct ExploreListVCTests {
         
         #expect(sut.films.count == 22, "VC's film should contain 22 films.")
         #expect(sut.viewModel.currentState == .content(isUsingArchivedData: false), "Should set the state to .content.")
-        #expect(sut.currentStateView == nil, "Should be nil.")
+        #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
         #expect(sut.collectionView.isHidden == false)
         #expect(sut.searchController.searchBar.isEnabled == true)
     }
@@ -126,7 +118,7 @@ struct ExploreListVCTests {
         let retryAction = mockPresenter.capturedActions.first
         #expect(retryAction?.title != nil, "Should not be nil.")
         #expect(retryAction?.style == .default, "Should be `.default`.")
-        #expect(sut.currentStateView == nil, "Should be nil.")
+        #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
         #expect(sut.viewModel.currentState == .error(expectedError), "Should be set to .`error`.")
     }
     
@@ -172,8 +164,8 @@ struct ExploreListVCTests {
         #expect(sut.loadTask == nil, "Should be nil.")
     }
     
-    @Test("VC handles transitions from empty search results view to collection view")
-    func exploreListVC_updateViewHierarchyForCurrentState_forStateViewTransitions_cleansUpPreviousView() async {
+    @Test("VC handles transition from empty search results view back to collection view")
+    func exploreListVC_whenSearchBarCancelButtonTapped_returnsToCollectionView() async {
         let sut = makeSUTForNetworkSuccess()
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
@@ -182,12 +174,13 @@ struct ExploreListVCTests {
         sut.view.layoutIfNeeded()
         
         #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil because empty search results view is on screen.")
+        #expect(sut.collectionView.isHidden, "Should be hidden.")
         
         sut.searchBarCancelButtonClicked(sut.searchController.searchBar)
         sut.view.layoutIfNeeded()
         
         #expect(sut.contentUnavailableConfiguration == nil, "Should be nil because the collection view is now on screen.")
-        #expect(sut.currentStateView == nil, "Should be nil because the collection view is now on screen.")
+        #expect(sut.collectionView.isHidden == false, "Should be on screen.")
     }
 
     @Test func exploreListVC_didUpdateFilms_updatesCollectionViewItemCount() {

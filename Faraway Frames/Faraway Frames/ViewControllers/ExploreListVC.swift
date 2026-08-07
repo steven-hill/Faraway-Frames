@@ -19,7 +19,6 @@ final class ExploreListVC: UIViewController {
     private(set) var filmLookup: [String: Film] = [:]
     let viewModel: FilmsListViewModel
     lazy var collectionView = UICollectionView()
-    private(set) var currentStateView: UIView?
     private let cellConfigurator: FilmRowCellConfigurator
     private var headerRegistration: UICollectionView.SupplementaryRegistration<NetworkErrorHeaderView>!
     private var filmCellRegistration: UICollectionView.CellRegistration<FilmRowCell, Film>!
@@ -169,21 +168,15 @@ final class ExploreListVC: UIViewController {
     private func updateViewHierarchyForCurrentState() {
         var collectionViewIsHidden = true
         var searchBarIsEnabled = false
-        currentStateView?.removeFromSuperview()
-        currentStateView = nil
-        let newStateView: UIView?
         
         switch viewModel.currentState {
         case .idle, .loadingAllFilms, .retrying:
             setNeedsUpdateContentUnavailableConfiguration()
-            newStateView = nil
         case .content(isUsingArchivedData: false), .content(isUsingArchivedData: true):
             setNeedsUpdateContentUnavailableConfiguration()
             collectionViewIsHidden = false
             searchBarIsEnabled = true
-            newStateView = nil
         case .emptySearchResults:
-            newStateView = nil
             setNeedsUpdateContentUnavailableConfiguration()
             searchBarIsEnabled = true
         case .error(let error):
@@ -195,19 +188,6 @@ final class ExploreListVC: UIViewController {
                                         message: error.localizedDescription,
                                         actions: [retryAction],
                                         from: self)
-            newStateView = nil
-        }
-        
-        if let stateView = newStateView {
-            view.addSubview(stateView)
-            currentStateView = stateView
-            let topAnchor = stateView is LoadingView ? view.topAnchor : view.safeAreaLayoutGuide.topAnchor
-            NSLayoutConstraint.activate([
-                stateView.topAnchor.constraint(equalTo: topAnchor),
-                stateView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-                stateView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-                stateView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-            ])
         }
         
         self.collectionView.isHidden = collectionViewIsHidden
