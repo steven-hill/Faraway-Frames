@@ -222,8 +222,6 @@ final class ExploreListVC: UIViewController {
     private func createLoadingView(with text: String) -> UIContentUnavailableConfiguration {
         var config = UIContentUnavailableConfiguration.loading()
         config.text = text
-        config.textProperties.font = .preferredFont(forTextStyle: .title1)
-        config.textProperties.color = .systemGray
         return config
     }
     
