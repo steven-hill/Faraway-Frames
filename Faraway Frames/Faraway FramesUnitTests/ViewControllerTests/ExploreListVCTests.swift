@@ -81,8 +81,7 @@ struct ExploreListVCTests {
         await Task.yield()
         sut.view.layoutIfNeeded()
         
-        let loadingView = sut.currentStateView as? LoadingView
-        #expect(loadingView != nil, "A `LoadingView` should have been added to the view hierarchy.")
+        #expect(sut.contentUnavailableConfiguration != nil, "Should be showing loading view.")
         #expect(sut.viewModel.currentState == .loadingAllFilms, "State should be `.loadingAllFilms`.")
     }
     
@@ -149,9 +148,9 @@ struct ExploreListVCTests {
         sut.loadViewIfNeeded()
         
         sut.retryButtonTapped()
+        sut.view.layoutIfNeeded()
         
-        let loadingView = sut.currentStateView as? LoadingView
-        #expect(loadingView != nil, "Should be showing loading view.")
+        #expect(sut.contentUnavailableConfiguration != nil, "Should be showing loading view.")
         #expect(sut.viewModel.currentState == .retrying, "Should be set to `.retrying`.")
         #expect(sut.viewModel.refreshTask != nil, "Should start a new `refreshTask`.")
         
@@ -504,12 +503,12 @@ struct ExploreListVCTests {
         let sut = ExploreListVC(viewModel: filmsListViewModel,
                                 cellConfigurator: mockCellConfigurator,
                                 accessibilityService: mockAccessibilityService)
-        
         sut.loadViewIfNeeded()
+
         sut.collectionView.refreshControl?.sendActions(for: .valueChanged)
+        sut.view.layoutIfNeeded()
         
-        let loadingView = sut.currentStateView as? LoadingView
-        #expect(loadingView != nil, "Should be showing loading view.")
+        #expect(sut.contentUnavailableConfiguration != nil, "Should be showing loading view.")
         #expect(sut.viewModel.currentState == .retrying, "Should be set to `.retrying`.")
         
         await sut.viewModel.refreshTask?.value
