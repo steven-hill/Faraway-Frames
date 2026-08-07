@@ -21,14 +21,6 @@ struct ExploreListVCTests {
         #expect(sut.view != nil, "Should not be nil.")
     }
     
-    @Test func exploreListVC_stateContainerView_onInit_isNil() {
-        let sut = makeSUT()
-        
-        sut.loadViewIfNeeded()
-        
-        #expect(sut.currentStateView == nil, "Should be nil on init.")
-    }
-    
     @Test func exploreListVC_isInsideANavigationController() {
         let sut = makeSUT()
         _ = UINavigationController(rootViewController: sut)
@@ -81,8 +73,7 @@ struct ExploreListVCTests {
         await Task.yield()
         sut.view.layoutIfNeeded()
         
-        let loadingView = sut.currentStateView as? LoadingView
-        #expect(loadingView != nil, "A `LoadingView` should have been added to the view hierarchy.")
+        #expect(sut.contentUnavailableConfiguration != nil, "Should be showing loading view.")
         #expect(sut.viewModel.currentState == .loadingAllFilms, "State should be `.loadingAllFilms`.")
     }
     
@@ -95,7 +86,7 @@ struct ExploreListVCTests {
         
         #expect(sut.films.count == 22, "VC's film should contain 22 films.")
         #expect(sut.viewModel.currentState == .content(isUsingArchivedData: false), "Should set the state to .content.")
-        #expect(sut.currentStateView == nil, "Should be nil.")
+        #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
         #expect(sut.collectionView.isHidden == false)
         #expect(sut.searchController.searchBar.isEnabled == true)
     }
@@ -127,7 +118,7 @@ struct ExploreListVCTests {
         let retryAction = mockPresenter.capturedActions.first
         #expect(retryAction?.title != nil, "Should not be nil.")
         #expect(retryAction?.style == .default, "Should be `.default`.")
-        #expect(sut.currentStateView == nil, "Should be nil.")
+        #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
         #expect(sut.viewModel.currentState == .error(expectedError), "Should be set to .`error`.")
     }
     
@@ -149,9 +140,9 @@ struct ExploreListVCTests {
         sut.loadViewIfNeeded()
         
         sut.retryButtonTapped()
+        sut.view.layoutIfNeeded()
         
-        let loadingView = sut.currentStateView as? LoadingView
-        #expect(loadingView != nil, "Should be showing loading view.")
+        #expect(sut.contentUnavailableConfiguration != nil, "Should be showing loading view.")
         #expect(sut.viewModel.currentState == .retrying, "Should be set to `.retrying`.")
         #expect(sut.viewModel.refreshTask != nil, "Should start a new `refreshTask`.")
         
@@ -173,24 +164,23 @@ struct ExploreListVCTests {
         #expect(sut.loadTask == nil, "Should be nil.")
     }
     
-    @Test("Transitioning out of a `FFStateView` removes it from memory and subviews")
-    func exploreListVC_updateViewHierarchyForCurrentState_forStateViewTransitions_cleansUpPreviousView() async {
+    @Test("VC handles transition from empty search results view back to collection view")
+    func exploreListVC_whenSearchBarCancelButtonTapped_returnsToCollectionView() async {
         let sut = makeSUTForNetworkSuccess()
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
-        
         sut.searchController.searchBar.text = "No results found"
         sut.updateSearchResults(for: sut.searchController)
         sut.view.layoutIfNeeded()
         
-        let emptySearchResultsView = sut.currentStateView as? FFStateView
-        #expect(emptySearchResultsView != nil, "An `FFStateView` should have been added to the view hierarchy.")
+        #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil because empty search results view is on screen.")
+        #expect(sut.collectionView.isHidden, "Should be hidden.")
         
         sut.searchBarCancelButtonClicked(sut.searchController.searchBar)
+        sut.view.layoutIfNeeded()
         
-        #expect(sut.currentStateView == nil, "Should now be nil because the collection view is now on screen.")
-        let remainingFFStateViews = sut.view.subviews.filter { $0 is FFStateView }
-        #expect(remainingFFStateViews.isEmpty, "`FFStateView` should be completely removed from the view hierarchy.")
+        #expect(sut.contentUnavailableConfiguration == nil, "Should be nil because the collection view is now on screen.")
+        #expect(sut.collectionView.isHidden == false, "Should be on screen.")
     }
 
     @Test func exploreListVC_didUpdateFilms_updatesCollectionViewItemCount() {
@@ -298,8 +288,7 @@ struct ExploreListVCTests {
         sut.updateSearchResults(for: sut.searchController)
         sut.view.layoutIfNeeded()
         
-        let emptySearchResultsView = sut.currentStateView as? FFStateView
-        #expect(emptySearchResultsView != nil, "An `FFStateView` should have been added to the view hierarchy.")
+        #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil because empty search results view is on screen.")
         #expect(sut.viewModel.currentState == .emptySearchResults, "Should set the state to `.emptySearchResults`.")
     }
     
@@ -507,12 +496,12 @@ struct ExploreListVCTests {
         let sut = ExploreListVC(viewModel: filmsListViewModel,
                                 cellConfigurator: mockCellConfigurator,
                                 accessibilityService: mockAccessibilityService)
-        
         sut.loadViewIfNeeded()
+
         sut.collectionView.refreshControl?.sendActions(for: .valueChanged)
+        sut.view.layoutIfNeeded()
         
-        let loadingView = sut.currentStateView as? LoadingView
-        #expect(loadingView != nil, "Should be showing loading view.")
+        #expect(sut.contentUnavailableConfiguration != nil, "Should be showing loading view.")
         #expect(sut.viewModel.currentState == .retrying, "Should be set to `.retrying`.")
         
         await sut.viewModel.refreshTask?.value

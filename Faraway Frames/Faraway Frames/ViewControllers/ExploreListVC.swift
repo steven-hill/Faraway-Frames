@@ -19,7 +19,6 @@ final class ExploreListVC: UIViewController {
     private(set) var filmLookup: [String: Film] = [:]
     let viewModel: FilmsListViewModel
     lazy var collectionView = UICollectionView()
-    private(set) var currentStateView: UIView?
     private let cellConfigurator: FilmRowCellConfigurator
     private var headerRegistration: UICollectionView.SupplementaryRegistration<NetworkErrorHeaderView>!
     private var filmCellRegistration: UICollectionView.CellRegistration<FilmRowCell, Film>!
@@ -58,6 +57,19 @@ final class ExploreListVC: UIViewController {
         configureSearchController()
         configureRefreshControl()
         loadTask = getAllFilms()
+        view.accessibilityIdentifier = "ExploreListVC_View"
+    }
+    
+    override func updateContentUnavailableConfiguration(using state: UIContentUnavailableConfigurationState) {
+        var config: UIContentUnavailableConfiguration? = nil
+        switch viewModel.currentState {
+        case .loadingAllFilms, .retrying:
+            config = createLoadingView()
+        case .emptySearchResults:
+            config = createEmptySearchResultsView()
+        default: break
+        }
+        self.contentUnavailableConfiguration = config
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -152,29 +164,23 @@ final class ExploreListVC: UIViewController {
         }
     }
     
+    // MARK: - UI Updates
     private func updateViewHierarchyForCurrentState() {
         var collectionViewIsHidden = true
         var searchBarIsEnabled = false
-        currentStateView?.removeFromSuperview()
-        currentStateView = nil
-        let newStateView: UIView?
         
         switch viewModel.currentState {
-        case .idle, .loadingAllFilms:
-            let loadingView = LoadingView(message: "Fetching films...")
-            loadingView.accessibilityIdentifier = "ExploreListVC_LoadingView"
-            newStateView = loadingView
+        case .idle, .loadingAllFilms, .retrying:
+            setNeedsUpdateContentUnavailableConfiguration()
         case .content(isUsingArchivedData: false), .content(isUsingArchivedData: true):
+            setNeedsUpdateContentUnavailableConfiguration()
             collectionViewIsHidden = false
             searchBarIsEnabled = true
-            newStateView = nil
         case .emptySearchResults:
-            let emptySearchResultsView = FFStateView(title: "No Results Found",
-                                                     secondaryText: nil,
-                                                     accessibilityIdentifier: "ExploreListVC_EmptySearchResultsView")
-            newStateView = emptySearchResultsView
+            setNeedsUpdateContentUnavailableConfiguration()
             searchBarIsEnabled = true
         case .error(let error):
+            setNeedsUpdateContentUnavailableConfiguration()
             let retryAction = AlertAction(title: "Retry", style: .default) { [weak self] _ in
                 self?.retryButtonTapped()
             }
@@ -182,27 +188,23 @@ final class ExploreListVC: UIViewController {
                                         message: error.localizedDescription,
                                         actions: [retryAction],
                                         from: self)
-            newStateView = nil
-        case .retrying:
-            let loadingView = LoadingView(message: "Retrying...")
-            loadingView.accessibilityIdentifier = "ExploreListVC_LoadingView"
-            newStateView = loadingView
-        }
-        
-        if let stateView = newStateView {
-            view.addSubview(stateView)
-            currentStateView = stateView
-            let topAnchor = stateView is LoadingView ? view.topAnchor : view.safeAreaLayoutGuide.topAnchor
-            NSLayoutConstraint.activate([
-                stateView.topAnchor.constraint(equalTo: topAnchor),
-                stateView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-                stateView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-                stateView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-            ])
         }
         
         self.collectionView.isHidden = collectionViewIsHidden
         self.searchController.searchBar.isEnabled = searchBarIsEnabled
+    }
+    
+    private func createLoadingView() -> UIContentUnavailableConfiguration {
+        var config = UIContentUnavailableConfiguration.loading()
+        config.text = "Loading films..."
+        return config
+    }
+    
+    private func createEmptySearchResultsView() -> UIContentUnavailableConfiguration {
+        var config = UIContentUnavailableConfiguration.search()
+        config.text = "No Films Found"
+        config.secondaryText = "Check spelling or try another search."
+        return config
     }
     
     func retryButtonTapped() {
