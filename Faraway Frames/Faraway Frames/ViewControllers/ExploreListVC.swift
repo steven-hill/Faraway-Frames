@@ -178,9 +178,7 @@ final class ExploreListVC: UIViewController {
         switch viewModel.currentState {
         case .idle, .loadingAllFilms:
             setNeedsUpdateContentUnavailableConfiguration()
-            let loadingView = LoadingView(message: "Fetching films...")
-            loadingView.accessibilityIdentifier = "ExploreListVC_LoadingView"
-            newStateView = loadingView
+            newStateView = nil
         case .content(isUsingArchivedData: false), .content(isUsingArchivedData: true):
             setNeedsUpdateContentUnavailableConfiguration()
             collectionViewIsHidden = false
@@ -202,9 +200,7 @@ final class ExploreListVC: UIViewController {
             newStateView = nil
         case .retrying:
             setNeedsUpdateContentUnavailableConfiguration()
-            let loadingView = LoadingView(message: "Retrying...")
-            loadingView.accessibilityIdentifier = "ExploreListVC_LoadingView"
-            newStateView = loadingView
+            newStateView = nil
         }
         
         if let stateView = newStateView {
