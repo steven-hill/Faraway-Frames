@@ -60,6 +60,14 @@ final class ExploreListVC: UIViewController {
         loadTask = getAllFilms()
     }
     
+    override func updateContentUnavailableConfiguration(using state: UIContentUnavailableConfigurationState) {
+        var config: UIContentUnavailableConfiguration? = nil
+        if case .emptySearchResults = viewModel.currentState {
+            config = createEmptySearchResultsView()
+        }
+        self.contentUnavailableConfiguration = config
+    }
+    
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         loadTask?.cancel()
