@@ -58,6 +58,7 @@ final class ExploreListVC: UIViewController {
         configureSearchController()
         configureRefreshControl()
         loadTask = getAllFilms()
+        view.accessibilityIdentifier = "ExploreListVC_View"
     }
     
     override func updateContentUnavailableConfiguration(using state: UIContentUnavailableConfigurationState) {
