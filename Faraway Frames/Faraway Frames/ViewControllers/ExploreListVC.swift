@@ -169,20 +169,21 @@ final class ExploreListVC: UIViewController {
         
         switch viewModel.currentState {
         case .idle, .loadingAllFilms:
+            setNeedsUpdateContentUnavailableConfiguration()
             let loadingView = LoadingView(message: "Fetching films...")
             loadingView.accessibilityIdentifier = "ExploreListVC_LoadingView"
             newStateView = loadingView
         case .content(isUsingArchivedData: false), .content(isUsingArchivedData: true):
+            setNeedsUpdateContentUnavailableConfiguration()
             collectionViewIsHidden = false
             searchBarIsEnabled = true
             newStateView = nil
         case .emptySearchResults:
-            let emptySearchResultsView = FFStateView(title: "No Results Found",
-                                                     secondaryText: nil,
-                                                     accessibilityIdentifier: "ExploreListVC_EmptySearchResultsView")
-            newStateView = emptySearchResultsView
+            newStateView = nil
+            setNeedsUpdateContentUnavailableConfiguration()
             searchBarIsEnabled = true
         case .error(let error):
+            setNeedsUpdateContentUnavailableConfiguration()
             let retryAction = AlertAction(title: "Retry", style: .default) { [weak self] _ in
                 self?.retryButtonTapped()
             }
@@ -192,6 +193,7 @@ final class ExploreListVC: UIViewController {
                                         from: self)
             newStateView = nil
         case .retrying:
+            setNeedsUpdateContentUnavailableConfiguration()
             let loadingView = LoadingView(message: "Retrying...")
             loadingView.accessibilityIdentifier = "ExploreListVC_LoadingView"
             newStateView = loadingView
