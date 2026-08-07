@@ -173,24 +173,22 @@ struct ExploreListVCTests {
         #expect(sut.loadTask == nil, "Should be nil.")
     }
     
-    @Test("Transitioning out of a `FFStateView` removes it from memory and subviews")
+    @Test("VC handles transitions from empty search results view to collection view")
     func exploreListVC_updateViewHierarchyForCurrentState_forStateViewTransitions_cleansUpPreviousView() async {
         let sut = makeSUTForNetworkSuccess()
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
-        
         sut.searchController.searchBar.text = "No results found"
         sut.updateSearchResults(for: sut.searchController)
         sut.view.layoutIfNeeded()
         
-        let emptySearchResultsView = sut.currentStateView as? FFStateView
-        #expect(emptySearchResultsView != nil, "An `FFStateView` should have been added to the view hierarchy.")
+        #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil because empty search results view is on screen.")
         
         sut.searchBarCancelButtonClicked(sut.searchController.searchBar)
+        sut.view.layoutIfNeeded()
         
-        #expect(sut.currentStateView == nil, "Should now be nil because the collection view is now on screen.")
-        let remainingFFStateViews = sut.view.subviews.filter { $0 is FFStateView }
-        #expect(remainingFFStateViews.isEmpty, "`FFStateView` should be completely removed from the view hierarchy.")
+        #expect(sut.contentUnavailableConfiguration == nil, "Should be nil because the collection view is now on screen.")
+        #expect(sut.currentStateView == nil, "Should be nil because the collection view is now on screen.")
     }
 
     @Test func exploreListVC_didUpdateFilms_updatesCollectionViewItemCount() {
@@ -298,8 +296,7 @@ struct ExploreListVCTests {
         sut.updateSearchResults(for: sut.searchController)
         sut.view.layoutIfNeeded()
         
-        let emptySearchResultsView = sut.currentStateView as? FFStateView
-        #expect(emptySearchResultsView != nil, "An `FFStateView` should have been added to the view hierarchy.")
+        #expect(sut.contentUnavailableConfiguration != nil, "Should not be nil because empty search results view is on screen.")
         #expect(sut.viewModel.currentState == .emptySearchResults, "Should set the state to `.emptySearchResults`.")
     }
     
