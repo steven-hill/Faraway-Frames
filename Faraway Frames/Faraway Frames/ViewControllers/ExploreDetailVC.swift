@@ -107,6 +107,7 @@ final class ExploreDetailVC: UIViewController {
             self.updateLayoutForTraits()
         }
         updateLayoutForTraits()
+        view.accessibilityIdentifier = "ExploreDetailVC_View"
     }
     
     private func updateLayoutForTraits() {

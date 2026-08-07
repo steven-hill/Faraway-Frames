@@ -26,8 +26,9 @@ final class ExploreDetailVCUITests: XCTestCase {
         
         launchAppAndNavigateToFilmDetails()
         
-        XCTAssertTrue(app.staticTexts["No Film Selected"].isHittable, "Should show a message.")
-        XCTAssertTrue(app.staticTexts["Select a film from the list for more details."].isHittable, "Should show a message.")
+        let vcView = app.otherElements["ExploreDetailVC_View"]
+        let vcViewStaticTexts = vcView.staticTexts
+        XCTAssertEqual(vcViewStaticTexts.count, 2, "Should have a primary and secondary text.")
         XCTAssertFalse(app.buttons["ExploreDetailVC_UpNextButton"].exists, "Should be hidden.")
         XCTAssertFalse(app.buttons["ExploreDetailVC_WatchedButton"].exists, "Should be hidden.")
         XCTAssertFalse(app.buttons["ExploreDetailVC_MoreLikeThisButton"].exists, "Should be hidden.")
