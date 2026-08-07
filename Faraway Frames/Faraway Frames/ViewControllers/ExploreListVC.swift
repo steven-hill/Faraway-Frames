@@ -64,12 +64,10 @@ final class ExploreListVC: UIViewController {
     override func updateContentUnavailableConfiguration(using state: UIContentUnavailableConfigurationState) {
         var config: UIContentUnavailableConfiguration? = nil
         switch viewModel.currentState {
-        case .loadingAllFilms:
-            config = createLoadingView(with: "Loading films...")
+        case .loadingAllFilms, .retrying:
+            config = createLoadingView()
         case .emptySearchResults:
             config = createEmptySearchResultsView()
-        case .retrying:
-            config = createLoadingView(with: "Retrying...")
         default: break
         }
         self.contentUnavailableConfiguration = config
@@ -176,7 +174,7 @@ final class ExploreListVC: UIViewController {
         let newStateView: UIView?
         
         switch viewModel.currentState {
-        case .idle, .loadingAllFilms:
+        case .idle, .loadingAllFilms, .retrying:
             setNeedsUpdateContentUnavailableConfiguration()
             newStateView = nil
         case .content(isUsingArchivedData: false), .content(isUsingArchivedData: true):
@@ -198,9 +196,6 @@ final class ExploreListVC: UIViewController {
                                         actions: [retryAction],
                                         from: self)
             newStateView = nil
-        case .retrying:
-            setNeedsUpdateContentUnavailableConfiguration()
-            newStateView = nil
         }
         
         if let stateView = newStateView {
@@ -219,9 +214,9 @@ final class ExploreListVC: UIViewController {
         self.searchController.searchBar.isEnabled = searchBarIsEnabled
     }
     
-    private func createLoadingView(with text: String) -> UIContentUnavailableConfiguration {
+    private func createLoadingView() -> UIContentUnavailableConfiguration {
         var config = UIContentUnavailableConfiguration.loading()
-        config.text = text
+        config.text = "Loading films..."
         return config
     }
     
