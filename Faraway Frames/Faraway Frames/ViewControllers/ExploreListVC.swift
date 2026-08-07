@@ -65,10 +65,11 @@ final class ExploreListVC: UIViewController {
         var config: UIContentUnavailableConfiguration? = nil
         switch viewModel.currentState {
         case .loadingAllFilms:
-            config = createLoadingView()
+            config = createLoadingView(with: "Loading films...")
         case .emptySearchResults:
             config = createEmptySearchResultsView()
-            config = createLoadingView()
+        case .retrying:
+            config = createLoadingView(with: "Retrying...")
         default: break
         }
         self.contentUnavailableConfiguration = config
