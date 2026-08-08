@@ -264,24 +264,12 @@ extension ExploreListVC: UICollectionViewDelegate {
 
 // MARK: - Films List View Model Delegate
 extension ExploreListVC: FilmsListViewModelDelegate {
-    func didStartLoadingFilms() {
-        updateViewHierarchyForCurrentState()
-    }
-    
-    func didUpdateFilms() {
-        updateViewHierarchyForCurrentState()
-    }
-    
-    func didFailToLoadFilms() {
+    func viewModel(
+        _ viewModel: FilmsListViewModel,
+        didChange
+        state: FilmsListViewModel.FilmsListState
+    ) {
         collectionView.refreshControl?.endRefreshing()
-        updateViewHierarchyForCurrentState()
-    }
-    
-    func didRetry() {
-        updateViewHierarchyForCurrentState()
-    }
-    
-    func didFailToMatchResults() {
         updateViewHierarchyForCurrentState()
     }
     

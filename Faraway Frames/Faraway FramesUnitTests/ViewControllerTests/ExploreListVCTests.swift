@@ -513,13 +513,17 @@ struct ExploreListVCTests {
         #expect(sut.collectionView.refreshControl?.isRefreshing == false, "Should be false.")
     }
     
-    @Test("Refreshing stops when failed to load films")
-    func exploreListVC_didFailToLoadFilms_stopsRefreshing() {
+    @Test("Refreshing stops when view model's state changes")
+    func exploreListVC_whenVMChangesState_refreshControl_stopsRefreshing() async {
         let sut = makeSUTForNetworkSuccess()
         sut.loadViewIfNeeded()
-        
+        await sut.loadTask?.value
         sut.collectionView.refreshControl?.sendActions(for: .valueChanged)
-        sut.didFailToLoadFilms()
+        
+        sut.viewModel(
+            sut.viewModel,
+            didChange: sut.viewModel.currentState
+        )
         
         #expect(sut.collectionView.refreshControl?.isRefreshing == false, "Should be false.")
     }

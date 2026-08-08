@@ -38,7 +38,9 @@ final class FilmsListViewModel {
     private let allFilmsMessage = "Showing all films"
     
     // MARK: - Initialisation
-    init(filmsListService: FilmsListService, imageLoader: ImageLoader, filmSyncService: FilmSyncService) {
+    init(filmsListService: FilmsListService,
+         imageLoader: ImageLoader,
+         filmSyncService: FilmSyncService) {
         self.filmsListService = filmsListService
         self.imageLoader = imageLoader
         self.filmSyncService = filmSyncService
@@ -47,7 +49,7 @@ final class FilmsListViewModel {
     // MARK: - Methods
     func getAllFilms() async {
         currentState = .loadingAllFilms
-        delegate?.didStartLoadingFilms()
+        delegate?.viewModel(self, didChange: currentState)
         do {
             try Task.checkCancellation()
             let fetchedFilms = try await filmsListService.fetchAllFilms()
@@ -57,13 +59,13 @@ final class FilmsListViewModel {
                 films: self.films,
                 isUsingArchivedData: filmsListService.isUsingFileManagerData
             )
-            delegate?.didUpdateFilms()
+            delegate?.viewModel(self, didChange: currentState)
             delegate?.viewModel(self, didEmit: .voiceOverAnnouncement(allFilmsMessage))
         } catch {
             guard !Task.isCancelled else { return }
             let networkError = APIError(from: error)
             currentState = .error(networkError)
-            delegate?.didFailToLoadFilms()
+            delegate?.viewModel(self, didChange: currentState)
         }
     }
     
@@ -80,14 +82,14 @@ final class FilmsListViewModel {
         filteredFilms = films.filter { $0.title.lowercased().contains(query) }
         if filteredFilms.isEmpty {
             currentState = .emptySearchResults
-            delegate?.didFailToMatchResults()
+            delegate?.viewModel(self, didChange: currentState)
             delegate?.viewModel(self, didEmit: .voiceOverAnnouncement("No results found. Try another query."))
         } else {
             currentState = .content(
                 films: filteredFilms,
                 isUsingArchivedData: filmsListService.isUsingFileManagerData
             )
-            delegate?.didUpdateFilms()
+            delegate?.viewModel(self, didChange: currentState)
             let message = String(format: NSLocalizedString("%d found", comment: ""), filteredFilms.count)
             delegate?.viewModel(self, didEmit: .voiceOverAnnouncement(message))
         }
@@ -108,7 +110,7 @@ final class FilmsListViewModel {
             films: films,
             isUsingArchivedData: filmsListService.isUsingFileManagerData
         )
-        delegate?.didUpdateFilms()
+        delegate?.viewModel(self, didChange: currentState)
         delegate?.viewModel(self, didEmit: .voiceOverAnnouncement(allFilmsMessage))
     }
     
@@ -116,7 +118,7 @@ final class FilmsListViewModel {
         refreshTask?.cancel()
         filteredFilms.removeAll()
         currentState = .loadingAllFilms
-        delegate?.didRetry()
+        delegate?.viewModel(self, didChange: currentState)
         refreshTask = Task {
             await getAllFilms()
         }
@@ -133,7 +135,7 @@ final class FilmsListViewModel {
                 films: films,
                 isUsingArchivedData: filmsListService.isUsingFileManagerData
             )
-            delegate?.didUpdateFilms()
+            delegate?.viewModel(self, didChange: currentState)
         }
         
         if let filteredIndex = filteredFilms.firstIndex(where: { $0.id == updatedFilm.id }) {
@@ -142,7 +144,7 @@ final class FilmsListViewModel {
                 films: filteredFilms,
                 isUsingArchivedData: filmsListService.isUsingFileManagerData
             )
-            delegate?.didUpdateFilms()
+            delegate?.viewModel(self, didChange: currentState)
         }
     }
 }
