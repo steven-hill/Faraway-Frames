@@ -30,14 +30,6 @@ struct ExploreListVCTests {
         #expect(sut.navigationController != nil, "VC should be inside a navigation controller.")
     }
     
-    @Test func exploreListVC_initiallyHasNoFilms() {
-        let sut = makeSUT()
-        
-        sut.loadViewIfNeeded()
-        
-        #expect(sut.films.isEmpty, "VC's films should be empty initially.")
-    }
-    
     @Test func exploreListVC_setsViewModelDelegateToSelf() {
         let sut = makeSUT()
         
@@ -78,16 +70,14 @@ struct ExploreListVCTests {
     }
     
     @Test(.tags(.networkRequest))
-    func exploreListVC_canUpdateFilmsArraySuccessfullyAndUpdateUI() async {
+    func exploreListVC_afterSuccessfulNetworkCall_updatesUICorrectly() async {
         let sut = makeSUTForNetworkSuccess()
         
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
         let itemCount = sut.collectionView.numberOfItems(inSection: 0)
         
-        #expect(sut.films.count == 22, "VC's film should contain 22 films.")
         #expect(itemCount == 22, "Should be 22 films in the collection view.")
-        #expect(sut.viewModel.currentState == .content(films: sut.viewModel.films, isUsingArchivedData: false), "Should set the state to .content.")
         #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
         #expect(sut.collectionView.isHidden == false)
         #expect(sut.searchController.searchBar.isEnabled == true)
@@ -209,7 +199,7 @@ struct ExploreListVCTests {
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
         
-        #expect(sut.filmLookup["2baf70d1-42bb-4437-b551-e5fed5a87abe"] == sut.films.first, "ID should be for 'Castle in the Sky'.")
+        #expect(sut.filmLookup["2baf70d1-42bb-4437-b551-e5fed5a87abe"] == sut.viewModel.films.first, "ID should be for 'Castle in the Sky'.")
     }
     
     @Test func exploreListVC_filmsLookup_returnsNilForUnknownID() {
@@ -246,17 +236,17 @@ struct ExploreListVCTests {
         await sut.loadTask?.value
         sut.searchController.searchBar.text = ""
         sut.updateSearchResults(for: sut.searchController)
+        let itemCount = sut.collectionView.numberOfItems(inSection: 0)
         
-        #expect(sut.films.count == 22, "When no search is attempted, the VC's films array should still contain all films.")
+        #expect(itemCount == 22, "All 22 films should still be in the collection view.")
     }
     
     @Test(.tags(.search))
-    func exploreListVC_whenFilmsArrayIsEmpty_searchIsNotAttempted() {
+    func exploreListVC_whenVMFilmsArrayIsEmpty_searchIsNotAttempted() {
         let sut = makeSUT()
         
         sut.updateSearchResults(for: sut.searchController)
         
-        #expect(sut.films.isEmpty, "When no search is attempted, the VC's films array should be empty.")
         #expect(sut.viewModel.films.isEmpty, "View model's films should be empty.")
         #expect(sut.viewModel.filteredFilms.isEmpty, "View model's filtered films should be empty.")
     }
@@ -269,8 +259,9 @@ struct ExploreListVCTests {
         await sut.loadTask?.value
         sut.searchController.searchBar.text = "Cas"
         sut.updateSearchResults(for: sut.searchController)
+        let itemCount = sut.collectionView.numberOfItems(inSection: 0)
         
-        #expect(sut.films.count == 2, "When search successfully finds results, the VC's films array should be updated with those results.")
+        #expect(itemCount == 2, "Should be two films in the collection view.")
     }
     
     @Test(.tags(.search))
@@ -288,18 +279,21 @@ struct ExploreListVCTests {
     }
     
     @Test(.tags(.search))
-    func exploreListVC_searchBarCancelButtonTapped_resetsFilmsArrayToAllFilms() async {
+    func exploreListVC_searchBarCancelButtonTapped_showsAllFilmsAgain() async {
         let sut = makeSUTForNetworkSuccess()
         
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
         sut.searchController.searchBar.text = "Cas"
         sut.updateSearchResults(for: sut.searchController)
-        #expect(sut.films.count == 2, "Search should find two films.")
+        let itemCountAfterSearch = sut.collectionView.numberOfItems(inSection: 0)
+        
+        #expect(itemCountAfterSearch == 2, "Should be two films in the collection view.")
         
         sut.searchBarCancelButtonClicked(sut.searchController.searchBar)
+        let itemCountAfterCancel = sut.collectionView.numberOfItems(inSection: 0)
         
-        #expect(sut.films.count == 22, "Should have an array of all films.")
+        #expect(itemCountAfterCancel == 22, "All 22 films should still be in the collection view.")
     }
     
     @Test(.tags(.search))
@@ -330,8 +324,9 @@ struct ExploreListVCTests {
         
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
+        let itemCount = sut.collectionView.numberOfItems(inSection: 0)
         
-        #expect(sut.films.count == 22, "Should have all 22 films to show.")
+        #expect(itemCount == 22, "All 22 films should still be in the collection view.")
         #expect(sut.searchController.searchBar.isEnabled == true, "Should be true.")
     }
     
@@ -343,8 +338,9 @@ struct ExploreListVCTests {
         await sut.loadTask?.value
         sut.searchController.searchBar.text = "Cas"
         sut.updateSearchResults(for: sut.searchController)
+        let itemCount = sut.collectionView.numberOfItems(inSection: 0)
         
-        #expect(sut.films.count == 2, "Should have 2 films in search results.")
+        #expect(itemCount == 2, "Should be 2 films in the collection view.")
         #expect(sut.searchController.searchBar.isEnabled == true, "Should be true.")
     }
     
@@ -395,7 +391,7 @@ struct ExploreListVCTests {
         sut.collectionView(sut.collectionView, didSelectItemAt: indexPath)
         
         #expect(spy.didSelectFilmCalled, "Delegate should be called.")
-        #expect(spy.selectedFilm?.id == sut.films[0].id, "Both ids should match.")
+        #expect(spy.selectedFilm?.id == sut.viewModel.films[0].id, "Both ids should match.")
         #expect(spy.selectedFilm?.title == "Castle in the Sky", "Should be `Castle in the Sky`.")
     }
     

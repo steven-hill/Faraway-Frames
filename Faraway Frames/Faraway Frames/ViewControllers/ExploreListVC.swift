@@ -15,7 +15,6 @@ final class ExploreListVC: UIViewController {
     
     // MARK: - Properties
     weak var navigationDelegate: ExploreNavigationDelegate?
-    private(set) var films: [Film] = []
     private(set) var filmLookup: [String: Film] = [:]
     let viewModel: FilmsListViewModel
     lazy var collectionView = UICollectionView()
@@ -106,7 +105,7 @@ final class ExploreListVC: UIViewController {
             var config = UICollectionLayoutListConfiguration(appearance: .sidebar)
             config.backgroundColor = .systemBackground
             config.headerMode = self.viewModel.currentState == .content(
-                films: films,
+                films: viewModel.films,
                 isUsingArchivedData: true
             ) ? .supplementary : .none
             return NSCollectionLayoutSection.list(using: config, layoutEnvironment: layoutEnvironment)
@@ -179,7 +178,7 @@ final class ExploreListVC: UIViewController {
             setNeedsUpdateContentUnavailableConfiguration()
             collectionViewIsHidden = false
             searchBarIsEnabled = true
-            self.films = films
+            //self.films = films
             let filmIds = films.map({ $0.id })
             filmLookup = Dictionary(uniqueKeysWithValues: films.map { ($0.id, $0) })
             collectionView.refreshControl?.endRefreshing()
@@ -318,7 +317,7 @@ extension ExploreListVC: UISearchBarDelegate {
 extension ExploreListVC: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         guard let searchText = searchController.searchBar.text, !searchText.isEmpty else { return }
-        guard !films.isEmpty else { return }
+        guard !viewModel.films.isEmpty else { return }
         viewModel.filterFilms(by: searchText)
     }
 }
