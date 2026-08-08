@@ -16,7 +16,6 @@ final class FilmsListViewModel {
         case content(isUsingArchivedData: Bool)
         case emptySearchResults
         case error(APIError)
-        case retrying
     }
     
     // MARK: - Properties
