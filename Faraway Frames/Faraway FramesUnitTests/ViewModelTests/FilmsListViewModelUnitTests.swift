@@ -390,7 +390,7 @@ struct FilmsListViewModelUnitTests {
         
         #expect(sut.refreshTask != nil, "A new task should be created")
         #expect(sut.filteredFilms.isEmpty, "Should be empty.")
-        #expect(sut.currentState == .retrying, "State should change to retrying")
+        #expect(sut.currentState == .loadingAllFilms, "State should change to `.loadingAllFilms`")
         #expect(delegateSpy.didRetryCallCount == 1, "Should have called delegate method once.")
         
         await sut.refreshTask?.value
