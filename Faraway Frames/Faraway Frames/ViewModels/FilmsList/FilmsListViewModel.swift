@@ -21,6 +21,11 @@ final class FilmsListViewModel {
         case error(APIError)
     }
     
+    // MARK: - Event Definition
+    enum FilmsListEvent {
+        case voiceOverAnnouncement(String)
+    }
+    
     // MARK: - Properties
     private let filmsListService: FilmsListService
     private let imageLoader: ImageLoader
@@ -53,7 +58,7 @@ final class FilmsListViewModel {
                 isUsingArchivedData: filmsListService.isUsingFileManagerData
             )
             delegate?.didUpdateFilms()
-            delegate?.didRequestVoiceOverAnnouncement(with: allFilmsMessage)
+            delegate?.viewModel(self, didEmit: .voiceOverAnnouncement(allFilmsMessage))
         } catch {
             guard !Task.isCancelled else { return }
             let networkError = APIError(from: error)
@@ -76,7 +81,7 @@ final class FilmsListViewModel {
         if filteredFilms.isEmpty {
             currentState = .emptySearchResults
             delegate?.didFailToMatchResults()
-            delegate?.didRequestVoiceOverAnnouncement(with: "No results found. Try another query.")
+            delegate?.viewModel(self, didEmit: .voiceOverAnnouncement("No results found. Try another query."))
         } else {
             currentState = .content(
                 films: filteredFilms,
@@ -84,7 +89,7 @@ final class FilmsListViewModel {
             )
             delegate?.didUpdateFilms()
             let message = String(format: NSLocalizedString("%d found", comment: ""), filteredFilms.count)
-            delegate?.didRequestVoiceOverAnnouncement(with: message)
+            delegate?.viewModel(self, didEmit: .voiceOverAnnouncement(message))
         }
     }
     
@@ -104,7 +109,7 @@ final class FilmsListViewModel {
             isUsingArchivedData: filmsListService.isUsingFileManagerData
         )
         delegate?.didUpdateFilms()
-        delegate?.didRequestVoiceOverAnnouncement(with: allFilmsMessage)
+        delegate?.viewModel(self, didEmit: .voiceOverAnnouncement(allFilmsMessage))
     }
     
     func retryLoadingAllFilms() {

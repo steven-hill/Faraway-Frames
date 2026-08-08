@@ -616,7 +616,10 @@ struct ExploreListVCTests {
     func exploreListVC_didRequestVoiceOverAnnouncement_whenVoiceOverIsDisabled_doesNotPost() async {
         let (sut, mockAccessibilityService) = await makeSUTForVOTests(voiceOverIsOn: false)
         
-        sut.didRequestVoiceOverAnnouncement(with: "test")
+        sut.viewModel(
+            sut.viewModel,
+            didEmit: FilmsListViewModel.FilmsListEvent.voiceOverAnnouncement("test")
+        )
         
         #expect(sut.voiceOverAnnouncementTask == nil, "Should be nil due to early exit via guard.")
         #expect(mockAccessibilityService.postedNotification == nil, "Should not have posted a notification.")
@@ -628,7 +631,10 @@ struct ExploreListVCTests {
     func exploreListVC_didRequestVoiceOverAnnouncement_whenVoiceOverIsOn_postsMessageAfterDelay() async throws {
         let (sut, mockAccessibilityService) = await makeSUTForVOTests(voiceOverIsOn: true)
         
-        sut.didRequestVoiceOverAnnouncement(with: "Test Announcement")
+        sut.viewModel(
+            sut.viewModel,
+            didEmit: FilmsListViewModel.FilmsListEvent.voiceOverAnnouncement("Test Announcement")
+        )
         await mockAccessibilityService.waitForNotification()
         
         #expect(mockAccessibilityService.postedNotification == .announcement, "The notification should be for an announcement.")
@@ -641,9 +647,16 @@ struct ExploreListVCTests {
     func exploreListVC_didRequestVoiceOverAnnouncement_multipleRequests_cancelsPreviousAndDebounces() async throws {
         let (sut, mockAccessibilityService) = await makeSUTForVOTests(voiceOverIsOn: true)
         
-        sut.didRequestVoiceOverAnnouncement(with: "First Message")
+        sut.viewModel(
+            sut.viewModel,
+            didEmit: FilmsListViewModel.FilmsListEvent.voiceOverAnnouncement("First Message")
+        )
         let firstTask = sut.voiceOverAnnouncementTask
-        sut.didRequestVoiceOverAnnouncement(with: "Second Message")
+        
+        sut.viewModel(
+            sut.viewModel,
+            didEmit: FilmsListViewModel.FilmsListEvent.voiceOverAnnouncement("Second Message")
+        )
         await mockAccessibilityService.waitForNotification()
         
         #expect(firstTask?.isCancelled == true, "Should have cancelled the first task.")
@@ -655,7 +668,12 @@ struct ExploreListVCTests {
     @Test("Clean up `voiceOverAnnouncementTask` in `viewWillDisappear`")
     func exploreListVC_viewWillDisappear_cancelsVoiceOverTaskAndSetsItToNil() async {
         let (sut, mockAccessibilityService) = await makeSUTForVOTests(voiceOverIsOn: true)
-        sut.didRequestVoiceOverAnnouncement(with: "Message")
+
+        sut.viewModel(
+            sut.viewModel,
+            didEmit: FilmsListViewModel.FilmsListEvent.voiceOverAnnouncement("Message")
+        )
+        
         let capturedTask = sut.voiceOverAnnouncementTask
         #expect(capturedTask?.isCancelled == false, "Should not be cancelled.")
         #expect(sut.loadTask != nil, "Should not be nil.")

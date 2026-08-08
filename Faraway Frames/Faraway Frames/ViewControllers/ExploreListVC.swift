@@ -285,8 +285,13 @@ extension ExploreListVC: FilmsListViewModelDelegate {
         updateViewHierarchyForCurrentState()
     }
     
-    func didRequestVoiceOverAnnouncement(with message: String) {
+    func viewModel(
+        _ viewModel: FilmsListViewModel,
+        didEmit
+        event: FilmsListViewModel.FilmsListEvent
+    ) {
         guard accessibilityService.isVoiceOverRunning else { return }
+        guard case let .voiceOverAnnouncement(message) = event else { return }
         voiceOverAnnouncementTask?.cancel()
         voiceOverAnnouncementTask = Task { [weak self] in
             guard let self else { return }

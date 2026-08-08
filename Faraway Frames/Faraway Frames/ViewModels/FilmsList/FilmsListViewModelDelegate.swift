@@ -13,5 +13,8 @@ protocol FilmsListViewModelDelegate: AnyObject {
     func didFailToLoadFilms()
     func didRetry()
     func didFailToMatchResults()
-    func didRequestVoiceOverAnnouncement(with message: String)
+    func viewModel(
+        _ viewModel: FilmsListViewModel,
+        didEmit event: FilmsListViewModel.FilmsListEvent
+    )
 }

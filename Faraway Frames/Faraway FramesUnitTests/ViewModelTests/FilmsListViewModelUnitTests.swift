@@ -492,18 +492,13 @@ struct FilmsListViewModelUnitTests {
     
     // MARK: - Films List View Model Delegate
     final class FilmsListViewModelDelegateSpy: FilmsListViewModelDelegate {
-        var didRequestVoiceOverAnnouncement = false
-        var capturedMessage: String?
         var didStartLoadingFilmsCallCount = 0
         var didUpdateFilmsCallCount = 0
         var didFailToLoadFilmsCallCount = 0
         var didRetryCallCount = 0
         var didFailToMatchResultsCallCount = 0
-        
-        func didRequestVoiceOverAnnouncement(with message: String) {
-            didRequestVoiceOverAnnouncement = true
-            capturedMessage = message
-        }
+        var didRequestVoiceOverAnnouncement = false
+        var capturedMessage: String?
         
         func didStartLoadingFilms() {
             didStartLoadingFilmsCallCount += 1
@@ -523,6 +518,16 @@ struct FilmsListViewModelUnitTests {
         
         func didFailToMatchResults() {
             didFailToMatchResultsCallCount += 1
+        }
+        
+        func viewModel(
+            _ viewModel: FilmsListViewModel,
+            didEmit
+            event: FilmsListViewModel.FilmsListEvent
+        ) {
+            didRequestVoiceOverAnnouncement = true
+            guard case let .voiceOverAnnouncement(message) = event else { return }
+            capturedMessage = message
         }
     }
 }
