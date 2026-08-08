@@ -38,7 +38,7 @@ struct FilmsListViewModelUnitTests {
         sut.delegate = delegateSpy
         await sut.getAllFilms()
         
-        #expect(delegateSpy.didRequestVoiceOverAnnouncement == true, "Should be made the request.")
+        #expect(delegateSpy.didEmitEventCallCount == 1, "Should make the request once.")
         #expect(delegateSpy.capturedMessage == "Showing all films", "Should be equal.")
     }
     
@@ -324,7 +324,7 @@ struct FilmsListViewModelUnitTests {
 
         sut.filterFilms(by: "Cas")
         
-        #expect(delegateSpy.didRequestVoiceOverAnnouncement, "Should be true.")
+        #expect(delegateSpy.didEmitEventCallCount == 2, "Should be called twice; once for loading all films, then once for filtering.")
         #expect(delegateSpy.capturedMessage == "2 found", "Should be equal.")
     }
     
@@ -337,7 +337,7 @@ struct FilmsListViewModelUnitTests {
 
         sut.filterFilms(by: "No results")
         
-        #expect(delegateSpy.didRequestVoiceOverAnnouncement, "Should be true.")
+        #expect(delegateSpy.didEmitEventCallCount == 2, "Should be called twice; once for loading all films, then once for filtering.")
         #expect(delegateSpy.capturedMessage == "No results found. Try another query.", "Should be equal.")
     }
     
@@ -369,12 +369,10 @@ struct FilmsListViewModelUnitTests {
         sut.delegate = delegateSpy
         await sut.getAllFilms()
         sut.filterFilms(by: "Cas")
-        delegateSpy.didRequestVoiceOverAnnouncement = false
-        delegateSpy.capturedMessage = nil
         
         sut.resetAllFilms()
         
-        #expect(delegateSpy.didRequestVoiceOverAnnouncement == true, "Should be true.")
+        #expect(delegateSpy.didEmitEventCallCount == 3, "Should be called three times; once for loading all films, twice for filtering, and once more for resetting.")
         #expect(delegateSpy.capturedMessage == "Showing all films", "Should be equal.")
     }
     
@@ -497,7 +495,7 @@ struct FilmsListViewModelUnitTests {
         var didFailToLoadFilmsCallCount = 0
         var didRetryCallCount = 0
         var didFailToMatchResultsCallCount = 0
-        var didRequestVoiceOverAnnouncement = false
+        var didEmitEventCallCount = 0
         var capturedMessage: String?
         
         func didStartLoadingFilms() {
@@ -525,9 +523,9 @@ struct FilmsListViewModelUnitTests {
             didEmit
             event: FilmsListViewModel.FilmsListEvent
         ) {
-            didRequestVoiceOverAnnouncement = true
             guard case let .voiceOverAnnouncement(message) = event else { return }
             capturedMessage = message
+            didEmitEventCallCount += 1
         }
     }
 }
