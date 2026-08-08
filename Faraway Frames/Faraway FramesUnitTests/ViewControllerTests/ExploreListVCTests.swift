@@ -143,7 +143,7 @@ struct ExploreListVCTests {
         sut.view.layoutIfNeeded()
         
         #expect(sut.contentUnavailableConfiguration != nil, "Should be showing loading view.")
-        #expect(sut.viewModel.currentState == .retrying, "Should be set to `.retrying`.")
+        #expect(sut.viewModel.currentState == .loadingAllFilms, "Should be set to `.loadingAllFilms`.")
         #expect(sut.viewModel.refreshTask != nil, "Should start a new `refreshTask`.")
         
         await sut.viewModel.refreshTask?.value
@@ -502,7 +502,7 @@ struct ExploreListVCTests {
         sut.view.layoutIfNeeded()
         
         #expect(sut.contentUnavailableConfiguration != nil, "Should be showing loading view.")
-        #expect(sut.viewModel.currentState == .retrying, "Should be set to `.retrying`.")
+        #expect(sut.viewModel.currentState == .loadingAllFilms, "Should be set to `.loadingAllFilms`.")
         
         await sut.viewModel.refreshTask?.value
         

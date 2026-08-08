@@ -63,7 +63,7 @@ final class ExploreListVC: UIViewController {
     override func updateContentUnavailableConfiguration(using state: UIContentUnavailableConfigurationState) {
         var config: UIContentUnavailableConfiguration? = nil
         switch viewModel.currentState {
-        case .loadingAllFilms, .retrying:
+        case .loadingAllFilms:
             config = createLoadingView()
         case .emptySearchResults:
             config = createEmptySearchResultsView()
@@ -170,7 +170,7 @@ final class ExploreListVC: UIViewController {
         var searchBarIsEnabled = false
         
         switch viewModel.currentState {
-        case .idle, .loadingAllFilms, .retrying:
+        case .idle, .loadingAllFilms:
             setNeedsUpdateContentUnavailableConfiguration()
         case .content(isUsingArchivedData: false), .content(isUsingArchivedData: true):
             setNeedsUpdateContentUnavailableConfiguration()
