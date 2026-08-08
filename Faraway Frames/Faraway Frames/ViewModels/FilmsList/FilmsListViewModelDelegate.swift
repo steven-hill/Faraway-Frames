@@ -8,10 +8,12 @@
 import Foundation
 
 protocol FilmsListViewModelDelegate: AnyObject {
-    func didStartLoadingFilms()
-    func didUpdateFilms(_ films: [Film])
-    func didFailToLoadFilms()
-    func didRetry()
-    func didFailToMatchResults()
-    func didRequestVoiceOverAnnouncement(with message: String)
+    func viewModel(
+        _ viewModel: FilmsListViewModel,
+        didChange state: FilmsListViewModel.FilmsListState
+    )
+    func viewModel(
+        _ viewModel: FilmsListViewModel,
+        didEmit event: FilmsListViewModel.FilmsListEvent
+    )
 }

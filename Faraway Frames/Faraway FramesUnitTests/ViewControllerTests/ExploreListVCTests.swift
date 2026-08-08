@@ -30,14 +30,6 @@ struct ExploreListVCTests {
         #expect(sut.navigationController != nil, "VC should be inside a navigation controller.")
     }
     
-    @Test func exploreListVC_initiallyHasNoFilms() {
-        let sut = makeSUT()
-        
-        sut.loadViewIfNeeded()
-        
-        #expect(sut.films.isEmpty, "VC's films should be empty initially.")
-    }
-    
     @Test func exploreListVC_setsViewModelDelegateToSelf() {
         let sut = makeSUT()
         
@@ -78,14 +70,14 @@ struct ExploreListVCTests {
     }
     
     @Test(.tags(.networkRequest))
-    func exploreListVC_canUpdateFilmsArraySuccessfullyAndUpdateUI() async {
+    func exploreListVC_afterSuccessfulNetworkCall_updatesUICorrectly() async {
         let sut = makeSUTForNetworkSuccess()
         
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
+        let itemCount = sut.collectionView.numberOfItems(inSection: 0)
         
-        #expect(sut.films.count == 22, "VC's film should contain 22 films.")
-        #expect(sut.viewModel.currentState == .content(isUsingArchivedData: false), "Should set the state to .content.")
+        #expect(itemCount == 22, "Should be 22 films in the collection view.")
         #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
         #expect(sut.collectionView.isHidden == false)
         #expect(sut.searchController.searchBar.isEnabled == true)
@@ -143,7 +135,7 @@ struct ExploreListVCTests {
         sut.view.layoutIfNeeded()
         
         #expect(sut.contentUnavailableConfiguration != nil, "Should be showing loading view.")
-        #expect(sut.viewModel.currentState == .retrying, "Should be set to `.retrying`.")
+        #expect(sut.viewModel.currentState == .loadingAllFilms, "Should be set to `.loadingAllFilms`.")
         #expect(sut.viewModel.refreshTask != nil, "Should start a new `refreshTask`.")
         
         await sut.viewModel.refreshTask?.value
@@ -182,17 +174,11 @@ struct ExploreListVCTests {
         #expect(sut.contentUnavailableConfiguration == nil, "Should be nil because the collection view is now on screen.")
         #expect(sut.collectionView.isHidden == false, "Should be on screen.")
     }
-
-    @Test func exploreListVC_didUpdateFilms_updatesCollectionViewItemCount() {
-        let sut = makeSUTForDataSource()
-        
-        let itemCount = sut.collectionView.numberOfItems(inSection: 0)
-        
-        #expect(itemCount == 1, "Should be 1 item in the collection view.")
-    }
     
-    @Test func exploreListVC_dataSource_returnsACell() {
-        let sut = makeSUTForDataSource()
+    @Test func exploreListVC_dataSource_returnsACell() async {
+        let sut = makeSUTForNetworkSuccess()
+        sut.loadViewIfNeeded()
+        await sut.loadTask?.value
         
         let indexPath = IndexPath(item: 0, section: 0)
         let cell = sut.collectionView.dataSource?.collectionView(sut.collectionView, cellForItemAt: indexPath)
@@ -200,26 +186,25 @@ struct ExploreListVCTests {
         #expect(cell != nil, "Should not be nil.")
     }
     
-    @Test func exploreListVC_filmsLookup_populatesCorrectly() {
-        let sut = makeSUTForDataSource()
+    @Test func exploreListVC_filmsLookup_populatesCorrectly() async {
+        let sut = makeSUTForNetworkSuccess()
+        sut.loadViewIfNeeded()
+        await sut.loadTask?.value
         
-        #expect(sut.filmLookup.count == 1, "Dictionary should have 1 film.")
+        #expect(sut.filmLookup.count == 22, "Dictionary should have 22 films.")
     }
     
-    @Test func exploreListVC_filmsLookup_returnsCorrectFilm() {
-        let sut = makeSUT()
+    @Test func exploreListVC_filmsLookup_returnsCorrectFilm() async {
+        let sut = makeSUTForNetworkSuccess()
         sut.loadViewIfNeeded()
-        let films: [Film] = [Film.sample[0]]
+        await sut.loadTask?.value
         
-        sut.didUpdateFilms(films)
-        
-        #expect(sut.filmLookup["2baf70d1-42bb-4437-b551-e5fed5a87abe"] != nil, "Should not be nil.")
-        #expect(sut.filmLookup["2baf70d1-42bb-4437-b551-e5fed5a87abe"] == films.first, "ID should be for 'Castle in the Sky'.")
-        #expect(sut.filmLookup.first?.value.title == "Castle in the Sky", "Title should be 'Castle in the Sky'.")
+        #expect(sut.filmLookup["2baf70d1-42bb-4437-b551-e5fed5a87abe"] == sut.viewModel.films.first, "ID should be for 'Castle in the Sky'.")
     }
     
     @Test func exploreListVC_filmsLookup_returnsNilForUnknownID() {
-        let sut = makeSUTForDataSource()
+        let sut = makeSUT()
+        sut.loadViewIfNeeded()
         
         #expect(sut.filmLookup["non existent ID"] == nil, "Should return nil if no film with that ID exists.")
     }
@@ -251,17 +236,17 @@ struct ExploreListVCTests {
         await sut.loadTask?.value
         sut.searchController.searchBar.text = ""
         sut.updateSearchResults(for: sut.searchController)
+        let itemCount = sut.collectionView.numberOfItems(inSection: 0)
         
-        #expect(sut.films.count == 22, "When no search is attempted, the VC's films array should still contain all films.")
+        #expect(itemCount == 22, "All 22 films should still be in the collection view.")
     }
     
     @Test(.tags(.search))
-    func exploreListVC_whenFilmsArrayIsEmpty_searchIsNotAttempted() {
+    func exploreListVC_whenVMFilmsArrayIsEmpty_searchIsNotAttempted() {
         let sut = makeSUT()
         
         sut.updateSearchResults(for: sut.searchController)
         
-        #expect(sut.films.isEmpty, "When no search is attempted, the VC's films array should be empty.")
         #expect(sut.viewModel.films.isEmpty, "View model's films should be empty.")
         #expect(sut.viewModel.filteredFilms.isEmpty, "View model's filtered films should be empty.")
     }
@@ -274,8 +259,9 @@ struct ExploreListVCTests {
         await sut.loadTask?.value
         sut.searchController.searchBar.text = "Cas"
         sut.updateSearchResults(for: sut.searchController)
+        let itemCount = sut.collectionView.numberOfItems(inSection: 0)
         
-        #expect(sut.films.count == 2, "When search successfully finds results, the VC's films array should be updated with those results.")
+        #expect(itemCount == 2, "Should be two films in the collection view.")
     }
     
     @Test(.tags(.search))
@@ -293,18 +279,21 @@ struct ExploreListVCTests {
     }
     
     @Test(.tags(.search))
-    func exploreListVC_searchBarCancelButtonTapped_resetsFilmsArrayToAllFilms() async {
+    func exploreListVC_searchBarCancelButtonTapped_showsAllFilmsAgain() async {
         let sut = makeSUTForNetworkSuccess()
         
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
         sut.searchController.searchBar.text = "Cas"
         sut.updateSearchResults(for: sut.searchController)
-        #expect(sut.films.count == 2, "Search should find two films.")
+        let itemCountAfterSearch = sut.collectionView.numberOfItems(inSection: 0)
+        
+        #expect(itemCountAfterSearch == 2, "Should be two films in the collection view.")
         
         sut.searchBarCancelButtonClicked(sut.searchController.searchBar)
+        let itemCountAfterCancel = sut.collectionView.numberOfItems(inSection: 0)
         
-        #expect(sut.films.count == 22, "Should have an array of all films.")
+        #expect(itemCountAfterCancel == 22, "All 22 films should still be in the collection view.")
     }
     
     @Test(.tags(.search))
@@ -335,8 +324,9 @@ struct ExploreListVCTests {
         
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
+        let itemCount = sut.collectionView.numberOfItems(inSection: 0)
         
-        #expect(sut.films.count == 22, "Should have all 22 films to show.")
+        #expect(itemCount == 22, "All 22 films should still be in the collection view.")
         #expect(sut.searchController.searchBar.isEnabled == true, "Should be true.")
     }
     
@@ -348,8 +338,9 @@ struct ExploreListVCTests {
         await sut.loadTask?.value
         sut.searchController.searchBar.text = "Cas"
         sut.updateSearchResults(for: sut.searchController)
+        let itemCount = sut.collectionView.numberOfItems(inSection: 0)
         
-        #expect(sut.films.count == 2, "Should have 2 films in search results.")
+        #expect(itemCount == 2, "Should be 2 films in the collection view.")
         #expect(sut.searchController.searchBar.isEnabled == true, "Should be true.")
     }
     
@@ -389,31 +380,27 @@ struct ExploreListVCTests {
         #expect(sut.searchController.searchBar.isEnabled == false, "Should be false.")
     }
     
-    @Test func exploreListVC_didSelectItemAt_notifiesDelegate_withCorrectFilm() {
-        let sut = makeSUT()
+    @Test func exploreListVC_didSelectItemAt_notifiesDelegate_withCorrectFilm() async {
+        let sut = makeSUTForNetworkSuccess()
         let spy = ExploreNavigationSpy()
         sut.navigationDelegate = spy
-        let testFilm = Film.sample[0]
-        let films = [testFilm]
         sut.loadViewIfNeeded()
-        sut.didUpdateFilms(films)
+        await sut.loadTask?.value
+                
         let indexPath = IndexPath(item: 0, section: 0)
-        
         sut.collectionView(sut.collectionView, didSelectItemAt: indexPath)
         
         #expect(spy.didSelectFilmCalled, "Delegate should be called.")
-        #expect(spy.selectedFilm?.id == testFilm.id, "Both ids should match.")
+        #expect(spy.selectedFilm?.id == sut.viewModel.films[0].id, "Both ids should match.")
         #expect(spy.selectedFilm?.title == "Castle in the Sky", "Should be `Castle in the Sky`.")
     }
     
-    @Test func exploreListVC_whenIndexPathIsInvalid_didSelectItemAt_doesNotNotifyDelegate() {
-        let sut = makeSUT()
+    @Test func exploreListVC_whenIndexPathIsInvalid_didSelectItemAt_doesNotNotifyDelegate() async {
+        let sut = makeSUTForNetworkSuccess()
         let spy = ExploreNavigationSpy()
         sut.navigationDelegate = spy
-        let testFilm = Film.sample[0]
-        let films = [testFilm]
         sut.loadViewIfNeeded()
-        sut.didUpdateFilms(films)
+        await sut.loadTask?.value
         
         let indexPath = IndexPath(item: 99, section: 0)
         sut.collectionView(sut.collectionView, didSelectItemAt: indexPath)
@@ -439,16 +426,14 @@ struct ExploreListVCTests {
     }
     
     @Test("iPhone only: collection view cell deselects after selection", .disabled(if: IpadHelper.isPad))
-    func exploreListVC_didSelectItemAt_deselectsItem() {
-        let sut = makeSUT()
+    func exploreListVC_didSelectItemAt_deselectsItem() async {
+        let sut = makeSUTForNetworkSuccess()
         let spy = ExploreNavigationSpy()
         spy.shouldDeselectAfterSelection = true
         sut.navigationDelegate = spy
-        let testFilm = Film.sample[0]
-        let films = [testFilm]
         sut.loadViewIfNeeded()
-        sut.didUpdateFilms(films)
-        
+        await sut.loadTask?.value
+
         let indexPath = IndexPath(item: 0, section: 0)
         sut.collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
         sut.collectionView(sut.collectionView, didSelectItemAt: indexPath)
@@ -457,14 +442,13 @@ struct ExploreListVCTests {
     }
     
     @Test("iPad only: collection view cell stays selected after selection", .enabled(if: IpadHelper.isPad))
-    func exploreListVC_didSelectItemAt_keepsItemSelected() {
-        let sut = makeSUT()
+    func exploreListVC_didSelectItemAt_keepsItemSelected() async {
+        let sut = makeSUTForNetworkSuccess()
         let spy = ExploreNavigationSpy()
+        spy.shouldDeselectAfterSelection = false
         sut.navigationDelegate = spy
-        let testFilm = Film.sample[0]
-        let films = [testFilm]
         sut.loadViewIfNeeded()
-        sut.didUpdateFilms(films)
+        await sut.loadTask?.value
         
         let indexPath = IndexPath(item: 0, section: 0)
         sut.collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
@@ -502,7 +486,7 @@ struct ExploreListVCTests {
         sut.view.layoutIfNeeded()
         
         #expect(sut.contentUnavailableConfiguration != nil, "Should be showing loading view.")
-        #expect(sut.viewModel.currentState == .retrying, "Should be set to `.retrying`.")
+        #expect(sut.viewModel.currentState == .loadingAllFilms, "Should be set to `.loadingAllFilms`.")
         
         await sut.viewModel.refreshTask?.value
         
@@ -525,19 +509,21 @@ struct ExploreListVCTests {
         sut.loadViewIfNeeded()
         
         sut.collectionView.refreshControl?.sendActions(for: .valueChanged)
-        let films: [Film] = [Film.sample[0]]
-        sut.didUpdateFilms(films)
         
         #expect(sut.collectionView.refreshControl?.isRefreshing == false, "Should be false.")
     }
     
-    @Test("Refreshing stops when failed to load films")
-    func exploreListVC_didFailToLoadFilms_stopsRefreshing() {
+    @Test("Refreshing stops when view model's state changes")
+    func exploreListVC_whenVMChangesState_refreshControl_stopsRefreshing() async {
         let sut = makeSUTForNetworkSuccess()
         sut.loadViewIfNeeded()
-        
+        await sut.loadTask?.value
         sut.collectionView.refreshControl?.sendActions(for: .valueChanged)
-        sut.didFailToLoadFilms()
+        
+        sut.viewModel(
+            sut.viewModel,
+            didChange: sut.viewModel.currentState
+        )
         
         #expect(sut.collectionView.refreshControl?.isRefreshing == false, "Should be false.")
     }
@@ -555,10 +541,8 @@ struct ExploreListVCTests {
         let sut = ExploreListVC(viewModel: filmsListViewModel,
                                 cellConfigurator: mockCellConfigurator,
                                 accessibilityService: mockAccessibilityService)
-        sut.loadViewIfNeeded()
-        let films: [Film] = [Film.sample[0]]
 
-        sut.didUpdateFilms(films)
+        sut.loadViewIfNeeded()
         await Task.yield()
         sut.collectionView.layoutIfNeeded()
         let indexPath = IndexPath(item: 0, section: 0)
@@ -584,10 +568,8 @@ struct ExploreListVCTests {
         let sut = ExploreListVC(viewModel: filmsListViewModel,
                                 cellConfigurator: mockCellConfigurator,
                                 accessibilityService: mockAccessibilityService)
-        sut.loadViewIfNeeded()
         
-        let films: [Film] = [Film.sample[0]]
-        sut.didUpdateFilms(films)
+        sut.loadViewIfNeeded()
         await Task.yield()
         sut.collectionView.layoutIfNeeded()
         
@@ -638,7 +620,10 @@ struct ExploreListVCTests {
     func exploreListVC_didRequestVoiceOverAnnouncement_whenVoiceOverIsDisabled_doesNotPost() async {
         let (sut, mockAccessibilityService) = await makeSUTForVOTests(voiceOverIsOn: false)
         
-        sut.didRequestVoiceOverAnnouncement(with: "test")
+        sut.viewModel(
+            sut.viewModel,
+            didEmit: FilmsListViewModel.FilmsListEvent.voiceOverAnnouncement("test")
+        )
         
         #expect(sut.voiceOverAnnouncementTask == nil, "Should be nil due to early exit via guard.")
         #expect(mockAccessibilityService.postedNotification == nil, "Should not have posted a notification.")
@@ -650,7 +635,10 @@ struct ExploreListVCTests {
     func exploreListVC_didRequestVoiceOverAnnouncement_whenVoiceOverIsOn_postsMessageAfterDelay() async throws {
         let (sut, mockAccessibilityService) = await makeSUTForVOTests(voiceOverIsOn: true)
         
-        sut.didRequestVoiceOverAnnouncement(with: "Test Announcement")
+        sut.viewModel(
+            sut.viewModel,
+            didEmit: FilmsListViewModel.FilmsListEvent.voiceOverAnnouncement("Test Announcement")
+        )
         await mockAccessibilityService.waitForNotification()
         
         #expect(mockAccessibilityService.postedNotification == .announcement, "The notification should be for an announcement.")
@@ -663,9 +651,16 @@ struct ExploreListVCTests {
     func exploreListVC_didRequestVoiceOverAnnouncement_multipleRequests_cancelsPreviousAndDebounces() async throws {
         let (sut, mockAccessibilityService) = await makeSUTForVOTests(voiceOverIsOn: true)
         
-        sut.didRequestVoiceOverAnnouncement(with: "First Message")
+        sut.viewModel(
+            sut.viewModel,
+            didEmit: FilmsListViewModel.FilmsListEvent.voiceOverAnnouncement("First Message")
+        )
         let firstTask = sut.voiceOverAnnouncementTask
-        sut.didRequestVoiceOverAnnouncement(with: "Second Message")
+        
+        sut.viewModel(
+            sut.viewModel,
+            didEmit: FilmsListViewModel.FilmsListEvent.voiceOverAnnouncement("Second Message")
+        )
         await mockAccessibilityService.waitForNotification()
         
         #expect(firstTask?.isCancelled == true, "Should have cancelled the first task.")
@@ -677,7 +672,12 @@ struct ExploreListVCTests {
     @Test("Clean up `voiceOverAnnouncementTask` in `viewWillDisappear`")
     func exploreListVC_viewWillDisappear_cancelsVoiceOverTaskAndSetsItToNil() async {
         let (sut, mockAccessibilityService) = await makeSUTForVOTests(voiceOverIsOn: true)
-        sut.didRequestVoiceOverAnnouncement(with: "Message")
+
+        sut.viewModel(
+            sut.viewModel,
+            didEmit: FilmsListViewModel.FilmsListEvent.voiceOverAnnouncement("Message")
+        )
+        
         let capturedTask = sut.voiceOverAnnouncementTask
         #expect(capturedTask?.isCancelled == false, "Should not be cancelled.")
         #expect(sut.loadTask != nil, "Should not be nil.")
@@ -736,14 +736,6 @@ struct ExploreListVCTests {
                              accessibilityService: mockAccessibilityService)
     }
     
-    private func makeSUTForDataSource() -> ExploreListVC {
-        let sut = makeSUT()
-        sut.loadViewIfNeeded()
-        let films: [Film] = [Film.sample[0]]
-        sut.didUpdateFilms(films)
-        return sut
-    }
-
     private func makeSUTForVOTests(voiceOverIsOn: Bool) async -> (sut: ExploreListVC, mockAccessibilityService: MockAccessibilityService) {
         let mockFilmsListService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
         let imageLoader = MockImageLoader()

@@ -15,7 +15,6 @@ final class ExploreListVC: UIViewController {
     
     // MARK: - Properties
     weak var navigationDelegate: ExploreNavigationDelegate?
-    private(set) var films: [Film] = []
     private(set) var filmLookup: [String: Film] = [:]
     let viewModel: FilmsListViewModel
     lazy var collectionView = UICollectionView()
@@ -63,7 +62,7 @@ final class ExploreListVC: UIViewController {
     override func updateContentUnavailableConfiguration(using state: UIContentUnavailableConfigurationState) {
         var config: UIContentUnavailableConfiguration? = nil
         switch viewModel.currentState {
-        case .loadingAllFilms, .retrying:
+        case .loadingAllFilms:
             config = createLoadingView()
         case .emptySearchResults:
             config = createEmptySearchResultsView()
@@ -105,7 +104,10 @@ final class ExploreListVC: UIViewController {
             guard let self = self else { return nil }
             var config = UICollectionLayoutListConfiguration(appearance: .sidebar)
             config.backgroundColor = .systemBackground
-            config.headerMode = self.viewModel.currentState == .content(isUsingArchivedData: true) ? .supplementary : .none
+            config.headerMode = self.viewModel.currentState == .content(
+                films: viewModel.films,
+                isUsingArchivedData: true
+            ) ? .supplementary : .none
             return NSCollectionLayoutSection.list(using: config, layoutEnvironment: layoutEnvironment)
         }
         return UICollectionViewCompositionalLayout(sectionProvider: sectionProvider)
@@ -170,12 +172,21 @@ final class ExploreListVC: UIViewController {
         var searchBarIsEnabled = false
         
         switch viewModel.currentState {
-        case .idle, .loadingAllFilms, .retrying:
+        case .idle, .loadingAllFilms:
             setNeedsUpdateContentUnavailableConfiguration()
-        case .content(isUsingArchivedData: false), .content(isUsingArchivedData: true):
+        case .content(films: let films, _):
             setNeedsUpdateContentUnavailableConfiguration()
             collectionViewIsHidden = false
             searchBarIsEnabled = true
+            //self.films = films
+            let filmIds = films.map({ $0.id })
+            filmLookup = Dictionary(uniqueKeysWithValues: films.map { ($0.id, $0) })
+            collectionView.refreshControl?.endRefreshing()
+            
+            var snapshot = NSDiffableDataSourceSnapshot<Section, Film.ID>()
+            snapshot.appendSections([.main])
+            snapshot.appendItems(filmIds, toSection: .main)
+            dataSource.apply(snapshot, animatingDifferences: true)
         case .emptySearchResults:
             setNeedsUpdateContentUnavailableConfiguration()
             searchBarIsEnabled = true
@@ -253,38 +264,22 @@ extension ExploreListVC: UICollectionViewDelegate {
 
 // MARK: - Films List View Model Delegate
 extension ExploreListVC: FilmsListViewModelDelegate {
-    func didStartLoadingFilms() {
-        updateViewHierarchyForCurrentState()
-    }
-    
-    func didUpdateFilms(_ films: [Film]) {
-        self.films = films
-        let filmIds = films.map({ $0.id })
-        filmLookup = Dictionary(uniqueKeysWithValues: films.map { ($0.id, $0) })
-        collectionView.refreshControl?.endRefreshing()
-        
-        var snapshot = NSDiffableDataSourceSnapshot<Section, Film.ID>()
-        snapshot.appendSections([.main])
-        snapshot.appendItems(filmIds, toSection: .main)
-        dataSource.apply(snapshot, animatingDifferences: true)
-        updateViewHierarchyForCurrentState()
-    }
-    
-    func didFailToLoadFilms() {
+    func viewModel(
+        _ viewModel: FilmsListViewModel,
+        didChange
+        state: FilmsListViewModel.FilmsListState
+    ) {
         collectionView.refreshControl?.endRefreshing()
         updateViewHierarchyForCurrentState()
     }
     
-    func didRetry() {
-        updateViewHierarchyForCurrentState()
-    }
-    
-    func didFailToMatchResults() {
-        updateViewHierarchyForCurrentState()
-    }
-    
-    func didRequestVoiceOverAnnouncement(with message: String) {
+    func viewModel(
+        _ viewModel: FilmsListViewModel,
+        didEmit
+        event: FilmsListViewModel.FilmsListEvent
+    ) {
         guard accessibilityService.isVoiceOverRunning else { return }
+        guard case let .voiceOverAnnouncement(message) = event else { return }
         voiceOverAnnouncementTask?.cancel()
         voiceOverAnnouncementTask = Task { [weak self] in
             guard let self else { return }
@@ -315,7 +310,7 @@ extension ExploreListVC: UISearchBarDelegate {
 extension ExploreListVC: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         guard let searchText = searchController.searchBar.text, !searchText.isEmpty else { return }
-        guard !films.isEmpty else { return }
+        guard !viewModel.films.isEmpty else { return }
         viewModel.filterFilms(by: searchText)
     }
 }

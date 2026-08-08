@@ -26,7 +26,9 @@ struct FilmsListViewModelUnitTests {
         await sut.getAllFilms()
         
         #expect(sut.films.count == 22, "There should be 22 films.")
-        #expect(sut.currentState == .content(isUsingArchivedData: false), "Should be `.content(isUsingArchivedData: false)`.")
+        #expect(sut.currentState == .content(
+            films: sut.films,
+            isUsingArchivedData: false), "Should be `.content(films: sut.films, isUsingArchivedData: false)`.")
     }
     
     @Test("ViewModel requests voice over announcement after fetching films", .tags(.networkRequest))
@@ -36,7 +38,7 @@ struct FilmsListViewModelUnitTests {
         sut.delegate = delegateSpy
         await sut.getAllFilms()
         
-        #expect(delegateSpy.didRequestVoiceOverAnnouncement == true, "Should be made the request.")
+        #expect(delegateSpy.didEmitEventCallCount == 1, "Should make the request once.")
         #expect(delegateSpy.capturedMessage == "Showing all films", "Should be equal.")
     }
     
@@ -70,7 +72,7 @@ struct FilmsListViewModelUnitTests {
         await Task.yield()
         
         #expect(sut.currentState == .loadingAllFilms)
-        #expect(delegateSpy.didStartLoadingFilmsCallCount == 1, "Should call delegate method once.")
+        #expect(delegateSpy.didChangeStateCallCount == 1, "Should call delegate method once.")
         task.cancel()
     }
     
@@ -93,7 +95,7 @@ struct FilmsListViewModelUnitTests {
         
         #expect(sut.films.isEmpty, "Films array should be empty on failure.")
         #expect(sut.currentState == .error(expectedError), "Should be `.error(APIError)`.")
-        #expect(delegateSpy.didFailToLoadFilmsCallCount == 1, "Should have called delegate method once.")
+        #expect(delegateSpy.didChangeStateCallCount == 2, "Should have called delegate method twice; once for loading, and again for error.")
     }
     
     @Test("Covers `handleFailure()`",.tags(.networkRequest))
@@ -159,7 +161,7 @@ struct FilmsListViewModelUnitTests {
         
         await sut.getAllFilms()
         
-        #expect(sut.currentState == .content(isUsingArchivedData: true), "Should be set to true.")
+        #expect(sut.currentState == .content(films: sut.films, isUsingArchivedData: true), "Should be using archived data.")
     }
     
     @Test(.tags(.networkRequest))
@@ -172,7 +174,7 @@ struct FilmsListViewModelUnitTests {
         
         await sut.getAllFilms()
         
-        #expect(sut.currentState == .content(isUsingArchivedData: false), "Should be set to false.")
+        #expect(sut.currentState == .content(films: sut.films, isUsingArchivedData: false), "Should be set to false.")
     }
     
     @Test(.tags(.search))
@@ -200,11 +202,12 @@ struct FilmsListViewModelUnitTests {
         sut.delegate = delegateSpy
         
         await sut.getAllFilms()
+        #expect(delegateSpy.didChangeStateCallCount == 2, "Should have been called twice; once for loading state, and again for error.")
         sut.filterFilms(by: "query")
         
         #expect(sut.films.isEmpty, "Films array should be empty on failure.")
         #expect(sut.filteredFilms.isEmpty, "Filtered films array should be empty.")
-        #expect(delegateSpy.didFailToMatchResultsCallCount == 0, "Should not have been called because function exits early at guard statement.")
+        #expect(delegateSpy.didChangeStateCallCount == 2, "Should not have been called again because function exits early at guard statement.")
     }
     
     @Test("ViewModel handles attempted search with empty search query by exiting early via guard",
@@ -219,7 +222,7 @@ struct FilmsListViewModelUnitTests {
         
         #expect(sut.films.count == 22, "Films array should have all 22 films.")
         #expect(sut.filteredFilms.isEmpty, "Filtered films should be empty.")
-        #expect(delegateSpy.didFailToMatchResultsCallCount == 0, "Should not have been called because function exits early at guard statement.")
+        #expect(delegateSpy.didChangeStateCallCount == 0, "Should not have been called because function exits early at guard statement.")
     }
     
     @Test(.tags(.search))
@@ -231,9 +234,8 @@ struct FilmsListViewModelUnitTests {
         
         sut.filterFilms(by: "Cas")
         
-        #expect(sut.filteredFilms.isEmpty == false, "Filtered films should not be empty.")
         #expect(sut.filteredFilms.count == 2, "Should have two films that have `cas` in the title.")
-        #expect(delegateSpy.didUpdateFilmsCallCount == 1, "Should have called delegate method once.")
+        #expect(delegateSpy.didChangeStateCallCount == 1, "Should have called delegate method once.")
     }
     
     @Test(.tags(.search))
@@ -243,7 +245,6 @@ struct FilmsListViewModelUnitTests {
 
         sut.filterFilms(by: "cas")
         
-        #expect(sut.filteredFilms.isEmpty == false, "Filtered films should not be empty.")
         #expect(sut.filteredFilms.count == 2, "Should have two films that have `cas` in the title.")
     }
     
@@ -258,7 +259,7 @@ struct FilmsListViewModelUnitTests {
         
         #expect(sut.filteredFilms.isEmpty, "No matches should return an empty array.")
         #expect(sut.currentState == .emptySearchResults, "Should be `.emptySearchResults` state.")
-        #expect(delegateSpy.didFailToMatchResultsCallCount == 1, "Should have called delegate method once.")
+        #expect(delegateSpy.didChangeStateCallCount == 1, "Should have called delegate method once.")
     }
     
     @Test(.tags(.search))
@@ -322,7 +323,7 @@ struct FilmsListViewModelUnitTests {
 
         sut.filterFilms(by: "Cas")
         
-        #expect(delegateSpy.didRequestVoiceOverAnnouncement, "Should be true.")
+        #expect(delegateSpy.didEmitEventCallCount == 2, "Should be called twice; once for loading all films, and again for filtering.")
         #expect(delegateSpy.capturedMessage == "2 found", "Should be equal.")
     }
     
@@ -335,7 +336,7 @@ struct FilmsListViewModelUnitTests {
 
         sut.filterFilms(by: "No results")
         
-        #expect(delegateSpy.didRequestVoiceOverAnnouncement, "Should be true.")
+        #expect(delegateSpy.didEmitEventCallCount == 2, "Should be called twice; once for loading all films, and again for filtering.")
         #expect(delegateSpy.capturedMessage == "No results found. Try another query.", "Should be equal.")
     }
     
@@ -347,7 +348,7 @@ struct FilmsListViewModelUnitTests {
         sut.resetAllFilms()
         
         #expect(sut.films.count == 22, "Should have 22 films.")
-        #expect(sut.currentState == .content(isUsingArchivedData: false), "Should be `.content(isUsingArchivedData: false)`.")
+        #expect(sut.currentState == .content(films: sut.films, isUsingArchivedData: false), "Should be `.content(films: sut.films, isUsingArchivedData: false)`.")
     }
     
     @Test func filmsListViewModel_resetAllFilms_emptiesFilteredFilms() async {
@@ -367,12 +368,10 @@ struct FilmsListViewModelUnitTests {
         sut.delegate = delegateSpy
         await sut.getAllFilms()
         sut.filterFilms(by: "Cas")
-        delegateSpy.didRequestVoiceOverAnnouncement = false
-        delegateSpy.capturedMessage = nil
         
         sut.resetAllFilms()
         
-        #expect(delegateSpy.didRequestVoiceOverAnnouncement == true, "Should be true.")
+        #expect(delegateSpy.didEmitEventCallCount == 3, "Should be called three times; once for loading all films, twice for filtering, and again for resetting.")
         #expect(delegateSpy.capturedMessage == "Showing all films", "Should be equal.")
     }
     
@@ -390,8 +389,8 @@ struct FilmsListViewModelUnitTests {
         
         #expect(sut.refreshTask != nil, "A new task should be created")
         #expect(sut.filteredFilms.isEmpty, "Should be empty.")
-        #expect(sut.currentState == .retrying, "State should change to retrying")
-        #expect(delegateSpy.didRetryCallCount == 1, "Should have called delegate method once.")
+        #expect(sut.currentState == .loadingAllFilms, "State should change to `.loadingAllFilms`")
+        #expect(delegateSpy.didChangeStateCallCount == 1, "Should have called delegate method once.")
         
         await sut.refreshTask?.value
         #expect(mockService.fetchWasCalled == true)
@@ -426,8 +425,8 @@ struct FilmsListViewModelUnitTests {
         #expect(result == sut.films[0], "Should return a film.")
     }
     
-    @Test("`updateFilmInArrays` updates a film's properties in both `films` and `filteredFilms` arrays, updates state, and calls delegate twice.")
-    func filmsListViewModel_updateFilmInArrays_whenFilmExistsInBothArrays_updatesBothAndSetsStateAndCallsDelegateTwice() async {
+    @Test("if a film exists in both `films` and `filteredFilms` arrays, `updateFilmInArrays` updates a film's properties in both arrays, updates state, and calls delegate correct number of times.")
+    func filmsListViewModel_updateFilmInArrays_whenFilmExistsInBothArrays_updatesBothAndSetsStateAndCallsDelegateCorrectNumberOfTimes() async {
         let sut = makeSUTForSuccessCase()
         let delegateSpy = FilmsListViewModelDelegateSpy()
         sut.delegate = delegateSpy
@@ -436,9 +435,7 @@ struct FilmsListViewModelUnitTests {
         var updatedFilm = sut.films[0]
         updatedFilm.isUpNext = true
         updatedFilm.isWatched = true
-        
-        /// Reset to zero because it has been called twice up to this point already.
-        delegateSpy.didUpdateFilmsCallCount = 0
+        #expect(delegateSpy.didChangeStateCallCount == 3, "Should have been called three times: once for loading state, twice for content, and again for filtering.")
         
         sut.updateFilmInArrays(updatedFilm)
         
@@ -446,8 +443,8 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.films[0].isWatched == true, "Should have updated to true.")
         #expect(sut.filteredFilms[0].isUpNext == true, "Should have updated to true.")
         #expect(sut.filteredFilms[0].isWatched == true, "Should have updated to true.")
-        #expect(sut.currentState == .content(isUsingArchivedData: false), "Should be `.content(isUsingArchivedData: false)`.")
-        #expect(delegateSpy.didUpdateFilmsCallCount == 2, "Should be two; one for `films`, and the other for `filteredFilms`.")
+        #expect(sut.currentState == .content(films: sut.filteredFilms, isUsingArchivedData: false), "Should be `.content(isUsingArchivedData: false)`.")
+        #expect(delegateSpy.didChangeStateCallCount == 5, "Should be five in total; the fourth time for `films`, and the fifth time for `filteredFilms`.")
     }
     
     @Test("`updateFilmInArrays` gracefully does nothing if the film ID does not exist in the arrays")
@@ -459,8 +456,7 @@ struct FilmsListViewModelUnitTests {
            sut.filterFilms(by: "Cas")
            let updatedFilm = Film(id: "non-existent-ID", title: "", originalTitle: "", originalTitleRomanised: "", image: "", movieBanner: "", description: "", director: "", producer: "", releaseDate: "", runningTime: "", rottenTomatoesScore: "", url: "")
            
-           /// Reset to zero because it has been called twice up to this point already.
-           delegateSpy.didUpdateFilmsCallCount = 0
+           #expect(delegateSpy.didChangeStateCallCount == 3, "Should have been called three times: once for loading state, twice for content, and again for filtering.")
            
            sut.updateFilmInArrays(updatedFilm)
            
@@ -468,7 +464,7 @@ struct FilmsListViewModelUnitTests {
            #expect(sut.films[0].isWatched == false, "Should be false and therefore unchanged.")
            #expect(sut.filteredFilms[0].isUpNext == false, "Should be false and therefore unchanged.")
            #expect(sut.filteredFilms[0].isWatched == false, "Should be false and therefore unchanged.")
-           #expect(delegateSpy.didUpdateFilmsCallCount == 0, "Should be zero; delegate method should not have been called.")
+           #expect(delegateSpy.didChangeStateCallCount == 3, "Should still be three; delegate method should not have been called any more times because film ID did not exist in the arrays.")
        }
     
     // MARK: - SUT Helper Methods
@@ -490,37 +486,26 @@ struct FilmsListViewModelUnitTests {
     
     // MARK: - Films List View Model Delegate
     final class FilmsListViewModelDelegateSpy: FilmsListViewModelDelegate {
-        var didRequestVoiceOverAnnouncement = false
+        var didChangeStateCallCount = 0
+        var didEmitEventCallCount = 0
         var capturedMessage: String?
-        var didStartLoadingFilmsCallCount = 0
-        var didUpdateFilmsCallCount = 0
-        var didFailToLoadFilmsCallCount = 0
-        var didRetryCallCount = 0
-        var didFailToMatchResultsCallCount = 0
         
-        func didRequestVoiceOverAnnouncement(with message: String) {
-            didRequestVoiceOverAnnouncement = true
+        func viewModel(
+            _ viewModel: FilmsListViewModel,
+            didChange
+            state: FilmsListViewModel.FilmsListState
+        ) {
+            didChangeStateCallCount += 1
+        }
+        
+        func viewModel(
+            _ viewModel: FilmsListViewModel,
+            didEmit
+            event: FilmsListViewModel.FilmsListEvent
+        ) {
+            guard case let .voiceOverAnnouncement(message) = event else { return }
             capturedMessage = message
-        }
-        
-        func didStartLoadingFilms() {
-            didStartLoadingFilmsCallCount += 1
-        }
-
-        func didUpdateFilms(_ films: [Film]) {
-            didUpdateFilmsCallCount += 1
-        }
-        
-        func didFailToLoadFilms() {
-            didFailToLoadFilmsCallCount += 1
-        }
-        
-        func didRetry() {
-            didRetryCallCount += 1
-        }
-        
-        func didFailToMatchResults() {
-            didFailToMatchResultsCallCount += 1
+            didEmitEventCallCount += 1
         }
     }
 }
