@@ -26,7 +26,9 @@ struct FilmsListViewModelUnitTests {
         await sut.getAllFilms()
         
         #expect(sut.films.count == 22, "There should be 22 films.")
-        #expect(sut.currentState == .content(isUsingArchivedData: false), "Should be `.content(isUsingArchivedData: false)`.")
+        #expect(sut.currentState == .content(
+            films: sut.films,
+            isUsingArchivedData: false), "Should be `.content(films: sut.films, isUsingArchivedData: false)`.")
     }
     
     @Test("ViewModel requests voice over announcement after fetching films", .tags(.networkRequest))
@@ -159,7 +161,7 @@ struct FilmsListViewModelUnitTests {
         
         await sut.getAllFilms()
         
-        #expect(sut.currentState == .content(isUsingArchivedData: true), "Should be set to true.")
+        #expect(sut.currentState == .content(films: sut.films, isUsingArchivedData: true), "Should be using archived data.")
     }
     
     @Test(.tags(.networkRequest))
@@ -172,7 +174,7 @@ struct FilmsListViewModelUnitTests {
         
         await sut.getAllFilms()
         
-        #expect(sut.currentState == .content(isUsingArchivedData: false), "Should be set to false.")
+        #expect(sut.currentState == .content(films: sut.films, isUsingArchivedData: false), "Should be set to false.")
     }
     
     @Test(.tags(.search))
@@ -347,7 +349,7 @@ struct FilmsListViewModelUnitTests {
         sut.resetAllFilms()
         
         #expect(sut.films.count == 22, "Should have 22 films.")
-        #expect(sut.currentState == .content(isUsingArchivedData: false), "Should be `.content(isUsingArchivedData: false)`.")
+        #expect(sut.currentState == .content(films: sut.films, isUsingArchivedData: false), "Should be `.content(films: sut.films, isUsingArchivedData: false)`.")
     }
     
     @Test func filmsListViewModel_resetAllFilms_emptiesFilteredFilms() async {
@@ -426,7 +428,7 @@ struct FilmsListViewModelUnitTests {
         #expect(result == sut.films[0], "Should return a film.")
     }
     
-    @Test("`updateFilmInArrays` updates a film's properties in both `films` and `filteredFilms` arrays, updates state, and calls delegate twice.")
+    @Test("if a film exists in both `films` and `filteredFilms` arrays, `updateFilmInArrays` updates a film's properties in both arrays, updates state, and calls delegate twice.")
     func filmsListViewModel_updateFilmInArrays_whenFilmExistsInBothArrays_updatesBothAndSetsStateAndCallsDelegateTwice() async {
         let sut = makeSUTForSuccessCase()
         let delegateSpy = FilmsListViewModelDelegateSpy()
@@ -446,7 +448,7 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.films[0].isWatched == true, "Should have updated to true.")
         #expect(sut.filteredFilms[0].isUpNext == true, "Should have updated to true.")
         #expect(sut.filteredFilms[0].isWatched == true, "Should have updated to true.")
-        #expect(sut.currentState == .content(isUsingArchivedData: false), "Should be `.content(isUsingArchivedData: false)`.")
+        #expect(sut.currentState == .content(films: sut.filteredFilms, isUsingArchivedData: false), "Should be `.content(isUsingArchivedData: false)`.")
         #expect(delegateSpy.didUpdateFilmsCallCount == 2, "Should be two; one for `films`, and the other for `filteredFilms`.")
     }
     
@@ -507,7 +509,7 @@ struct FilmsListViewModelUnitTests {
             didStartLoadingFilmsCallCount += 1
         }
 
-        func didUpdateFilms(_ films: [Film]) {
+        func didUpdateFilms() {
             didUpdateFilmsCallCount += 1
         }
         

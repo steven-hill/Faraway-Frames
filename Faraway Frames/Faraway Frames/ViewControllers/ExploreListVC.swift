@@ -105,7 +105,10 @@ final class ExploreListVC: UIViewController {
             guard let self = self else { return nil }
             var config = UICollectionLayoutListConfiguration(appearance: .sidebar)
             config.backgroundColor = .systemBackground
-            config.headerMode = self.viewModel.currentState == .content(isUsingArchivedData: true) ? .supplementary : .none
+            config.headerMode = self.viewModel.currentState == .content(
+                films: films,
+                isUsingArchivedData: true
+            ) ? .supplementary : .none
             return NSCollectionLayoutSection.list(using: config, layoutEnvironment: layoutEnvironment)
         }
         return UICollectionViewCompositionalLayout(sectionProvider: sectionProvider)
@@ -172,10 +175,19 @@ final class ExploreListVC: UIViewController {
         switch viewModel.currentState {
         case .idle, .loadingAllFilms:
             setNeedsUpdateContentUnavailableConfiguration()
-        case .content(isUsingArchivedData: false), .content(isUsingArchivedData: true):
+        case .content(films: let films, _):
             setNeedsUpdateContentUnavailableConfiguration()
             collectionViewIsHidden = false
             searchBarIsEnabled = true
+            self.films = films
+            let filmIds = films.map({ $0.id })
+            filmLookup = Dictionary(uniqueKeysWithValues: films.map { ($0.id, $0) })
+            collectionView.refreshControl?.endRefreshing()
+            
+            var snapshot = NSDiffableDataSourceSnapshot<Section, Film.ID>()
+            snapshot.appendSections([.main])
+            snapshot.appendItems(filmIds, toSection: .main)
+            dataSource.apply(snapshot, animatingDifferences: true)
         case .emptySearchResults:
             setNeedsUpdateContentUnavailableConfiguration()
             searchBarIsEnabled = true
@@ -257,16 +269,7 @@ extension ExploreListVC: FilmsListViewModelDelegate {
         updateViewHierarchyForCurrentState()
     }
     
-    func didUpdateFilms(_ films: [Film]) {
-        self.films = films
-        let filmIds = films.map({ $0.id })
-        filmLookup = Dictionary(uniqueKeysWithValues: films.map { ($0.id, $0) })
-        collectionView.refreshControl?.endRefreshing()
-        
-        var snapshot = NSDiffableDataSourceSnapshot<Section, Film.ID>()
-        snapshot.appendSections([.main])
-        snapshot.appendItems(filmIds, toSection: .main)
-        dataSource.apply(snapshot, animatingDifferences: true)
+    func didUpdateFilms() {
         updateViewHierarchyForCurrentState()
     }
     

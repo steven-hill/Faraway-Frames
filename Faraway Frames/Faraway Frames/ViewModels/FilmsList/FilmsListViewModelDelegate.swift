@@ -9,7 +9,7 @@ import Foundation
 
 protocol FilmsListViewModelDelegate: AnyObject {
     func didStartLoadingFilms()
-    func didUpdateFilms(_ films: [Film])
+    func didUpdateFilms()
     func didFailToLoadFilms()
     func didRetry()
     func didFailToMatchResults()
