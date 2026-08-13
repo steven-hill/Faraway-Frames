@@ -24,7 +24,7 @@ struct PersistenceControllerTests {
             #expect(nsError.domain == NSCocoaErrorDomain, "Should be a Cocoa error")
             #expect(nsError.code == NSFileReadNoSuchFileError, "Should be a no such file error")
         default:
-            Issue.record("Expected .loadingStoresFailed, but got \(thrownError)")
+            Issue.record("Expected `.loadingStoresFailed`, but got \(thrownError)")
         }
     }
     
@@ -38,6 +38,6 @@ struct PersistenceControllerTests {
             }
         }
         
-        #expect(thrownError == .loadingStoresFailed(error: mockError))
+        #expect(thrownError == .loadingStoresFailed(error: mockError), "Expected `.loadingStoresFailed`, but got \(thrownError)")
     }
 }
