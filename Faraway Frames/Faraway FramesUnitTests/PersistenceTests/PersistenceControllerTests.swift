@@ -14,7 +14,7 @@ struct PersistenceControllerTests {
     
     @Test("Invalid persistent container name string throws a loading failure", (.tags(.persistence)))
     func persistenceController_withTypoInContainerName_throwsLoadingStoresFailedError() throws {
-        let thrownError = #expect(throws: PersistenceError.self) {
+        let thrownError = #expect(throws: PersistenceStoresError.self) {
             try PersistenceController(inMemory: true, containerName: "FarawayFramesCDModelTypo")
         }
         
@@ -32,7 +32,7 @@ struct PersistenceControllerTests {
     func persistenceController_whenLoadingPersistentStoresFails_throwsCorrectError() throws {
         let mockError = NSError(domain: "TestDomain", code: 42, userInfo: nil)
         
-        let thrownError = #expect(throws: PersistenceError.self) {
+        let thrownError = #expect(throws: PersistenceStoresError.self) {
             try PersistenceController(inMemory: true) { container, completion in
                 completion(NSPersistentStoreDescription(), mockError)
             }
