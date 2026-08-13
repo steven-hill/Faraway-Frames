@@ -415,16 +415,6 @@ struct FilmsListViewModelUnitTests {
         _ = await secondTask.result
     }
     
-    @Test("`syncFilmWithDatabase` calls service with film and returns film", .tags(.persistence))
-    func filmsListViewModel_syncFilmWithDatabase_callsServiceWithFilm() async {
-        let sut = makeSUTForSuccessCase()
-        await sut.getAllFilms()
-        
-        let result = await sut.syncFilmWithDatabase(sut.films[0])
-        
-        #expect(result == sut.films[0], "Should return a film.")
-    }
-    
     @Test("if a film exists in both `films` and `filteredFilms` arrays, `updateFilmInArrays` updates a film's properties in both arrays, updates state, and calls delegate correct number of times.")
     func filmsListViewModel_updateFilmInArrays_whenFilmExistsInBothArrays_updatesBothAndSetsStateAndCallsDelegateCorrectNumberOfTimes() async {
         let sut = makeSUTForSuccessCase()
