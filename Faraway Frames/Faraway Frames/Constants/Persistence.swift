@@ -9,4 +9,5 @@ import Foundation
 
 enum Persistence {
     static let persistentContainerName = "FarawayFramesCDModel"
+    nonisolated static let entityname = "FilmMO"
 }

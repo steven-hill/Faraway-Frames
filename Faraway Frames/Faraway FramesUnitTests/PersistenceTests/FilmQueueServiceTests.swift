@@ -119,7 +119,7 @@ struct FilmQueueServiceTests {
     
     // MARK: - Fetch Films Helper Method
     private func fetchFilmsFromDatabase(film: Film, testPersistenceController: PersistenceController) -> [FilmMO] {
-        let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
+        let request = NSFetchRequest<FilmMO>(entityName: Persistence.entityname)
         request.predicate = NSPredicate(format: "id == %@", film.id)
         return try! testPersistenceController.viewContext.fetch(request)
     }

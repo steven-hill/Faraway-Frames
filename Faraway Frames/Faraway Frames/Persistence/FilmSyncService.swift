@@ -17,7 +17,7 @@ final class FilmSyncService {
     func syncFilmsWithLocalStorage(_ films: [Film]) async -> [Film] {
         guard !films.isEmpty else { return [] }
         return await context.perform { [context] in
-            let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
+            let request = NSFetchRequest<FilmMO>(entityName: Persistence.entityname)
             let filmsIDs = films.map { $0.id }
             request.predicate = NSPredicate(format: "id IN %@", filmsIDs)
             
@@ -48,7 +48,7 @@ final class FilmSyncService {
     
     func syncSingleFilmWithLocalStorage(_ film: Film) async -> Film {
         await context.perform {
-            let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
+            let request = NSFetchRequest<FilmMO>(entityName: Persistence.entityname)
             request.predicate = NSPredicate(format: "id == %@", film.id)
             request.fetchLimit = 1
             

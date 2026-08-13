@@ -351,7 +351,7 @@ struct HomeVCTests {
             filmQueueService: filmQueueService)
         let sut = HomeVC(homeViewModel: homeVM)
         let entity = try #require(
-            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
             "The Core Data model schema must contain an entity definition named 'FilmMO'."
         )
         return (sut, context, entity)
@@ -375,7 +375,7 @@ struct HomeVCTests {
             filmQueueService: filmQueueService)
         let sut = HomeVC(homeViewModel: homeVM)
         let entity = try #require(
-            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
             "The Core Data model schema must contain an entity definition named 'FilmMO'."
         )
         return (sut, context, entity)
@@ -401,7 +401,7 @@ struct HomeVCTests {
         homeVM.coordinatorDelegate = spyDelegate
         let sut = HomeVC(homeViewModel: homeVM)
         let entity = try #require(
-            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
             "The Core Data model schema must contain an entity definition named 'FilmMO'.")
         return (sut, context, spyDelegate, entity)
     }

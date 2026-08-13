@@ -144,7 +144,7 @@ struct FilmSyncServiceTests {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
         let entity = try #require(
-            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
             "The Core Data model schema must contain an entity definition named 'FilmMO'."
         )
         let sut = FilmSyncService(context: context)
