@@ -54,17 +54,6 @@ final class PersistenceController: PersistenceControlling {
             createMockMO(context: viewContext)
         }
     }
-    
-    // MARK: - Core Data Saving
-    func saveContext() throws {
-        if viewContext.hasChanges {
-            do {
-                try viewContext.save()
-            } catch {
-                throw PersistenceError.savingFailed(error: error)
-            }
-        }
-    }
 }
 
 /// Creates mock data for UI tests.
