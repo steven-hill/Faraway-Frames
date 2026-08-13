@@ -15,7 +15,7 @@ struct FilmMOQueryTests {
     func filmMO_upNextFetchRequest_hasCorrectPredicateAndSort() {
         let request = FilmMO.upNextFetchRequest()
         
-        #expect(request.entityName == "FilmMO", "Should target the FilmMO table.")
+        #expect(request.entityName == Persistence.entityname, "Should target the FilmMO table.")
         #expect(request.sortDescriptors?.first?.key == "dateAddedToUpNext", "Should sort rows by date added.")
         #expect(request.predicate?.predicateFormat == "isUpNext == 1", "Predicate must filter strictly for active true status.")
     }
@@ -24,7 +24,7 @@ struct FilmMOQueryTests {
     func filmMO_watchedFetchRequest_hasCorrectPredicateAndSort() {
         let request = FilmMO.watchedFetchRequest()
         
-        #expect(request.entityName == "FilmMO", "Should target the FilmMO table.")
+        #expect(request.entityName == Persistence.entityname, "Should target the FilmMO table.")
         #expect(request.sortDescriptors?.first?.key == "dateAddedToWatched", "Should sort rows by date added.")
         #expect(request.predicate?.predicateFormat == "isWatched == 1", "Predicate must filter strictly for active true status.")
     }
@@ -33,7 +33,7 @@ struct FilmMOQueryTests {
     func filmMO_exploreDetailFetchRequest_hasCorrectPredicateAndSort() {
         let request = FilmMO.exploreDetailFetchRequest(using: "test_id")
         
-        #expect(request.entityName == "FilmMO", "Should target the FilmMO table.")
+        #expect(request.entityName == Persistence.entityname, "Should target the FilmMO table.")
         #expect(request.sortDescriptors?.first?.key == "title", "Should sort rows by their title.")
         #expect(request.predicate?.predicateFormat == "id == \"test_id\"", "Predicate must filter strictly for `film.id`.")
     }

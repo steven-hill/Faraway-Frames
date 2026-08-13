@@ -26,7 +26,7 @@ final class PersistenceController: PersistenceControlling {
                 domain: NSCocoaErrorDomain,
                 code: NSFileReadNoSuchFileError,
                 userInfo: [NSLocalizedDescriptionKey: "Failed to locate the .momd file for the container"])
-            throw PersistenceError.loadingStoresFailed(error: error)
+            throw PersistenceStoresError.loadingStoresFailed(error: error)
         }
         
         container = NSPersistentContainer(name: containerName)
@@ -45,24 +45,13 @@ final class PersistenceController: PersistenceControlling {
             }
         }
         if let error = storesLoadingError {
-            throw PersistenceError.loadingStoresFailed(error: error)
+            throw PersistenceStoresError.loadingStoresFailed(error: error)
         }
         
         container.viewContext.automaticallyMergesChangesFromParent = true
         
         if isUITesting {
             createMockMO(context: viewContext)
-        }
-    }
-    
-    // MARK: - Core Data Saving
-    func saveContext() throws {
-        if viewContext.hasChanges {
-            do {
-                try viewContext.save()
-            } catch {
-                throw PersistenceError.savingFailed(error: error)
-            }
         }
     }
 }

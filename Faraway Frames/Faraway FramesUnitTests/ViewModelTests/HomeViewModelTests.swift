@@ -34,7 +34,7 @@ struct HomeViewModelTests {
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         let entity = try #require(
-            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
             "The Core Data model schema must contain an entity definition named 'FilmMO'."
         )
         
@@ -233,7 +233,7 @@ struct HomeViewModelTests {
         let context = testPersistenceController.viewContext
         let sampleFilm = Film.sample[0]
         let entity = try #require(
-            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
             "The Core Data model schema must contain an entity definition named 'FilmMO'."
         )
         _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
@@ -264,7 +264,7 @@ struct HomeViewModelTests {
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         let entity = try #require(
-            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
             "The Core Data model schema must contain an entity definition named 'FilmMO'."
         )
         let targetFilm = Film.sample[0]
@@ -286,7 +286,7 @@ struct HomeViewModelTests {
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         let entity = try #require(
-            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
             "The Core Data model schema must contain an entity definition named 'FilmMO'."
         )
         let targetFilm = Film.sample[0]
@@ -308,7 +308,7 @@ struct HomeViewModelTests {
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         let entity = try #require(
-            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
             "The Core Data model schema must contain an entity definition named 'FilmMO'."
         )
         let targetFilm = Film.sample[0]
@@ -330,7 +330,7 @@ struct HomeViewModelTests {
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         let entity = try #require(
-            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
             "The Core Data model schema must contain an entity definition named 'FilmMO'."
         )
         let targetFilm = Film.sample[0]
@@ -371,7 +371,7 @@ struct HomeViewModelTests {
     func homeViewModel_lookupUpNextFilm_whenFilmExistsInArray_returnsFilm() throws {
         let (sut, context) = makeSUTWithContext()
         let entity = try #require(
-            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
             "The Core Data model schema must contain an entity definition named 'FilmMO'."
         )
         
@@ -400,7 +400,7 @@ struct HomeViewModelTests {
     func homeViewModel_lookupWatchedFilm_whenFilmExistsInArray_returnsFilm() throws {
         let (sut, context) = makeSUTWithContext()
         let entity = try #require(
-            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
             "The Core Data model schema must contain an entity definition named 'FilmMO'."
         )
         let targetFilm = Film.sample[0].id

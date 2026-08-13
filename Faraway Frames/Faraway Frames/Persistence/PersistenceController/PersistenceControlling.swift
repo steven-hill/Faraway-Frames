@@ -10,5 +10,4 @@ import CoreData
 protocol PersistenceControlling {
     var container: NSPersistentContainer { get }
     var viewContext: NSManagedObjectContext { get }
-    func saveContext() throws
 }

@@ -15,7 +15,7 @@ final class ThrowingFetchedResultsController: NSFetchedResultsController<FilmMO>
     init(context: NSManagedObjectContext, errorToThrow: Error) {
         self.errorToThrow = errorToThrow
         
-        let validRequest = NSFetchRequest<FilmMO>(entityName: "FilmMO")
+        let validRequest = NSFetchRequest<FilmMO>(entityName: Persistence.entityname)
         validRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
         super.init(
             fetchRequest: validRequest,

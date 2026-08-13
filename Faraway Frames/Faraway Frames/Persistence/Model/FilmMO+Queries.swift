@@ -33,7 +33,7 @@ extension FilmMO {
         predicate: NSPredicate,
         ascending: Bool
     ) -> NSFetchRequest<FilmMO> {
-        let request = NSFetchRequest<FilmMO>(entityName: "FilmMO")
+        let request = NSFetchRequest<FilmMO>(entityName: Persistence.entityname)
         request.sortDescriptors = [NSSortDescriptor(key: sortKey, ascending: ascending)]
         request.predicate = predicate
         return request

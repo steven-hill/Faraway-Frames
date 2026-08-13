@@ -124,10 +124,6 @@ final class FilmsListViewModel {
         }
     }
     
-    func syncFilmWithDatabase(_ film: Film) async -> Film {
-        return await filmSyncService.syncSingleFilmWithLocalStorage(film)
-    }
-    
     func updateFilmInArrays(_ updatedFilm: Film) {
         if let masterIndex = films.firstIndex(where: { $0.id == updatedFilm.id }) {
             films[masterIndex] = updatedFilm

@@ -426,7 +426,7 @@ struct FilmDetailViewModelTests {
         let filmQueueService = FilmQueueService(context: context, saver: saver)
         let targetFilm = Film.sample[0]
         let entity = try #require(
-            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
             "The Core Data model schema must contain an entity definition named 'FilmMO'."
         )
         _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
@@ -489,7 +489,7 @@ struct FilmDetailViewModelTests {
         let filmQueueService = FilmQueueService(context: context, saver: saver)
         let targetFilm = Film.sample[0]
         let entity = try #require(
-            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
             "The Core Data model schema must contain an entity definition named 'FilmMO'."
         )
         _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: false, isWatched: true)
@@ -515,7 +515,7 @@ struct FilmDetailViewModelTests {
         let context = testPersistenceController.viewContext
         let filmQueueService = FilmQueueService(context: context)
         let entity = try #require(
-            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
             "The Core Data model schema must contain an entity definition named 'FilmMO'."
         )
         var targetFilm = Film.sample[0]
@@ -554,7 +554,7 @@ struct FilmDetailViewModelTests {
         let context = testPersistenceController.viewContext
         let filmQueueService = FilmQueueService(context: context)
         let entity = try #require(
-            NSEntityDescription.entity(forEntityName: "FilmMO", in: context),
+            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
             "The Core Data model schema must contain an entity definition named 'FilmMO'."
         )
         let filmMO = PersistenceHelper.makeFilmMO(with: targetFilm, entity: entity, context: context, isUpNext: true, isWatched: false)
