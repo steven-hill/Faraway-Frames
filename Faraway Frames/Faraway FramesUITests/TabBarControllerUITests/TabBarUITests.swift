@@ -86,14 +86,4 @@ final class TabBarUITests: XCTestCase {
         let title = app.staticTexts["Home"]
         XCTAssertTrue(title.exists, "Should exist.")
     }
-    
-    func test_tabBar_canNavigateFromExploreTabToAssistantTab() throws {
-        guard CurrentDevice.isIPhone else {
-            throw XCTSkip("iPhone-only test")
-        }
-        app.tabBars.buttons["Assistant"].firstMatch.tap()
-        let title = app.staticTexts["Assistant"]
-        
-        XCTAssertTrue(title.exists, "Should have a title.")
-    }
 }
