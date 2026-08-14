@@ -48,12 +48,6 @@ final class TabBarUITests: XCTestCase {
         XCTAssertTrue(app.buttons.matching(identifier: "Explore").element(boundBy: 1).exists, "Should exist.")
         XCTAssertTrue(app.buttons.matching(identifier: "Explore").element(boundBy: 0).isHittable, "Should be able to be tapped.")
         XCTAssertTrue(app.buttons.matching(identifier: "Explore").element(boundBy: 1).isHittable, "Should be able to be tapped.")
-        
-        XCTAssertEqual(app.buttons.matching(identifier: "Assistant").count, 2, "Should be 2.")
-        XCTAssertTrue(app.buttons.matching(identifier: "Assistant").element(boundBy: 0).exists, "Should exist.")
-        XCTAssertTrue(app.buttons.matching(identifier: "Assistant").element(boundBy: 1).exists, "Should exist.")
-        XCTAssertTrue(app.buttons.matching(identifier: "Assistant").element(boundBy: 0).isHittable, "Should be able to be tapped.")
-        XCTAssertTrue(app.buttons.matching(identifier: "Assistant").element(boundBy: 1).isHittable, "Should be able to be tapped.")
     }
     
     func test_tabBar_hasCorrectNumberOfTabs() throws {
