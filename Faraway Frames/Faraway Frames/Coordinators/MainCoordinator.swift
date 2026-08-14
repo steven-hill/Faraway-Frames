@@ -48,10 +48,6 @@ final class MainCoordinator: Coordinator {
         exploreSplitViewCoordinator.start()
         childCoordinators.append(exploreSplitViewCoordinator)
         
-        let assistantCoordinator = AssistantCoordinator()
-        assistantCoordinator.start()
-        childCoordinators.append(assistantCoordinator)
-        
         tabBarController.tabs = [
             UITab(title: "Home", image: SFSymbols.house, identifier: "homeTab") { _ in
                 return homeCoordinator.navigationController
