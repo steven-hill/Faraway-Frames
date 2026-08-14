@@ -48,12 +48,6 @@ final class TabBarUITests: XCTestCase {
         XCTAssertTrue(app.buttons.matching(identifier: "Explore").element(boundBy: 1).exists, "Should exist.")
         XCTAssertTrue(app.buttons.matching(identifier: "Explore").element(boundBy: 0).isHittable, "Should be able to be tapped.")
         XCTAssertTrue(app.buttons.matching(identifier: "Explore").element(boundBy: 1).isHittable, "Should be able to be tapped.")
-        
-        XCTAssertEqual(app.buttons.matching(identifier: "Assistant").count, 2, "Should be 2.")
-        XCTAssertTrue(app.buttons.matching(identifier: "Assistant").element(boundBy: 0).exists, "Should exist.")
-        XCTAssertTrue(app.buttons.matching(identifier: "Assistant").element(boundBy: 1).exists, "Should exist.")
-        XCTAssertTrue(app.buttons.matching(identifier: "Assistant").element(boundBy: 0).isHittable, "Should be able to be tapped.")
-        XCTAssertTrue(app.buttons.matching(identifier: "Assistant").element(boundBy: 1).isHittable, "Should be able to be tapped.")
     }
     
     func test_tabBar_hasCorrectNumberOfTabs() throws {
@@ -62,7 +56,7 @@ final class TabBarUITests: XCTestCase {
         }
         let numberOfTabs = app.tabBars.firstMatch.buttons.count
         
-        XCTAssertEqual(numberOfTabs, 3, "Should have three tabs.")
+        XCTAssertEqual(numberOfTabs, 2, "Should have two tabs.")
     }
     
     func test_tabBar_onInit_homeTabIsSelected() {
@@ -85,15 +79,5 @@ final class TabBarUITests: XCTestCase {
         app.tabBars.buttons["Home"].firstMatch.tap()
         let title = app.staticTexts["Home"]
         XCTAssertTrue(title.exists, "Should exist.")
-    }
-    
-    func test_tabBar_canNavigateFromExploreTabToAssistantTab() throws {
-        guard CurrentDevice.isIPhone else {
-            throw XCTSkip("iPhone-only test")
-        }
-        app.tabBars.buttons["Assistant"].firstMatch.tap()
-        let title = app.staticTexts["Assistant"]
-        
-        XCTAssertTrue(title.exists, "Should have a title.")
     }
 }

@@ -35,21 +35,12 @@ struct MainCoordinatorTests {
         #expect(childCoordinator != nil, "Should not be nil.")
     }
     
-    @Test func mainCoordinator_start_createsAssistantCoordinatorAsChildCoordinator() throws {
+    @Test func mainCoordinator_start_createsCorrectNumberOfTabs() throws {
         let (sut, _) = try makeSUT()
         
         sut.start()
         
-        let childCoordinator = sut.childCoordinators[2] as? AssistantCoordinator
-        #expect(childCoordinator != nil, "Should not be nil.")
-    }
-    
-    @Test func mainCoordinator_start_createsThreeTabs() throws {
-        let (sut, _) = try makeSUT()
-        
-        sut.start()
-        
-        #expect(sut.tabBarController.tabs.count == 3, "Should be three tabs.")
+        #expect(sut.tabBarController.tabs.count == 2, "Should be two tabs.")
     }
     
     @Test func mainCoordinator_start_setsRootViewController() throws {
