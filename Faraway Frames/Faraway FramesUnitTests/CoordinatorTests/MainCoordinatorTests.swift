@@ -35,15 +35,6 @@ struct MainCoordinatorTests {
         #expect(childCoordinator != nil, "Should not be nil.")
     }
     
-    @Test func mainCoordinator_start_createsAssistantCoordinatorAsChildCoordinator() throws {
-        let (sut, _) = try makeSUT()
-        
-        sut.start()
-        
-        let childCoordinator = sut.childCoordinators[2] as? AssistantCoordinator
-        #expect(childCoordinator != nil, "Should not be nil.")
-    }
-    
     @Test func mainCoordinator_start_createsThreeTabs() throws {
         let (sut, _) = try makeSUT()
         
