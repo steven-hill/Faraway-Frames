@@ -100,6 +100,15 @@ struct ExploreSplitViewCoordinatorTests {
         
         #expect(exploreSplitVCSpy.hideWasCalled == true, "Should collapse the primary view controller's column.")
     }
+    
+    @Test("Can push a `AssistantVC` onto navigation stack")
+    func exploreSplitViewCoordinator_didTapMoreLikeThisButton_pushesAssistantVC() throws {
+        let (sut, exploreSplitVCSpy) = makeSUT()
+        
+        sut.didTapMoreLikeThisButton()
+        
+        #expect(exploreSplitVCSpy.viewControllers.count == 3, "Should be 3 view controllers.")
+    }
 
     // MARK: - SUT Helper Methods
     private func makeSUT() -> (sut: ExploreSplitViewCoordinator, exploreSplitVCSpy: UISplitViewController) {
