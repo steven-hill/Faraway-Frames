@@ -62,7 +62,7 @@ final class TabBarUITests: XCTestCase {
         }
         let numberOfTabs = app.tabBars.firstMatch.buttons.count
         
-        XCTAssertEqual(numberOfTabs, 3, "Should have three tabs.")
+        XCTAssertEqual(numberOfTabs, 2, "Should have two tabs.")
     }
     
     func test_tabBar_onInit_homeTabIsSelected() {
