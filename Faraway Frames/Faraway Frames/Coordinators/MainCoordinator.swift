@@ -54,9 +54,6 @@ final class MainCoordinator: Coordinator {
             },
             UITab(title: "Explore", image: SFSymbols.filmStack, identifier: "exploreTab") { _ in
                 return exploreSplitViewCoordinator.exploreSplitVC
-            },
-            UITab(title: "Assistant", image: SFSymbols.sparkles, identifier: "assistantTab") { _ in
-                return assistantCoordinator.navigationController
             }
         ]
         window.rootViewController = tabBarController
