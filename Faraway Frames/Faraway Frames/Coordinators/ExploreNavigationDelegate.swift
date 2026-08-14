@@ -10,4 +10,5 @@ import Foundation
 protocol ExploreNavigationDelegate: AnyObject {
     var shouldDeselectAfterSelection: Bool { get }
     func didSelectFilm(_ film: Film)
+    func didTapMoreLikeThisButton()
 }

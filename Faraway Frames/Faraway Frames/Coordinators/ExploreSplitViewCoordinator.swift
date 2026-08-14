@@ -91,4 +91,8 @@ extension ExploreSplitViewCoordinator: ExploreNavigationDelegate {
             exploreSplitVC.hide(.primary)
         }
     }
+    
+    func didTapMoreLikeThisButton() {
+        
+    }
 }
