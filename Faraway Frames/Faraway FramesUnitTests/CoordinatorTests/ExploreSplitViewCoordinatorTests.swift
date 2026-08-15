@@ -26,8 +26,8 @@ struct ExploreSplitViewCoordinatorTests {
         sut.start()
         
         let primary = exploreSplitVCSpy.viewController(for: .primary)
-        #expect(primary is UINavigationController)
-        #expect((primary as? UINavigationController)?.topViewController is ExploreListVC)
+        #expect(primary is UINavigationController, "Should be a navigation controller.")
+        #expect((primary as? UINavigationController)?.topViewController is ExploreListVC, "Should be `ExploreListVC`.")
     }
     
     @Test func exploreSplitViewCoordinator_setsUpSecondaryVCCorrectly() {
@@ -36,8 +36,8 @@ struct ExploreSplitViewCoordinatorTests {
         sut.start()
         
         let secondary = exploreSplitVCSpy.viewController(for: .secondary)
-        #expect(secondary is UINavigationController)
-        #expect((secondary as? UINavigationController)?.topViewController is ExploreDetailVC)
+        #expect(secondary is UINavigationController, "Should be a navigation controller.")
+        #expect((secondary as? UINavigationController)?.topViewController is ExploreDetailVC, "Should be `ExploreDetailVC`.")
     }
     
     @Test func exploreSplitViewCoordinator_returnsCorrectColumnFromDelegate() {
