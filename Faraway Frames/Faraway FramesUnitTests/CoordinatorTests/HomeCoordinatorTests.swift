@@ -50,6 +50,24 @@ struct HomeCoordinatorTests {
         #expect(detailVC.navigationDelegate === sut, "`ExploreDetailVC`'s navigation delegate should be set to `HomeCoordinator`.")
     }
     
+    @Test("Presents VC modally when the user taps the `More Like This` button")
+    func homeCoordinator_didTapMoreLikeThisButton_presentsVCModally() {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
+        let navControllerSpy = NavControllerSpy()
+        let sut = HomeCoordinator(navigationController: navControllerSpy,
+                                  context: testPersistenceController.viewContext,
+                                  imageLoader: MockImageLoader(),
+                                  filmQueueService: filmQueueService,
+                                  frcFactory: MockFRCFactory()
+        )
+        sut.start()
+        
+        sut.exploreDetailDidTapMoreLikeThisButton()
+        
+        #expect(navControllerSpy.didPresentModal, "Should have presented a VC modally.")
+    }
+    
     // MARK: - SUT Helper Method
     private func makeSUT() -> HomeCoordinator {
         let testPersistenceController = try! PersistenceController(inMemory: true)
@@ -61,5 +79,16 @@ struct HomeCoordinatorTests {
                                   frcFactory: MockFRCFactory()
         )
         return sut
+    }
+    
+    // MARK: - Navigation Controller Spy
+    final class NavControllerSpy: UINavigationController {
+        var didPresentModal = false
+        
+        override func present(_ viewControllerToPresent: UIViewController,
+                              animated flag: Bool,
+                              completion: (() -> Void)? = nil) {
+            didPresentModal = true
+        }
     }
 }

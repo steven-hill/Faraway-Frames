@@ -58,6 +58,8 @@ extension HomeCoordinator: HomeViewModelCoordinatorDelegate {
 
 extension HomeCoordinator: ExploreDetailNavigationDelegate {
     func exploreDetailDidTapMoreLikeThisButton() {
-        
+        let assistantVC = AssistantVC()
+        let navController = UINavigationController(rootViewController: assistantVC)
+        navigationController.present(navController, animated: true)
     }
 }
