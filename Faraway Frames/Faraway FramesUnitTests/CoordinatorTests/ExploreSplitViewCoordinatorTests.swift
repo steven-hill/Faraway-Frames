@@ -107,7 +107,7 @@ struct ExploreSplitViewCoordinatorTests {
         let sut = makeSUT(with: spy)
         sut.start()
         
-        sut.didTapMoreLikeThisButton()
+        sut.exploreDetailDidTapMoreLikeThisButton()
         
         #expect(spy.didPresentModal, "Should have presented a VC modally.")
     }
