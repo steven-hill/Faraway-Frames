@@ -101,13 +101,15 @@ struct ExploreSplitViewCoordinatorTests {
         #expect(exploreSplitVCSpy.hideWasCalled == true, "Should collapse the primary view controller's column.")
     }
     
-    @Test("Can push a `AssistantVC` onto navigation stack")
-    func exploreSplitViewCoordinator_didTapMoreLikeThisButton_pushesAssistantVC() throws {
-        let (sut, exploreSplitVCSpy) = makeSUT()
+    @Test("Presents VC modally when the user taps the `More Like This` button")
+    func exploreSplitViewCoordinator_didTapMoreLikeThisButton_presentsVCModally() {
+        let spy = ExploreSplitVCSpy(style: .doubleColumn)
+        let sut = makeSUT(with: spy)
+        sut.start()
         
         sut.didTapMoreLikeThisButton()
         
-        #expect(exploreSplitVCSpy.viewControllers.count == 3, "Should be 3 view controllers.")
+        #expect(spy.didPresentModal, "Should have presented a VC modally.")
     }
 
     // MARK: - SUT Helper Methods
@@ -141,6 +143,13 @@ struct ExploreSplitViewCoordinatorTests {
     
     // MARK: - ExploreSplitVC Spies
     final class ExploreSplitVCSpy: UISplitViewController {
+        var didPresentModal = false
+        
+        override func present(_ viewControllerToPresent: UIViewController,
+                              animated flag: Bool,
+                              completion: (() -> Void)? = nil) {
+            didPresentModal = true
+        }
     }
     
     final class CollapsedSplitViewSpy: UISplitViewController {
