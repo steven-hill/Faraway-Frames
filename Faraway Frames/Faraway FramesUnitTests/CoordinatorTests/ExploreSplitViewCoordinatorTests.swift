@@ -81,8 +81,8 @@ struct ExploreSplitViewCoordinatorTests {
         #expect(sut.shouldDeselectAfterSelection == false, "Should be false.")
     }
     
-    @Test("Two view controllers are created, and delegate is set")
-    func exploreSplitViewCoordinator_didSelectFilm_withFilm_createsExploreDetailVCAndSetsItsDelegate() {
+    @Test("Creates an instance of `ExploreDetailVC`, and both its delegates are set")
+    func exploreSplitViewCoordinator_didSelectFilm_withFilm_createsExploreDetailVCAndSetsBothDelegates() {
         let spy = ExploreSplitVCSpy(style: .doubleColumn)
         let sut = makeSUT(with: spy)
         sut.start()
@@ -103,7 +103,8 @@ struct ExploreSplitViewCoordinatorTests {
             return
         }
         
-        #expect(detailVC.delegate === expectedListVC, "The detail view controller delegate must be set to the `ExploreListVC` instance.")
+        #expect(detailVC.delegate === expectedListVC, "`ExploreDetailVC`'s delegate must be set to the `ExploreListVC` instance.")
+        #expect(detailVC.navigationDelegate === sut, "`ExploreDetailVC`'s navigation delegate should be set to `ExploreSplitViewCoordinator`.")
     }
     
     @Test("iPad only: Primary VC's column is collapsed when film is selected from list", .enabled(if: IpadHelper.isPad))
