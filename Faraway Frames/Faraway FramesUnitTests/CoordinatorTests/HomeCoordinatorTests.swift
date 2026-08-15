@@ -13,7 +13,7 @@ import UIKit
 struct HomeCoordinatorTests {
     
     @Test func homeCoordinator_start_placesViewControllerOnNavigationStack() {
-        let sut = makeSUT()
+        let sut = makeSUT(navSpy: nil)
 
         sut.start()
         
@@ -23,7 +23,7 @@ struct HomeCoordinatorTests {
     
     @Test("Sets Home View Model's coordinator delegate to self.")
     func homeCoordinator_start_setsHomeViewModelsCoordinatorDelegate() {
-        let sut = makeSUT()
+        let sut = makeSUT(navSpy: nil)
         
         sut.start()
         let homeVC = sut.navigationController.viewControllers.first as! HomeVC
@@ -31,9 +31,9 @@ struct HomeCoordinatorTests {
         #expect(homeVC.homeViewModel.coordinatorDelegate != nil, "Should be set.")
     }
 
-    @Test("HomeCoordinator pushes `ExploreDetailVC` onto navigation stack after delegate method passes over a film")
-    func homeCoordinator_homeViewModelDidCaptureFilm_displaysCorrectViewControllerWithFilm() {
-        let sut = makeSUT()
+    @Test("HomeCoordinator pushes `ExploreDetailVC` onto navigation stack after delegate method passes over a film, and sets navigation delegate")
+    func homeCoordinator_homeViewModelDidCaptureFilm_displaysCorrectViewControllerWithFilmAndSetsNavigationDelegate() async {
+        let sut = makeSUT(navSpy: nil)
         sut.start()
         let film = Film.sample[0]
 
@@ -43,21 +43,45 @@ struct HomeCoordinatorTests {
             return
         }
         detailVC.view.layoutIfNeeded()
+        await Task.yield()
         
         #expect(sut.navigationController.viewControllers.count == 2, "Should be two view controllers on the navigation stack.")
         #expect(detailVC.updatedFilm?.id == film.id, "Should match the film passed to delegate method.")
+        #expect(detailVC.navigationDelegate === sut, "`ExploreDetailVC`'s navigation delegate should be set to `HomeCoordinator`.")
+    }
+    
+    @Test("Presents VC modally when the user taps the `More Like This` button")
+    func homeCoordinator_didTapMoreLikeThisButton_presentsVCModally() {
+        let navControllerSpy = NavControllerSpy()
+        let sut = makeSUT(navSpy: navControllerSpy)
+        sut.start()
+        
+        sut.exploreDetailDidTapMoreLikeThisButton()
+        
+        #expect(navControllerSpy.didPresentModal, "Should have presented a VC modally.")
     }
     
     // MARK: - SUT Helper Method
-    private func makeSUT() -> HomeCoordinator {
+    private func makeSUT(navSpy: NavControllerSpy?) -> HomeCoordinator {
+        let navController = navSpy ?? UINavigationController()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let sut = HomeCoordinator(navigationController: UINavigationController(),
+        return HomeCoordinator(navigationController: navController,
                                   context: testPersistenceController.viewContext,
                                   imageLoader: MockImageLoader(),
                                   filmQueueService: filmQueueService,
                                   frcFactory: MockFRCFactory()
         )
-        return sut
+    }
+    
+    // MARK: - Navigation Controller Spy
+    final class NavControllerSpy: UINavigationController {
+        var didPresentModal = false
+        
+        override func present(_ viewControllerToPresent: UIViewController,
+                              animated flag: Bool,
+                              completion: (() -> Void)? = nil) {
+            didPresentModal = true
+        }
     }
 }

@@ -26,8 +26,8 @@ struct ExploreSplitViewCoordinatorTests {
         sut.start()
         
         let primary = exploreSplitVCSpy.viewController(for: .primary)
-        #expect(primary is UINavigationController)
-        #expect((primary as? UINavigationController)?.topViewController is ExploreListVC)
+        #expect(primary is UINavigationController, "Should be a navigation controller.")
+        #expect((primary as? UINavigationController)?.topViewController is ExploreListVC, "Should be `ExploreListVC`.")
     }
     
     @Test func exploreSplitViewCoordinator_setsUpSecondaryVCCorrectly() {
@@ -36,8 +36,25 @@ struct ExploreSplitViewCoordinatorTests {
         sut.start()
         
         let secondary = exploreSplitVCSpy.viewController(for: .secondary)
-        #expect(secondary is UINavigationController)
-        #expect((secondary as? UINavigationController)?.topViewController is ExploreDetailVC)
+        #expect(secondary is UINavigationController, "Should be a navigation controller.")
+        #expect((secondary as? UINavigationController)?.topViewController is ExploreDetailVC, "Should be `ExploreDetailVC`.")
+    }
+    
+    @Test func exploreSplitViewCoordinator_start_setsExploreDetailVCNavigationDelegate() {
+        let (sut, exploreSplitVCSpy) = makeSUT()
+        
+        sut.start()
+        
+        guard let secondaryNav = exploreSplitVCSpy.viewController(for: .secondary) as? UINavigationController else {
+            Issue.record("The secondary view controller must be an instance of `UINavigationController`.")
+            return
+        }
+        guard let detailVC = secondaryNav.viewControllers.first as? ExploreDetailVC else {
+            Issue.record("The secondary nav controller's child VC must be an instance of `ExploreDetailVC`.")
+            return
+        }
+        
+        #expect(detailVC.navigationDelegate === sut, "`ExploreDetailVC`'s navigation delegate should be set to `ExploreSplitViewCoordinator`.")
     }
     
     @Test func exploreSplitViewCoordinator_returnsCorrectColumnFromDelegate() {
@@ -64,8 +81,8 @@ struct ExploreSplitViewCoordinatorTests {
         #expect(sut.shouldDeselectAfterSelection == false, "Should be false.")
     }
     
-    @Test("Two view controllers are created, and delegate is set")
-    func exploreSplitViewCoordinator_didSelectFilm_withFilm_createsExploreDetailVCAndSetsItsDelegate() {
+    @Test("Creates an instance of `ExploreDetailVC`, and both its delegates are set")
+    func exploreSplitViewCoordinator_didSelectFilm_withFilm_createsExploreDetailVCAndSetsBothDelegates() {
         let spy = ExploreSplitVCSpy(style: .doubleColumn)
         let sut = makeSUT(with: spy)
         sut.start()
@@ -86,7 +103,8 @@ struct ExploreSplitViewCoordinatorTests {
             return
         }
         
-        #expect(detailVC.delegate === expectedListVC, "The detail view controller delegate must be set to the `ExploreListVC` instance.")
+        #expect(detailVC.delegate === expectedListVC, "`ExploreDetailVC`'s delegate must be set to the `ExploreListVC` instance.")
+        #expect(detailVC.navigationDelegate === sut, "`ExploreDetailVC`'s navigation delegate should be set to `ExploreSplitViewCoordinator`.")
     }
     
     @Test("iPad only: Primary VC's column is collapsed when film is selected from list", .enabled(if: IpadHelper.isPad))
@@ -99,6 +117,17 @@ struct ExploreSplitViewCoordinatorTests {
         sut.didSelectFilm(film)
         
         #expect(exploreSplitVCSpy.hideWasCalled == true, "Should collapse the primary view controller's column.")
+    }
+    
+    @Test("Presents VC modally when the user taps the `More Like This` button")
+    func exploreSplitViewCoordinator_didTapMoreLikeThisButton_presentsVCModally() {
+        let spy = ExploreSplitVCSpy(style: .doubleColumn)
+        let sut = makeSUT(with: spy)
+        sut.start()
+        
+        sut.exploreDetailDidTapMoreLikeThisButton()
+        
+        #expect(spy.didPresentModal, "Should have presented a VC modally.")
     }
 
     // MARK: - SUT Helper Methods
@@ -132,6 +161,13 @@ struct ExploreSplitViewCoordinatorTests {
     
     // MARK: - ExploreSplitVC Spies
     final class ExploreSplitVCSpy: UISplitViewController {
+        var didPresentModal = false
+        
+        override func present(_ viewControllerToPresent: UIViewController,
+                              animated flag: Bool,
+                              completion: (() -> Void)? = nil) {
+            didPresentModal = true
+        }
     }
     
     final class CollapsedSplitViewSpy: UISplitViewController {

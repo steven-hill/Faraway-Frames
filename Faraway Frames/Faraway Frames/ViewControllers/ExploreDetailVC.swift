@@ -17,6 +17,7 @@ final class ExploreDetailVC: UIViewController {
         didSet { updateWatchedButtonUI() }
     }
     weak var delegate: FilmDetailViewControllerDelegate?
+    weak var navigationDelegate: ExploreDetailNavigationDelegate?
     let filmDetailViewModel: FilmDetailViewModel
     private(set) var updatedFilm: Film? = nil
     var alertPresenter: AlertPresenting = AlertPresenter()
@@ -273,6 +274,10 @@ final class ExploreDetailVC: UIViewController {
         
         watchedButton.addAction(UIAction { [weak self] _ in
             self?.handleQueueToggle(queue: .watched)
+        }, for: .touchUpInside)
+        
+        moreLikeThisButton.addAction(UIAction { [weak self] _ in
+            self?.navigationDelegate?.exploreDetailDidTapMoreLikeThisButton()
         }, for: .touchUpInside)
     }
     

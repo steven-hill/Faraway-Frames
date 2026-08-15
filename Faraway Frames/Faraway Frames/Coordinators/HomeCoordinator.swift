@@ -51,6 +51,15 @@ extension HomeCoordinator: HomeViewModelCoordinatorDelegate {
                                                       filmQueueService: filmQueueService
         )
         let detailVC = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
+        detailVC.navigationDelegate = self
         navigationController.pushViewController(detailVC, animated: true)
+    }
+}
+
+extension HomeCoordinator: ExploreDetailNavigationDelegate {
+    func exploreDetailDidTapMoreLikeThisButton() {
+        let assistantVC = AssistantVC()
+        let navController = UINavigationController(rootViewController: assistantVC)
+        navigationController.present(navController, animated: true)
     }
 }
