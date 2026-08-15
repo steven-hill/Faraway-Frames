@@ -20,7 +20,8 @@ final class AssistantVC: UIViewController {
         let closeButton = UIBarButtonItem(
             barButtonSystemItem: .close,
             target: self,
-            action: #selector(closeTapped))
+            action: #selector(closeTapped)
+        )
         closeButton.accessibilityIdentifier = "AssistantVC_CloseButton"
         closeButton.accessibilityLabel = "Return to film details"
         navigationItem.rightBarButtonItem = closeButton
