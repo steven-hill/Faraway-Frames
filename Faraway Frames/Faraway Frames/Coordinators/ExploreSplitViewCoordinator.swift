@@ -98,6 +98,7 @@ extension ExploreSplitViewCoordinator: ExploreNavigationDelegate {
 extension ExploreSplitViewCoordinator: ExploreDetailNavigationDelegate {
     func exploreDetailDidTapMoreLikeThisButton() {
         let assistantVC = AssistantVC()
-        exploreSplitVC.present(assistantVC, animated: true)
+        let navigationController = UINavigationController(rootViewController: assistantVC)
+        exploreSplitVC.present(navigationController, animated: true)
     }
 }
