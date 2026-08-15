@@ -60,6 +60,7 @@ final class ExploreSplitViewCoordinator: Coordinator {
         exploreSplitVC.setViewController(exploreListNav, for: .primary)
         
         let exploreDetailVC = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
+        exploreDetailVC.navigationDelegate = self
         let exploreDetailNav = UINavigationController(rootViewController: exploreDetailVC)
         exploreSplitVC.setViewController(exploreDetailNav, for: .secondary)
     }
@@ -82,6 +83,7 @@ extension ExploreSplitViewCoordinator: ExploreNavigationDelegate {
     func didSelectFilm(_ film: Film) {
         filmDetailViewModel.setFilm(film)
         let detailVC = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
+        detailVC.navigationDelegate = self
         if let primaryNav = exploreSplitVC.viewController(for: .primary) as? UINavigationController,
            let exploreListVC = primaryNav.viewControllers.first as? ExploreListVC {
             detailVC.delegate = exploreListVC
@@ -90,5 +92,12 @@ extension ExploreSplitViewCoordinator: ExploreNavigationDelegate {
         if exploreSplitVC.isCollapsed == false {
             exploreSplitVC.hide(.primary)
         }
+    }
+}
+
+extension ExploreSplitViewCoordinator: ExploreDetailNavigationDelegate {
+    func exploreDetailDidTapMoreLikeThisButton() {
+        let assistantVC = AssistantVC()
+        exploreSplitVC.present(assistantVC, animated: true)
     }
 }
