@@ -40,6 +40,23 @@ struct ExploreSplitViewCoordinatorTests {
         #expect((secondary as? UINavigationController)?.topViewController is ExploreDetailVC, "Should be `ExploreDetailVC`.")
     }
     
+    @Test func exploreSplitViewCoordinator_start_setsExploreDetailVCNavigationDelegate() {
+        let (sut, exploreSplitVCSpy) = makeSUT()
+        
+        sut.start()
+        
+        guard let secondaryNav = exploreSplitVCSpy.viewController(for: .secondary) as? UINavigationController else {
+            Issue.record("The secondary view controller must be an instance of `UINavigationController`.")
+            return
+        }
+        guard let detailVC = secondaryNav.viewControllers.first as? ExploreDetailVC else {
+            Issue.record("The secondary nav controller's child VC must be an instance of `ExploreDetailVC`.")
+            return
+        }
+        
+        #expect(detailVC.navigationDelegate === sut, "`ExploreDetailVC`'s navigation delegate should be set to `ExploreSplitViewCoordinator`.")
+    }
+    
     @Test func exploreSplitViewCoordinator_returnsCorrectColumnFromDelegate() {
         let sut = makeSUT(with: ExploreSplitVCSpy())
         
