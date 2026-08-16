@@ -127,7 +127,7 @@ struct ExploreSplitViewCoordinatorTests {
         
         sut.exploreDetailDidTapMoreLikeThisButton()
         
-        #expect(spy.didPresentModal, "Should have presented a VC modally.")
+        #expect(spy.presentModalCallCount == 1, "Should have called method once to present a VC modally.")
     }
 
     // MARK: - SUT Helper Methods
