@@ -161,12 +161,12 @@ struct ExploreSplitViewCoordinatorTests {
     
     // MARK: - ExploreSplitVC Spies
     final class ExploreSplitVCSpy: UISplitViewController {
-        var didPresentModal = false
+        var presentModalCallCount = 0
         
         override func present(_ viewControllerToPresent: UIViewController,
                               animated flag: Bool,
                               completion: (() -> Void)? = nil) {
-            didPresentModal = true
+            presentModalCallCount += 1
         }
     }
     
