@@ -58,7 +58,7 @@ struct HomeCoordinatorTests {
         
         sut.exploreDetailDidTapMoreLikeThisButton()
         
-        #expect(navControllerSpy.didPresentModal, "Should have presented a VC modally.")
+        #expect(navControllerSpy.presentModalCallCount == 1, "Should have called method once to present a VC modally.")
     }
     
     // MARK: - SUT Helper Method
