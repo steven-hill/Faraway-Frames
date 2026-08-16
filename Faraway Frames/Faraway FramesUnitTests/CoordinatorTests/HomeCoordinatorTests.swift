@@ -76,12 +76,12 @@ struct HomeCoordinatorTests {
     
     // MARK: - Navigation Controller Spy
     final class NavControllerSpy: UINavigationController {
-        var didPresentModal = false
+        var presentModalCallCount = 0
         
         override func present(_ viewControllerToPresent: UIViewController,
                               animated flag: Bool,
                               completion: (() -> Void)? = nil) {
-            didPresentModal = true
+            presentModalCallCount += 1
         }
     }
 }
