@@ -7,18 +7,9 @@
 
 import FoundationModels
 
-// MARK: - Client Model Status Definition
-enum ClientModelStatus {
-    case ready
-    case unsupportedDevice
-    case appleIntelligenceDisabled
-    case waitingForModel
-    case unknown
-}
-
 final class FoundationModelsClient: FoundationModelsService {
     
-    func checkAvailability() -> ClientModelStatus {
+    func checkAvailability() -> SystemLanguageModelStatus {
         switch SystemLanguageModel.default.availability {
         case .available:
             return .ready

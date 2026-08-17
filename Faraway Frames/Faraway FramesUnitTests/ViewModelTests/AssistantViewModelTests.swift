@@ -54,7 +54,7 @@ struct AssistantViewModelTests {
     
     // MARK: - System Language Model Availability
     struct ModelAvailabilityTestCase {
-        let availability: ClientModelStatus
+        let availability: SystemLanguageModelStatus
         let expectedStatus: AssistantViewModel.ModelsStatus
     }
 }
