@@ -7,7 +7,7 @@
 
 import FoundationModels
 
-final class FoundationModelsClient: FoundationModelsService {
+struct FoundationModelsClient: FoundationModelsService {
     
     func checkAvailability() -> SystemLanguageModelStatus {
         switch SystemLanguageModel.default.availability {
