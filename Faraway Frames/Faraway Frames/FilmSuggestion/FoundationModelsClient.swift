@@ -9,6 +9,7 @@ import FoundationModels
 
 struct FoundationModelsClient: FoundationModelsService {
     
+    /// Maps framework's enum into custom enum.
     func checkAvailability() -> SystemLanguageModelStatus {
         switch SystemLanguageModel.default.availability {
         case .available:
