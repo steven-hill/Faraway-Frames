@@ -11,7 +11,7 @@ final class AssistantViewModel {
     
     // MARK: - Foundation Models Status
     enum ModelsStatus {
-        case unknown
+        case idle
         case ready
         case unsupportedDevice
         case appleIntelligenceDisabled
@@ -19,7 +19,7 @@ final class AssistantViewModel {
     }
     
     // MARK: - Properties
-    private(set) var status: ModelsStatus = .unknown
+    private(set) var status: ModelsStatus = .idle
     private let foundationModelsClient: FoundationModelsService
     
     // MARK: - Initialisation

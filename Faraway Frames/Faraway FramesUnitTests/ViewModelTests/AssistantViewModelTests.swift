@@ -12,11 +12,11 @@ import FoundationModels
 @MainActor
 struct AssistantViewModelTests {
 
-    @Test("On init the status should be unknown")
-    func assistantViewModel_onInit_statusIsUnknown() {
+    @Test("On init the status is correct")
+    func assistantViewModel_onInit_statusIsCorrect() {
         let sut = AssistantViewModel()
         
-        #expect(sut.status == .unknown, "Should be `.unknown` initially.")
+        #expect(sut.status == .idle, "Should be `.idle` initially.")
     }
     
     @Test("View model correctly maps system language model availability states",
