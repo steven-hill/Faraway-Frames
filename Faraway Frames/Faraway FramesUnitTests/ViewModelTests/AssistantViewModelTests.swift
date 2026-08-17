@@ -19,25 +19,24 @@ struct AssistantViewModelTests {
         #expect(sut.status == .unknown, "Should be `.unknown` initially.")
     }
     
-    @Test("When `SystemLanguageModel` is available, status updates correctly")
-    func assistantViewModel_checkAvailability_whenTheModelIsAvailable_statusChangesToReady() {
+    @Test("View model correctly maps system language model availability states",
+          arguments: [
+            ModelAvailabilityTestCase(availability: .available, expectedStatus: .ready),
+            ModelAvailabilityTestCase(availability: .unavailable(.deviceNotEligible), expectedStatus: .unsupportedDevice)
+          ])
+    func assistantViewModel_checkAvailability_mapsModelAvailabilityCorrectly(testCase: ModelAvailabilityTestCase) async {
         let mockFoundationModelsClient = MockFoundationModelsClient()
-        mockFoundationModelsClient.stubbedAvailability = .available
+        mockFoundationModelsClient.stubbedAvailability = testCase.availability
         let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
         
         sut.checkModelsAvailability()
         
-        #expect(sut.status == .ready, "Should have updated to `.ready`.")
+        #expect(sut.status == testCase.expectedStatus, "`status` should have been updated correctly.")
     }
     
-    @Test("When device doesn't support Apple Intelligence, status updates correctly")
-    func assistantViewModel_checkAvailability_whenDeviceDoesNotSupportAppleIntelligence_statusChangesToReady() {
-        let mockFoundationModelsClient = MockFoundationModelsClient()
-        mockFoundationModelsClient.stubbedAvailability = .unavailable(.deviceNotEligible)
-        let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
-        
-        sut.checkModelsAvailability()
-        
-        #expect(sut.status == .unsupportedDevice, "Should have updated to `.unsupportedDevice`.")
+    // MARK: - System Language Model Availability
+    struct ModelAvailabilityTestCase {
+        let availability: SystemLanguageModel.Availability
+        let expectedStatus: AssistantViewModel.ModelsStatus
     }
 }
