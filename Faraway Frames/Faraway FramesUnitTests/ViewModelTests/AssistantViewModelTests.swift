@@ -19,7 +19,7 @@ struct AssistantViewModelTests {
         #expect(sut.status == .idle, "Should be `.idle` initially.")
     }
     
-    @Test("View model correctly maps system language model availability states",
+    @Test("View model correctly maps system language model availability status",
           arguments: [
             ModelAvailabilityTestCase(
                 availability: .ready,
@@ -42,12 +42,12 @@ struct AssistantViewModelTests {
                 expectedStatus: .unknown
             )
           ])
-    func assistantViewModel_checkAvailability_mapsModelAvailabilityCorrectly(testCase: ModelAvailabilityTestCase) {
+    func assistantViewModel_checkSystemLanguageModelAvailability_mapsModelAvailabilityCorrectly(testCase: ModelAvailabilityTestCase) {
         let mockFoundationModelsClient = MockFoundationModelsClient()
         mockFoundationModelsClient.stubbedAvailability = testCase.availability
         let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
         
-        sut.checkModelsAvailability()
+        sut.checkSystemLanguageModelAvailability()
         
         #expect(sut.status == testCase.expectedStatus, "`status` should have been updated correctly.")
     }

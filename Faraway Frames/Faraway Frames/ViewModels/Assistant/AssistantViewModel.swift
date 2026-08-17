@@ -28,8 +28,8 @@ final class AssistantViewModel {
         self.foundationModelsClient = foundationModelsClient
     }
     
-    // MARK: - Methods
-    func checkModelsAvailability() {
+    // MARK: - Method
+    func checkSystemLanguageModelAvailability() {
         switch foundationModelsClient.checkAvailability() {
         case .ready:
             status = .ready
