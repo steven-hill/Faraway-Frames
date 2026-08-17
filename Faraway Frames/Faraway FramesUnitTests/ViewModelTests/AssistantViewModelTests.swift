@@ -11,19 +11,19 @@ import Testing
 @MainActor
 struct AssistantViewModelTests {
 
-    @Test("On init the model status should be unknown")
+    @Test("On init the status should be unknown")
     func assistantViewModel_onInit_statusIsUnknown() {
         let sut = AssistantViewModel()
         
         #expect(sut.status == .unknown, "Should be `.unknown` initially.")
     }
     
-    @Test("When `SystemLanguageModel` is available, status changes to ready")
+    @Test("When `SystemLanguageModel` is available, status updates correctly")
     func assistantViewModel_checkAvailability_whenTheModelIsAvailable_statusChangesToReady() {
         let sut = AssistantViewModel()
         
         sut.checkModelsAvailability()
         
-        #expect(sut.status == .isReady, "Should have updated to `.isReady`.")
+        #expect(sut.status == .ready, "Should have updated to `.ready`.")
     }
 }
