@@ -16,4 +16,15 @@ final class AssistantViewModel {
     
     // MARK: - Properties
     private(set) var status: ModelsStatus = .unknown
+    private let foundationModelsClient: FoundationModelsService
+    
+    // MARK: - Initialisation
+    init(foundationModelsClient: FoundationModelsService = FoundationModelsClient()) {
+        self.foundationModelsClient = foundationModelsClient
+    }
+    
+    // MARK: - Methods
+    func checkModelsAvailability() {
+        
+    }
 }

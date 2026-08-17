@@ -5,4 +5,10 @@
 //  Created by Steven Hill on 17/08/2026.
 //
 
-import Foundation
+import FoundationModels
+
+final class FoundationModelsClient: FoundationModelsService {
+    func checkAvailability() -> SystemLanguageModel.Availability {
+        return SystemLanguageModel.default.availability
+    }
+}
