@@ -11,50 +11,22 @@ import FoundationModels
 
 @MainActor
 struct AssistantViewModelTests {
-
-    @Test("On init the status is correct")
-    func assistantViewModel_onInit_statusIsCorrect() {
-        let sut = AssistantViewModel()
-        
-        #expect(sut.status == .idle, "Should be `.idle` initially.")
-    }
     
-    @Test("View model correctly maps system language model availability status",
+    @Test("View model can get the system language model availability status from the service",
           arguments: [
-            ModelAvailabilityTestCase(
-                availability: .ready,
-                expectedStatus: .ready
-            ),
-            ModelAvailabilityTestCase(
-                availability: .unsupportedDevice,
-                expectedStatus: .unsupportedDevice
-            ),
-            ModelAvailabilityTestCase(
-                availability: .appleIntelligenceDisabled,
-                expectedStatus: .appleIntelligenceDisabled
-            ),
-            ModelAvailabilityTestCase(
-                availability: .waitingForModel,
-                expectedStatus: .waitingForModel
-            ),
-            ModelAvailabilityTestCase(
-                availability: .unknown,
-                expectedStatus: .unknown
-            )
+            SystemLanguageModelStatus.ready,
+            SystemLanguageModelStatus.unsupportedDevice,
+            SystemLanguageModelStatus.appleIntelligenceDisabled,
+            SystemLanguageModelStatus.waitingForModel,
+            SystemLanguageModelStatus.unknown
           ])
-    func assistantViewModel_checkSystemLanguageModelAvailability_mapsModelAvailabilityCorrectly(testCase: ModelAvailabilityTestCase) {
+    func assistantViewModel_checkSystemLanguageModelAvailability_returnsModelAvailabilityFromService(testCase: SystemLanguageModelStatus) {
         let mockFoundationModelsClient = MockFoundationModelsClient()
-        mockFoundationModelsClient.stubbedAvailability = testCase.availability
+        mockFoundationModelsClient.stubbedAvailability = testCase
         let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
         
-        sut.checkSystemLanguageModelAvailability()
+        let status = sut.checkSystemLanguageModelAvailability()
         
-        #expect(sut.status == testCase.expectedStatus, "`status` should have been updated correctly.")
-    }
-    
-    // MARK: - System Language Model Availability
-    struct ModelAvailabilityTestCase {
-        let availability: SystemLanguageModelStatus
-        let expectedStatus: AssistantViewModel.ModelsStatus
+        #expect(status == testCase, "`status` should match the expected value.")
     }
 }
