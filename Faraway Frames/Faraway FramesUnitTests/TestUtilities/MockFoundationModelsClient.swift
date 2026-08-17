@@ -9,9 +9,9 @@ import FoundationModels
 @testable import Faraway_Frames
 
 final class MockFoundationModelsClient: FoundationModelsService {
-    var stubbedAvailability: SystemLanguageModel.Availability = .available
+    var stubbedAvailability: ClientModelStatus = .ready
     
-    func checkAvailability() -> SystemLanguageModel.Availability {
+    func checkAvailability() -> ClientModelStatus {
         return stubbedAvailability
     }
 }

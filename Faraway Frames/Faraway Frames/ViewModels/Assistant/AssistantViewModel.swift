@@ -31,15 +31,15 @@ final class AssistantViewModel {
     // MARK: - Methods
     func checkModelsAvailability() {
         switch foundationModelsClient.checkAvailability() {
-        case .available:
+        case .ready:
             status = .ready
-        case .unavailable(.deviceNotEligible):
+        case .unsupportedDevice:
             status = .unsupportedDevice
-        case .unavailable(.appleIntelligenceNotEnabled):
+        case .appleIntelligenceDisabled:
             status = .appleIntelligenceDisabled
-        case .unavailable(.modelNotReady):
+        case .waitingForModel:
             status = .waitingForModel
-        case .unavailable(_):
+        case .unknown:
             status = .unknown
         }
     }

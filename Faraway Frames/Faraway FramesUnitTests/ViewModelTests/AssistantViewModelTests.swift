@@ -22,20 +22,24 @@ struct AssistantViewModelTests {
     @Test("View model correctly maps system language model availability states",
           arguments: [
             ModelAvailabilityTestCase(
-                availability: .available,
+                availability: .ready,
                 expectedStatus: .ready
             ),
             ModelAvailabilityTestCase(
-                availability: .unavailable(.deviceNotEligible),
+                availability: .unsupportedDevice,
                 expectedStatus: .unsupportedDevice
             ),
             ModelAvailabilityTestCase(
-                availability: .unavailable(.appleIntelligenceNotEnabled),
+                availability: .appleIntelligenceDisabled,
                 expectedStatus: .appleIntelligenceDisabled
             ),
             ModelAvailabilityTestCase(
-                availability: .unavailable(.modelNotReady),
+                availability: .waitingForModel,
                 expectedStatus: .waitingForModel
+            ),
+            ModelAvailabilityTestCase(
+                availability: .unknown,
+                expectedStatus: .unknown
             )
           ])
     func assistantViewModel_checkAvailability_mapsModelAvailabilityCorrectly(testCase: ModelAvailabilityTestCase) {
@@ -50,7 +54,7 @@ struct AssistantViewModelTests {
     
     // MARK: - System Language Model Availability
     struct ModelAvailabilityTestCase {
-        let availability: SystemLanguageModel.Availability
+        let availability: ClientModelStatus
         let expectedStatus: AssistantViewModel.ModelsStatus
     }
 }

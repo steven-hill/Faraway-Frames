@@ -8,5 +8,5 @@
 import FoundationModels
 
 protocol FoundationModelsService {
-    func checkAvailability() -> SystemLanguageModel.Availability
+    func checkAvailability() -> ClientModelStatus
 }
