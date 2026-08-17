@@ -14,6 +14,8 @@ final class AssistantViewModel {
         case unknown
         case ready
         case unsupportedDevice
+        case appleIntelligenceDisabled
+        case waitingForModel
     }
     
     // MARK: - Properties
@@ -32,6 +34,10 @@ final class AssistantViewModel {
             status = .ready
         case .unavailable(.deviceNotEligible):
             status = .unsupportedDevice
+        case .unavailable(.appleIntelligenceNotEnabled):
+            status = .appleIntelligenceDisabled
+        case .unavailable(.modelNotReady):
+            status = .waitingForModel
         default: break
         }
     }
