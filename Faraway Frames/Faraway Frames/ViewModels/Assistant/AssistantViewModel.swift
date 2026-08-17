@@ -13,6 +13,7 @@ final class AssistantViewModel {
     enum ModelsStatus {
         case unknown
         case ready
+        case unsupportedDevice
     }
     
     // MARK: - Properties
@@ -29,6 +30,8 @@ final class AssistantViewModel {
         switch foundationModelsClient.checkAvailability() {
         case .available:
             status = .ready
+        case .unavailable(.deviceNotEligible):
+            status = .unsupportedDevice
         default: break
         }
     }

@@ -7,6 +7,7 @@
 
 import Testing
 @testable import Faraway_Frames
+import FoundationModels
 
 @MainActor
 struct AssistantViewModelTests {
@@ -21,10 +22,22 @@ struct AssistantViewModelTests {
     @Test("When `SystemLanguageModel` is available, status updates correctly")
     func assistantViewModel_checkAvailability_whenTheModelIsAvailable_statusChangesToReady() {
         let mockFoundationModelsClient = MockFoundationModelsClient()
+        mockFoundationModelsClient.stubbedAvailability = .available
         let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
         
         sut.checkModelsAvailability()
         
         #expect(sut.status == .ready, "Should have updated to `.ready`.")
+    }
+    
+    @Test("When device doesn't support Apple Intelligence, status updates correctly")
+    func assistantViewModel_checkAvailability_whenDeviceDoesNotSupportAppleIntelligence_statusChangesToReady() {
+        let mockFoundationModelsClient = MockFoundationModelsClient()
+        mockFoundationModelsClient.stubbedAvailability = .unavailable(.deviceNotEligible)
+        let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
+        
+        sut.checkModelsAvailability()
+        
+        #expect(sut.status == .unsupportedDevice, "Should have updated to `.unsupportedDevice`.")
     }
 }
