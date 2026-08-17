@@ -1,5 +1,5 @@
 //
-//  FoundationModelClientTests.swift
+//  FoundationModelsClientTests.swift
 //  Faraway FramesTests
 //
 //  Created by Steven Hill on 17/08/2026.
@@ -7,7 +7,7 @@
 
 import Testing
 
-struct FoundationModelClientTests {
+struct FoundationModelsClientTests {
 
     @Test func doNothing() {
     }
