@@ -20,7 +20,8 @@ struct AssistantViewModelTests {
     
     @Test("When `SystemLanguageModel` is available, status updates correctly")
     func assistantViewModel_checkAvailability_whenTheModelIsAvailable_statusChangesToReady() {
-        let sut = AssistantViewModel()
+        let mockFoundationModelsClient = MockFoundationModelsClient()
+        let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
         
         sut.checkModelsAvailability()
         
