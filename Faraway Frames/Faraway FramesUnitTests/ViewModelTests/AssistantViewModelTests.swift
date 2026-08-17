@@ -6,9 +6,15 @@
 //
 
 import Testing
+@testable import Faraway_Frames
 
+@MainActor
 struct AssistantViewModelTests {
 
-    @Test func doNothing() {
+    @Test("On init the model status should be unknown")
+    func assistantViewModel_onInit_statusIsUnknown() {
+        let sut = AssistantViewModel()
+        
+        #expect(sut.status == .unknown, "Should be `.unknown` initially")
     }
 }
