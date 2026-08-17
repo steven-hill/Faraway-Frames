@@ -21,7 +21,7 @@ struct AssistantViewModelTests {
             SystemLanguageModelStatus.unknown
           ])
     func assistantViewModel_checkSystemLanguageModelAvailability_returnsModelAvailabilityFromService(testCase: SystemLanguageModelStatus) {
-        let mockFoundationModelsClient = MockFoundationModelsClient()
+        var mockFoundationModelsClient = MockFoundationModelsClient()
         mockFoundationModelsClient.stubbedAvailability = testCase
         let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
         
