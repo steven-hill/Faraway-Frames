@@ -42,13 +42,14 @@ struct AssistantViewModelTests {
     }
     
     @Test("View model handles model error correctly")
-    func assistantViewModel_whenRequestToModelResultsInError_handlesError() {
-        let mockFoundationModelsClient = MockFoundationModelsClient()
+    func assistantViewModel_whenRequestToModelResultsInError_handlesError() async {
+        var mockFoundationModelsClient = MockFoundationModelsClient()
         mockFoundationModelsClient.shouldThrowError = true
         let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
         
         await sut.requestFilmRecommendationsFromModel()
         
-        #expect(sut.responseText.isEmpty == false, "Should display the error.")
+        #expect(sut.error != nil, "Should not be nil.")
+        #expect(sut.responseText.isEmpty, "Should still be empty.")
     }
 }

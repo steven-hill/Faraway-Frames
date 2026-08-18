@@ -7,16 +7,22 @@
 
 import FoundationModels
 @testable import Faraway_Frames
+import Foundation
 
 struct MockFoundationModelsClient: FoundationModelsService {
     var stubbedAvailability: SystemLanguageModelStatus = .ready
-    let stubbedResponse = "Here are three films you might like..."
+    var stubbedResponse = "Here are three films you might like..."
+    var shouldThrowError = false
     
     func checkAvailability() -> SystemLanguageModelStatus {
         return stubbedAvailability
     }
     
     func generateResponse(for film: String) async throws -> String {
-        return stubbedResponse
+        if shouldThrowError {
+            throw NSError(domain: "MockError", code: -1, userInfo: nil)
+        } else {
+            return stubbedResponse
+        }
     }
 }
