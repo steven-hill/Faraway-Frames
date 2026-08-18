@@ -32,7 +32,7 @@ struct AssistantViewModelTests {
     }
     
     @Test("View model updates response text when the model successfully generates a response")
-    func assistantViewModel_whenModelGeneratesResponse_updatesResponseText() async throws {
+    func assistantViewModel_requestFilmRecommendationsFromModel_whenModelGeneratesResponse_updatesResponseText() async throws {
         let mockFoundationModelsClient = MockFoundationModelsClient()
         let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
         try #require(sut.responseText.isEmpty, "Should be empty initially.")
@@ -55,7 +55,7 @@ struct AssistantViewModelTests {
             TextGenerationError.systemOverloaded,
             TextGenerationError.unknown
           ])
-    func assistantViewModel_whenRequestToModelResultsInError_handlesError(error: TextGenerationError) async {
+    func assistantViewModel_requestFilmRecommendationsFromModel_whenRequestToModelResultsInError_handlesError(error: TextGenerationError) async {
         let mockFoundationModelsClient = MockFoundationModelsClient()
         mockFoundationModelsClient.stubbedError = error
         let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
