@@ -34,9 +34,10 @@ struct AssistantViewModelTests {
     func assistantViewModel_whenModelGeneratesResponse_updatesResponseText() async {
         let mockFoundationModelsClient = MockFoundationModelsClient()
         let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
+        #expect(sut.responseText.isEmpty, "Should be empty initially.")
         
         await sut.requestFilmRecommendationsFromModel()
         
-        #expect(sut.responseText == mockFoundationModelsClient.stubbedResponse)
+        #expect(sut.responseText == mockFoundationModelsClient.stubbedResponse, "Should update with model's response.")
     }
 }
