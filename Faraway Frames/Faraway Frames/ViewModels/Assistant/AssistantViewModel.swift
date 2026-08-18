@@ -29,10 +29,9 @@ final class AssistantViewModel {
         do {
             let output = try await foundationModelsClient.generateResponse(for: film)
             responseText = output
-        } catch let error as TextGenerationError {
-            self.errorMessage = error.localizedDescription
         } catch {
-            self.errorMessage = error.localizedDescription
+            let domainError = error as? TextGenerationError ?? .unknown
+            self.errorMessage = domainError.localizedDescription
         }
     }
 }
