@@ -31,7 +31,34 @@ struct FoundationModelsClient: FoundationModelsService {
             """
         )
         let prompt = "I like the Studio Ghibli film called \(film). Based on that film, what Studio Ghibli films do you recommend I watch next? Recommend no more than three."
-        let response = try await session.respond(to: prompt)
-        return response.content
+        do {
+            let response = try await session.respond(to: prompt)
+            return response.content
+        } catch let error as LanguageModelSession.GenerationError {
+            switch error {
+            case .exceededContextWindowSize:
+                throw TextGenerationError.contextWindowExceeded
+            case .assetsUnavailable:
+                throw TextGenerationError.localAssetsMissing
+            case .guardrailViolation:
+                throw TextGenerationError.contentBlockedByGuardrails
+            case .unsupportedLanguageOrLocale:
+                throw TextGenerationError.languageNotSupported
+            case .rateLimited:
+                throw TextGenerationError.rateLimited
+            case .concurrentRequests:
+                throw TextGenerationError.systemOverloaded
+            case .decodingFailure:
+                throw TextGenerationError.outputParsingFailed
+            case .refusal:
+                throw TextGenerationError.requestRefused
+            case .unsupportedGuide:
+                throw TextGenerationError.unknown
+            @unknown default:
+                throw TextGenerationError.unknown
+            }
+        } catch {
+            throw TextGenerationError.unknown
+        }
     }
 }
