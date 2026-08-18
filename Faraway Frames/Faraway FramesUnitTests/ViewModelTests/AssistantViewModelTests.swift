@@ -40,4 +40,15 @@ struct AssistantViewModelTests {
         
         #expect(sut.responseText == mockFoundationModelsClient.stubbedResponse, "Should update with model's response.")
     }
+    
+    @Test("View model handles model error correctly")
+    func assistantViewModel_whenRequestToModelResultsInError_handlesError() {
+        let mockFoundationModelsClient = MockFoundationModelsClient()
+        mockFoundationModelsClient.shouldThrowError = true
+        let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
+        
+        await sut.requestFilmRecommendationsFromModel()
+        
+        #expect(sut.responseText.isEmpty == false, "Should display the error.")
+    }
 }
