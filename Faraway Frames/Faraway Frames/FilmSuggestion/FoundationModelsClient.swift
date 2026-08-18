@@ -23,4 +23,8 @@ struct FoundationModelsClient: FoundationModelsService {
             }
         }
     }
+    
+    func generateResponse(for film: String) async throws -> String {
+        return ""
+    }
 }

@@ -31,12 +31,12 @@ struct AssistantViewModelTests {
     }
     
     @Test("View model updates response text when the model successfully generates a response")
-    func assistantViewModel_whenModelGeneratesResponse_updatesResponseText() {
+    func assistantViewModel_whenModelGeneratesResponse_updatesResponseText() async {
         let mockFoundationModelsClient = MockFoundationModelsClient()
         let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
         
-        sut.requestFilmRecommendationsFromModel()
+        await sut.requestFilmRecommendationsFromModel()
         
-        #expect(sut.responseText != nil)
+        #expect(sut.responseText == mockFoundationModelsClient.stubbedResponse)
     }
 }

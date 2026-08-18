@@ -24,9 +24,9 @@ final class AssistantViewModel {
         return foundationModelsClient.checkAvailability()
     }
     
-    func requestFilmRecommendationsFromModel() {
+    func requestFilmRecommendationsFromModel() async {
         do {
-            let output = try await foundationModelsClient.generateResponse()
+            let output = try await foundationModelsClient.generateResponse(for: "")
             responseText = output
         } catch {
             responseText = "Error: \(error.localizedDescription)"
