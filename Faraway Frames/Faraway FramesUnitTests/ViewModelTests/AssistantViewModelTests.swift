@@ -21,12 +21,36 @@ struct AssistantViewModelTests {
             SystemLanguageModelStatus.unknown
           ])
     func assistantViewModel_checkSystemLanguageModelAvailability_returnsModelAvailabilityFromService(testCase: SystemLanguageModelStatus) {
-        var mockFoundationModelsClient = MockFoundationModelsClient()
+        let mockFoundationModelsClient = MockFoundationModelsClient()
         mockFoundationModelsClient.stubbedAvailability = testCase
         let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
         
         let status = sut.checkSystemLanguageModelAvailability()
         
         #expect(status == testCase, "`status` should match the expected value.")
+    }
+    
+    @Test("View model updates response text when the model successfully generates a response")
+    func assistantViewModel_whenModelGeneratesResponse_updatesResponseText() async throws {
+        let mockFoundationModelsClient = MockFoundationModelsClient()
+        let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
+        try #require(sut.responseText.isEmpty, "Should be empty initially.")
+        
+        await sut.requestFilmRecommendationsFromModel()
+        
+        #expect(sut.responseText == mockFoundationModelsClient.stubbedResponse, "Should update with model's response.")
+        #expect(mockFoundationModelsClient.generateResponseCallCount == 1, "Should have called method once.")
+    }
+    
+    @Test("View model handles model error correctly")
+    func assistantViewModel_whenRequestToModelResultsInError_handlesError() async {
+        let mockFoundationModelsClient = MockFoundationModelsClient()
+        mockFoundationModelsClient.shouldThrowError = true
+        let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
+        
+        await sut.requestFilmRecommendationsFromModel()
+        
+        #expect(sut.error != nil, "Should not be nil.")
+        #expect(sut.responseText.isEmpty, "Should still be empty.")
     }
 }

@@ -6,19 +6,31 @@
 //
 
 import FoundationModels
+import Foundation
 
 final class AssistantViewModel {
     
-    // MARK: - Property
+    // MARK: - Properties
     private let foundationModelsClient: FoundationModelsService
+    private(set) var responseText: String = ""
+    private(set) var error: Error?
     
     // MARK: - Initialisation
     init(foundationModelsClient: FoundationModelsService = FoundationModelsClient()) {
         self.foundationModelsClient = foundationModelsClient
     }
     
-    // MARK: - Method
+    // MARK: - Methods
     func checkSystemLanguageModelAvailability() -> SystemLanguageModelStatus {
         return foundationModelsClient.checkAvailability()
+    }
+    
+    func requestFilmRecommendationsFromModel() async {
+        do {
+            let output = try await foundationModelsClient.generateResponse(for: "")
+            responseText = output
+        } catch {
+            self.error = error
+        }
     }
 }

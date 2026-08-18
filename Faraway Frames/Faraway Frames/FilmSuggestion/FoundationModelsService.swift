@@ -9,4 +9,5 @@ import FoundationModels
 
 protocol FoundationModelsService {
     func checkAvailability() -> SystemLanguageModelStatus
+    func generateResponse(for film: String) async throws -> String
 }
