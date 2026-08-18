@@ -31,10 +31,10 @@ struct AssistantViewModelTests {
     }
     
     @Test("View model updates response text when the model successfully generates a response")
-    func assistantViewModel_whenModelGeneratesResponse_updatesResponseText() async {
+    func assistantViewModel_whenModelGeneratesResponse_updatesResponseText() async throws {
         let mockFoundationModelsClient = MockFoundationModelsClient()
         let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
-        #expect(sut.responseText.isEmpty, "Should be empty initially.")
+        try #require(sut.responseText.isEmpty, "Should be empty initially.")
         
         await sut.requestFilmRecommendationsFromModel()
         
