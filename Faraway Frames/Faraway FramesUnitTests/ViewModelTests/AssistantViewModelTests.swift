@@ -42,15 +42,26 @@ struct AssistantViewModelTests {
         #expect(mockFoundationModelsClient.generateResponseCallCount == 1, "Should have called method once.")
     }
     
-    @Test("View model handles model error correctly")
-    func assistantViewModel_whenRequestToModelResultsInError_handlesError() async {
+    @Test("View model handles model error correctly",
+          arguments: [
+            TextGenerationError.contextWindowExceeded,
+            TextGenerationError.contentBlockedByGuardrails,
+            TextGenerationError.languageNotSupported,
+            TextGenerationError.localAssetsMissing,
+            TextGenerationError.outputParsingFailed,
+            TextGenerationError.rateLimited,
+            TextGenerationError.requestRefused,
+            TextGenerationError.systemOverloaded,
+            TextGenerationError.unknown
+          ])
+    func assistantViewModel_whenRequestToModelResultsInError_handlesError(error: TextGenerationError) async {
         let mockFoundationModelsClient = MockFoundationModelsClient()
-        mockFoundationModelsClient.shouldThrowError = true
+        mockFoundationModelsClient.stubbedError = error
         let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
         
         await sut.requestFilmRecommendationsFromModel()
         
-        #expect(sut.error != nil, "Should not be nil.")
+        #expect(sut.errorMessage == error.localizedDescription, "Should match.")
         #expect(sut.responseText.isEmpty, "Should still be empty.")
     }
 }
