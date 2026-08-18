@@ -29,4 +29,14 @@ struct AssistantViewModelTests {
         
         #expect(status == testCase, "`status` should match the expected value.")
     }
+    
+    @Test("View model updates response text when the model successfully generates a response")
+    func assistantViewModel_whenModelGeneratesResponse_updatesResponseText() {
+        let mockFoundationModelsClient = MockFoundationModelsClient()
+        let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
+        
+        sut.requestFilmRecommendationsFromModel()
+        
+        #expect(sut.responseText != nil)
+    }
 }
