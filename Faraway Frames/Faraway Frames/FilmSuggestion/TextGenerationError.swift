@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// Custom error to use instead of `LanguageModelSession.GenerationError`.
 enum TextGenerationError: LocalizedError {
     case contextWindowExceeded
     case localAssetsMissing
