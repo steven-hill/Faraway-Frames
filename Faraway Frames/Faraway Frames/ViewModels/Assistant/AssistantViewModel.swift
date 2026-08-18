@@ -13,7 +13,7 @@ final class AssistantViewModel {
     // MARK: - Properties
     private let foundationModelsClient: FoundationModelsService
     private(set) var responseText: String = ""
-    private(set) var error: Error?
+    private(set) var errorMessage: String = ""
     
     // MARK: - Initialisation
     init(foundationModelsClient: FoundationModelsService = FoundationModelsClient()) {
@@ -29,8 +29,10 @@ final class AssistantViewModel {
         do {
             let output = try await foundationModelsClient.generateResponse(for: "")
             responseText = output
+        } catch let error as TextGenerationError {
+            self.errorMessage = error.localizedDescription
         } catch {
-            self.error = error
+            self.errorMessage = error.localizedDescription
         }
     }
 }
