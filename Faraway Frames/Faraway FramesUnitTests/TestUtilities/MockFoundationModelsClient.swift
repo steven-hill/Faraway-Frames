@@ -19,6 +19,7 @@ final class MockFoundationModelsClient: FoundationModelsService {
     //MARK: - Spy property
     private(set) var generateResponseCallCount = 0
     
+    //MARK: - Methods
     func checkAvailability() -> SystemLanguageModelStatus {
         return stubbedAvailability
     }
