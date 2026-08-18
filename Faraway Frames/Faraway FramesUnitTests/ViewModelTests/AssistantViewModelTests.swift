@@ -8,6 +8,7 @@
 import Testing
 @testable import Faraway_Frames
 import FoundationModels
+import Foundation
 
 @MainActor
 struct AssistantViewModelTests {
