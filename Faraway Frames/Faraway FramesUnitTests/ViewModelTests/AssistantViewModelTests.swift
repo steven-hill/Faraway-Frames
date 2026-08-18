@@ -8,6 +8,7 @@
 import Testing
 @testable import Faraway_Frames
 import FoundationModels
+import Foundation
 
 @MainActor
 struct AssistantViewModelTests {
@@ -31,26 +32,37 @@ struct AssistantViewModelTests {
     }
     
     @Test("View model updates response text when the model successfully generates a response")
-    func assistantViewModel_whenModelGeneratesResponse_updatesResponseText() async throws {
+    func assistantViewModel_requestFilmRecommendationsFromModel_whenModelGeneratesResponse_updatesResponseText() async throws {
         let mockFoundationModelsClient = MockFoundationModelsClient()
         let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
         try #require(sut.responseText.isEmpty, "Should be empty initially.")
         
-        await sut.requestFilmRecommendationsFromModel()
+        await sut.requestFilmRecommendationsFromModel(for: Film.sample[0].title)
         
         #expect(sut.responseText == mockFoundationModelsClient.stubbedResponse, "Should update with model's response.")
         #expect(mockFoundationModelsClient.generateResponseCallCount == 1, "Should have called method once.")
     }
     
-    @Test("View model handles model error correctly")
-    func assistantViewModel_whenRequestToModelResultsInError_handlesError() async {
+    @Test("View model handles model error correctly",
+          arguments: [
+            TextGenerationError.contextWindowExceeded,
+            TextGenerationError.contentBlockedByGuardrails,
+            TextGenerationError.languageNotSupported,
+            TextGenerationError.localAssetsMissing,
+            TextGenerationError.outputParsingFailed,
+            TextGenerationError.rateLimited,
+            TextGenerationError.requestRefused,
+            TextGenerationError.systemOverloaded,
+            TextGenerationError.unknown
+          ])
+    func assistantViewModel_requestFilmRecommendationsFromModel_whenRequestToModelResultsInError_handlesError(error: TextGenerationError) async {
         let mockFoundationModelsClient = MockFoundationModelsClient()
-        mockFoundationModelsClient.shouldThrowError = true
+        mockFoundationModelsClient.stubbedError = error
         let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
         
-        await sut.requestFilmRecommendationsFromModel()
+        await sut.requestFilmRecommendationsFromModel(for: Film.sample[0].title)
         
-        #expect(sut.error != nil, "Should not be nil.")
+        #expect(sut.errorMessage == error.localizedDescription, "Should match.")
         #expect(sut.responseText.isEmpty, "Should still be empty.")
     }
 }
