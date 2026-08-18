@@ -37,7 +37,7 @@ struct AssistantViewModelTests {
         let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
         try #require(sut.responseText.isEmpty, "Should be empty initially.")
         
-        await sut.requestFilmRecommendationsFromModel()
+        await sut.requestFilmRecommendationsFromModel(for: Film.sample[0].title)
         
         #expect(sut.responseText == mockFoundationModelsClient.stubbedResponse, "Should update with model's response.")
         #expect(mockFoundationModelsClient.generateResponseCallCount == 1, "Should have called method once.")
@@ -60,7 +60,7 @@ struct AssistantViewModelTests {
         mockFoundationModelsClient.stubbedError = error
         let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
         
-        await sut.requestFilmRecommendationsFromModel()
+        await sut.requestFilmRecommendationsFromModel(for: Film.sample[0].title)
         
         #expect(sut.errorMessage == error.localizedDescription, "Should match.")
         #expect(sut.responseText.isEmpty, "Should still be empty.")
