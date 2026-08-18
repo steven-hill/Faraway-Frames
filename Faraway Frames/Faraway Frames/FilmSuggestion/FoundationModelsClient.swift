@@ -25,6 +25,13 @@ struct FoundationModelsClient: FoundationModelsService {
     }
     
     func generateResponse(for film: String) async throws -> String {
-        return ""
+        let session = LanguageModelSession(
+            instructions: """
+            You are a film critic, specialising in the films of Studio Ghibli.
+            """
+        )
+        let prompt = "I like the Studio Ghibli film called \(film). Based on that film, what Studio Ghibli films do you recommend I watch next? Recommend no more than three."
+        let response = try await session.respond(to: prompt)
+        return response.content
     }
 }
