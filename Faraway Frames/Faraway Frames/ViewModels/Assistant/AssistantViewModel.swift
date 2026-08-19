@@ -10,8 +10,14 @@ import Foundation
 
 final class AssistantViewModel {
     
+    // MARK: - State Definition
+    enum AssistantState {
+        case idle
+    }
+    
     // MARK: - Properties
     private let foundationModelsClient: FoundationModelsService
+    private(set) var currentState: AssistantState = .idle
     private(set) var responseText: String = ""
     private(set) var errorMessage: String = ""
     
