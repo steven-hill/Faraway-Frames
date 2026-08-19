@@ -32,10 +32,10 @@ final class MockFoundationModelsClient: FoundationModelsService {
     }
     
     func generateResponse(for film: String) async throws -> String {
+        generateResponseCallCount += 1
         if shouldPauseForProcessingStateTest {
             await withCheckedContinuation { self.continuation = $0 }
         }
-        generateResponseCallCount += 1
         if let error = stubbedError {
             throw error
         } else {
