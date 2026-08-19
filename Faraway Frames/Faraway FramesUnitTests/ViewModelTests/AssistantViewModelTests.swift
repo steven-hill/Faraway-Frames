@@ -51,8 +51,8 @@ struct AssistantViewModelTests {
         task.cancel()
     }
     
-    @Test("View model updates response text when the model successfully generates a response")
-    func assistantViewModel_requestFilmRecommendationsFromModel_whenModelGeneratesResponse_updatesResponseText() async throws {
+    @Test("View model updates response text and state when the model successfully generates a response")
+    func assistantViewModel_requestFilmRecommendationsFromModel_whenModelGeneratesResponse_updatesResponseTextAndState() async throws {
         let mockFoundationModelsClient = MockFoundationModelsClient()
         let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
         try #require(sut.responseText.isEmpty, "Should be empty initially.")
@@ -60,6 +60,7 @@ struct AssistantViewModelTests {
         await sut.requestFilmRecommendationsFromModel(for: Film.sample[0].title)
         
         #expect(sut.responseText == mockFoundationModelsClient.stubbedResponse, "Should update with model's response.")
+        #expect(sut.currentState == .receivedOutput, "Should be `.receivedOutput`.")
         #expect(mockFoundationModelsClient.generateResponseCallCount == 1, "Should have called method once.")
     }
     

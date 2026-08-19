@@ -14,6 +14,7 @@ final class AssistantViewModel {
     enum AssistantState {
         case idle
         case processing
+        case receivedOutput
     }
     
     // MARK: - Properties
@@ -36,6 +37,7 @@ final class AssistantViewModel {
         currentState = .processing
         do {
             let output = try await foundationModelsClient.generateResponse(for: film)
+            currentState = .receivedOutput
             responseText = output
         } catch {
             let domainError = error as? TextGenerationError ?? .unknown
