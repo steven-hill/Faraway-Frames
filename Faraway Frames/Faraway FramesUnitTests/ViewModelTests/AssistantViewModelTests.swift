@@ -38,17 +38,19 @@ struct AssistantViewModelTests {
     }
     
     @Test("View model's state is correct during language model request")
-    func assistantViewModel_requestFilmRecommendationsFromModel_duringRequest_updatesState() async {
+    func assistantViewModel_requestFilmRecommendationsFromModel_duringRequest_updatesState() async throws {
         let mockFoundationModelsClient = MockFoundationModelsClient()
+        mockFoundationModelsClient.shouldPauseForProcessingStateTest = true
         let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
+        try #require(sut.currentState == .idle, "Should be `.idle` initially.")
         
-        let task = Task {
+        _ = Task {
             await sut.requestFilmRecommendationsFromModel(for: Film.sample[0].title)
         }
         await Task.yield()
         
         #expect(sut.currentState == .processing, "Should be `.processing` while requesting response from model.")
-        task.cancel()
+        mockFoundationModelsClient.resumeExecution()
     }
     
     @Test("View model updates response text and state when the model successfully generates a response")
