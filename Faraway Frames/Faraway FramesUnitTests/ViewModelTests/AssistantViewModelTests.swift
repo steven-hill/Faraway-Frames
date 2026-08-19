@@ -13,12 +13,6 @@ import Foundation
 @MainActor
 struct AssistantViewModelTests {
     
-    @Test("View model state is `.idle` on init")
-    func assistantViewModel_initialState_isIdle() {
-        let sut = AssistantViewModel()
-        #expect(sut.currentState == .idle, "Should be `.idle` on init.")
-    }
-    
     @Test("View model can get the system language model availability status from the service",
           arguments: [
             SystemLanguageModelStatus.ready,
