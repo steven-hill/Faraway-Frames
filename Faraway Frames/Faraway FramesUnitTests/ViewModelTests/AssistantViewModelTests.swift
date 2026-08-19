@@ -31,8 +31,24 @@ struct AssistantViewModelTests {
         #expect(status == testCase, "`status` should match the expected value.")
     }
     
-    @Test("View model updates response text when the model successfully generates a response")
-    func assistantViewModel_requestFilmRecommendationsFromModel_whenModelGeneratesResponse_updatesResponseText() async throws {
+    @Test("View model's state is correct during language model request")
+    func assistantViewModel_requestFilmRecommendationsFromModel_duringRequest_updatesState() async throws {
+        let mockFoundationModelsClient = MockFoundationModelsClient()
+        mockFoundationModelsClient.shouldPauseForProcessingStateTest = true
+        let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
+        try #require(sut.currentState == .idle, "Should be `.idle` initially.")
+        
+        _ = Task {
+            await sut.requestFilmRecommendationsFromModel(for: Film.sample[0].title)
+        }
+        await Task.yield()
+        
+        #expect(sut.currentState == .processing, "Should be `.processing` while requesting response from model.")
+        mockFoundationModelsClient.resumeExecution()
+    }
+    
+    @Test("View model updates response text and state when the model successfully generates a response")
+    func assistantViewModel_requestFilmRecommendationsFromModel_whenModelGeneratesResponse_updatesResponseTextAndState() async throws {
         let mockFoundationModelsClient = MockFoundationModelsClient()
         let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
         try #require(sut.responseText.isEmpty, "Should be empty initially.")
@@ -40,10 +56,11 @@ struct AssistantViewModelTests {
         await sut.requestFilmRecommendationsFromModel(for: Film.sample[0].title)
         
         #expect(sut.responseText == mockFoundationModelsClient.stubbedResponse, "Should update with model's response.")
+        #expect(sut.currentState == .receivedOutput, "Should be `.receivedOutput`.")
         #expect(mockFoundationModelsClient.generateResponseCallCount == 1, "Should have called method once.")
     }
     
-    @Test("View model handles model error correctly",
+    @Test("View model handles model error correctly and updates state",
           arguments: [
             TextGenerationError.contextWindowExceeded,
             TextGenerationError.contentBlockedByGuardrails,
@@ -55,13 +72,16 @@ struct AssistantViewModelTests {
             TextGenerationError.systemOverloaded,
             TextGenerationError.unknown
           ])
-    func assistantViewModel_requestFilmRecommendationsFromModel_whenRequestToModelResultsInError_handlesError(error: TextGenerationError) async {
+    func assistantViewModel_requestFilmRecommendationsFromModel_whenRequestToModelResultsInError_updatesStateAndHandlesError(error: TextGenerationError) async throws {
         let mockFoundationModelsClient = MockFoundationModelsClient()
         mockFoundationModelsClient.stubbedError = error
         let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
+        try #require(sut.currentState == .idle, "Should be `.idle` initially.")
+        try #require(sut.errorMessage.isEmpty, "Should be empty initially.")
         
         await sut.requestFilmRecommendationsFromModel(for: Film.sample[0].title)
         
+        #expect(sut.currentState == .modelError, "Should be `.modelError`.")
         #expect(sut.errorMessage == error.localizedDescription, "Should match.")
         #expect(sut.responseText.isEmpty, "Should still be empty.")
     }

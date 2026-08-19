@@ -10,8 +10,17 @@ import Foundation
 
 final class AssistantViewModel {
     
+    // MARK: - State Definition
+    enum AssistantState {
+        case idle
+        case processing
+        case receivedOutput
+        case modelError
+    }
+    
     // MARK: - Properties
     private let foundationModelsClient: FoundationModelsService
+    private(set) var currentState: AssistantState = .idle
     private(set) var responseText: String = ""
     private(set) var errorMessage: String = ""
     
@@ -26,10 +35,13 @@ final class AssistantViewModel {
     }
     
     func requestFilmRecommendationsFromModel(for film: String) async {
+        currentState = .processing
         do {
             let output = try await foundationModelsClient.generateResponse(for: film)
+            currentState = .receivedOutput
             responseText = output
         } catch {
+            currentState = .modelError
             let domainError = error as? TextGenerationError ?? .unknown
             self.errorMessage = domainError.localizedDescription
         }
