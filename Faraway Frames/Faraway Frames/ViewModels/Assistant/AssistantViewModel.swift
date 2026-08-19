@@ -15,6 +15,7 @@ final class AssistantViewModel {
         case idle
         case processing
         case receivedOutput
+        case modelError
     }
     
     // MARK: - Properties
@@ -40,6 +41,7 @@ final class AssistantViewModel {
             currentState = .receivedOutput
             responseText = output
         } catch {
+            currentState = .modelError
             let domainError = error as? TextGenerationError ?? .unknown
             self.errorMessage = domainError.localizedDescription
         }

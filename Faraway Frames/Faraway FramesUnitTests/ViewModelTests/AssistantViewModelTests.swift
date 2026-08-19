@@ -66,7 +66,7 @@ struct AssistantViewModelTests {
         #expect(mockFoundationModelsClient.generateResponseCallCount == 1, "Should have called method once.")
     }
     
-    @Test("View model handles model error correctly",
+    @Test("View model handles model error correctly and updates state",
           arguments: [
             TextGenerationError.contextWindowExceeded,
             TextGenerationError.contentBlockedByGuardrails,
@@ -78,13 +78,14 @@ struct AssistantViewModelTests {
             TextGenerationError.systemOverloaded,
             TextGenerationError.unknown
           ])
-    func assistantViewModel_requestFilmRecommendationsFromModel_whenRequestToModelResultsInError_handlesError(error: TextGenerationError) async {
+    func assistantViewModel_requestFilmRecommendationsFromModel_whenRequestToModelResultsInError_updatesStateAndHandlesError(error: TextGenerationError) async {
         let mockFoundationModelsClient = MockFoundationModelsClient()
         mockFoundationModelsClient.stubbedError = error
         let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
         
         await sut.requestFilmRecommendationsFromModel(for: Film.sample[0].title)
         
+        #expect(sut.currentState == .modelError, "Should be `.modelError`.")
         #expect(sut.errorMessage == error.localizedDescription, "Should match.")
         #expect(sut.responseText.isEmpty, "Should still be empty.")
     }
