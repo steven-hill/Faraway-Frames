@@ -13,6 +13,7 @@ final class AssistantViewModel {
     // MARK: - State Definition
     enum AssistantState {
         case idle
+        case processing
     }
     
     // MARK: - Properties
@@ -32,6 +33,7 @@ final class AssistantViewModel {
     }
     
     func requestFilmRecommendationsFromModel(for film: String) async {
+        currentState = .processing
         do {
             let output = try await foundationModelsClient.generateResponse(for: film)
             responseText = output

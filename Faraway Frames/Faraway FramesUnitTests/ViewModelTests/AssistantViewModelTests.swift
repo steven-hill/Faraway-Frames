@@ -37,6 +37,20 @@ struct AssistantViewModelTests {
         #expect(status == testCase, "`status` should match the expected value.")
     }
     
+    @Test("View model's state is correct during language model request")
+    func assistantViewModel_requestFilmRecommendationsFromModel_duringRequest_updatesState() async {
+        let mockFoundationModelsClient = MockFoundationModelsClient()
+        let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
+        
+        let task = Task {
+            await sut.requestFilmRecommendationsFromModel(for: Film.sample[0].title)
+        }
+        await Task.yield()
+        
+        #expect(sut.currentState == .processing, "Should be `.processing` while requesting response from model.")
+        task.cancel()
+    }
+    
     @Test("View model updates response text when the model successfully generates a response")
     func assistantViewModel_requestFilmRecommendationsFromModel_whenModelGeneratesResponse_updatesResponseText() async throws {
         let mockFoundationModelsClient = MockFoundationModelsClient()
