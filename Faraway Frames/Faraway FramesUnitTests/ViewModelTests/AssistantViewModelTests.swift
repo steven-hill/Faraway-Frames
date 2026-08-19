@@ -78,10 +78,12 @@ struct AssistantViewModelTests {
             TextGenerationError.systemOverloaded,
             TextGenerationError.unknown
           ])
-    func assistantViewModel_requestFilmRecommendationsFromModel_whenRequestToModelResultsInError_updatesStateAndHandlesError(error: TextGenerationError) async {
+    func assistantViewModel_requestFilmRecommendationsFromModel_whenRequestToModelResultsInError_updatesStateAndHandlesError(error: TextGenerationError) async throws {
         let mockFoundationModelsClient = MockFoundationModelsClient()
         mockFoundationModelsClient.stubbedError = error
         let sut = AssistantViewModel(foundationModelsClient: mockFoundationModelsClient)
+        try #require(sut.currentState == .idle, "Should be `.idle` initially.")
+        try #require(sut.errorMessage.isEmpty, "Should be empty initially.")
         
         await sut.requestFilmRecommendationsFromModel(for: Film.sample[0].title)
         
