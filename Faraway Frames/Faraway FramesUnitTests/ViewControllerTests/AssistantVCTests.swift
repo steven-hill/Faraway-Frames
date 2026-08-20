@@ -13,7 +13,8 @@ import UIKit
 struct AssistantVCTests {
 
     @Test func assistantVC_canInitAndLoadView() {
-        let sut = AssistantVC()
+        let assistantVC = AssistantViewModel(foundationModelsClient: MockFoundationModelsClient())
+        let sut = AssistantVC(assistantViewModel: assistantVC)
         
         sut.loadViewIfNeeded()
         

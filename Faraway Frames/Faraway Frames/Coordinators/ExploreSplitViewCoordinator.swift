@@ -20,6 +20,7 @@ final class ExploreSplitViewCoordinator: Coordinator {
     let exploreSplitVC: UISplitViewController
     private(set) var filmDetailViewModel: FilmDetailViewModel
     private let frcFactory: FilmDetailFRCFactory
+    private let foundationModelsClient: FoundationModelsService
     
     init(dependencies: Dependencies,
          imageLoader: ImageLoader,
@@ -27,7 +28,8 @@ final class ExploreSplitViewCoordinator: Coordinator {
          filmQueueService: FilmQueueServiceProtocol,
          filmSyncService: FilmSyncService,
          exploreSplitVC: UISplitViewController = ExploreSplitVC(style: .doubleColumn),
-         frcFactory: FilmDetailFRCFactory) {
+         frcFactory: FilmDetailFRCFactory,
+         foundationModelsClient: FoundationModelsService) {
         self.dependencies = dependencies
         self.imageLoader = imageLoader
         self.context = context
@@ -35,6 +37,7 @@ final class ExploreSplitViewCoordinator: Coordinator {
         self.filmSyncService = filmSyncService
         self.exploreSplitVC = exploreSplitVC
         self.frcFactory = frcFactory
+        self.foundationModelsClient = foundationModelsClient
         filmDetailViewModel = FilmDetailViewModel(film: nil,
                                                   imageLoader: imageLoader,
                                                   managedObjectContext: context,
@@ -97,7 +100,8 @@ extension ExploreSplitViewCoordinator: ExploreNavigationDelegate {
 
 extension ExploreSplitViewCoordinator: ExploreDetailNavigationDelegate {
     func exploreDetailDidTapMoreLikeThisButton() {
-        let assistantVC = AssistantVC()
+        let assistantViewModel = AssistantViewModel(foundationModelsClient: foundationModelsClient)
+        let assistantVC = AssistantVC(assistantViewModel: assistantViewModel)
         let navigationController = UINavigationController(rootViewController: assistantVC)
         exploreSplitVC.present(navigationController, animated: true)
     }

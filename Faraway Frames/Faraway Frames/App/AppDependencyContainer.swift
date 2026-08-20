@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class AppDependencyContainer: FilmsListServicing, ImageLoading, PersistentStoring, AccessibilityServicing {
+final class AppDependencyContainer: FilmsListServicing, ImageLoading, PersistentStoring, AccessibilityServicing, FoundationModelsServicing {
     private let cacheManager = CacheManager()
     
     func makePersistenceController() throws -> PersistenceControlling {
@@ -24,5 +24,9 @@ final class AppDependencyContainer: FilmsListServicing, ImageLoading, Persistent
     
     func makeAccessibilityService() -> AccessibilityService {
         return DefaultAccessibilityService()
+    }
+    
+    func makeFoundationModelsService() -> FoundationModelsService {
+        return FoundationModelsClient()
     }
 }

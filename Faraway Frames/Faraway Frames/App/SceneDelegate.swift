@@ -21,7 +21,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
     
     private func setUpDependencies(with window: UIWindow) {
-        typealias Dependencies = FilmsListServicing & ImageLoading & PersistentStoring & AccessibilityServicing
+        typealias Dependencies = FilmsListServicing & ImageLoading & PersistentStoring & AccessibilityServicing & FoundationModelsServicing
         let dependencies: Dependencies
         
         if ProcessInfo.processInfo.isUITesting {

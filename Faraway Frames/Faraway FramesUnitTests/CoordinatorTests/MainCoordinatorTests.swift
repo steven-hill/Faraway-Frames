@@ -61,10 +61,17 @@ struct MainCoordinatorTests {
     }
     
     // MARK: - Helper Method
-    private func makeSUT() throws -> (sut: MainCoordinator, window: WindowSpy) {
+    private func makeSUT() throws -> (
+        sut: MainCoordinator,
+        window: WindowSpy
+    ) {
         let mockContainer = MockContainer()
         let windowSpy = WindowSpy()
-        let sut = MainCoordinator(window: windowSpy, dependencies: mockContainer, persistenceController: try mockContainer.makePersistenceController())
+        let sut = MainCoordinator(
+            window: windowSpy,
+            dependencies: mockContainer,
+            persistenceController: try mockContainer.makePersistenceController()
+        )
         return (sut, windowSpy)
     }
     

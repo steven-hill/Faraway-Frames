@@ -14,17 +14,20 @@ final class HomeCoordinator: Coordinator {
     private let imageLoader: ImageLoader
     private let filmQueueService: FilmQueueService
     private let frcFactory: HomeFRCFactory & FilmDetailFRCFactory
+    private let foundationModelsClient: FoundationModelsService
     
     init(navigationController: UINavigationController,
          context: NSManagedObjectContext,
          imageLoader: ImageLoader,
          filmQueueService: FilmQueueService,
-         frcFactory: HomeFRCFactory & FilmDetailFRCFactory) {
+         frcFactory: HomeFRCFactory & FilmDetailFRCFactory,
+         foundationModelsClient: FoundationModelsService) {
         self.navigationController = navigationController
         self.context = context
         self.imageLoader = imageLoader
         self.filmQueueService = filmQueueService
         self.frcFactory = frcFactory
+        self.foundationModelsClient = foundationModelsClient
     }
     
     func start() {
@@ -58,7 +61,8 @@ extension HomeCoordinator: HomeViewModelCoordinatorDelegate {
 
 extension HomeCoordinator: ExploreDetailNavigationDelegate {
     func exploreDetailDidTapMoreLikeThisButton() {
-        let assistantVC = AssistantVC()
+        let assistantViewModel = AssistantViewModel(foundationModelsClient: foundationModelsClient)
+        let assistantVC = AssistantVC(assistantViewModel: assistantViewModel)
         let navController = UINavigationController(rootViewController: assistantVC)
         navigationController.present(navController, animated: true)
     }

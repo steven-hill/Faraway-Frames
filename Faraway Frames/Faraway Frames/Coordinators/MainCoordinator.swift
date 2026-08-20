@@ -11,7 +11,7 @@ import UIKit
 final class MainCoordinator: Coordinator {
     var childCoordinators = [Coordinator]()
     var window: WindowProtocol
-    typealias Dependencies = FilmsListServicing & ImageLoading & AccessibilityServicing
+    typealias Dependencies = FilmsListServicing & ImageLoading & AccessibilityServicing & FoundationModelsServicing
     let dependencies: Dependencies
     let persistenceController: PersistenceControlling
     let tabBarController = TabBarController()
@@ -30,12 +30,14 @@ final class MainCoordinator: Coordinator {
         let filmQueueService = FilmQueueService(context: managedObjectContext)
         let filmSyncService = FilmSyncService(context: managedObjectContext)
         let imageLoader = dependencies.makeImageLoader()
+        let foundationModelsClient = dependencies.makeFoundationModelsService()
         
         let homeCoordinator = HomeCoordinator(navigationController: UINavigationController(),
                                               context: managedObjectContext,
                                               imageLoader: imageLoader,
                                               filmQueueService: filmQueueService,
-                                              frcFactory: frcFactory)
+                                              frcFactory: frcFactory,
+                                              foundationModelsClient: foundationModelsClient)
         homeCoordinator.start()
         childCoordinators.append(homeCoordinator)
         
@@ -44,7 +46,8 @@ final class MainCoordinator: Coordinator {
                                                                       context: managedObjectContext,
                                                                       filmQueueService: filmQueueService,
                                                                       filmSyncService: filmSyncService,
-                                                                      frcFactory: frcFactory)
+                                                                      frcFactory: frcFactory,
+                                                                      foundationModelsClient: foundationModelsClient)
         exploreSplitViewCoordinator.start()
         childCoordinators.append(exploreSplitViewCoordinator)
         

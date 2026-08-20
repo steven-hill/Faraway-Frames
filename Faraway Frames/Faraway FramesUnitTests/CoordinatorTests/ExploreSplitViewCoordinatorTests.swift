@@ -142,7 +142,8 @@ struct ExploreSplitViewCoordinatorTests {
                                               filmQueueService: filmQueueService,
                                               filmSyncService: filmSyncService,
                                               exploreSplitVC: exploreSplitVCSpy,
-                                              frcFactory: MockFRCFactory())
+                                              frcFactory: MockFRCFactory(),
+                                              foundationModelsClient: MockFoundationModelsClient())
         return (sut, exploreSplitVCSpy)
     }
     
@@ -156,7 +157,8 @@ struct ExploreSplitViewCoordinatorTests {
                                            filmQueueService: filmQueueService,
                                            filmSyncService: filmSyncService,
                                            exploreSplitVC: spy,
-                                           frcFactory: MockFRCFactory())
+                                           frcFactory: MockFRCFactory(),
+                                           foundationModelsClient: MockFoundationModelsClient())
     }
     
     // MARK: - ExploreSplitVC Spies
