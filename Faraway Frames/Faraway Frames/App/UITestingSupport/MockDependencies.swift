@@ -7,7 +7,8 @@
 
 import Foundation
 
-final class MockDependencies: FilmsListServicing, ImageLoading, PersistentStoring, AccessibilityServicing {
+final class MockDependencies: FilmsListServicing, ImageLoading, PersistentStoring, AccessibilityServicing, FoundationModelsServicing {
+    
     private let shouldSucceed: Bool = ProcessInfo.processInfo.isUITestingMockNetworkSuccess
     private let isUsingFileManagerData: Bool = ProcessInfo.processInfo.isUITestingMockNetworkFailureWithFileManagerData
     
@@ -25,5 +26,9 @@ final class MockDependencies: FilmsListServicing, ImageLoading, PersistentStorin
     
     func makeAccessibilityService() -> AccessibilityService {
         return MockAccessibilityServiceForUITests()
+    }
+    
+    func makeFoundationModelsService() -> FoundationModelsService {
+        return MockFoundationModelsClientForUITests()
     }
 }

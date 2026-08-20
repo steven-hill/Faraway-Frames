@@ -15,7 +15,7 @@ final class AssistantVC: UIViewController {
     // MARK: - Initialisation
     init(assistantViewModel: AssistantViewModel) {
         self.assistantViewModel = assistantViewModel
-        super.init()
+        super.init(nibName: nil, bundle: nil)
     }
     
     required init?(coder: NSCoder) {
