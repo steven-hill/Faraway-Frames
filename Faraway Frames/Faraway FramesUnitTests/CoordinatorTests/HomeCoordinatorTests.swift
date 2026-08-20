@@ -67,11 +67,11 @@ struct HomeCoordinatorTests {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
         return HomeCoordinator(navigationController: navController,
-                                  context: testPersistenceController.viewContext,
-                                  imageLoader: MockImageLoader(),
-                                  filmQueueService: filmQueueService,
-                                  frcFactory: MockFRCFactory()
-        )
+                               context: testPersistenceController.viewContext,
+                               imageLoader: MockImageLoader(),
+                               filmQueueService: filmQueueService,
+                               frcFactory: MockFRCFactory(),
+                               foundationModelsClient: MockFoundationModelsClient())
     }
     
     // MARK: - Navigation Controller Spy
