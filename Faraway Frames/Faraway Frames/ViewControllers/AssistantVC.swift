@@ -8,6 +8,19 @@
 import UIKit
 
 final class AssistantVC: UIViewController {
+
+    // MARK: - Property
+    private let assistantViewModel: AssistantViewModel
+    
+    // MARK: - Initialisation
+    init(assistantViewModel: AssistantViewModel) {
+        self.assistantViewModel = assistantViewModel
+        super.init()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     // MARK: - View Life Cycle
     override func viewDidLoad() {
@@ -34,5 +47,5 @@ final class AssistantVC: UIViewController {
 
 // MARK: - Preview
 #Preview("AssistantVC") {
-    AssistantVC()
+    AssistantVC(assistantViewModel: AssistantViewModel())
 }
