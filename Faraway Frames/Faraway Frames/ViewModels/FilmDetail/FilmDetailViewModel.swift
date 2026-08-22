@@ -38,8 +38,7 @@ final class FilmDetailViewModel: NSObject {
     private(set) var shouldRetrySetFilmWithoutSync = false
     
     // MARK: - Initialisation
-    init(film: Film? = nil,
-        imageLoader: ImageLoader,
+    init(imageLoader: ImageLoader,
         managedObjectContext: NSManagedObjectContext,
         frcFactory: FilmDetailFRCFactory,
         filmQueueService: FilmQueueServiceProtocol) {

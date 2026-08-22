@@ -36,8 +36,7 @@ struct FilmDetailViewModelTests {
         let mockImageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let sut = FilmDetailViewModel(film: film,
-                                      imageLoader: mockImageLoader,
+        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
                                       managedObjectContext: testPersistenceController.viewContext,
                                       frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService
@@ -275,8 +274,7 @@ struct FilmDetailViewModelTests {
         let mockImageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let sut = FilmDetailViewModel(film: targetFilm,
-                                      imageLoader: mockImageLoader,
+        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
                                       managedObjectContext: testPersistenceController.viewContext,
                                       frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService
@@ -298,8 +296,7 @@ struct FilmDetailViewModelTests {
         let mockImageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let sut = FilmDetailViewModel(film: targetFilm,
-                                      imageLoader: mockImageLoader,
+        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
                                       managedObjectContext: testPersistenceController.viewContext,
                                       frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService
@@ -396,8 +393,7 @@ struct FilmDetailViewModelTests {
         let saver = ThrowingSaver(errorToThrow: scenario.systemError)
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext, saver: saver)
         let targetFilm = Film.sample[0]
-        let sut = FilmDetailViewModel(film: targetFilm,
-                                      imageLoader: mockImageLoader,
+        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
                                       managedObjectContext: testPersistenceController.viewContext,
                                       frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService)
@@ -431,8 +427,7 @@ struct FilmDetailViewModelTests {
         )
         _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
         try? context.save()
-        let sut = FilmDetailViewModel(film: targetFilm,
-                                      imageLoader: mockImageLoader,
+        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
                                       managedObjectContext: context,
                                       frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService)
@@ -459,8 +454,7 @@ struct FilmDetailViewModelTests {
         let saver = ThrowingSaver(errorToThrow: scenario.systemError)
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext, saver: saver)
         let targetFilm = Film.sample[0]
-        let sut = FilmDetailViewModel(film: targetFilm,
-                                      imageLoader: mockImageLoader,
+        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
                                       managedObjectContext: testPersistenceController.viewContext,
                                       frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService)
@@ -494,8 +488,7 @@ struct FilmDetailViewModelTests {
         )
         _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: false, isWatched: true)
         try? context.save()
-        let sut = FilmDetailViewModel(film: targetFilm,
-                                      imageLoader: mockImageLoader,
+        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
                                       managedObjectContext: context,
                                       frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService)
@@ -523,8 +516,7 @@ struct FilmDetailViewModelTests {
         targetFilm.isWatched = true
         let filmMO = PersistenceHelper.makeFilmMO(with: targetFilm, entity: entity, context: context, isUpNext: true, isWatched: true)
         try? context.save()
-        let sut = FilmDetailViewModel(film: targetFilm,
-                                      imageLoader: MockImageLoader(),
+        let sut = FilmDetailViewModel(imageLoader: MockImageLoader(),
                                       managedObjectContext: context,
                                       frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService)
@@ -560,8 +552,7 @@ struct FilmDetailViewModelTests {
         let filmMO = PersistenceHelper.makeFilmMO(with: targetFilm, entity: entity, context: context, isUpNext: true, isWatched: false)
         try? context.save()
         
-        let sut = FilmDetailViewModel(film: targetFilm,
-                                      imageLoader: MockImageLoader(),
+        let sut = FilmDetailViewModel(imageLoader: MockImageLoader(),
                                       managedObjectContext: context,
                                       frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService)
@@ -584,8 +575,7 @@ struct FilmDetailViewModelTests {
         let mockImageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let sut = FilmDetailViewModel(film: film,
-                                      imageLoader: mockImageLoader,
+        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
                                       managedObjectContext: testPersistenceController.viewContext,
                                       frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService)
