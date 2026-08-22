@@ -20,6 +20,7 @@ final class FilmDetailViewModel: NSObject {
     }
     
     // MARK: - Properties
+    var film: Film?
     private let imageLoader: ImageLoader
     private let managedObjectContext: NSManagedObjectContext
     private(set) var detailFRC: NSFetchedResultsController<FilmMO>?
