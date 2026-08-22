@@ -47,9 +47,6 @@ final class FilmDetailViewModel: NSObject {
         self.frcFactory = frcFactory
         self.filmQueueService = filmQueueService
         super.init()
-        if let film {
-            setFilm(film)
-        }
     }
     
     //MARK: - Deinitialisation
