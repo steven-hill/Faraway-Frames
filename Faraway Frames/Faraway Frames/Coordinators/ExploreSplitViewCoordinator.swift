@@ -38,8 +38,7 @@ final class ExploreSplitViewCoordinator: Coordinator {
         self.exploreSplitVC = exploreSplitVC
         self.frcFactory = frcFactory
         self.foundationModelsClient = foundationModelsClient
-        filmDetailViewModel = FilmDetailViewModel(film: nil,
-                                                  imageLoader: imageLoader,
+        filmDetailViewModel = FilmDetailViewModel(imageLoader: imageLoader,
                                                   managedObjectContext: context,
                                                   frcFactory: frcFactory,
                                                   filmQueueService: filmQueueService

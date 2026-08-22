@@ -47,8 +47,7 @@ final class HomeCoordinator: Coordinator {
 
 extension HomeCoordinator: HomeViewModelCoordinatorDelegate {
     func homeViewModelDidCaptureFilm(_ film: Film) {
-        let filmDetailViewModel = FilmDetailViewModel(film: film,
-                                                      imageLoader: imageLoader,
+        let filmDetailViewModel = FilmDetailViewModel(imageLoader: imageLoader,
                                                       managedObjectContext: context,
                                                       frcFactory: frcFactory,
                                                       filmQueueService: filmQueueService

@@ -270,8 +270,7 @@ struct ExploreDetailVCTests {
         let saver = ThrowingSaver(errorToThrow: scenario.systemError)
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext, saver: saver)
         let targetFilm = Film.sample[0]
-        let vm = FilmDetailViewModel(film: targetFilm,
-                                     imageLoader: mockImageLoader,
+        let vm = FilmDetailViewModel(imageLoader: mockImageLoader,
                                      managedObjectContext: testPersistenceController.viewContext,
                                      frcFactory: MockFRCFactory(),
                                      filmQueueService: filmQueueService)
@@ -299,8 +298,7 @@ struct ExploreDetailVCTests {
         let saver = ThrowingSaver(errorToThrow: scenario.systemError)
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext, saver: saver)
         let targetFilm = Film.sample[0]
-        let vm = FilmDetailViewModel(film: targetFilm,
-                                     imageLoader: mockImageLoader,
+        let vm = FilmDetailViewModel(imageLoader: mockImageLoader,
                                      managedObjectContext: testPersistenceController.viewContext,
                                      frcFactory: MockFRCFactory(),
                                      filmQueueService: filmQueueService)
@@ -337,8 +335,7 @@ struct ExploreDetailVCTests {
         let saver = ThrowingSaver(errorToThrow: scenario.systemError)
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext, saver: saver)
         let targetFilm = Film.sample[0]
-        let vm = FilmDetailViewModel(film: targetFilm,
-                                      imageLoader: mockImageLoader,
+        let vm = FilmDetailViewModel(imageLoader: mockImageLoader,
                                       managedObjectContext: testPersistenceController.viewContext,
                                       frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService)
@@ -372,8 +369,7 @@ struct ExploreDetailVCTests {
         let saver = ThrowingSaver(errorToThrow: scenario.systemError)
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext, saver: saver)
         let targetFilm = Film.sample[0]
-        let vm = FilmDetailViewModel(film: targetFilm,
-                                      imageLoader: mockImageLoader,
+        let vm = FilmDetailViewModel(imageLoader: mockImageLoader,
                                       managedObjectContext: testPersistenceController.viewContext,
                                       frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService)
@@ -541,8 +537,7 @@ struct ExploreDetailVCTests {
         let mockImageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let filmDetailViewModel = FilmDetailViewModel(film: film,
-                                                      imageLoader: mockImageLoader,
+        let filmDetailViewModel = FilmDetailViewModel(imageLoader: mockImageLoader,
                                                       managedObjectContext: testPersistenceController.viewContext,
                                                       frcFactory: MockFRCFactory(),
                                                       filmQueueService: filmQueueService)
@@ -570,8 +565,7 @@ struct ExploreDetailVCTests {
         let film = Film.sample[0]
         let spyFQS = FilmQueueServiceSpy()
         let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmDetailViewModel = FilmDetailViewModel(film: film,
-                                                      imageLoader: MockImageLoader(),
+        let filmDetailViewModel = FilmDetailViewModel(imageLoader: MockImageLoader(),
                                                       managedObjectContext: testPersistenceController.viewContext,
                                                       frcFactory: MockFRCFactory(),
                                                       filmQueueService: spyFQS)
