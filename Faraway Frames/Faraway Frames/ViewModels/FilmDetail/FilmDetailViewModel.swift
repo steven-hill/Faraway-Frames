@@ -70,7 +70,8 @@ final class FilmDetailViewModel: NSObject {
         getMovieBanner(for: film, displayModel: displayModel)
     }
     
-    private func setupFRCAndPerformFetch(for film: Film) {
+    func performFetch() {
+        guard let film else { return }
         let frc = frcFactory.makeFilmDetailFRC(for: film.id,
                                                context: managedObjectContext)
         frc.delegate = self
