@@ -83,7 +83,7 @@ extension ExploreSplitViewCoordinator: ExploreNavigationDelegate {
     }
     
     func didSelectFilm(_ film: Film) {
-        filmDetailViewModel.setFilm()
+        filmDetailViewModel.film = film
         let detailVC = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
         detailVC.navigationDelegate = self
         if let primaryNav = exploreSplitVC.viewController(for: .primary) as? UINavigationController,
