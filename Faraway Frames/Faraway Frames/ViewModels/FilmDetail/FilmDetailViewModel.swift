@@ -35,7 +35,6 @@ final class FilmDetailViewModel: NSObject {
     weak var delegate: FilmDetailViewModelDelegate?
     private(set) var attemptingToUpdateFilm = false
     private(set) var filmWasUpdated = false
-    private(set) var shouldRetrySetFilmWithoutSync = false
     
     // MARK: - Initialisation
     init(imageLoader: ImageLoader,
@@ -69,9 +68,6 @@ final class FilmDetailViewModel: NSObject {
         let displayModel = FilmDetailDisplayModel(film: film)
         currentState = .content(displayModel: displayModel)
         getMovieBanner(for: film, displayModel: displayModel)
-        if shouldRetrySetFilmWithoutSync == false {
-            setupFRCAndPerformFetch(for: film)
-        }
     }
     
     private func setupFRCAndPerformFetch(for film: Film) {
@@ -87,7 +83,6 @@ final class FilmDetailViewModel: NSObject {
             
             try frc.performFetch()
         } catch {
-            shouldRetrySetFilmWithoutSync = true
             let reason = PersistenceFailureReason(from: error)
             let filmDetailError = FilmDetailError.fetchFailed(reason)
             currentState = .fetchFailure(filmDetailError, film)

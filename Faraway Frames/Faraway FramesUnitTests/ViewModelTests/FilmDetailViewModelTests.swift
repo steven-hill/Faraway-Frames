@@ -96,7 +96,6 @@ struct FilmDetailViewModelTests {
         
         sut.setFilm()
         
-        #expect(sut.shouldRetrySetFilmWithoutSync == true, "Should be set to true.")
         #expect(sut.currentState == .fetchFailure(expectedError, film), "Should be `.fetchFailure`.")
         #expect(delegateSpy.didReceiveErrorCallCount == 1, "Should call the delegate once.")
     }
