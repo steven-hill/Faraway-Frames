@@ -109,6 +109,7 @@ final class ExploreDetailVC: UIViewController {
         }
         updateLayoutForTraits()
         view.accessibilityIdentifier = "ExploreDetailVC_View"
+        filmDetailViewModel.setFilm()
     }
     
     private func updateLayoutForTraits() {

@@ -85,13 +85,15 @@ struct ExploreDetailVCTests {
         #expect(sut.filmDetailViewModel.delegate != nil, "Should set the delegate.")
     }
 
-    @Test func exploreDetailVC_viewDidLoad_withFilm_contentUnavailableConfiguration_isNil() {
+    @Test func exploreDetailVC_viewDidLoad_withFilm_updatesVMState_andContentUnavailableConfiguration_isNil() {
         let sut = makeSUTWithFilm()
+        let displayModel = FilmDetailViewModel.FilmDetailDisplayModel(film: Film.sample[0])
         
         sut.loadViewIfNeeded()
         sut.setNeedsUpdateContentUnavailableConfiguration()
         
         #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
+        #expect(sut.filmDetailViewModel.currentState == .content(displayModel: displayModel, image: nil), "Should be `.content`.")
     }
     
     @Test func exploreDetailVC_viewDidLoad_whenFilmIsNil_displaysEmptyState_andContentUnavailableConfiguration_isNil() {
@@ -542,6 +544,8 @@ struct ExploreDetailVCTests {
                                                       frcFactory: MockFRCFactory(),
                                                       filmQueueService: filmQueueService)
         let sut = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
+        filmDetailViewModel.film = film
+        filmDetailViewModel.setFilm()
         return sut
     }
     
