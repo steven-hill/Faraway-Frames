@@ -56,7 +56,7 @@ final class FilmDetailViewModel: NSObject {
     }
     
     // MARK: - Methods
-    func setFilm(_ film: Film?) {
+    func setFilm() {
         imageLoadTask?.cancel()
         
         guard let film = film else {
@@ -210,8 +210,8 @@ final class FilmDetailViewModel: NSObject {
         }
     }
     
-    func returnToFilmContent(film: Film) {
-        setFilm(film)
+    func returnToFilmContent() {
+        setFilm()
     }
 }
 

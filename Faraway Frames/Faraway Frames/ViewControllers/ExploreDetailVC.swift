@@ -392,7 +392,7 @@ extension ExploreDetailVC: FilmDetailViewModelDelegate {
         case .fetchFailure(let error, let film):
             let okAction = AlertAction(title: "Ok", style: .default) { [weak self] _ in
                 guard let self else { return }
-                filmDetailViewModel.returnToFilmContent(film: film)
+                filmDetailViewModel.returnToFilmContent()
             }
             alertPresenter.presentAlert(title: error.localizedDescription,
                                         message: error.secondaryText,
@@ -412,7 +412,7 @@ extension ExploreDetailVC: FilmDetailViewModelDelegate {
                 guard let self else { return }
                 let button = queue == .upNext ? self.upNextButton : self.watchedButton
                 self.setButtonEnabled(true, button: button)
-                self.filmDetailViewModel.returnToFilmContent(film: film)
+                self.filmDetailViewModel.returnToFilmContent()
             }
             alertPresenter.presentAlert(title: error.localizedDescription,
                                         message: error.secondaryText,

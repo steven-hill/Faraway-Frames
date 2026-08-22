@@ -132,7 +132,7 @@ struct ExploreDetailVCTests {
         let sut = try makeSUTWithFetchFailureFRC(throwing: scenario.systemError)
         let mockPresenter = MockAlertPresenter()
         sut.alertPresenter = mockPresenter
-        sut.filmDetailViewModel.setFilm(Film.sample[0])
+        sut.filmDetailViewModel.setFilm()
         
         sut.didReceiveError()
         
@@ -153,7 +153,7 @@ struct ExploreDetailVCTests {
         let sut = try makeSUTWithFetchFailureFRC(throwing: unknownError)
         let mockPresenter = MockAlertPresenter()
         sut.alertPresenter = mockPresenter
-        sut.filmDetailViewModel.setFilm(Film.sample[0])
+        sut.filmDetailViewModel.setFilm()
         
         sut.didReceiveError()
         
@@ -179,11 +179,11 @@ struct ExploreDetailVCTests {
     ) async throws {
         let film = Film.sample[0]
         let sut = try makeSUTWithFetchFailureFRC(throwing: scenario.systemError)
-        sut.filmDetailViewModel.setFilm(film)
+        sut.filmDetailViewModel.setFilm()
         sut.view.layoutIfNeeded()
         
         // Simulates tapping 'Ok' button.
-        sut.filmDetailViewModel.returnToFilmContent(film: film)
+        sut.filmDetailViewModel.returnToFilmContent()
         
         switch sut.filmDetailViewModel.currentState {
         case .noFilmSelected:
@@ -342,7 +342,7 @@ struct ExploreDetailVCTests {
         let sut = ExploreDetailVC(filmDetailViewModel: vm)
         let mockPresenter = MockAlertPresenter()
         sut.alertPresenter = mockPresenter
-        sut.filmDetailViewModel.setFilm(targetFilm)
+        sut.filmDetailViewModel.setFilm()
         await sut.filmDetailViewModel.updateStatus(for: targetFilm, queue: .upNext, action: .add)
         sut.didReceiveError()
         sut.view.layoutIfNeeded()
@@ -377,7 +377,7 @@ struct ExploreDetailVCTests {
         let sut = ExploreDetailVC(filmDetailViewModel: vm)
         let mockPresenter = MockAlertPresenter()
         sut.alertPresenter = mockPresenter
-        sut.filmDetailViewModel.setFilm(targetFilm)
+        sut.filmDetailViewModel.setFilm()
         await sut.filmDetailViewModel.updateStatus(for: targetFilm, queue: .upNext, action: .add)
         sut.didReceiveError()
         sut.view.layoutIfNeeded()        

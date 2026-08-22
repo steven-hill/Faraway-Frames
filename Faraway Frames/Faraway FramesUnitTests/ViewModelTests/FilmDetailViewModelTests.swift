@@ -62,7 +62,7 @@ struct FilmDetailViewModelTests {
         let film: Film? = nil
         let sut = makeSUT()
         
-        sut.setFilm(film)
+        sut.setFilm()
         
         #expect(sut.currentState == .noFilmSelected, "Should update the state to `.noFilmSelected` when film is nil.")
         #expect(sut.filmWasUpdated == false, "Should still be false.")
@@ -94,7 +94,7 @@ struct FilmDetailViewModelTests {
         let expectedError = FilmDetailError.fetchFailed(scenario.expectedReason)
         let film = Film.sample[0]
         
-        sut.setFilm(film)
+        sut.setFilm()
         
         #expect(sut.shouldRetrySetFilmWithoutSync == true, "Should be set to true.")
         #expect(sut.currentState == .fetchFailure(expectedError, film), "Should be `.fetchFailure`.")
@@ -116,12 +116,12 @@ struct FilmDetailViewModelTests {
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
 
-        sut.setFilm(filmA)
+        sut.setFilm()
         let taskA = sut.imageLoadTask
         await Task.yield()
         #expect(mockImageLoader.loadCount == 1)
 
-        sut.setFilm(filmB)
+        sut.setFilm()
         #expect(taskA?.isCancelled == true, "TaskA should be cancelled.")
         await Task.yield()
         #expect(mockImageLoader.loadCount == 2)
@@ -147,7 +147,7 @@ struct FilmDetailViewModelTests {
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
         
-        sut.setFilm(film)
+        sut.setFilm()
         await Task.yield()
         mockImageLoader.resume(shouldSucceed: false)
         await Task.yield()
@@ -171,7 +171,7 @@ struct FilmDetailViewModelTests {
                                                             frcFactory: MockFRCFactory(),
                                                             filmQueueService: filmQueueService
         )
-        sut?.setFilm(film)
+        sut?.setFilm()
         let capturedTask = sut?.imageLoadTask
         #expect(capturedTask?.isCancelled == false, "Should not be cancelled.")
         #expect(sut?.imageLoadTask != nil, "Should not be nil.")
@@ -581,9 +581,9 @@ struct FilmDetailViewModelTests {
                                       filmQueueService: filmQueueService)
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
-        sut.setFilm(film)
+        sut.setFilm()
         
-        sut.returnToFilmContent(film: film)
+        sut.returnToFilmContent()
         
         switch sut.currentState {
         case .noFilmSelected:
