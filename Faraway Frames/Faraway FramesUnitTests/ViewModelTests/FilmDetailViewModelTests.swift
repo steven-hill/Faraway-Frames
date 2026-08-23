@@ -70,6 +70,52 @@ struct FilmDetailViewModelTests {
         #expect((sut.detailFRC == nil), "Should be nil.")
     }
     
+    @Test("View model sets `detailFRC` and sets itself as its delegate correctly")
+    func filmDetailViewModel_performFetch_setsDetailFRCAndDelegateCorrectly() {
+        let sut = makeSUT()
+        sut.film = Film.sample[0]
+        sut.setFilm()
+        
+        sut.performFetch()
+        
+        #expect((sut.detailFRC != nil), "Should be nil.")
+        #expect(sut.detailFRC?.delegate === sut, "ViewModel should register as the FRC delegate.")
+    }
+    
+    @Test("View model fetches film from the database if it exists there")
+    func filmDetailViewModel_performFetch_updatesFilmWithDatabaseIfItExists() throws {
+        let testPersistenceController = try PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let filmQueueService = FilmQueueService(context: context)
+        let sut = FilmDetailViewModel(imageLoader: MockImageLoader(),
+                                      managedObjectContext: context,
+                                      frcFactory: MockFRCFactory(),
+                                      filmQueueService: filmQueueService)
+        let delegateSpy = FilmDetailViewModelSpy()
+        sut.delegate = delegateSpy
+        let film = Film.sample[0]
+        let entity = try #require(
+            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
+            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
+        _ = PersistenceHelper.makeFilmMO(
+            with: film,
+            entity: entity,
+            context: context,
+            isUpNext: true,
+            isWatched: true
+        )
+        try? context.save()
+        sut.film = film
+        sut.setFilm()
+        
+        sut.performFetch()
+        
+        #expect(sut.detailFRC?.fetchedObjects?.count == 1)
+        #expect(sut.detailFRC?.fetchedObjects?.first?.isUpNext == true)
+        #expect(sut.detailFRC?.fetchedObjects?.first?.isWatched == true)
+    }
+    
     @Test("When `detailFRC` encounters an error fetching film, error should be handled by updating `currentState` and calling the delegate",
           (.tags(.persistence)),
           arguments: PersistenceHelper.errorScenarios
