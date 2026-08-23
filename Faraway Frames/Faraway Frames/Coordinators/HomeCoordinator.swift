@@ -52,6 +52,7 @@ extension HomeCoordinator: HomeViewModelCoordinatorDelegate {
                                                       frcFactory: frcFactory,
                                                       filmQueueService: filmQueueService
         )
+        filmDetailViewModel.film = film
         let detailVC = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
         detailVC.navigationDelegate = self
         navigationController.pushViewController(detailVC, animated: true)
