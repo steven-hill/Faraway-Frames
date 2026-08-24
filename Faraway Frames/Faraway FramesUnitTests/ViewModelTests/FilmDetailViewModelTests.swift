@@ -82,8 +82,8 @@ struct FilmDetailViewModelTests {
         #expect(sut.detailFRC?.delegate === sut, "ViewModel should register as the FRC delegate.")
     }
     
-    @Test("View model fetches film from the database if it exists there")
-    func filmDetailViewModel_performFetch_updatesFilmWithDatabaseIfItExists() throws {
+    @Test("View model fetches film with correct values from the database if it exists there")
+    func filmDetailViewModel_performFetch_fetchesFilmFromDatabaseIfItExists() throws {
         let testPersistenceController = try PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
         let filmQueueService = FilmQueueService(context: context)
@@ -111,9 +111,9 @@ struct FilmDetailViewModelTests {
         
         sut.performFetch()
         
-        #expect(sut.detailFRC?.fetchedObjects?.count == 1)
-        #expect(sut.detailFRC?.fetchedObjects?.first?.isUpNext == true)
-        #expect(sut.detailFRC?.fetchedObjects?.first?.isWatched == true)
+        #expect(sut.detailFRC?.fetchedObjects?.count == 1, "Should return only one result.")
+        #expect(sut.detailFRC?.fetchedObjects?.first?.isUpNext == true, "Should match the value from the database.")
+        #expect(sut.detailFRC?.fetchedObjects?.first?.isWatched == true, "Should match the value from the database.")
     }
     
     @Test("When `detailFRC` encounters an error fetching film, error should be handled by updating `currentState` and calling the delegate",
