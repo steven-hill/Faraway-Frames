@@ -220,10 +220,13 @@ struct ExploreDetailVCTests {
         let film = Film.sample[0]
         let sut = try makeSUTWithFetchFailureFRC(throwing: scenario.systemError)
         sut.filmDetailViewModel.film = film
-        sut.filmDetailViewModel.setFilm()
-        sut.view.layoutIfNeeded()
+        sut.viewDidLoad()
+        sut.viewDidAppear(false)
+        await Task.yield()
         
-        // Simulates tapping 'Ok' button.
+        #expect(sut.filmDetailViewModel.currentState == .fetchFailure(FilmDetailError.fetchFailed(scenario.expectedReason), film))
+        
+        // Simulates tapping the alert's 'Ok' button.
         sut.filmDetailViewModel.returnToFilmContent()
         
         switch sut.filmDetailViewModel.currentState {

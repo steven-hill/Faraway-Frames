@@ -391,17 +391,14 @@ extension ExploreDetailVC: FilmDetailViewModelDelegate {
     }
     
     func didReceiveError() {
-        navigationItem.hidesBackButton = true
+        navigationItem.hidesBackButton = false
         contentView.isHidden = false
         buttonsContainer.isHidden = false
         setNeedsUpdateContentUnavailableConfiguration()
         
         switch filmDetailViewModel.currentState {
-        case .fetchFailure(let error, let film):
-            let okAction = AlertAction(title: "Ok", style: .default) { [weak self] _ in
-                guard let self else { return }
-                filmDetailViewModel.returnToFilmContent()
-            }
+        case .fetchFailure(let error, _):
+            let okAction = AlertAction(title: "Ok", style: .default, handler: nil)
             alertPresenter.presentAlert(title: error.localizedDescription,
                                         message: error.secondaryText,
                                         actions: [okAction],
