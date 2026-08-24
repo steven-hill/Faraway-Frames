@@ -268,7 +268,7 @@ private extension FilmDetailViewModel {
         
         if isSaveError {
             errorCode = (failureReason == "diskFull") ? .fileWriteOutOfSpace : .persistentStoreOpen
-        } else { // Must be isLoadError due to the guard check above
+        } else { 
             errorCode = (failureReason == "databaseError") ? .coreData : .persistentStoreOpen
         }
         
