@@ -20,6 +20,7 @@ final class FilmDetailViewModel: NSObject {
     }
     
     // MARK: - Properties
+    var film: Film?
     private let imageLoader: ImageLoader
     private let managedObjectContext: NSManagedObjectContext
     private(set) var detailFRC: NSFetchedResultsController<FilmMO>?
@@ -34,11 +35,9 @@ final class FilmDetailViewModel: NSObject {
     weak var delegate: FilmDetailViewModelDelegate?
     private(set) var attemptingToUpdateFilm = false
     private(set) var filmWasUpdated = false
-    private(set) var shouldRetrySetFilmWithoutSync = false
     
     // MARK: - Initialisation
-    init(film: Film? = nil,
-        imageLoader: ImageLoader,
+    init(imageLoader: ImageLoader,
         managedObjectContext: NSManagedObjectContext,
         frcFactory: FilmDetailFRCFactory,
         filmQueueService: FilmQueueServiceProtocol) {
@@ -47,9 +46,6 @@ final class FilmDetailViewModel: NSObject {
         self.frcFactory = frcFactory
         self.filmQueueService = filmQueueService
         super.init()
-        if let film {
-            setFilm(film)
-        }
     }
     
     //MARK: - Deinitialisation
@@ -59,7 +55,7 @@ final class FilmDetailViewModel: NSObject {
     }
     
     // MARK: - Methods
-    func setFilm(_ film: Film?) {
+    func setFilm() {
         imageLoadTask?.cancel()
         
         guard let film = film else {
@@ -72,12 +68,11 @@ final class FilmDetailViewModel: NSObject {
         let displayModel = FilmDetailDisplayModel(film: film)
         currentState = .content(displayModel: displayModel)
         getMovieBanner(for: film, displayModel: displayModel)
-        if shouldRetrySetFilmWithoutSync == false {
-            setupFRCAndPerformFetch(for: film)
-        }
     }
     
-    private func setupFRCAndPerformFetch(for film: Film) {
+    /// Fetch the film from the database (if it exists there) so the film on `ExploreDetailVC` is in sync with what is in the database.
+    func performFetch() {
+        guard let film else { return }
         let frc = frcFactory.makeFilmDetailFRC(for: film.id,
                                                context: managedObjectContext)
         frc.delegate = self
@@ -90,7 +85,6 @@ final class FilmDetailViewModel: NSObject {
             
             try frc.performFetch()
         } catch {
-            shouldRetrySetFilmWithoutSync = true
             let reason = PersistenceFailureReason(from: error)
             let filmDetailError = FilmDetailError.fetchFailed(reason)
             currentState = .fetchFailure(filmDetailError, film)
@@ -213,8 +207,8 @@ final class FilmDetailViewModel: NSObject {
         }
     }
     
-    func returnToFilmContent(film: Film) {
-        setFilm(film)
+    func returnToFilmContent() {
+        setFilm()
     }
 }
 
@@ -275,7 +269,7 @@ private extension FilmDetailViewModel {
         
         if isSaveError {
             errorCode = (failureReason == "diskFull") ? .fileWriteOutOfSpace : .persistentStoreOpen
-        } else { // Must be isLoadError due to the guard check above
+        } else { 
             errorCode = (failureReason == "databaseError") ? .coreData : .persistentStoreOpen
         }
         

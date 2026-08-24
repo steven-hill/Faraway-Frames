@@ -32,7 +32,7 @@ struct ExploreDetailVCTests {
         
         #expect(sut.isUpNext == false, "Should be false.")
         #expect(sut.isWatched == false, "Should be false.")
-        #expect(sut.updatedFilm == nil, "Should be nil.")
+        #expect(sut.updatedFilm != nil, "Should not be nil.")
     }
     
     @Test func exploreDetailVC_whenFilmIsNil_isInsideANavigationController() {
@@ -85,13 +85,15 @@ struct ExploreDetailVCTests {
         #expect(sut.filmDetailViewModel.delegate != nil, "Should set the delegate.")
     }
 
-    @Test func exploreDetailVC_viewDidLoad_withFilm_contentUnavailableConfiguration_isNil() {
+    @Test func exploreDetailVC_viewDidLoad_withFilm_updatesVMState_andContentUnavailableConfiguration_isNil() {
         let sut = makeSUTWithFilm()
+        let displayModel = FilmDetailViewModel.FilmDetailDisplayModel(film: Film.sample[0])
         
         sut.loadViewIfNeeded()
         sut.setNeedsUpdateContentUnavailableConfiguration()
         
         #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
+        #expect(sut.filmDetailViewModel.currentState == .content(displayModel: displayModel, image: nil), "Should be `.content`.")
     }
     
     @Test func exploreDetailVC_viewDidLoad_whenFilmIsNil_displaysEmptyState_andContentUnavailableConfiguration_isNil() {
@@ -121,6 +123,40 @@ struct ExploreDetailVCTests {
         #expect(sut.title == nil, "Should be nil.")
     }
     
+    @Test("VC makes request to fetch values for film via VM in `viewDidAppear`")
+    func exploreDetailVC_viewDidAppear_syncsValuesWithThoseInDatabase() async throws {
+        let testPersistenceController = try PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let filmQueueService = FilmQueueService(context: context)
+        let vm = FilmDetailViewModel(imageLoader: MockImageLoader(),
+                                      managedObjectContext: context,
+                                      frcFactory: MockFRCFactory(),
+                                      filmQueueService: filmQueueService)
+        let sut = ExploreDetailVC(filmDetailViewModel: vm)
+        let film = Film.sample[0]
+        let entity = try #require(
+            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
+            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
+        _ = PersistenceHelper.makeFilmMO(
+            with: film,
+            entity: entity,
+            context: context,
+            isUpNext: true,
+            isWatched: false
+        )
+        try? context.save()
+        sut.filmDetailViewModel.film = film
+        sut.filmDetailViewModel.setFilm()
+                
+        sut.viewDidAppear(false)
+        await Task.yield()
+        
+        #expect(sut.filmDetailViewModel.detailFRC?.fetchedObjects?.count == 1, "Should be one result.")
+        #expect(sut.filmDetailViewModel.detailFRC?.fetchedObjects?.first?.isUpNext == true, "Should be true.")
+        #expect(sut.filmDetailViewModel.detailFRC?.fetchedObjects?.first?.isWatched == false, "Should be false.")
+    }
+    
     @Test("Alert is presented for fetch film failure",
           .tags(.persistence),
           arguments: PersistenceHelper.errorScenarios
@@ -132,7 +168,9 @@ struct ExploreDetailVCTests {
         let sut = try makeSUTWithFetchFailureFRC(throwing: scenario.systemError)
         let mockPresenter = MockAlertPresenter()
         sut.alertPresenter = mockPresenter
-        sut.filmDetailViewModel.setFilm(Film.sample[0])
+        sut.filmDetailViewModel.film = Film.sample[0]
+        sut.filmDetailViewModel.setFilm()
+        sut.filmDetailViewModel.performFetch()
         
         sut.didReceiveError()
         
@@ -153,7 +191,9 @@ struct ExploreDetailVCTests {
         let sut = try makeSUTWithFetchFailureFRC(throwing: unknownError)
         let mockPresenter = MockAlertPresenter()
         sut.alertPresenter = mockPresenter
-        sut.filmDetailViewModel.setFilm(Film.sample[0])
+        sut.filmDetailViewModel.film = Film.sample[0]
+        sut.filmDetailViewModel.setFilm()
+        sut.filmDetailViewModel.performFetch()
         
         sut.didReceiveError()
         
@@ -179,11 +219,15 @@ struct ExploreDetailVCTests {
     ) async throws {
         let film = Film.sample[0]
         let sut = try makeSUTWithFetchFailureFRC(throwing: scenario.systemError)
-        sut.filmDetailViewModel.setFilm(film)
-        sut.view.layoutIfNeeded()
+        sut.filmDetailViewModel.film = film
+        sut.viewDidLoad()
+        sut.viewDidAppear(false)
+        await Task.yield()
         
-        // Simulates tapping 'Ok' button.
-        sut.filmDetailViewModel.returnToFilmContent(film: film)
+        #expect(sut.filmDetailViewModel.currentState == .fetchFailure(FilmDetailError.fetchFailed(scenario.expectedReason), film))
+        
+        // Simulates tapping the alert's 'Ok' button.
+        sut.filmDetailViewModel.returnToFilmContent()
         
         switch sut.filmDetailViewModel.currentState {
         case .noFilmSelected:
@@ -261,7 +305,7 @@ struct ExploreDetailVCTests {
           .tags(.persistence),
           arguments: PersistenceHelper.errorScenarios
     )
-    func exploreDetailVC_didReceiveError_notifiesContentUnavailableConfigurationToUpdate(
+    func exploreDetailVC_didReceiveError_contentUnavailableConfigurationRemainsNil(
     scenario: (systemError: Error,
                expectedReason: PersistenceFailureReason)
     ) async {
@@ -270,17 +314,16 @@ struct ExploreDetailVCTests {
         let saver = ThrowingSaver(errorToThrow: scenario.systemError)
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext, saver: saver)
         let targetFilm = Film.sample[0]
-        let vm = FilmDetailViewModel(film: targetFilm,
-                                     imageLoader: mockImageLoader,
+        let vm = FilmDetailViewModel(imageLoader: mockImageLoader,
                                      managedObjectContext: testPersistenceController.viewContext,
                                      frcFactory: MockFRCFactory(),
                                      filmQueueService: filmQueueService)
         let sut = ExploreDetailVC(filmDetailViewModel: vm)
+        sut.filmDetailViewModel.film = targetFilm
+        sut.filmDetailViewModel.setFilm()
         let expectedError = FilmDetailError.addFailed(scenario.expectedReason)
+        
         await sut.filmDetailViewModel.updateStatus(for: targetFilm, queue: .upNext, action: .add)
-
-        sut.didReceiveError()
-        sut.view.layoutIfNeeded()
 
         #expect(sut.filmDetailViewModel.currentState == .error(expectedError, targetFilm, .upNext), "Should be in the error state.")
         #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
@@ -291,22 +334,24 @@ struct ExploreDetailVCTests {
           arguments: PersistenceHelper.errorScenarios
     )
     func exploreDetailVC_whenUpdatingStateFails_presentsAlert(
-    scenario: (systemError: CocoaError,
-               expectedReason: PersistenceFailureReason)
+        scenario: (systemError: CocoaError,
+                   expectedReason: PersistenceFailureReason)
     ) async {
         let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let saver = ThrowingSaver(errorToThrow: scenario.systemError)
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext, saver: saver)
         let targetFilm = Film.sample[0]
-        let vm = FilmDetailViewModel(film: targetFilm,
-                                     imageLoader: mockImageLoader,
+        let vm = FilmDetailViewModel(imageLoader: mockImageLoader,
                                      managedObjectContext: testPersistenceController.viewContext,
                                      frcFactory: MockFRCFactory(),
                                      filmQueueService: filmQueueService)
         let sut = ExploreDetailVC(filmDetailViewModel: vm)
         let mockPresenter = MockAlertPresenter()
         sut.alertPresenter = mockPresenter
+        sut.filmDetailViewModel.film = targetFilm
+        sut.filmDetailViewModel.setFilm()
+        
         await sut.filmDetailViewModel.updateStatus(for: targetFilm,
                                                    queue: .upNext,
                                                    action: .add)
@@ -329,23 +374,23 @@ struct ExploreDetailVCTests {
           arguments: PersistenceHelper.errorScenarios
     )
     func exploreDetailVC_tapRetryButtonOnErrorConfig_callsVMUpdateStatusAgain(
-    scenario: (systemError: Error,
-               expectedReason: PersistenceFailureReason)
+        scenario: (systemError: Error,
+                   expectedReason: PersistenceFailureReason)
     ) async {
         let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let saver = ThrowingSaver(errorToThrow: scenario.systemError)
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext, saver: saver)
         let targetFilm = Film.sample[0]
-        let vm = FilmDetailViewModel(film: targetFilm,
-                                      imageLoader: mockImageLoader,
+        let vm = FilmDetailViewModel(imageLoader: mockImageLoader,
                                       managedObjectContext: testPersistenceController.viewContext,
                                       frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService)
         let sut = ExploreDetailVC(filmDetailViewModel: vm)
         let mockPresenter = MockAlertPresenter()
         sut.alertPresenter = mockPresenter
-        sut.filmDetailViewModel.setFilm(targetFilm)
+        sut.filmDetailViewModel.film = targetFilm
+        sut.filmDetailViewModel.setFilm()
         await sut.filmDetailViewModel.updateStatus(for: targetFilm, queue: .upNext, action: .add)
         sut.didReceiveError()
         sut.view.layoutIfNeeded()
@@ -359,21 +404,20 @@ struct ExploreDetailVCTests {
         #expect(vm.attemptingToUpdateFilm == true, "Should be true because `updateStatus` was called from the retry button.")
     }
     
-    @Test("Tapping `cancel` button on error config reloads film content and updates VM's `currentState`",
+    @Test("Tapping `cancel` button on alert reloads film content and updates VM's `currentState`",
           .tags(.persistence),
           arguments: PersistenceHelper.errorScenarios
     )
-    func exploreDetailVC_tapCancelButtonOnErrorConfig_reloadsFilmContentAndUpdatesState(
-    scenario: (systemError: Error,
-               expectedReason: PersistenceFailureReason)
+    func exploreDetailVC_tapCancelButtonOnAlert_reloadsFilmContentAndUpdatesState(
+        scenario: (systemError: Error,
+                   expectedReason: PersistenceFailureReason)
     ) async {
         let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let saver = ThrowingSaver(errorToThrow: scenario.systemError)
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext, saver: saver)
         let targetFilm = Film.sample[0]
-        let vm = FilmDetailViewModel(film: targetFilm,
-                                      imageLoader: mockImageLoader,
+        let vm = FilmDetailViewModel(imageLoader: mockImageLoader,
                                       managedObjectContext: testPersistenceController.viewContext,
                                       frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService)
@@ -381,7 +425,9 @@ struct ExploreDetailVCTests {
         let sut = ExploreDetailVC(filmDetailViewModel: vm)
         let mockPresenter = MockAlertPresenter()
         sut.alertPresenter = mockPresenter
-        sut.filmDetailViewModel.setFilm(targetFilm)
+        sut.filmDetailViewModel.film = targetFilm
+        sut.filmDetailViewModel.setFilm()
+        sut.filmDetailViewModel.performFetch()
         await sut.filmDetailViewModel.updateStatus(for: targetFilm, queue: .upNext, action: .add)
         sut.didReceiveError()
         sut.view.layoutIfNeeded()        
@@ -541,12 +587,13 @@ struct ExploreDetailVCTests {
         let mockImageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let filmDetailViewModel = FilmDetailViewModel(film: film,
-                                                      imageLoader: mockImageLoader,
+        let filmDetailViewModel = FilmDetailViewModel(imageLoader: mockImageLoader,
                                                       managedObjectContext: testPersistenceController.viewContext,
                                                       frcFactory: MockFRCFactory(),
                                                       filmQueueService: filmQueueService)
         let sut = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
+        filmDetailViewModel.film = film
+        filmDetailViewModel.setFilm()
         return sut
     }
     
@@ -567,15 +614,15 @@ struct ExploreDetailVCTests {
     }
     
     private func makeSUTWithFilmAndFilmQueueServiceSpy() -> (vc: ExploreDetailVC, spyFQS: FilmQueueServiceSpy) {
-        let film = Film.sample[0]
         let spyFQS = FilmQueueServiceSpy()
         let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmDetailViewModel = FilmDetailViewModel(film: film,
-                                                      imageLoader: MockImageLoader(),
+        let filmDetailViewModel = FilmDetailViewModel(imageLoader: MockImageLoader(),
                                                       managedObjectContext: testPersistenceController.viewContext,
                                                       frcFactory: MockFRCFactory(),
                                                       filmQueueService: spyFQS)
         let sut = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
+        filmDetailViewModel.film = Film.sample[0]
+        filmDetailViewModel.setFilm()
         sut.loadViewIfNeeded()
         return (sut, spyFQS)
     }

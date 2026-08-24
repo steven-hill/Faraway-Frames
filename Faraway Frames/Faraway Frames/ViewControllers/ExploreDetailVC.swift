@@ -109,6 +109,7 @@ final class ExploreDetailVC: UIViewController {
         }
         updateLayoutForTraits()
         view.accessibilityIdentifier = "ExploreDetailVC_View"
+        filmDetailViewModel.setFilm()
     }
     
     private func updateLayoutForTraits() {
@@ -167,6 +168,13 @@ final class ExploreDetailVC: UIViewController {
         
         if movieBannerHeightConstraint == nil || contentViewLeadingConstraint == nil || contentViewTrailingConstraint == nil {
             updateLayoutFor(size: view.bounds.size)
+        }
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        Task {
+            filmDetailViewModel.performFetch()
         }
     }
     
@@ -383,16 +391,15 @@ extension ExploreDetailVC: FilmDetailViewModelDelegate {
     }
     
     func didReceiveError() {
-        navigationItem.hidesBackButton = true
-        contentView.isHidden = true
-        buttonsContainer.isHidden = true
+        contentView.isHidden = false
+        buttonsContainer.isHidden = false
         setNeedsUpdateContentUnavailableConfiguration()
         
         switch filmDetailViewModel.currentState {
-        case .fetchFailure(let error, let film):
+        case .fetchFailure(let error, _):
             let okAction = AlertAction(title: "Ok", style: .default) { [weak self] _ in
                 guard let self else { return }
-                filmDetailViewModel.returnToFilmContent(film: film)
+                filmDetailViewModel.returnToFilmContent()
             }
             alertPresenter.presentAlert(title: error.localizedDescription,
                                         message: error.secondaryText,
@@ -412,7 +419,7 @@ extension ExploreDetailVC: FilmDetailViewModelDelegate {
                 guard let self else { return }
                 let button = queue == .upNext ? self.upNextButton : self.watchedButton
                 self.setButtonEnabled(true, button: button)
-                self.filmDetailViewModel.returnToFilmContent(film: film)
+                self.filmDetailViewModel.returnToFilmContent()
             }
             alertPresenter.presentAlert(title: error.localizedDescription,
                                         message: error.secondaryText,
@@ -430,8 +437,7 @@ extension ExploreDetailVC: FilmDetailViewModelDelegate {
     let imageLoader = APIClientImageLoader(cacheManager: CacheManager())
     let testPersistenceController = try! PersistenceController(inMemory: true)
     let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-    let vm = FilmDetailViewModel(film: Film.sample[0],
-                                 imageLoader: imageLoader,
+    let vm = FilmDetailViewModel(imageLoader: imageLoader,
                                  managedObjectContext: testPersistenceController.viewContext,
                                  frcFactory: FRCFactory(),
                                  filmQueueService: filmQueueService

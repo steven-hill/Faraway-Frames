@@ -38,8 +38,7 @@ final class ExploreSplitViewCoordinator: Coordinator {
         self.exploreSplitVC = exploreSplitVC
         self.frcFactory = frcFactory
         self.foundationModelsClient = foundationModelsClient
-        filmDetailViewModel = FilmDetailViewModel(film: nil,
-                                                  imageLoader: imageLoader,
+        filmDetailViewModel = FilmDetailViewModel(imageLoader: imageLoader,
                                                   managedObjectContext: context,
                                                   frcFactory: frcFactory,
                                                   filmQueueService: filmQueueService
@@ -84,7 +83,7 @@ extension ExploreSplitViewCoordinator: ExploreNavigationDelegate {
     }
     
     func didSelectFilm(_ film: Film) {
-        filmDetailViewModel.setFilm(film)
+        filmDetailViewModel.film = film
         let detailVC = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
         detailVC.navigationDelegate = self
         if let primaryNav = exploreSplitVC.viewController(for: .primary) as? UINavigationController,
