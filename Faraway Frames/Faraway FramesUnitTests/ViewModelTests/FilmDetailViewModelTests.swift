@@ -91,8 +91,6 @@ struct FilmDetailViewModelTests {
                                       managedObjectContext: context,
                                       frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService)
-        let delegateSpy = FilmDetailViewModelSpy()
-        sut.delegate = delegateSpy
         let film = Film.sample[0]
         let entity = try #require(
             NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
