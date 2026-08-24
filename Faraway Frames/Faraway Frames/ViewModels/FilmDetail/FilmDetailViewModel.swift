@@ -70,6 +70,7 @@ final class FilmDetailViewModel: NSObject {
         getMovieBanner(for: film, displayModel: displayModel)
     }
     
+    /// Fetch the film from the database (if it exists there) so the film on `ExploreDetailVC` is in sync with what is in the database.
     func performFetch() {
         guard let film else { return }
         let frc = frcFactory.makeFilmDetailFRC(for: film.id,
