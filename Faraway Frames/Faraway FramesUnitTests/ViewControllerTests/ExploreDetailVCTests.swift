@@ -123,6 +123,40 @@ struct ExploreDetailVCTests {
         #expect(sut.title == nil, "Should be nil.")
     }
     
+    @Test("VC makes request to fetch values for film via VM in `viewDidAppear`")
+    func exploreDetailVC_viewDidAppear_syncsValuesWithThoseInDatabase() async throws {
+        let testPersistenceController = try PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let filmQueueService = FilmQueueService(context: context)
+        let vm = FilmDetailViewModel(imageLoader: MockImageLoader(),
+                                      managedObjectContext: context,
+                                      frcFactory: MockFRCFactory(),
+                                      filmQueueService: filmQueueService)
+        let sut = ExploreDetailVC(filmDetailViewModel: vm)
+        let film = Film.sample[0]
+        let entity = try #require(
+            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
+            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
+        _ = PersistenceHelper.makeFilmMO(
+            with: film,
+            entity: entity,
+            context: context,
+            isUpNext: true,
+            isWatched: false
+        )
+        try? context.save()
+        sut.filmDetailViewModel.film = film
+        sut.filmDetailViewModel.setFilm()
+                
+        sut.viewDidAppear(false)
+        await Task.yield()
+        
+        #expect(sut.filmDetailViewModel.detailFRC?.fetchedObjects?.count == 1, "Should be one result.")
+        #expect(sut.filmDetailViewModel.detailFRC?.fetchedObjects?.first?.isUpNext == true, "Should be true.")
+        #expect(sut.filmDetailViewModel.detailFRC?.fetchedObjects?.first?.isWatched == false, "Should be false.")
+    }
+    
     @Test("Alert is presented for fetch film failure",
           .tags(.persistence),
           arguments: PersistenceHelper.errorScenarios
