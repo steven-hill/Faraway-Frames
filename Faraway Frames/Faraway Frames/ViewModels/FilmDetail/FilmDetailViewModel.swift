@@ -207,9 +207,7 @@ final class FilmDetailViewModel: NSObject {
     }
     
     func returnToFilmContent() {
-        guard let film = film else { return }
-        let displayModel = FilmDetailDisplayModel(film: film)
-        currentState = .content(displayModel: displayModel)
+        setFilm()
     }
 }
 

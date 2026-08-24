@@ -398,7 +398,10 @@ extension ExploreDetailVC: FilmDetailViewModelDelegate {
         
         switch filmDetailViewModel.currentState {
         case .fetchFailure(let error, _):
-            let okAction = AlertAction(title: "Ok", style: .default, handler: nil)
+            let okAction = AlertAction(title: "Ok", style: .default) { [weak self] _ in
+                guard let self else { return }
+                filmDetailViewModel.returnToFilmContent()
+            }
             alertPresenter.presentAlert(title: error.localizedDescription,
                                         message: error.secondaryText,
                                         actions: [okAction],
