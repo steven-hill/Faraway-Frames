@@ -392,8 +392,8 @@ extension ExploreDetailVC: FilmDetailViewModelDelegate {
     
     func didReceiveError() {
         navigationItem.hidesBackButton = true
-        contentView.isHidden = true
-        buttonsContainer.isHidden = true
+        contentView.isHidden = false
+        buttonsContainer.isHidden = false
         setNeedsUpdateContentUnavailableConfiguration()
         
         switch filmDetailViewModel.currentState {
