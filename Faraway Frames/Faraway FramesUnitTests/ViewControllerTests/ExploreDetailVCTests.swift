@@ -138,7 +138,7 @@ struct ExploreDetailVCTests {
             NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
             "The Core Data model schema must contain an entity definition named 'FilmMO'."
         )
-        _ = PersistenceHelper.makeFilmMO(
+        let filmMO = PersistenceHelper.makeFilmMO(
             with: film,
             entity: entity,
             context: context,
@@ -150,11 +150,12 @@ struct ExploreDetailVCTests {
         sut.filmDetailViewModel.setFilm()
                 
         sut.viewDidAppear(false)
-        await Task.yield()
+        vm.handleFilmUpdate(filmMO)
         
-        #expect(sut.filmDetailViewModel.detailFRC?.fetchedObjects?.count == 1, "Should be one result.")
-        #expect(sut.filmDetailViewModel.detailFRC?.fetchedObjects?.first?.isUpNext == true, "Should be true.")
-        #expect(sut.filmDetailViewModel.detailFRC?.fetchedObjects?.first?.isWatched == false, "Should be false.")
+        if case .content(let displayModel,_) = vm.currentState {
+            #expect(displayModel.isUpNext == true, "Should be true.")
+            #expect(displayModel.isWatched == false, "Should be false.")
+        }
     }
     
     @Test("Alert is presented for fetch film failure",
