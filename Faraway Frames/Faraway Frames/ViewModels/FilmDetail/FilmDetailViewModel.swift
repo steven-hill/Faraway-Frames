@@ -114,56 +114,6 @@ final class FilmDetailViewModel: NSObject {
         }
     }
     
-    // MARK: - Presentation data structure
-    struct FilmDetailDisplayModel: Equatable {
-        var film: Film
-        let title: String
-        let visualOriginalTitles: String
-        let spokenJapaneseTitle: NSAttributedString
-        let releaseYearAndDurationText: String
-        let releaseYearAndDurationAccessibilityLabel: String
-        let synopsisTitle: String = NSLocalizedString("Synopsis", comment: "")
-        let synopsisDescription: String
-        let rottenTomatoesScoreText: NSAttributedString
-        let director: String
-        let producer: String
-        let creditsAccessibilityLabel: String
-        var isUpNext: Bool { film.isUpNext }
-        var isWatched: Bool { film.isWatched }
-        
-        init(film: Film) {
-            self.film = film
-            self.title = film.title
-            self.visualOriginalTitles = "\(film.originalTitle)\n\(film.originalTitleRomanised)"
-            self.synopsisDescription = film.description
-            self.director = film.director
-            self.producer = film.producer
-            self.releaseYearAndDurationText = "\(film.releaseDate) • \(film.runningTime) mins"
-            self.releaseYearAndDurationAccessibilityLabel = "Released in \(film.releaseDate), running time \(film.runningTime) minutes."
-            self.creditsAccessibilityLabel = "Credits. Directed by \(film.director). Produced by \(film.producer)."
-            
-            let fullScoreText = "Rotten Tomatoes \(film.rottenTomatoesScore)%"
-            let scoreAttributedString = NSMutableAttributedString(string: fullScoreText)
-            let rtRange = NSRange(location: 0, length: 16)
-            scoreAttributedString.addAttribute(.foregroundColor, value: UIColor.systemRed, range: rtRange)
-            let scoreRange = NSRange(location: 16, length: (fullScoreText as NSString).length - 16)
-            scoreAttributedString.addAttribute(.foregroundColor, value: UIColor.secondaryLabel, range: scoreRange)
-            self.rottenTomatoesScoreText = scoreAttributedString
-            
-            let prefix = "Original title: "
-            let combinedString = NSMutableAttributedString(string: "\(prefix)\(film.originalTitle)")
-            let prefixLength = (prefix as NSString).length
-            let japaneseLength = (film.originalTitle as NSString).length
-            combinedString.addAttribute(
-                .accessibilitySpeechLanguage,
-                value: "ja",
-                range: NSRange(location: prefixLength, length: japaneseLength)
-            )
-            self.spokenJapaneseTitle = combinedString
-        }
-    }
-    
-    // MARK: - Persistence method
     func updateStatus(for film: Film, queue: FilmQueue, action: QueueAction) async {
         do {
             attemptingToUpdateFilm = true
@@ -268,6 +218,57 @@ extension FilmDetailViewModel {
         if oldFilm.isWatched != freshFilmData.isWatched {
             let action: QueueAction = freshFilmData.isWatched ? .add : .remove
             notifyDelegateOfStatusChange(queue: .watched, action: action)
+        }
+    }
+}
+
+// MARK: - Presentation data structure
+extension FilmDetailViewModel {
+    struct FilmDetailDisplayModel: Equatable {
+        var film: Film
+        let title: String
+        let visualOriginalTitles: String
+        let spokenJapaneseTitle: NSAttributedString
+        let releaseYearAndDurationText: String
+        let releaseYearAndDurationAccessibilityLabel: String
+        let synopsisTitle: String = NSLocalizedString("Synopsis", comment: "")
+        let synopsisDescription: String
+        let rottenTomatoesScoreText: NSAttributedString
+        let director: String
+        let producer: String
+        let creditsAccessibilityLabel: String
+        var isUpNext: Bool { film.isUpNext }
+        var isWatched: Bool { film.isWatched }
+        
+        init(film: Film) {
+            self.film = film
+            self.title = film.title
+            self.visualOriginalTitles = "\(film.originalTitle)\n\(film.originalTitleRomanised)"
+            self.synopsisDescription = film.description
+            self.director = film.director
+            self.producer = film.producer
+            self.releaseYearAndDurationText = "\(film.releaseDate) • \(film.runningTime) mins"
+            self.releaseYearAndDurationAccessibilityLabel = "Released in \(film.releaseDate), running time \(film.runningTime) minutes."
+            self.creditsAccessibilityLabel = "Credits. Directed by \(film.director). Produced by \(film.producer)."
+            
+            let fullScoreText = "Rotten Tomatoes \(film.rottenTomatoesScore)%"
+            let scoreAttributedString = NSMutableAttributedString(string: fullScoreText)
+            let rtRange = NSRange(location: 0, length: 16)
+            scoreAttributedString.addAttribute(.foregroundColor, value: UIColor.systemRed, range: rtRange)
+            let scoreRange = NSRange(location: 16, length: (fullScoreText as NSString).length - 16)
+            scoreAttributedString.addAttribute(.foregroundColor, value: UIColor.secondaryLabel, range: scoreRange)
+            self.rottenTomatoesScoreText = scoreAttributedString
+            
+            let prefix = "Original title: "
+            let combinedString = NSMutableAttributedString(string: "\(prefix)\(film.originalTitle)")
+            let prefixLength = (prefix as NSString).length
+            let japaneseLength = (film.originalTitle as NSString).length
+            combinedString.addAttribute(
+                .accessibilitySpeechLanguage,
+                value: "ja",
+                range: NSRange(location: prefixLength, length: japaneseLength)
+            )
+            self.spokenJapaneseTitle = combinedString
         }
     }
 }
