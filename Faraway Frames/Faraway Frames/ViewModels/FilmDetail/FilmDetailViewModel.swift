@@ -23,7 +23,7 @@ final class FilmDetailViewModel: NSObject {
     var film: Film?
     private let imageLoader: ImageLoader
     private let managedObjectContext: NSManagedObjectContext
-    private(set) var detailFRC: NSFetchedResultsController<FilmMO>?
+    private var detailFRC: NSFetchedResultsController<FilmMO>?
     private let frcFactory: FilmDetailFRCFactory
     private let filmQueueService: FilmQueueServiceProtocol
     private(set) var imageLoadTask: Task<Void, Never>?
