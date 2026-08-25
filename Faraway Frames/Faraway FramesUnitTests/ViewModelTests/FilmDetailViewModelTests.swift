@@ -575,9 +575,9 @@ struct FilmDetailViewModelTests {
         sut.performFetch()
         
         if case .content(let initialModel, _) = sut.currentState {
-                #expect(initialModel.isUpNext == true, "Should be true.")
-                #expect(initialModel.isWatched == true, "Should be true.")
-            }
+            #expect(initialModel.isUpNext == true, "Should be true.")
+            #expect(initialModel.isWatched == true, "Should be true.")
+        }
         
         filmMO.isUpNext = false
         filmMO.isWatched = false
