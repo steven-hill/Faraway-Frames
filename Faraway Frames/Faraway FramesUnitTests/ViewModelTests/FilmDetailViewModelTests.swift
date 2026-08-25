@@ -96,9 +96,9 @@ struct FilmDetailViewModelTests {
         sut.film = film
         sut.setFilm()
         #expect(delegateSpy.updateFilmDetailsCallCount == 1, "Should call the delegate.")
-        sut.performFetch()
         
-        sut.handleFetchedFilmUpdate(filmMO)
+        sut.performFetch()
+        sut.handleFilmUpdate(filmMO)
         
         if case .content(let displayModel,_) = sut.currentState {
             #expect(displayModel.isUpNext == true, "Should be true.")

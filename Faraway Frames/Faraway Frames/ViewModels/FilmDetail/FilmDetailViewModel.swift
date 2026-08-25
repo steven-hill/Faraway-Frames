@@ -215,43 +215,59 @@ final class FilmDetailViewModel: NSObject {
 // MARK: - Fetched Results Controller Delegate
 extension FilmDetailViewModel: NSFetchedResultsControllerDelegate {
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        let updatedFilmMO = controller.fetchedObjects?.first as? FilmMO
+        handleFilmUpdate(updatedFilmMO)
+    }
+}
+
+// MARK: - Film Mutation Logic
+extension FilmDetailViewModel {
+    func handleFilmUpdate(_ filmMO: FilmMO?) {
+        /// Capture the existing image if we are in a content state.
         var currentImage: UIImage? = nil
         if case .content(_, let activeImage) = currentState {
             currentImage = activeImage
         }
         
-        if controller.fetchedObjects?.isEmpty ?? true {
-            if case .content(let displayModel, _) = currentState {
-                var resetFilm = displayModel.film
-                resetFilm.isUpNext = false
-                resetFilm.isWatched = false
-                
-                let resetDisplayModel = FilmDetailDisplayModel(film: resetFilm)
-                currentState = .content(displayModel: resetDisplayModel, image: currentImage)
-                
-                notifyDelegateOfStatusChange(queue: .upNext, action: .remove)
-                notifyDelegateOfStatusChange(queue: .watched, action: .remove)
-            }
+        /// Handle deletion / empty state.
+        guard let filmMO else {
+            handleFilmDeletion(currentImage: currentImage)
             return
         }
         
-        guard let updatedFilmMO = controller.fetchedObjects?.first as? FilmMO else { return }
-        let freshFilmData = Film(from: updatedFilmMO)
+        /// Handle update.
+        let freshFilmData = Film(from: filmMO)
+        handleFilmModification(freshFilmData, currentImage: currentImage)
+    }
+    
+    private func handleFilmDeletion(currentImage: UIImage?) {
+        guard case .content(let displayModel, _) = currentState else { return }
         
-        if case .content(let oldDisplayModel, _) = currentState {
-            let oldFilm = oldDisplayModel.film
-            
-            let updatedDisplayModel = FilmDetailDisplayModel(film: freshFilmData)
-            currentState = .content(displayModel: updatedDisplayModel, image: currentImage)
-            
-            if oldFilm.isUpNext != freshFilmData.isUpNext {
-                let action: QueueAction = freshFilmData.isUpNext ? .add : .remove
-                notifyDelegateOfStatusChange(queue: .upNext, action: action)
-            }
-            if oldFilm.isWatched != freshFilmData.isWatched {
-                let action: QueueAction = freshFilmData.isWatched ? .add : .remove
-                notifyDelegateOfStatusChange(queue: .watched, action: action)
-            }
+        var resetFilm = displayModel.film
+        resetFilm.isUpNext = false
+        resetFilm.isWatched = false
+        
+        let resetDisplayModel = FilmDetailDisplayModel(film: resetFilm)
+        currentState = .content(displayModel: resetDisplayModel, image: currentImage)
+        
+        notifyDelegateOfStatusChange(queue: .upNext, action: .remove)
+        notifyDelegateOfStatusChange(queue: .watched, action: .remove)
+    }
+    
+    private func handleFilmModification(_ freshFilmData: Film, currentImage: UIImage?) {
+        guard case .content(let oldDisplayModel, _) = currentState else { return }
+        let oldFilm = oldDisplayModel.film
+        
+        let updatedDisplayModel = FilmDetailDisplayModel(film: freshFilmData)
+        currentState = .content(displayModel: updatedDisplayModel, image: currentImage)
+        
+        if oldFilm.isUpNext != freshFilmData.isUpNext {
+            let action: QueueAction = freshFilmData.isUpNext ? .add : .remove
+            notifyDelegateOfStatusChange(queue: .upNext, action: action)
+        }
+        if oldFilm.isWatched != freshFilmData.isWatched {
+            let action: QueueAction = freshFilmData.isWatched ? .add : .remove
+            notifyDelegateOfStatusChange(queue: .watched, action: action)
         }
     }
 }
