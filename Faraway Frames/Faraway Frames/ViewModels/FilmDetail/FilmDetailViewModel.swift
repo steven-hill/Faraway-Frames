@@ -70,6 +70,16 @@ final class FilmDetailViewModel: NSObject {
         getMovieBanner(for: film, displayModel: displayModel)
     }
     
+    func getMovieBanner(for film: Film, displayModel: FilmDetailDisplayModel) {
+        let fallbackImage = SFSymbols.movieClapper
+        imageLoadTask = Task { [weak self, displayModel] in
+            guard let self, !Task.isCancelled else { return }
+            let downloadedImage = await imageLoader.loadImage(for: film.movieBanner)
+            guard !Task.isCancelled else { return }
+            currentState = .content(displayModel: displayModel, image: downloadedImage ?? fallbackImage)
+        }
+    }
+    
     /// Fetch the film from the database (if it exists there) so the film on `ExploreDetailVC` is in sync with what is in the database.
     func performFetch() {
         guard let film else { return }
@@ -101,16 +111,6 @@ final class FilmDetailViewModel: NSObject {
             delegate?.didReceiveError()
         case .error:
             delegate?.didReceiveError()
-        }
-    }
-    
-    func getMovieBanner(for film: Film, displayModel: FilmDetailDisplayModel) {
-        let fallbackImage = SFSymbols.movieClapper
-        imageLoadTask = Task { [weak self, displayModel] in
-            guard let self, !Task.isCancelled else { return }
-            let downloadedImage = await imageLoader.loadImage(for: film.movieBanner)
-            guard !Task.isCancelled else { return }
-            currentState = .content(displayModel: displayModel, image: downloadedImage ?? fallbackImage)
         }
     }
     
