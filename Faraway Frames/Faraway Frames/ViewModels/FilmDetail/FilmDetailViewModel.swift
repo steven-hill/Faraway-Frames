@@ -23,7 +23,7 @@ final class FilmDetailViewModel: NSObject {
     var film: Film?
     private let imageLoader: ImageLoader
     private let managedObjectContext: NSManagedObjectContext
-    private(set) var detailFRC: NSFetchedResultsController<FilmMO>?
+    private var detailFRC: NSFetchedResultsController<FilmMO>?
     private let frcFactory: FilmDetailFRCFactory
     private let filmQueueService: FilmQueueServiceProtocol
     private(set) var imageLoadTask: Task<Void, Never>?
@@ -70,6 +70,16 @@ final class FilmDetailViewModel: NSObject {
         getMovieBanner(for: film, displayModel: displayModel)
     }
     
+    func getMovieBanner(for film: Film, displayModel: FilmDetailDisplayModel) {
+        let fallbackImage = SFSymbols.movieClapper
+        imageLoadTask = Task { [weak self, displayModel] in
+            guard let self, !Task.isCancelled else { return }
+            let downloadedImage = await imageLoader.loadImage(for: film.movieBanner)
+            guard !Task.isCancelled else { return }
+            currentState = .content(displayModel: displayModel, image: downloadedImage ?? fallbackImage)
+        }
+    }
+    
     /// Fetch the film from the database (if it exists there) so the film on `ExploreDetailVC` is in sync with what is in the database.
     func performFetch() {
         guard let film else { return }
@@ -104,66 +114,6 @@ final class FilmDetailViewModel: NSObject {
         }
     }
     
-    func getMovieBanner(for film: Film, displayModel: FilmDetailDisplayModel) {
-        let fallbackImage = SFSymbols.movieClapper
-        imageLoadTask = Task { [weak self, displayModel] in
-            guard let self, !Task.isCancelled else { return }
-            let downloadedImage = await imageLoader.loadImage(for: film.movieBanner)
-            guard !Task.isCancelled else { return }
-            currentState = .content(displayModel: displayModel, image: downloadedImage ?? fallbackImage)
-        }
-    }
-    
-    // MARK: - Presentation data structure
-    struct FilmDetailDisplayModel: Equatable {
-        var film: Film
-        let title: String
-        let visualOriginalTitles: String
-        let spokenJapaneseTitle: NSAttributedString
-        let releaseYearAndDurationText: String
-        let releaseYearAndDurationAccessibilityLabel: String
-        let synopsisTitle: String = NSLocalizedString("Synopsis", comment: "")
-        let synopsisDescription: String
-        let rottenTomatoesScoreText: NSAttributedString
-        let director: String
-        let producer: String
-        let creditsAccessibilityLabel: String
-        var isUpNext: Bool { film.isUpNext }
-        var isWatched: Bool { film.isWatched }
-        
-        init(film: Film) {
-            self.film = film
-            self.title = film.title
-            self.visualOriginalTitles = "\(film.originalTitle)\n\(film.originalTitleRomanised)"
-            self.synopsisDescription = film.description
-            self.director = film.director
-            self.producer = film.producer
-            self.releaseYearAndDurationText = "\(film.releaseDate) • \(film.runningTime) mins"
-            self.releaseYearAndDurationAccessibilityLabel = "Released in \(film.releaseDate), running time \(film.runningTime) minutes."
-            self.creditsAccessibilityLabel = "Credits. Directed by \(film.director). Produced by \(film.producer)."
-            
-            let fullScoreText = "Rotten Tomatoes \(film.rottenTomatoesScore)%"
-            let scoreAttributedString = NSMutableAttributedString(string: fullScoreText)
-            let rtRange = NSRange(location: 0, length: 16)
-            scoreAttributedString.addAttribute(.foregroundColor, value: UIColor.systemRed, range: rtRange)
-            let scoreRange = NSRange(location: 16, length: (fullScoreText as NSString).length - 16)
-            scoreAttributedString.addAttribute(.foregroundColor, value: UIColor.secondaryLabel, range: scoreRange)
-            self.rottenTomatoesScoreText = scoreAttributedString
-            
-            let prefix = "Original title: "
-            let combinedString = NSMutableAttributedString(string: "\(prefix)\(film.originalTitle)")
-            let prefixLength = (prefix as NSString).length
-            let japaneseLength = (film.originalTitle as NSString).length
-            combinedString.addAttribute(
-                .accessibilitySpeechLanguage,
-                value: "ja",
-                range: NSRange(location: prefixLength, length: japaneseLength)
-            )
-            self.spokenJapaneseTitle = combinedString
-        }
-    }
-    
-    // MARK: - Persistence method
     func updateStatus(for film: Film, queue: FilmQueue, action: QueueAction) async {
         do {
             attemptingToUpdateFilm = true
@@ -215,43 +165,110 @@ final class FilmDetailViewModel: NSObject {
 // MARK: - Fetched Results Controller Delegate
 extension FilmDetailViewModel: NSFetchedResultsControllerDelegate {
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        let updatedFilmMO = controller.fetchedObjects?.first as? FilmMO
+        handleFilmUpdate(updatedFilmMO)
+    }
+}
+
+// MARK: - Film Mutation Logic
+extension FilmDetailViewModel {
+    func handleFilmUpdate(_ filmMO: FilmMO?) {
+        /// Capture the existing image if we are in a content state.
         var currentImage: UIImage? = nil
         if case .content(_, let activeImage) = currentState {
             currentImage = activeImage
         }
         
-        if controller.fetchedObjects?.isEmpty ?? true {
-            if case .content(let displayModel, _) = currentState {
-                var resetFilm = displayModel.film
-                resetFilm.isUpNext = false
-                resetFilm.isWatched = false
-                
-                let resetDisplayModel = FilmDetailDisplayModel(film: resetFilm)
-                currentState = .content(displayModel: resetDisplayModel, image: currentImage)
-                
-                notifyDelegateOfStatusChange(queue: .upNext, action: .remove)
-                notifyDelegateOfStatusChange(queue: .watched, action: .remove)
-            }
+        /// Handle deletion / empty state.
+        guard let filmMO else {
+            handleFilmDeletion(currentImage: currentImage)
             return
         }
         
-        guard let updatedFilmMO = controller.fetchedObjects?.first as? FilmMO else { return }
-        let freshFilmData = Film(from: updatedFilmMO)
+        /// Handle update.
+        let freshFilmData = Film(from: filmMO)
+        handleFilmModification(freshFilmData, currentImage: currentImage)
+    }
+    
+    private func handleFilmDeletion(currentImage: UIImage?) {
+        guard case .content(let displayModel, _) = currentState else { return }
         
-        if case .content(let oldDisplayModel, _) = currentState {
-            let oldFilm = oldDisplayModel.film
+        var resetFilm = displayModel.film
+        resetFilm.isUpNext = false
+        resetFilm.isWatched = false
+        
+        let resetDisplayModel = FilmDetailDisplayModel(film: resetFilm)
+        currentState = .content(displayModel: resetDisplayModel, image: currentImage)
+        
+        notifyDelegateOfStatusChange(queue: .upNext, action: .remove)
+        notifyDelegateOfStatusChange(queue: .watched, action: .remove)
+    }
+    
+    private func handleFilmModification(_ freshFilmData: Film, currentImage: UIImage?) {
+        guard case .content(let oldDisplayModel, _) = currentState else { return }
+        let oldFilm = oldDisplayModel.film
+        
+        let updatedDisplayModel = FilmDetailDisplayModel(film: freshFilmData)
+        currentState = .content(displayModel: updatedDisplayModel, image: currentImage)
+        
+        if oldFilm.isUpNext != freshFilmData.isUpNext {
+            let action: QueueAction = freshFilmData.isUpNext ? .add : .remove
+            notifyDelegateOfStatusChange(queue: .upNext, action: action)
+        }
+        if oldFilm.isWatched != freshFilmData.isWatched {
+            let action: QueueAction = freshFilmData.isWatched ? .add : .remove
+            notifyDelegateOfStatusChange(queue: .watched, action: action)
+        }
+    }
+}
+
+// MARK: - Presentation data structure
+extension FilmDetailViewModel {
+    struct FilmDetailDisplayModel: Equatable {
+        var film: Film
+        let title: String
+        let visualOriginalTitles: String
+        let spokenJapaneseTitle: NSAttributedString
+        let releaseYearAndDurationText: String
+        let releaseYearAndDurationAccessibilityLabel: String
+        let synopsisTitle: String = NSLocalizedString("Synopsis", comment: "")
+        let synopsisDescription: String
+        let rottenTomatoesScoreText: NSAttributedString
+        let director: String
+        let producer: String
+        let creditsAccessibilityLabel: String
+        var isUpNext: Bool { film.isUpNext }
+        var isWatched: Bool { film.isWatched }
+        
+        init(film: Film) {
+            self.film = film
+            self.title = film.title
+            self.visualOriginalTitles = "\(film.originalTitle)\n\(film.originalTitleRomanised)"
+            self.synopsisDescription = film.description
+            self.director = film.director
+            self.producer = film.producer
+            self.releaseYearAndDurationText = "\(film.releaseDate) • \(film.runningTime) mins"
+            self.releaseYearAndDurationAccessibilityLabel = "Released in \(film.releaseDate), running time \(film.runningTime) minutes."
+            self.creditsAccessibilityLabel = "Credits. Directed by \(film.director). Produced by \(film.producer)."
             
-            let updatedDisplayModel = FilmDetailDisplayModel(film: freshFilmData)
-            currentState = .content(displayModel: updatedDisplayModel, image: currentImage)
+            let fullScoreText = "Rotten Tomatoes \(film.rottenTomatoesScore)%"
+            let scoreAttributedString = NSMutableAttributedString(string: fullScoreText)
+            let rtRange = NSRange(location: 0, length: 16)
+            scoreAttributedString.addAttribute(.foregroundColor, value: UIColor.systemRed, range: rtRange)
+            let scoreRange = NSRange(location: 16, length: (fullScoreText as NSString).length - 16)
+            scoreAttributedString.addAttribute(.foregroundColor, value: UIColor.secondaryLabel, range: scoreRange)
+            self.rottenTomatoesScoreText = scoreAttributedString
             
-            if oldFilm.isUpNext != freshFilmData.isUpNext {
-                let action: QueueAction = freshFilmData.isUpNext ? .add : .remove
-                notifyDelegateOfStatusChange(queue: .upNext, action: action)
-            }
-            if oldFilm.isWatched != freshFilmData.isWatched {
-                let action: QueueAction = freshFilmData.isWatched ? .add : .remove
-                notifyDelegateOfStatusChange(queue: .watched, action: action)
-            }
+            let prefix = "Original title: "
+            let combinedString = NSMutableAttributedString(string: "\(prefix)\(film.originalTitle)")
+            let prefixLength = (prefix as NSString).length
+            let japaneseLength = (film.originalTitle as NSString).length
+            combinedString.addAttribute(
+                .accessibilitySpeechLanguage,
+                value: "ja",
+                range: NSRange(location: prefixLength, length: japaneseLength)
+            )
+            self.spokenJapaneseTitle = combinedString
         }
     }
 }

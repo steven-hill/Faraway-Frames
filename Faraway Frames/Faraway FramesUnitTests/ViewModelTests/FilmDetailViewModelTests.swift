@@ -30,8 +30,8 @@ struct FilmDetailViewModelTests {
         #expect(spy.updateWithEmptyStateCallCount == 1, "Should call delegate method once.")
     }
     
-    @Test("When a film is passed into the initialiser, `currentState` should be updated, but not `filmWasUpdated`.")
-    func filmDetailViewModel_whenFilmIsPassedIn_updatesCurrentStateAndFRCButNotFilmWasUpdated() {
+    @Test("When a film is set, `currentState` should be updated, but not `filmWasUpdated`.")
+    func filmDetailViewModel_whenFilmIsNotNil_updatesCurrentStateAndFRCButNotFilmWasUpdated() {
         let film = Film.sample[0]
         let mockImageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
@@ -67,19 +67,6 @@ struct FilmDetailViewModelTests {
         
         #expect(sut.currentState == .noFilmSelected, "Should update the state to `.noFilmSelected` when film is nil.")
         #expect(sut.filmWasUpdated == false, "Should still be false.")
-        #expect((sut.detailFRC == nil), "Should be nil.")
-    }
-    
-    @Test("View model sets `detailFRC` and sets itself as its delegate correctly")
-    func filmDetailViewModel_performFetch_setsDetailFRCAndDelegateCorrectly() {
-        let sut = makeSUT()
-        sut.film = Film.sample[0]
-        sut.setFilm()
-        
-        sut.performFetch()
-        
-        #expect((sut.detailFRC != nil), "Should be nil.")
-        #expect(sut.detailFRC?.delegate === sut, "ViewModel should register as the FRC delegate.")
     }
     
     @Test("View model fetches film with correct values from the database if it exists there")
@@ -91,12 +78,14 @@ struct FilmDetailViewModelTests {
                                       managedObjectContext: context,
                                       frcFactory: MockFRCFactory(),
                                       filmQueueService: filmQueueService)
+        let delegateSpy = FilmDetailViewModelSpy()
+        sut.delegate = delegateSpy
         let film = Film.sample[0]
         let entity = try #require(
             NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
             "The Core Data model schema must contain an entity definition named 'FilmMO'."
         )
-        _ = PersistenceHelper.makeFilmMO(
+        let filmMO = PersistenceHelper.makeFilmMO(
             with: film,
             entity: entity,
             context: context,
@@ -106,12 +95,16 @@ struct FilmDetailViewModelTests {
         try? context.save()
         sut.film = film
         sut.setFilm()
+        #expect(delegateSpy.updateFilmDetailsCallCount == 1, "Should call the delegate.")
         
         sut.performFetch()
+        sut.handleFilmUpdate(filmMO)
         
-        #expect(sut.detailFRC?.fetchedObjects?.count == 1, "Should return only one result.")
-        #expect(sut.detailFRC?.fetchedObjects?.first?.isUpNext == true, "Should match the value from the database.")
-        #expect(sut.detailFRC?.fetchedObjects?.first?.isWatched == true, "Should match the value from the database.")
+        if case .content(let displayModel,_) = sut.currentState {
+            #expect(displayModel.isUpNext == true, "Should be true.")
+            #expect(displayModel.isWatched == true, "Should be true.")
+        }
+        #expect(delegateSpy.updateFilmDetailsCallCount == 2, "Should call the delegate again.")
     }
     
     @Test("When `detailFRC` encounters an error fetching film, error should be handled by updating `currentState` and calling the delegate",
@@ -582,9 +575,9 @@ struct FilmDetailViewModelTests {
         sut.performFetch()
         
         if case .content(let initialModel, _) = sut.currentState {
-                #expect(initialModel.isUpNext == true, "Should be true.")
-                #expect(initialModel.isWatched == true, "Should be true.")
-            }
+            #expect(initialModel.isUpNext == true, "Should be true.")
+            #expect(initialModel.isWatched == true, "Should be true.")
+        }
         
         filmMO.isUpNext = false
         filmMO.isWatched = false
