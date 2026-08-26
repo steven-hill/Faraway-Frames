@@ -310,18 +310,7 @@ struct ExploreDetailVCTests {
     scenario: (systemError: Error,
                expectedReason: PersistenceFailureReason)
     ) async {
-        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
-        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext, saver: saver)
-        let targetFilm = Film.sample[0]
-        let vm = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                     managedObjectContext: testPersistenceController.viewContext,
-                                     frcFactory: MockFRCFactory(),
-                                     filmQueueService: filmQueueService)
-        let sut = ExploreDetailVC(filmDetailViewModel: vm)
-        sut.filmDetailViewModel.film = targetFilm
-        sut.filmDetailViewModel.setFilm()
+        let (sut, targetFilm) = makeSUTForUpdateFilmStatusFailure(errorToThrow: scenario.systemError)
         let expectedError = FilmDetailError.addFailed(scenario.expectedReason)
         
         await sut.filmDetailViewModel.updateStatus(for: targetFilm, queue: .upNext, action: .add)
