@@ -327,20 +327,10 @@ struct ExploreDetailVCTests {
         scenario: (systemError: CocoaError,
                    expectedReason: PersistenceFailureReason)
     ) async {
-        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
-        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext, saver: saver)
-        let targetFilm = Film.sample[0]
-        let vm = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                     managedObjectContext: testPersistenceController.viewContext,
-                                     frcFactory: MockFRCFactory(),
-                                     filmQueueService: filmQueueService)
-        let sut = ExploreDetailVC(filmDetailViewModel: vm)
+        let (sut, targetFilm) = makeSUTForUpdateFilmStatusFailure(errorToThrow: scenario.systemError)
         let mockPresenter = MockAlertPresenter()
         sut.alertPresenter = mockPresenter
-        sut.filmDetailViewModel.film = targetFilm
-        sut.filmDetailViewModel.setFilm()
+        let expectedError = FilmDetailError.addFailed(scenario.expectedReason)
         
         await sut.filmDetailViewModel.updateStatus(for: targetFilm,
                                                    queue: .upNext,
@@ -348,7 +338,6 @@ struct ExploreDetailVCTests {
 
         sut.didReceiveError()
         sut.view.layoutIfNeeded()
-        let expectedError = FilmDetailError.addFailed(scenario.expectedReason)
         let state = UIContentUnavailableConfigurationState(traitCollection: sut.traitCollection)
         sut.updateContentUnavailableConfiguration(using: state)
         let config = sut.contentUnavailableConfiguration as? UIContentUnavailableConfiguration
