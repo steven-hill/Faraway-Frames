@@ -614,6 +614,22 @@ struct ExploreDetailVCTests {
         return ExploreDetailVC(filmDetailViewModel: vm)
     }
     
+    private func makeSUTForUpdateFilmStatusFailure(errorToThrow: Error) -> (vc: ExploreDetailVC, film: Film) {
+        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let saver = ThrowingSaver(errorToThrow: errorToThrow)
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext, saver: saver)
+        let targetFilm = Film.sample[0]
+        let vm = FilmDetailViewModel(imageLoader: mockImageLoader,
+                                     managedObjectContext: testPersistenceController.viewContext,
+                                     frcFactory: MockFRCFactory(),
+                                     filmQueueService: filmQueueService)
+        let sut = ExploreDetailVC(filmDetailViewModel: vm)
+        sut.filmDetailViewModel.film = targetFilm
+        sut.filmDetailViewModel.setFilm()
+        return (sut, targetFilm)
+    }
+    
     private func makeSUTWithFilmAndFilmQueueServiceSpy() -> (vc: ExploreDetailVC, spyFQS: FilmQueueServiceSpy) {
         let spyFQS = FilmQueueServiceSpy()
         let testPersistenceController = try! PersistenceController(inMemory: true)
