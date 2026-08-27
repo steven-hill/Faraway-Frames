@@ -117,20 +117,13 @@ struct FilmDetailViewModelTests {
     
     @Test("Quick selection of films ignores the results of the cancelled task", .tags(.networkRequest))
     func filmDetailViewModel_setFilm_cancelsPreviousImageDownloadTask() async {
-        let filmA = Film.sample[0]
-        let filmB = Film.sample[1]
-        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                      managedObjectContext: testPersistenceController.viewContext,
-                                      frcFactory: MockFRCFactory(),
-                                      filmQueueService: filmQueueService
-        )
+        let (sut, mockImageLoader) = makeSUTAndMockImageLoader()
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
-
+        let filmA = Film.sample[0]
+        let filmB = Film.sample[1]
         sut.film = filmA
+        
         sut.setFilm()
         let taskA = sut.imageLoadTask
         await Task.yield()
@@ -138,7 +131,7 @@ struct FilmDetailViewModelTests {
 
         sut.film = filmB
         sut.setFilm()
-        #expect(taskA?.isCancelled == true, "TaskA should be cancelled.")
+        #expect(taskA?.isCancelled == true, "taskA should be cancelled.")
         await Task.yield()
         #expect(mockImageLoader.loadCount == 2)
 
@@ -151,14 +144,7 @@ struct FilmDetailViewModelTests {
 
     @Test(.tags(.networkRequest))
     func filmDetailViewModel_getMovieBanner_whenFailedToDownloadMovieBannerImage_returnsFallbackImage() async {
-        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                      managedObjectContext: testPersistenceController.viewContext,
-                                      frcFactory: MockFRCFactory(),
-                                      filmQueueService: filmQueueService
-        )
+        let (sut, mockImageLoader) = makeSUTAndMockImageLoader()
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
         
@@ -680,6 +666,21 @@ struct FilmDetailViewModelTests {
             frcFactory: mockFactory,
             filmQueueService: filmQueueService
         )
+    }
+    
+    private func makeSUTAndMockImageLoader() -> (
+        sut: FilmDetailViewModel,
+        mockImageLoader: ExploreDetailMovieBannerMockImageLoader
+    ) {
+        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
+        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
+                                      managedObjectContext: testPersistenceController.viewContext,
+                                      frcFactory: MockFRCFactory(),
+                                      filmQueueService: filmQueueService
+        )
+        return (sut, mockImageLoader)
     }
     
     //MARK: - Film Detail View Model Spy
