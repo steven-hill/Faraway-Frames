@@ -331,7 +331,9 @@ struct FilmDetailViewModelTests {
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
         let targetFilm = Film.sample[0]
+        
         await sut.updateStatus(for: targetFilm, queue: .upNext, action: .add)
+        
         #expect(spy.upNextStatusChangeCallCount == 1, "Should call delegate method when adding a film to upNext.")
         
         await sut.updateStatus(for: targetFilm, queue: .upNext, action: .remove)
@@ -351,9 +353,11 @@ struct FilmDetailViewModelTests {
         let targetFilm = Film.sample[0]
 
         await sut.updateStatus(for: targetFilm, queue: .watched, action: .add)
+        
         #expect(spy.watchedStatusChangeCallCount == 1, "Should call delegate method when adding a film to watched.")
         
         await sut.updateStatus(for: targetFilm, queue: .watched, action: .remove)
+        
         #expect(spy.watchedStatusChangeCallCount == 2, "Should call delegate method again when removing a film from watched.")
                 
         await sut.updateStatus(for: targetFilm, queue: .watched, action: .remove)
