@@ -408,15 +408,15 @@ struct FilmDetailViewModelTests {
             ),
             "The Core Data model schema must contain an entity definition named 'FilmMO'."
         )
+        let targetFilm = Film.sample[0]
         _ = PersistenceHelper.makeFilmMO(
-            with: Film.sample[0],
+            with: targetFilm,
             entity: entity,
             context: context,
             isUpNext: true,
             isWatched: false
         )
         try? context.save()
-        let targetFilm = Film.sample[0]
         let expectedError = FilmDetailError.removeFailed(scenario.expectedReason)
         
         await sut.updateStatus(for: targetFilm, queue: .upNext, action: .remove)
