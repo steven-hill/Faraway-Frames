@@ -33,15 +33,7 @@ struct FilmDetailViewModelTests {
     @Test("When a film is set, `currentState` should be updated, but not `filmWasUpdated`.")
     func filmDetailViewModel_whenFilmIsNotNil_updatesCurrentStateAndFRCButNotFilmWasUpdated() {
         let film = Film.sample[0]
-        let mockImageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                      managedObjectContext: testPersistenceController.viewContext,
-                                      frcFactory: MockFRCFactory(),
-                                      filmQueueService: filmQueueService
-        )
-        
+        let sut = makeSUT()
         sut.film = film
         sut.setFilm()
         
