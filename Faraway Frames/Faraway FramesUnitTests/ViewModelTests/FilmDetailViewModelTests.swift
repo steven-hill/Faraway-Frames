@@ -665,13 +665,13 @@ struct FilmDetailViewModelTests {
     
     //MARK: - Helper method
     private func makeSUT() -> FilmDetailViewModel {
-        let mockImageLoader = MockImageLoader()
         let persistenceController = try! PersistenceController.init(inMemory: true)
         let filmQueueService = FilmQueueService(context: persistenceController.viewContext)
-        return FilmDetailViewModel(imageLoader: mockImageLoader,
-                                   managedObjectContext: persistenceController.viewContext,
-                                   frcFactory: MockFRCFactory(),
-                                   filmQueueService: filmQueueService
+        return FilmDetailViewModel(
+            imageLoader: ExploreDetailMovieBannerMockImageLoader(),
+            managedObjectContext: persistenceController.viewContext,
+            frcFactory: MockFRCFactory(),
+            filmQueueService: filmQueueService
         )
     }
     
