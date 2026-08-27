@@ -37,16 +37,11 @@ struct FilmDetailViewModelTests {
         sut.film = film
         sut.setFilm()
         
-        switch sut.currentState {
-        case .noFilmSelected:
-            Issue.record("Expected state to be `.content`, but it was `.noFilmSelected`.")
-        case .content(let displayModel, _):
+        if case .content(let displayModel, _) = sut.currentState {
             #expect(displayModel.title == film.title, "Should match.")
             #expect(displayModel.visualOriginalTitles == "\(film.originalTitle)\n\(film.originalTitleRomanised)", "Should match.")
-        case .fetchFailure:
-            Issue.record("Expected state to be `.content`, but it was `.fetchFailure`.")
-        case .error(_, _, _):
-            Issue.record("Expected state to be `.content`, but it was `.error`.")
+        } else {
+            Issue.record("Expected state to be `.content`.")
         }
         #expect(sut.filmWasUpdated == false, "Should still be false.")
     }
@@ -517,6 +512,8 @@ struct FilmDetailViewModelTests {
         if case .content(let displayModel, _) = sut.currentState {
             #expect(displayModel.isUpNext == false, "Should be false.")
             #expect(displayModel.isWatched == false, "Should be false.")
+        } else {
+            Issue.record("Expected state to be `.content` with both values set to false.")
         }
     }
 
@@ -549,6 +546,8 @@ struct FilmDetailViewModelTests {
         #expect(spy.watchedStatusChangeCallCount == 1, "Should have notified the delegate once.")
         if case .content(let displayModel, _) = sut.currentState {
             #expect(displayModel.isWatched == true, "Should align with the fresh database record.")
+        } else {
+            Issue.record("Expected state to be `.content` with `isWatched` set to true.")
         }
     }
     
@@ -564,16 +563,11 @@ struct FilmDetailViewModelTests {
         
         sut.returnToFilmContent()
         
-        switch sut.currentState {
-        case .noFilmSelected:
-            Issue.record("Expected state to be `.content`, but it was `.noFilmSelected`.")
-        case .content(let displayModel, _):
+        if case .content(let displayModel, _) = sut.currentState {
             #expect(displayModel.title == film.title, "Should match.")
             #expect(displayModel.visualOriginalTitles == "\(film.originalTitle)\n\(film.originalTitleRomanised)", "Should match.")
-        case .fetchFailure:
-            Issue.record("Expected state to be `.content`, but it was `.fetchFailure`.")
-        case .error(_, _, _):
-            Issue.record("Expected state to be `.content`, but it was `.error`.")
+        } else {
+            Issue.record("Expected state to be `.content`.")
         }
         #expect(sut.filmWasUpdated == false, "Should be false.")
         #expect(spy.updateFilmDetailsCallCount == 2, "Should have been called twice; once for the loading content the first time, twice for displaying it again.")
