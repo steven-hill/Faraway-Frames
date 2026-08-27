@@ -63,13 +63,7 @@ struct FilmDetailViewModelTests {
     
     @Test("View model fetches film with correct values from the database if it exists there")
     func filmDetailViewModel_performFetch_fetchesFilmFromDatabaseIfItExists() throws {
-        let testPersistenceController = try PersistenceController(inMemory: true)
-        let context = testPersistenceController.viewContext
-        let filmQueueService = FilmQueueService(context: context)
-        let sut = FilmDetailViewModel(imageLoader: MockImageLoader(),
-                                      managedObjectContext: context,
-                                      frcFactory: MockFRCFactory(),
-                                      filmQueueService: filmQueueService)
+        let (sut, context) = makeSUTAndContext()
         let delegateSpy = FilmDetailViewModelSpy()
         sut.delegate = delegateSpy
         let film = Film.sample[0]
@@ -655,7 +649,7 @@ struct FilmDetailViewModelTests {
         #expect(spy.updateFilmDetailsCallCount == 2, "Should have been called twice; once for the loading content the first time, twice for loading it again.")
     }
     
-    //MARK: - Helper method
+    //MARK: - Helper methods
     private func makeSUT() -> FilmDetailViewModel {
         let persistenceController = try! PersistenceController.init(inMemory: true)
         let filmQueueService = FilmQueueService(context: persistenceController.viewContext)
@@ -665,6 +659,20 @@ struct FilmDetailViewModelTests {
             frcFactory: MockFRCFactory(),
             filmQueueService: filmQueueService
         )
+    }
+    
+    private func makeSUTAndContext() -> (
+        sut: FilmDetailViewModel,
+        context: NSManagedObjectContext
+    ) {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let filmQueueService = FilmQueueService(context: context)
+        let sut = FilmDetailViewModel(imageLoader: ExploreDetailMovieBannerMockImageLoader(),
+                                      managedObjectContext: context,
+                                      frcFactory: MockFRCFactory(),
+                                      filmQueueService: filmQueueService)
+        return (sut, context)
     }
     
     //MARK: - Film Detail View Model Spy
