@@ -108,7 +108,7 @@ struct FilmDetailViewModelTests {
         mockFactory.makeFilmDetailFRCStub = { _, context in
             return ThrowingFetchedResultsController(context: context, errorToThrow: scenario.systemError)
         }
-        let mockImageLoader = MockImageLoader()
+        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
         let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
                                       managedObjectContext: context,
                                       frcFactory: mockFactory,
