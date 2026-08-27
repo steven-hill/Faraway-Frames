@@ -158,17 +158,9 @@ struct FilmDetailViewModelTests {
     }
     
     @Test("Deallocating the view model cancels any active image download tasks", .tags(.networkRequest))
-    func filmDetailViewModel_deinit_cancelsActiveImageLoadTask() async throws {
+    func filmDetailViewModel_deinit_cancelsActiveImageLoadTask() async {
+        var sut: FilmDetailViewModel? = makeSUT()
         let film = Film.sample[0]
-        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let context = testPersistenceController.viewContext
-        let filmQueueService = FilmQueueService(context: context)
-        var sut: FilmDetailViewModel? = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                                            managedObjectContext: context,
-                                                            frcFactory: MockFRCFactory(),
-                                                            filmQueueService: filmQueueService
-        )
         sut?.film = film
         sut?.setFilm()
         let capturedTask = sut?.imageLoadTask
