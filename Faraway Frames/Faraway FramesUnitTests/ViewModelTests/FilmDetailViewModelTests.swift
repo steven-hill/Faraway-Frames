@@ -373,18 +373,11 @@ struct FilmDetailViewModelTests {
         scenario: (systemError: Error,
                    expectedReason: PersistenceFailureReason)
     ) async {
-        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
-        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext, saver: saver)
-        let targetFilm = Film.sample[0]
-        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                      managedObjectContext: testPersistenceController.viewContext,
-                                      frcFactory: MockFRCFactory(),
-                                      filmQueueService: filmQueueService)
+        let (sut,_) = makeSUTAndContextWithThrowingSaver(error: scenario.systemError)
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
         let expectedError = FilmDetailError.addFailed(scenario.expectedReason)
+        let targetFilm = Film.sample[0]
         
         await sut.updateStatus(for: targetFilm, queue: .upNext, action: .add)
         
@@ -400,24 +393,25 @@ struct FilmDetailViewModelTests {
         scenario: (systemError: Error,
                    expectedReason: PersistenceFailureReason)
     ) async throws {
-        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let context = testPersistenceController.viewContext
-        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
-        let filmQueueService = FilmQueueService(context: context, saver: saver)
-        let targetFilm = Film.sample[0]
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
-        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
-        try? context.save()
-        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                      managedObjectContext: context,
-                                      frcFactory: MockFRCFactory(),
-                                      filmQueueService: filmQueueService)
+        let (sut, context) = makeSUTAndContextWithThrowingSaver(error: scenario.systemError)
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
+        let entity = try #require(
+            NSEntityDescription.entity(
+                forEntityName: Persistence.entityname,
+                in: context
+            ),
+            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
+        _ = PersistenceHelper.makeFilmMO(
+            with: Film.sample[0],
+            entity: entity,
+            context: context,
+            isUpNext: true,
+            isWatched: false
+        )
+        try? context.save()
+        let targetFilm = Film.sample[0]
         let expectedError = FilmDetailError.removeFailed(scenario.expectedReason)
         
         await sut.updateStatus(for: targetFilm, queue: .upNext, action: .remove)
@@ -434,17 +428,10 @@ struct FilmDetailViewModelTests {
         scenario: (systemError: Error,
                    expectedReason: PersistenceFailureReason)
     ) async {
-        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
-        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext, saver: saver)
-        let targetFilm = Film.sample[0]
-        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                      managedObjectContext: testPersistenceController.viewContext,
-                                      frcFactory: MockFRCFactory(),
-                                      filmQueueService: filmQueueService)
+        let (sut,_) = makeSUTAndContextWithThrowingSaver(error: scenario.systemError)
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
+        let targetFilm = Film.sample[0]
         let expectedError = FilmDetailError.addFailed(scenario.expectedReason)
         
         await sut.updateStatus(for: targetFilm, queue: .watched, action: .add)
@@ -461,24 +448,25 @@ struct FilmDetailViewModelTests {
         scenario: (systemError: Error,
                    expectedReason: PersistenceFailureReason)
     ) async throws {
-        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let context = testPersistenceController.viewContext
-        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
-        let filmQueueService = FilmQueueService(context: context, saver: saver)
-        let targetFilm = Film.sample[0]
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
-        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: false, isWatched: true)
-        try? context.save()
-        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                      managedObjectContext: context,
-                                      frcFactory: MockFRCFactory(),
-                                      filmQueueService: filmQueueService)
+        let (sut, context) = makeSUTAndContextWithThrowingSaver(error: scenario.systemError)
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
+        let entity = try #require(
+            NSEntityDescription.entity(
+                forEntityName: Persistence.entityname,
+                in: context
+            ),
+            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
+        _ = PersistenceHelper.makeFilmMO(
+            with: Film.sample[0],
+            entity: entity,
+            context: context,
+            isUpNext: false,
+            isWatched: true
+        )
+        try? context.save()
+        let targetFilm = Film.sample[0]
         let expectedError = FilmDetailError.removeFailed(scenario.expectedReason)
         
         await sut.updateStatus(for: targetFilm, queue: .watched, action: .remove)
@@ -665,6 +653,23 @@ struct FilmDetailViewModelTests {
         return (sut, mockImageLoader)
     }
     
+    private func makeSUTAndContextWithThrowingSaver(error: Error) -> (
+        sut: FilmDetailViewModel,
+        context: NSManagedObjectContext
+    ) {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let saver = ThrowingSaver(errorToThrow: error)
+        let filmQueueService = FilmQueueService(context: context, saver: saver)
+        let sut = FilmDetailViewModel(
+            imageLoader: ExploreDetailMovieBannerMockImageLoader(),
+            managedObjectContext: testPersistenceController.viewContext,
+            frcFactory: MockFRCFactory(),
+            filmQueueService: filmQueueService
+        )
+        return (sut, context)
+    }
+                                               
     //MARK: - Film Detail View Model Spy
     final class FilmDetailViewModelSpy: FilmDetailViewModelDelegate {
         var updateFilmDetailsCallCount = 0
