@@ -261,15 +261,8 @@ struct FilmDetailViewModelTests {
     
     @Test("`updateStatus` updates `currentState` and `filmWasUpdated` when `upNext` persistent change completes successfully", .tags(.persistence))
     func filmDetailViewModel_updateStatus_whenUpNextChangeIsSuccessful_updatesCurrentStateAndFilmWasUpdatedFlag() async {
+        let sut = makeSUT()
         let targetFilm = Film.sample[0]
-        let mockImageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                      managedObjectContext: testPersistenceController.viewContext,
-                                      frcFactory: MockFRCFactory(),
-                                      filmQueueService: filmQueueService
-        )
         sut.film = targetFilm
         sut.setFilm()
         
