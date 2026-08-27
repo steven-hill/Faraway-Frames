@@ -630,10 +630,11 @@ struct FilmDetailViewModelTests {
         let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                      managedObjectContext: testPersistenceController.viewContext,
-                                      frcFactory: MockFRCFactory(),
-                                      filmQueueService: filmQueueService
+        let sut = FilmDetailViewModel(
+            imageLoader: ExploreDetailMovieBannerMockImageLoader(),
+            managedObjectContext: testPersistenceController.viewContext,
+            frcFactory: MockFRCFactory(),
+            filmQueueService: filmQueueService
         )
         return (sut, mockImageLoader)
     }
