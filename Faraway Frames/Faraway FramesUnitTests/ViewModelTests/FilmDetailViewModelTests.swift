@@ -61,20 +61,14 @@ struct FilmDetailViewModelTests {
         let (sut, context) = makeSUTAndContext()
         let delegateSpy = FilmDetailViewModelSpy()
         sut.delegate = delegateSpy
-        let film = Film.sample[0]
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
-        let filmMO = PersistenceHelper.makeFilmMO(
-            with: film,
-            entity: entity,
+        let targetFilm = Film.sample[0]
+        let filmMO = try saveFilmToDatabase(
             context: context,
+            film: targetFilm,
             isUpNext: true,
             isWatched: true
         )
-        try? context.save()
-        sut.film = film
+        sut.film = targetFilm
         sut.setFilm()
         #expect(delegateSpy.updateFilmDetailsCallCount == 1, "Should call the delegate.")
         
@@ -401,22 +395,13 @@ struct FilmDetailViewModelTests {
         let (sut, context) = makeSUTAndContextWithThrowingSaver(error: scenario.systemError)
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
-        let entity = try #require(
-            NSEntityDescription.entity(
-                forEntityName: Persistence.entityname,
-                in: context
-            ),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
         let targetFilm = Film.sample[0]
-        _ = PersistenceHelper.makeFilmMO(
-            with: targetFilm,
-            entity: entity,
+        _ = try saveFilmToDatabase(
             context: context,
+            film: targetFilm,
             isUpNext: true,
             isWatched: false
         )
-        try? context.save()
         let expectedError = FilmDetailError.removeFailed(scenario.expectedReason)
         
         await sut.updateStatus(for: targetFilm, queue: .upNext, action: .remove)
@@ -456,22 +441,13 @@ struct FilmDetailViewModelTests {
         let (sut, context) = makeSUTAndContextWithThrowingSaver(error: scenario.systemError)
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
-        let entity = try #require(
-            NSEntityDescription.entity(
-                forEntityName: Persistence.entityname,
-                in: context
-            ),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
-        _ = PersistenceHelper.makeFilmMO(
-            with: Film.sample[0],
-            entity: entity,
+        let targetFilm = Film.sample[0]
+        _ = try saveFilmToDatabase(
             context: context,
+            film: targetFilm,
             isUpNext: false,
             isWatched: true
         )
-        try? context.save()
-        let targetFilm = Film.sample[0]
         let expectedError = FilmDetailError.removeFailed(scenario.expectedReason)
         
         await sut.updateStatus(for: targetFilm, queue: .watched, action: .remove)
@@ -481,46 +457,38 @@ struct FilmDetailViewModelTests {
     }
     
     @Test("FRC delegate catches database film deletions, updates UI and calls delegates", .tags(.persistence))
-    func filmDetailViewModel_frc_handlesDeletionFromDatabase_andUpdatesUI() throws {
+    func filmDetailViewModel_frc_handlesDeletionFromDatabase_andUpdatesUI() async throws {
         let (sut, context) = makeSUTAndContext()
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
-        let entity = try #require(
-            NSEntityDescription.entity(
-                forEntityName: Persistence.entityname,
-                in: context
-            ),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
-        var targetFilm = Film.sample[0]
-        targetFilm.isUpNext = true
-        targetFilm.isWatched = true
-        let filmMO = PersistenceHelper.makeFilmMO(
-            with: targetFilm,
-            entity: entity,
+        let targetFilm = Film.sample[0]
+        let filmMO = try saveFilmToDatabase(
             context: context,
+            film: targetFilm,
             isUpNext: true,
             isWatched: true
         )
-        try? context.save()
         
         sut.film = targetFilm
         sut.setFilm()
         sut.performFetch()
+        /// Simulates fetched results controller noticing changes in `controllerDidChangeContent()`.
+        sut.handleFilmUpdate(filmMO)
         
         if case .content(let initialModel, _) = sut.currentState {
             #expect(initialModel.isUpNext == true, "Should be true.")
             #expect(initialModel.isWatched == true, "Should be true.")
+            #expect(spy.upNextStatusChangeCallCount == 1, "Should have notified the delegate once.")
+            #expect(spy.watchedStatusChangeCallCount == 1, "Should have notified the delegate once.")
         } else {
-            Issue.record("Expected state to be `.content` with both values set to false, but got \(sut.currentState).")
+            Issue.record("Expected state to be `.content` with both values set to true, but got \(sut.currentState).")
         }
+ 
+        /// Simulates fetched results controller noticing changes: `filmMO.isUpNext = false` and `filmMO.isWatched = false`.
+        sut.handleFilmUpdate(nil)
         
-        filmMO.isUpNext = false
-        filmMO.isWatched = false
-        try? context.save()
-        
-        #expect(spy.upNextStatusChangeCallCount == 1, "Should have notified the delegate once.")
-        #expect(spy.watchedStatusChangeCallCount == 1, "Should have notified the delegate once.")
+        #expect(spy.upNextStatusChangeCallCount == 2, "Should have notified the delegate again.")
+        #expect(spy.watchedStatusChangeCallCount == 2, "Should have notified the delegate again.")
         if case .content(let displayModel, _) = sut.currentState {
             #expect(displayModel.isUpNext == false, "Should be false.")
             #expect(displayModel.isWatched == false, "Should be false.")
@@ -535,25 +503,19 @@ struct FilmDetailViewModelTests {
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
         let targetFilm = Film.sample[0]
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
-        let filmMO = PersistenceHelper.makeFilmMO(
-            with: targetFilm,
-            entity: entity,
+        let filmMO = try saveFilmToDatabase(
             context: context,
+            film: targetFilm,
             isUpNext: true,
             isWatched: false
         )
-        try? context.save()
         sut.film = targetFilm
         sut.setFilm()
         sut.performFetch()
 
-        /// Simulate change to `filmMO` in the context.
+        /// Simulate change to `filmMO`picked up by fetched results controller.
         filmMO.isWatched = true
-        try? context.save()
+        sut.handleFilmUpdate(filmMO)
 
         #expect(spy.watchedStatusChangeCallCount == 1, "Should have notified the delegate once.")
         if case .content(let displayModel, _) = sut.currentState {
@@ -660,6 +622,29 @@ struct FilmDetailViewModelTests {
             filmQueueService: filmQueueService
         )
         return (sut, context)
+    }
+    
+    private func saveFilmToDatabase(
+        context: NSManagedObjectContext,
+        film: Film,
+        isUpNext: Bool,
+        isWatched: Bool
+    ) throws -> FilmMO {
+        let entity = try #require(
+            NSEntityDescription.entity(
+                forEntityName: Persistence.entityname,
+                in: context
+            ), "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
+        let filmMO = PersistenceHelper.makeFilmMO(
+            with: film,
+            entity: entity,
+            context: context,
+            isUpNext: isUpNext,
+            isWatched: isWatched
+        )
+        try? context.save()
+        return filmMO
     }
                                                
     //MARK: - Film Detail View Model Spy
