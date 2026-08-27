@@ -41,7 +41,7 @@ struct FilmDetailViewModelTests {
             #expect(displayModel.title == film.title, "Should match.")
             #expect(displayModel.visualOriginalTitles == "\(film.originalTitle)\n\(film.originalTitleRomanised)", "Should match.")
         } else {
-            Issue.record("Expected state to be `.content`.")
+            Issue.record("Expected state to be `.content` but got \(sut.currentState).")
         }
         #expect(sut.filmWasUpdated == false, "Should still be false.")
     }
@@ -84,6 +84,8 @@ struct FilmDetailViewModelTests {
         if case .content(let displayModel,_) = sut.currentState {
             #expect(displayModel.isUpNext == true, "Should be true.")
             #expect(displayModel.isWatched == true, "Should be true.")
+        } else {
+            Issue.record("Expected state to be `.content` but got \(sut.currentState).")
         }
         #expect(delegateSpy.updateFilmDetailsCallCount == 2, "Should call the delegate again.")
     }
@@ -131,7 +133,6 @@ struct FilmDetailViewModelTests {
         #expect(mockImageLoader.loadCount == 2)
 
         mockImageLoader.resume(shouldSucceed: true)
-        mockImageLoader.resume(shouldSucceed: true)
         await Task.yield()
 
         #expect(spy.updateFilmDetailsCallCount == 3, "Should be called three times in total; once for filmA's initial content, twice for filmB's initial content and its movie banner.")
@@ -142,13 +143,22 @@ struct FilmDetailViewModelTests {
         let (sut, mockImageLoader) = makeSUTAndMockImageLoader()
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
+        let film = Film.sample[0]
+        sut.film = film
         
+        /// Calls `getMovieBanner()` itself.
+        sut.setFilm()
+
+        await Task.yield()
         mockImageLoader.resume(shouldSucceed: false)
+        await Task.yield()
         
         if case .content(let displayModel, let image) = sut.currentState {
             #expect(image == SFSymbols.movieClapper, "Should show the film details with `movieclapper` as a fallback image.")
             #expect(sut.currentState == .content(displayModel: displayModel, image: image), "Should have a `FilmDetailDisplayModel` and an image.")
             #expect(spy.updateFilmDetailsCallCount == 2, "Should have called `didUpdateFilmDetails()` twice; once for the film object, and again for the image.")
+        } else {
+            Issue.record("Expected state to be `.content` but got \(sut.currentState).")
         }
     }
     
@@ -266,7 +276,7 @@ struct FilmDetailViewModelTests {
         if case .content(let displayModel, _) = sut.currentState {
             #expect(displayModel.isUpNext == true)
         } else {
-            Issue.record("State should be .content with an isUpNext value updated to true.")
+            Issue.record("State should be .content with an isUpNext value updated to true, but got \(sut.currentState).")
         }
         #expect(sut.filmWasUpdated == true, "Should be true.")
     }
@@ -283,7 +293,7 @@ struct FilmDetailViewModelTests {
         if case .content(let displayModel, _) = sut.currentState {
             #expect(displayModel.isWatched == true)
         } else {
-            Issue.record("State should be .content with an isWatched value updated to true.")
+            Issue.record("State should be .content with an isWatched value updated to true, but got \(sut.currentState).")
         }
         #expect(sut.filmWasUpdated == true, "Should be true.")
     }
@@ -501,6 +511,8 @@ struct FilmDetailViewModelTests {
         if case .content(let initialModel, _) = sut.currentState {
             #expect(initialModel.isUpNext == true, "Should be true.")
             #expect(initialModel.isWatched == true, "Should be true.")
+        } else {
+            Issue.record("Expected state to be `.content` with both values set to false, but got \(sut.currentState).")
         }
         
         filmMO.isUpNext = false
@@ -513,7 +525,7 @@ struct FilmDetailViewModelTests {
             #expect(displayModel.isUpNext == false, "Should be false.")
             #expect(displayModel.isWatched == false, "Should be false.")
         } else {
-            Issue.record("Expected state to be `.content` with both values set to false.")
+            Issue.record("Expected state to be `.content` with both values set to false, but got \(sut.currentState).")
         }
     }
 
@@ -547,7 +559,7 @@ struct FilmDetailViewModelTests {
         if case .content(let displayModel, _) = sut.currentState {
             #expect(displayModel.isWatched == true, "Should align with the fresh database record.")
         } else {
-            Issue.record("Expected state to be `.content` with `isWatched` set to true.")
+            Issue.record("Expected state to be `.content` with `isWatched` set to true, but got \(sut.currentState).")
         }
     }
     
@@ -567,7 +579,7 @@ struct FilmDetailViewModelTests {
             #expect(displayModel.title == film.title, "Should match.")
             #expect(displayModel.visualOriginalTitles == "\(film.originalTitle)\n\(film.originalTitleRomanised)", "Should match.")
         } else {
-            Issue.record("Expected state to be `.content`.")
+            Issue.record("Expected state to be `.content`, but got \(sut.currentState)")
         }
         #expect(sut.filmWasUpdated == false, "Should be false.")
         #expect(spy.updateFilmDetailsCallCount == 2, "Should have been called twice; once for the loading content the first time, twice for displaying it again.")
