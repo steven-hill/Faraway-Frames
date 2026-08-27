@@ -177,10 +177,10 @@ struct FilmDetailViewModelTests {
     @Test("Verifies that the display model formats the Japanese title and range correctly for VoiceOver")
     func filmDetailViewModel_displayModel_setsCorrectAccessibilityPropertiesForOriginalTitle() {
         let film = Film.sample[0]
-        
         let displayModel = FilmDetailViewModel.FilmDetailDisplayModel(film: film)
         let attributedLabel = displayModel.spokenJapaneseTitle
         let expectedPrefix = "Original title: "
+        
         #expect(attributedLabel.string == "\(expectedPrefix)\(film.originalTitle)")
         
         var range = NSRange()
@@ -197,7 +197,7 @@ struct FilmDetailViewModelTests {
     }
     
 
-    @Test("Verifies direct property pass-through mapping from `Film`")
+    @Test("Verifies the display model maps properties correctly from `Film`")
     func filmDetailViewModel_displayModel_mapsBasicPropertiesDirectly() {
         let displayModel = FilmDetailViewModel.FilmDetailDisplayModel(film: Film.sample[0])
         
