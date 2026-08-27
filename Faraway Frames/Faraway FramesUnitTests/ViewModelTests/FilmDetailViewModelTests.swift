@@ -33,28 +33,15 @@ struct FilmDetailViewModelTests {
     @Test("When a film is set, `currentState` should be updated, but not `filmWasUpdated`.")
     func filmDetailViewModel_whenFilmIsNotNil_updatesCurrentStateAndFRCButNotFilmWasUpdated() {
         let film = Film.sample[0]
-        let mockImageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                      managedObjectContext: testPersistenceController.viewContext,
-                                      frcFactory: MockFRCFactory(),
-                                      filmQueueService: filmQueueService
-        )
-        
+        let sut = makeSUT()
         sut.film = film
         sut.setFilm()
         
-        switch sut.currentState {
-        case .noFilmSelected:
-            Issue.record("Expected state to be `.content`, but it was `.noFilmSelected`.")
-        case .content(let displayModel, _):
+        if case .content(let displayModel, _) = sut.currentState {
             #expect(displayModel.title == film.title, "Should match.")
             #expect(displayModel.visualOriginalTitles == "\(film.originalTitle)\n\(film.originalTitleRomanised)", "Should match.")
-        case .fetchFailure:
-            Issue.record("Expected state to be `.content`, but it was `.fetchFailure`.")
-        case .error(_, _, _):
-            Issue.record("Expected state to be `.content`, but it was `.error`.")
+        } else {
+            Issue.record("Expected state to be `.content` but got \(sut.currentState).")
         }
         #expect(sut.filmWasUpdated == false, "Should still be false.")
     }
@@ -71,29 +58,17 @@ struct FilmDetailViewModelTests {
     
     @Test("View model fetches film with correct values from the database if it exists there")
     func filmDetailViewModel_performFetch_fetchesFilmFromDatabaseIfItExists() throws {
-        let testPersistenceController = try PersistenceController(inMemory: true)
-        let context = testPersistenceController.viewContext
-        let filmQueueService = FilmQueueService(context: context)
-        let sut = FilmDetailViewModel(imageLoader: MockImageLoader(),
-                                      managedObjectContext: context,
-                                      frcFactory: MockFRCFactory(),
-                                      filmQueueService: filmQueueService)
+        let (sut, context) = makeSUTAndContext()
         let delegateSpy = FilmDetailViewModelSpy()
         sut.delegate = delegateSpy
-        let film = Film.sample[0]
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
-        let filmMO = PersistenceHelper.makeFilmMO(
-            with: film,
-            entity: entity,
+        let targetFilm = Film.sample[0]
+        let filmMO = try saveFilmToDatabase(
             context: context,
+            film: targetFilm,
             isUpNext: true,
             isWatched: true
         )
-        try? context.save()
-        sut.film = film
+        sut.film = targetFilm
         sut.setFilm()
         #expect(delegateSpy.updateFilmDetailsCallCount == 1, "Should call the delegate.")
         
@@ -103,6 +78,8 @@ struct FilmDetailViewModelTests {
         if case .content(let displayModel,_) = sut.currentState {
             #expect(displayModel.isUpNext == true, "Should be true.")
             #expect(displayModel.isWatched == true, "Should be true.")
+        } else {
+            Issue.record("Expected state to be `.content` but got \(sut.currentState).")
         }
         #expect(delegateSpy.updateFilmDetailsCallCount == 2, "Should call the delegate again.")
     }
@@ -114,19 +91,8 @@ struct FilmDetailViewModelTests {
     func filmDetailViewModel_performsFetch_whenThereIsAnError_setsCorrectFailureState(
         for scenario: (systemError: Error,
                        expectedReason: PersistenceFailureReason)
-    ) throws {
-        let testPersistenceController = try PersistenceController(inMemory: true)
-        let context = testPersistenceController.viewContext
-        let filmQueueService = FilmQueueService(context: context)
-        var mockFactory = MockFRCFactory()
-        mockFactory.makeFilmDetailFRCStub = { _, context in
-            return ThrowingFetchedResultsController(context: context, errorToThrow: scenario.systemError)
-        }
-        let mockImageLoader = MockImageLoader()
-        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                      managedObjectContext: context,
-                                      frcFactory: mockFactory,
-                                      filmQueueService: filmQueueService)
+    ) {
+        let sut = makeSUTWithThrowingFRC(error: scenario.systemError)
         let delegateSpy = FilmDetailViewModelSpy()
         sut.delegate = delegateSpy
         let expectedError = FilmDetailError.fetchFailed(scenario.expectedReason)
@@ -142,20 +108,13 @@ struct FilmDetailViewModelTests {
     
     @Test("Quick selection of films ignores the results of the cancelled task", .tags(.networkRequest))
     func filmDetailViewModel_setFilm_cancelsPreviousImageDownloadTask() async {
-        let filmA = Film.sample[0]
-        let filmB = Film.sample[1]
-        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                      managedObjectContext: testPersistenceController.viewContext,
-                                      frcFactory: MockFRCFactory(),
-                                      filmQueueService: filmQueueService
-        )
+        let (sut, mockImageLoader) = makeSUTAndMockImageLoader()
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
-
+        let filmA = Film.sample[0]
+        let filmB = Film.sample[1]
         sut.film = filmA
+        
         sut.setFilm()
         let taskA = sut.imageLoadTask
         await Task.yield()
@@ -163,11 +122,10 @@ struct FilmDetailViewModelTests {
 
         sut.film = filmB
         sut.setFilm()
-        #expect(taskA?.isCancelled == true, "TaskA should be cancelled.")
+        #expect(taskA?.isCancelled == true, "taskA should be cancelled.")
         await Task.yield()
         #expect(mockImageLoader.loadCount == 2)
 
-        mockImageLoader.resume(shouldSucceed: true)
         mockImageLoader.resume(shouldSucceed: true)
         await Task.yield()
 
@@ -176,38 +134,32 @@ struct FilmDetailViewModelTests {
 
     @Test(.tags(.networkRequest))
     func filmDetailViewModel_getMovieBanner_whenFailedToDownloadMovieBannerImage_returnsFallbackImage() async {
-        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                      managedObjectContext: testPersistenceController.viewContext,
-                                      frcFactory: MockFRCFactory(),
-                                      filmQueueService: filmQueueService
-        )
+        let (sut, mockImageLoader) = makeSUTAndMockImageLoader()
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
+        let film = Film.sample[0]
+        sut.film = film
         
+        /// Calls `getMovieBanner()` itself.
+        sut.setFilm()
+
+        await Task.yield()
         mockImageLoader.resume(shouldSucceed: false)
+        await Task.yield()
         
         if case .content(let displayModel, let image) = sut.currentState {
             #expect(image == SFSymbols.movieClapper, "Should show the film details with `movieclapper` as a fallback image.")
             #expect(sut.currentState == .content(displayModel: displayModel, image: image), "Should have a `FilmDetailDisplayModel` and an image.")
             #expect(spy.updateFilmDetailsCallCount == 2, "Should have called `didUpdateFilmDetails()` twice; once for the film object, and again for the image.")
+        } else {
+            Issue.record("Expected state to be `.content` but got \(sut.currentState).")
         }
     }
     
     @Test("Deallocating the view model cancels any active image download tasks", .tags(.networkRequest))
-    func filmDetailViewModel_deinit_cancelsActiveImageLoadTask() async throws {
+    func filmDetailViewModel_deinit_cancelsActiveImageLoadTask() async {
+        var sut: FilmDetailViewModel? = makeSUT()
         let film = Film.sample[0]
-        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let context = testPersistenceController.viewContext
-        let filmQueueService = FilmQueueService(context: context)
-        var sut: FilmDetailViewModel? = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                                            managedObjectContext: context,
-                                                            frcFactory: MockFRCFactory(),
-                                                            filmQueueService: filmQueueService
-        )
         sut?.film = film
         sut?.setFilm()
         let capturedTask = sut?.imageLoadTask
@@ -224,10 +176,10 @@ struct FilmDetailViewModelTests {
     @Test("Verifies that the display model formats the Japanese title and range correctly for VoiceOver")
     func filmDetailViewModel_displayModel_setsCorrectAccessibilityPropertiesForOriginalTitle() {
         let film = Film.sample[0]
-        
         let displayModel = FilmDetailViewModel.FilmDetailDisplayModel(film: film)
         let attributedLabel = displayModel.spokenJapaneseTitle
         let expectedPrefix = "Original title: "
+        
         #expect(attributedLabel.string == "\(expectedPrefix)\(film.originalTitle)")
         
         var range = NSRange()
@@ -244,7 +196,7 @@ struct FilmDetailViewModelTests {
     }
     
 
-    @Test("Verifies direct property pass-through mapping from `Film`")
+    @Test("Verifies the display model maps properties correctly from `Film`")
     func filmDetailViewModel_displayModel_mapsBasicPropertiesDirectly() {
         let displayModel = FilmDetailViewModel.FilmDetailDisplayModel(film: Film.sample[0])
         
@@ -308,15 +260,8 @@ struct FilmDetailViewModelTests {
     
     @Test("`updateStatus` updates `currentState` and `filmWasUpdated` when `upNext` persistent change completes successfully", .tags(.persistence))
     func filmDetailViewModel_updateStatus_whenUpNextChangeIsSuccessful_updatesCurrentStateAndFilmWasUpdatedFlag() async {
+        let sut = makeSUT()
         let targetFilm = Film.sample[0]
-        let mockImageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                      managedObjectContext: testPersistenceController.viewContext,
-                                      frcFactory: MockFRCFactory(),
-                                      filmQueueService: filmQueueService
-        )
         sut.film = targetFilm
         sut.setFilm()
         
@@ -325,22 +270,15 @@ struct FilmDetailViewModelTests {
         if case .content(let displayModel, _) = sut.currentState {
             #expect(displayModel.isUpNext == true)
         } else {
-            Issue.record("State should be .content with an isUpNext value updated to true.")
+            Issue.record("State should be .content with an isUpNext value updated to true, but got \(sut.currentState).")
         }
         #expect(sut.filmWasUpdated == true, "Should be true.")
     }
     
     @Test("`updateStatus` updates `currentState` and `filmWasUpdated` when `watched` persistent change completes successfully", .tags(.persistence))
     func filmDetailViewModel_updateStatus_whenWatchedChangeIsSuccessful_updatesCurrentStateAndFilmWasUpdatedFlag() async {
+        let sut = makeSUT()
         let targetFilm = Film.sample[0]
-        let mockImageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                      managedObjectContext: testPersistenceController.viewContext,
-                                      frcFactory: MockFRCFactory(),
-                                      filmQueueService: filmQueueService
-        )
         sut.film = targetFilm
         sut.setFilm()
         
@@ -349,7 +287,7 @@ struct FilmDetailViewModelTests {
         if case .content(let displayModel, _) = sut.currentState {
             #expect(displayModel.isWatched == true)
         } else {
-            Issue.record("State should be .content with an isWatched value updated to true.")
+            Issue.record("State should be .content with an isWatched value updated to true, but got \(sut.currentState).")
         }
         #expect(sut.filmWasUpdated == true, "Should be true.")
     }
@@ -392,7 +330,9 @@ struct FilmDetailViewModelTests {
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
         let targetFilm = Film.sample[0]
+        
         await sut.updateStatus(for: targetFilm, queue: .upNext, action: .add)
+        
         #expect(spy.upNextStatusChangeCallCount == 1, "Should call delegate method when adding a film to upNext.")
         
         await sut.updateStatus(for: targetFilm, queue: .upNext, action: .remove)
@@ -412,9 +352,11 @@ struct FilmDetailViewModelTests {
         let targetFilm = Film.sample[0]
 
         await sut.updateStatus(for: targetFilm, queue: .watched, action: .add)
+        
         #expect(spy.watchedStatusChangeCallCount == 1, "Should call delegate method when adding a film to watched.")
         
         await sut.updateStatus(for: targetFilm, queue: .watched, action: .remove)
+        
         #expect(spy.watchedStatusChangeCallCount == 2, "Should call delegate method again when removing a film from watched.")
                 
         await sut.updateStatus(for: targetFilm, queue: .watched, action: .remove)
@@ -430,18 +372,11 @@ struct FilmDetailViewModelTests {
         scenario: (systemError: Error,
                    expectedReason: PersistenceFailureReason)
     ) async {
-        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
-        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext, saver: saver)
-        let targetFilm = Film.sample[0]
-        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                      managedObjectContext: testPersistenceController.viewContext,
-                                      frcFactory: MockFRCFactory(),
-                                      filmQueueService: filmQueueService)
+        let (sut,_) = makeSUTAndContextWithThrowingSaver(error: scenario.systemError)
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
         let expectedError = FilmDetailError.addFailed(scenario.expectedReason)
+        let targetFilm = Film.sample[0]
         
         await sut.updateStatus(for: targetFilm, queue: .upNext, action: .add)
         
@@ -457,24 +392,16 @@ struct FilmDetailViewModelTests {
         scenario: (systemError: Error,
                    expectedReason: PersistenceFailureReason)
     ) async throws {
-        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let context = testPersistenceController.viewContext
-        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
-        let filmQueueService = FilmQueueService(context: context, saver: saver)
-        let targetFilm = Film.sample[0]
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
-        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
-        try? context.save()
-        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                      managedObjectContext: context,
-                                      frcFactory: MockFRCFactory(),
-                                      filmQueueService: filmQueueService)
+        let (sut, context) = makeSUTAndContextWithThrowingSaver(error: scenario.systemError)
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
+        let targetFilm = Film.sample[0]
+        _ = try saveFilmToDatabase(
+            context: context,
+            film: targetFilm,
+            isUpNext: true,
+            isWatched: false
+        )
         let expectedError = FilmDetailError.removeFailed(scenario.expectedReason)
         
         await sut.updateStatus(for: targetFilm, queue: .upNext, action: .remove)
@@ -491,17 +418,10 @@ struct FilmDetailViewModelTests {
         scenario: (systemError: Error,
                    expectedReason: PersistenceFailureReason)
     ) async {
-        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
-        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext, saver: saver)
-        let targetFilm = Film.sample[0]
-        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                      managedObjectContext: testPersistenceController.viewContext,
-                                      frcFactory: MockFRCFactory(),
-                                      filmQueueService: filmQueueService)
+        let (sut,_) = makeSUTAndContextWithThrowingSaver(error: scenario.systemError)
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
+        let targetFilm = Film.sample[0]
         let expectedError = FilmDetailError.addFailed(scenario.expectedReason)
         
         await sut.updateStatus(for: targetFilm, queue: .watched, action: .add)
@@ -518,24 +438,16 @@ struct FilmDetailViewModelTests {
         scenario: (systemError: Error,
                    expectedReason: PersistenceFailureReason)
     ) async throws {
-        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let context = testPersistenceController.viewContext
-        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
-        let filmQueueService = FilmQueueService(context: context, saver: saver)
-        let targetFilm = Film.sample[0]
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
-        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: false, isWatched: true)
-        try? context.save()
-        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                      managedObjectContext: context,
-                                      frcFactory: MockFRCFactory(),
-                                      filmQueueService: filmQueueService)
+        let (sut, context) = makeSUTAndContextWithThrowingSaver(error: scenario.systemError)
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
+        let targetFilm = Film.sample[0]
+        _ = try saveFilmToDatabase(
+            context: context,
+            film: targetFilm,
+            isUpNext: false,
+            isWatched: true
+        )
         let expectedError = FilmDetailError.removeFailed(scenario.expectedReason)
         
         await sut.updateStatus(for: targetFilm, queue: .watched, action: .remove)
@@ -545,101 +457,78 @@ struct FilmDetailViewModelTests {
     }
     
     @Test("FRC delegate catches database film deletions, updates UI and calls delegates", .tags(.persistence))
-    func filmDetailViewModel_frc_handlesDeletionFromDatabase_andUpdatesUI() throws {
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let context = testPersistenceController.viewContext
-        let filmQueueService = FilmQueueService(context: context)
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
-        var targetFilm = Film.sample[0]
-        targetFilm.isUpNext = true
-        targetFilm.isWatched = true
-        let filmMO = PersistenceHelper.makeFilmMO(
-            with: targetFilm,
-            entity: entity,
+    func filmDetailViewModel_frc_handlesDeletionFromDatabase_andUpdatesUI() async throws {
+        let (sut, context) = makeSUTAndContext()
+        let spy = FilmDetailViewModelSpy()
+        sut.delegate = spy
+        let targetFilm = Film.sample[0]
+        let filmMO = try saveFilmToDatabase(
             context: context,
+            film: targetFilm,
             isUpNext: true,
             isWatched: true
         )
-        try? context.save()
-        let sut = FilmDetailViewModel(imageLoader: MockImageLoader(),
-                                      managedObjectContext: context,
-                                      frcFactory: MockFRCFactory(),
-                                      filmQueueService: filmQueueService)
-        let spy = FilmDetailViewModelSpy()
-        sut.delegate = spy
+        
         sut.film = targetFilm
         sut.setFilm()
         sut.performFetch()
+        /// Simulates fetched results controller noticing changes in `controllerDidChangeContent()`.
+        sut.handleFilmUpdate(filmMO)
         
         if case .content(let initialModel, _) = sut.currentState {
             #expect(initialModel.isUpNext == true, "Should be true.")
             #expect(initialModel.isWatched == true, "Should be true.")
+            #expect(spy.upNextStatusChangeCallCount == 1, "Should have notified the delegate once.")
+            #expect(spy.watchedStatusChangeCallCount == 1, "Should have notified the delegate once.")
+        } else {
+            Issue.record("Expected state to be `.content` with both values set to true, but got \(sut.currentState).")
         }
+ 
+        /// Simulates fetched results controller noticing changes: `filmMO.isUpNext = false` and `filmMO.isWatched = false`.
+        sut.handleFilmUpdate(nil)
         
-        filmMO.isUpNext = false
-        filmMO.isWatched = false
-        try? context.save()
-        
-        #expect(spy.upNextStatusChangeCallCount == 1, "Should have notified the delegate once.")
-        #expect(spy.watchedStatusChangeCallCount == 1, "Should have notified the delegate once.")
+        #expect(spy.upNextStatusChangeCallCount == 2, "Should have notified the delegate again.")
+        #expect(spy.watchedStatusChangeCallCount == 2, "Should have notified the delegate again.")
         if case .content(let displayModel, _) = sut.currentState {
             #expect(displayModel.isUpNext == false, "Should be false.")
             #expect(displayModel.isWatched == false, "Should be false.")
+        } else {
+            Issue.record("Expected state to be `.content` with both values set to false, but got \(sut.currentState).")
         }
     }
 
     @Test("FRC delegate catches database edits from other tabs to keep the UI in sync and call delegate", .tags(.persistence))
     func filmDetailViewModel_frc_capturesExternalDatabaseSave_andUpdatesUI() throws {
+        let (sut, context) = makeSUTAndContext()
+        let spy = FilmDetailViewModelSpy()
+        sut.delegate = spy
         let targetFilm = Film.sample[0]
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let context = testPersistenceController.viewContext
-        let filmQueueService = FilmQueueService(context: context)
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
-        let filmMO = PersistenceHelper.makeFilmMO(
-            with: targetFilm,
-            entity: entity,
+        let filmMO = try saveFilmToDatabase(
             context: context,
+            film: targetFilm,
             isUpNext: true,
             isWatched: false
         )
-        try? context.save()
-        
-        let sut = FilmDetailViewModel(imageLoader: MockImageLoader(),
-                                      managedObjectContext: context,
-                                      frcFactory: MockFRCFactory(),
-                                      filmQueueService: filmQueueService)
-        let spy = FilmDetailViewModelSpy()
-        sut.delegate = spy
         sut.film = targetFilm
         sut.setFilm()
         sut.performFetch()
 
+        /// Simulate change to `filmMO`picked up by fetched results controller.
         filmMO.isWatched = true
-        try? context.save()
+        sut.handleFilmUpdate(filmMO)
 
         #expect(spy.watchedStatusChangeCallCount == 1, "Should have notified the delegate once.")
-        
         if case .content(let displayModel, _) = sut.currentState {
             #expect(displayModel.isWatched == true, "Should align with the fresh database record.")
+        } else {
+            Issue.record("Expected state to be `.content` with `isWatched` set to true, but got \(sut.currentState).")
         }
     }
     
-    @Test("View model loads film content again")
-    func filmDetailViewModel_returnToFilmContent_loadsFilmContentAgain() {
+    @Test("View model displays film content again")
+    func filmDetailViewModel_returnToFilmContent_displaysFilmContentAgain() {
         let film = Film.sample[0]
-        let mockImageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                      managedObjectContext: testPersistenceController.viewContext,
-                                      frcFactory: MockFRCFactory(),
-                                      filmQueueService: filmQueueService)
+        let sut = makeSUT()
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
         sut.film = film
@@ -648,33 +537,116 @@ struct FilmDetailViewModelTests {
         
         sut.returnToFilmContent()
         
-        switch sut.currentState {
-        case .noFilmSelected:
-            Issue.record("Expected state to be `.content`, but it was `.noFilmSelected`.")
-        case .content(let displayModel, _):
+        if case .content(let displayModel, _) = sut.currentState {
             #expect(displayModel.title == film.title, "Should match.")
             #expect(displayModel.visualOriginalTitles == "\(film.originalTitle)\n\(film.originalTitleRomanised)", "Should match.")
-        case .fetchFailure:
-            Issue.record("Expected state to be `.content`, but it was `.fetchFailure`.")
-        case .error(_, _, _):
-            Issue.record("Expected state to be `.content`, but it was `.error`.")
+        } else {
+            Issue.record("Expected state to be `.content`, but got \(sut.currentState)")
         }
         #expect(sut.filmWasUpdated == false, "Should be false.")
-        #expect(spy.updateFilmDetailsCallCount == 2, "Should have been called twice; once for the loading content the first time, twice for loading it again.")
+        #expect(spy.updateFilmDetailsCallCount == 2, "Should have been called twice; once for the loading content the first time, twice for displaying it again.")
     }
     
-    //MARK: - Helper method
+    //MARK: - Helper methods
     private func makeSUT() -> FilmDetailViewModel {
-        let mockImageLoader = MockImageLoader()
         let persistenceController = try! PersistenceController.init(inMemory: true)
         let filmQueueService = FilmQueueService(context: persistenceController.viewContext)
-        return FilmDetailViewModel(imageLoader: mockImageLoader,
-                                   managedObjectContext: persistenceController.viewContext,
-                                   frcFactory: MockFRCFactory(),
-                                   filmQueueService: filmQueueService
+        return FilmDetailViewModel(
+            imageLoader: ExploreDetailMovieBannerMockImageLoader(),
+            managedObjectContext: persistenceController.viewContext,
+            frcFactory: MockFRCFactory(),
+            filmQueueService: filmQueueService
         )
     }
     
+    private func makeSUTAndContext() -> (
+        sut: FilmDetailViewModel,
+        context: NSManagedObjectContext
+    ) {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let filmQueueService = FilmQueueService(context: context)
+        let sut = FilmDetailViewModel(
+            imageLoader: ExploreDetailMovieBannerMockImageLoader(),
+            managedObjectContext: context,
+            frcFactory: MockFRCFactory(),
+            filmQueueService: filmQueueService)
+        return (sut, context)
+    }
+    
+    private func makeSUTWithThrowingFRC(error: Error) -> FilmDetailViewModel {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let filmQueueService = FilmQueueService(context: context)
+        var mockFactory = MockFRCFactory()
+        mockFactory.makeFilmDetailFRCStub = { _, context in
+            return ThrowingFetchedResultsController(context: context, errorToThrow: error)
+        }
+        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
+        return FilmDetailViewModel(
+            imageLoader: mockImageLoader,
+            managedObjectContext: context,
+            frcFactory: mockFactory,
+            filmQueueService: filmQueueService
+        )
+    }
+    
+    private func makeSUTAndMockImageLoader() -> (
+        sut: FilmDetailViewModel,
+        mockImageLoader: ExploreDetailMovieBannerMockImageLoader
+    ) {
+        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
+        let sut = FilmDetailViewModel(
+            imageLoader: mockImageLoader,
+            managedObjectContext: testPersistenceController.viewContext,
+            frcFactory: MockFRCFactory(),
+            filmQueueService: filmQueueService
+        )
+        return (sut, mockImageLoader)
+    }
+    
+    private func makeSUTAndContextWithThrowingSaver(error: Error) -> (
+        sut: FilmDetailViewModel,
+        context: NSManagedObjectContext
+    ) {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let saver = ThrowingSaver(errorToThrow: error)
+        let filmQueueService = FilmQueueService(context: context, saver: saver)
+        let sut = FilmDetailViewModel(
+            imageLoader: ExploreDetailMovieBannerMockImageLoader(),
+            managedObjectContext: testPersistenceController.viewContext,
+            frcFactory: MockFRCFactory(),
+            filmQueueService: filmQueueService
+        )
+        return (sut, context)
+    }
+    
+    private func saveFilmToDatabase(
+        context: NSManagedObjectContext,
+        film: Film,
+        isUpNext: Bool,
+        isWatched: Bool
+    ) throws -> FilmMO {
+        let entity = try #require(
+            NSEntityDescription.entity(
+                forEntityName: Persistence.entityname,
+                in: context
+            ), "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
+        let filmMO = PersistenceHelper.makeFilmMO(
+            with: film,
+            entity: entity,
+            context: context,
+            isUpNext: isUpNext,
+            isWatched: isWatched
+        )
+        try? context.save()
+        return filmMO
+    }
+                                               
     //MARK: - Film Detail View Model Spy
     final class FilmDetailViewModelSpy: FilmDetailViewModelDelegate {
         var updateFilmDetailsCallCount = 0
