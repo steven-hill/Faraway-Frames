@@ -100,19 +100,8 @@ struct FilmDetailViewModelTests {
     func filmDetailViewModel_performsFetch_whenThereIsAnError_setsCorrectFailureState(
         for scenario: (systemError: Error,
                        expectedReason: PersistenceFailureReason)
-    ) throws {
-        let testPersistenceController = try PersistenceController(inMemory: true)
-        let context = testPersistenceController.viewContext
-        let filmQueueService = FilmQueueService(context: context)
-        var mockFactory = MockFRCFactory()
-        mockFactory.makeFilmDetailFRCStub = { _, context in
-            return ThrowingFetchedResultsController(context: context, errorToThrow: scenario.systemError)
-        }
-        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
-        let sut = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                      managedObjectContext: context,
-                                      frcFactory: mockFactory,
-                                      filmQueueService: filmQueueService)
+    ) {
+        let sut = makeSUTWithThrowingFRC(error: scenario.systemError)
         let delegateSpy = FilmDetailViewModelSpy()
         sut.delegate = delegateSpy
         let expectedError = FilmDetailError.fetchFailed(scenario.expectedReason)
@@ -668,11 +657,29 @@ struct FilmDetailViewModelTests {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
         let filmQueueService = FilmQueueService(context: context)
-        let sut = FilmDetailViewModel(imageLoader: ExploreDetailMovieBannerMockImageLoader(),
-                                      managedObjectContext: context,
-                                      frcFactory: MockFRCFactory(),
-                                      filmQueueService: filmQueueService)
+        let sut = FilmDetailViewModel(
+            imageLoader: ExploreDetailMovieBannerMockImageLoader(),
+            managedObjectContext: context,
+            frcFactory: MockFRCFactory(),
+            filmQueueService: filmQueueService)
         return (sut, context)
+    }
+    
+    private func makeSUTWithThrowingFRC(error: Error) -> FilmDetailViewModel {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let filmQueueService = FilmQueueService(context: context)
+        var mockFactory = MockFRCFactory()
+        mockFactory.makeFilmDetailFRCStub = { _, context in
+            return ThrowingFetchedResultsController(context: context, errorToThrow: error)
+        }
+        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
+        return FilmDetailViewModel(
+            imageLoader: mockImageLoader,
+            managedObjectContext: context,
+            frcFactory: mockFactory,
+            filmQueueService: filmQueueService
+        )
     }
     
     //MARK: - Film Detail View Model Spy
