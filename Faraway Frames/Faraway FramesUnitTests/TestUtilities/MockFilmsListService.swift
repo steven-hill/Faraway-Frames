@@ -11,12 +11,12 @@ import Testing
 final class MockFilmsListService: FilmsListService {
     var isUsingFileManagerData: Bool = false
     var result: Result<[Film], Error>?
-    var fetchWasCalled = false
+    var fetchAllFilmsCallCount = 0
     private var continuation: CheckedContinuation<[Film], Error>?
     var shouldPauseForLoadingStateTest = false
     
     func fetchAllFilms() async throws -> [Film] {
-        fetchWasCalled = true
+        fetchAllFilmsCallCount += 1
         
         if shouldPauseForLoadingStateTest {
             return try await withCheckedThrowingContinuation { self.continuation = $0 }
@@ -42,5 +42,22 @@ final class MockFilmsListService: FilmsListService {
         case .failure(let error): continuation?.resume(throwing: error)
         case .none: continuation?.resume(throwing: APIError.unknown)
         }
+    }
+}
+
+// MARK: - Factory Methods
+extension MockFilmsListService {
+    static func makeSuccess(
+        films: [Film] = try! JSONHelper.loadAndDecodeFilmsFromJSON()
+    ) -> MockFilmsListService {
+        let mockService = MockFilmsListService()
+        mockService.result = .success(films)
+        return mockService
+    }
+    
+    static func makeFailure(error: Error) -> MockFilmsListService {
+        let mockService = MockFilmsListService()
+        mockService.result = .failure(error)
+        return mockService
     }
 }

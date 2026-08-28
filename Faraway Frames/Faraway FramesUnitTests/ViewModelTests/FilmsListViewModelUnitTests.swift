@@ -48,7 +48,7 @@ struct FilmsListViewModelUnitTests {
         
         await sut.getAllFilms()
 
-        #expect(mockFilmsListService.fetchWasCalled == true, "The service should be told to fetch films.")
+        #expect(mockFilmsListService.fetchAllFilmsCallCount == 1, "The service should be called to fetch films once.")
     }
     
     @Test("ViewModel has correct `currentState` during network request, and calls delegate", .tags(.networkRequest))
@@ -155,6 +155,17 @@ struct FilmsListViewModelUnitTests {
         await sut.getAllFilms()
         
         #expect(sut.currentState == .content(films: sut.films, isUsingArchivedData: false), "Should be set to false.")
+    }
+    
+    @Test("`getAllFilms` uses `filmSyncService` to sync films' data with local database",
+          (.tags(.networkRequest))
+    )
+    func filmsListViewModel_getAllFilms_callsMethodOnFilmSyncService() async {
+        let (sut, spy) = makeSUTAndFilmSyncServiceSpy()
+        
+        await sut.getAllFilms()
+        
+        #expect(spy.syncFilmsWithLocalStorageCallCount == 1, "The film sync service method should have been called once.")
     }
     
     @Test(.tags(.search))
@@ -369,7 +380,7 @@ struct FilmsListViewModelUnitTests {
         #expect(delegateSpy.didChangeStateCallCount == 1, "Should have called delegate method once.")
         
         await sut.refreshTask?.value
-        #expect(mockFilmsListService.fetchWasCalled == true)
+        #expect(mockFilmsListService.fetchAllFilmsCallCount == 1, "Should have used the service to make one network call.")
     }
     
     @Test("Back-to-back network retries cancel the previous task")
@@ -453,7 +464,7 @@ struct FilmsListViewModelUnitTests {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
         let sut = FilmsListViewModel(
-            filmsListService: MockFilmsListServiceHelper.setupMockServiceForSuccessCase(),
+            filmsListService: MockFilmsListService.makeSuccess(),
             imageLoader: mockImageLoader,
             filmSyncService: filmSyncService
         )
@@ -464,7 +475,7 @@ struct FilmsListViewModelUnitTests {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
         return FilmsListViewModel(
-            filmsListService: MockFilmsListServiceHelper.setupMockServiceForSuccessCase(),
+            filmsListService: MockFilmsListService.makeSuccess(),
             imageLoader: MockImageLoader(),
             filmSyncService: filmSyncService
         )
@@ -474,10 +485,24 @@ struct FilmsListViewModelUnitTests {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
         return FilmsListViewModel(
-            filmsListService: MockFilmsListServiceHelper.setupMockServiceForFailureCase(error: error),
+            filmsListService: MockFilmsListService.makeFailure(error: error),
             imageLoader: MockImageLoader(),
             filmSyncService: filmSyncService
         )
+    }
+    
+    private func makeSUTAndFilmSyncServiceSpy() -> (
+        sut: FilmsListViewModel,
+        filmSyncServiceSpy: FilmSyncServiceSpy
+    ) {
+        let mockService = MockFilmsListService.makeSuccess()
+        let spy = FilmSyncServiceSpy()
+        let sut = FilmsListViewModel(
+            filmsListService: mockService,
+            imageLoader: MockImageLoader(),
+            filmSyncService: spy
+        )
+        return (sut, spy)
     }
     
     // MARK: - Films List View Model Delegate
@@ -502,6 +527,16 @@ struct FilmsListViewModelUnitTests {
             guard case let .voiceOverAnnouncement(message) = event else { return }
             capturedMessage = message
             didEmitEventCallCount += 1
+        }
+    }
+    
+    // MARK: - Film Sync Service Spy
+    final class FilmSyncServiceSpy: FilmSyncServicing {
+        var syncFilmsWithLocalStorageCallCount: Int = 0
+        
+        func syncFilmsWithLocalStorage(_ films: [Film]) async -> [Film] {
+            syncFilmsWithLocalStorageCallCount += 1
+            return []
         }
     }
 }

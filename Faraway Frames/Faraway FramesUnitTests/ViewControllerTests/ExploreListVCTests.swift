@@ -130,6 +130,9 @@ struct ExploreListVCTests {
                                 cellConfigurator: mockCellConfigurator,
                                 accessibilityService: mockAccessibilityService)
         sut.loadViewIfNeeded()
+        await Task.yield()
+        
+        #expect(mockService.fetchAllFilmsCallCount == 1, "Should call `fetchAllFilms()` the first time.")
         
         sut.retryButtonTapped()
         sut.view.layoutIfNeeded()
@@ -139,7 +142,7 @@ struct ExploreListVCTests {
         #expect(sut.viewModel.refreshTask != nil, "Should start a new `refreshTask`.")
         
         await sut.viewModel.refreshTask?.value
-        #expect(mockService.fetchWasCalled == true, "Should call fetchAllFilms once.")
+        #expect(mockService.fetchAllFilmsCallCount == 2, "Should call `fetchAllFilms()` the second time.")
     }
     
     @Test(.tags(.networkRequest))
@@ -481,6 +484,9 @@ struct ExploreListVCTests {
                                 cellConfigurator: mockCellConfigurator,
                                 accessibilityService: mockAccessibilityService)
         sut.loadViewIfNeeded()
+        await Task.yield()
+        
+        #expect(mockService.fetchAllFilmsCallCount == 1, "Should call `fetchAllFilms()` the first time.")
 
         sut.collectionView.refreshControl?.sendActions(for: .valueChanged)
         sut.view.layoutIfNeeded()
@@ -490,7 +496,7 @@ struct ExploreListVCTests {
         
         await sut.viewModel.refreshTask?.value
         
-        #expect(mockService.fetchWasCalled == true, "Should call fetchAllFilms.")
+        #expect(mockService.fetchAllFilmsCallCount == 2, "Should call `fetchAllFilms()` the second time.")
     }
     
     @Test("Pull to refresh updates Content Unavailable Configuration")
@@ -583,7 +589,7 @@ struct ExploreListVCTests {
     @Test("`filmDetailViewController` delegate method correctly routes the updated film to FilmsListViewModel")
     func exploreListVC_filmDetailViewController_routesUpdatedFilmToFilmsListViewModel() async {
         let initialFilm = Film.sample[0]
-        let mockFilmsListService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
+        let mockFilmsListService = MockFilmsListService.makeSuccess()
         let imageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
@@ -706,7 +712,7 @@ struct ExploreListVCTests {
     }
     
     private func makeSUTForNetworkSuccess() -> ExploreListVC {
-        let mockFilmsListService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
+        let mockFilmsListService = MockFilmsListService.makeSuccess()
         let imageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
@@ -737,7 +743,7 @@ struct ExploreListVCTests {
     }
     
     private func makeSUTForVOTests(voiceOverIsOn: Bool) async -> (sut: ExploreListVC, mockAccessibilityService: MockAccessibilityService) {
-        let mockFilmsListService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
+        let mockFilmsListService = MockFilmsListService.makeSuccess()
         let imageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
@@ -760,7 +766,6 @@ struct ExploreListVCTests {
         var shouldDeselectAfterSelection = false
         var selectedFilm: Film?
         var didSelectFilmCalled = false
-        
         var onDidSelectFilmCalled: (@Sendable (Film) -> Void)?
         
         func didSelectFilm(_ film: Film) {
