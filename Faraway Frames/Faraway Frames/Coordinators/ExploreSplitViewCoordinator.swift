@@ -16,7 +16,7 @@ final class ExploreSplitViewCoordinator: Coordinator {
     private let imageLoader: ImageLoader
     private let context: NSManagedObjectContext
     private let filmQueueService: FilmQueueServiceProtocol
-    private let filmSyncService: FilmSyncService
+    private let filmSyncService: FilmSyncServicing
     let exploreSplitVC: UISplitViewController
     private(set) var filmDetailViewModel: FilmDetailViewModel
     private let frcFactory: FilmDetailFRCFactory
@@ -26,7 +26,7 @@ final class ExploreSplitViewCoordinator: Coordinator {
          imageLoader: ImageLoader,
          context: NSManagedObjectContext,
          filmQueueService: FilmQueueServiceProtocol,
-         filmSyncService: FilmSyncService,
+         filmSyncService: FilmSyncServicing,
          exploreSplitVC: UISplitViewController = ExploreSplitVC(style: .doubleColumn),
          frcFactory: FilmDetailFRCFactory,
          foundationModelsClient: FoundationModelsService) {
@@ -38,10 +38,11 @@ final class ExploreSplitViewCoordinator: Coordinator {
         self.exploreSplitVC = exploreSplitVC
         self.frcFactory = frcFactory
         self.foundationModelsClient = foundationModelsClient
-        filmDetailViewModel = FilmDetailViewModel(imageLoader: imageLoader,
-                                                  managedObjectContext: context,
-                                                  frcFactory: frcFactory,
-                                                  filmQueueService: filmQueueService
+        filmDetailViewModel = FilmDetailViewModel(
+            imageLoader: imageLoader,
+            managedObjectContext: context,
+            frcFactory: frcFactory,
+            filmQueueService: filmQueueService
         )
     }
     
@@ -52,7 +53,11 @@ final class ExploreSplitViewCoordinator: Coordinator {
     private func createExploreSplitVC() {
         exploreSplitVC.preferredDisplayMode = .oneBesideSecondary
         exploreSplitVC.delegate = self
-        let filmsListViewModel = FilmsListViewModel(filmsListService: dependencies.makeFilmsListService(), imageLoader: imageLoader, filmSyncService: filmSyncService)
+        let filmsListViewModel = FilmsListViewModel(
+            filmsListService: dependencies.makeFilmsListService(),
+            imageLoader: imageLoader,
+            filmSyncService: filmSyncService
+        )
         let cellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
         let exploreListVC = ExploreListVC(viewModel: filmsListViewModel,
                                           cellConfigurator: cellConfigurator,

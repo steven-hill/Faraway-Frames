@@ -29,7 +29,7 @@ final class FilmsListViewModel {
     // MARK: - Properties
     private let filmsListService: FilmsListService
     private let imageLoader: ImageLoader
-    private let filmSyncService: FilmSyncService
+    private let filmSyncService: FilmSyncServicing
     weak var delegate: FilmsListViewModelDelegate?
     private(set) var films: [Film] = []
     private(set) var currentState: FilmsListState = .idle
@@ -40,7 +40,7 @@ final class FilmsListViewModel {
     // MARK: - Initialisation
     init(filmsListService: FilmsListService,
          imageLoader: ImageLoader,
-         filmSyncService: FilmSyncService) {
+         filmSyncService: FilmSyncServicing) {
         self.filmsListService = filmsListService
         self.imageLoader = imageLoader
         self.filmSyncService = filmSyncService

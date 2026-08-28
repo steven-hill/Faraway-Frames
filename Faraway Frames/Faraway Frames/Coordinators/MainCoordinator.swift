@@ -32,22 +32,26 @@ final class MainCoordinator: Coordinator {
         let imageLoader = dependencies.makeImageLoader()
         let foundationModelsClient = dependencies.makeFoundationModelsService()
         
-        let homeCoordinator = HomeCoordinator(navigationController: UINavigationController(),
-                                              context: managedObjectContext,
-                                              imageLoader: imageLoader,
-                                              filmQueueService: filmQueueService,
-                                              frcFactory: frcFactory,
-                                              foundationModelsClient: foundationModelsClient)
+        let homeCoordinator = HomeCoordinator(
+            navigationController: UINavigationController(),
+            context: managedObjectContext,
+            imageLoader: imageLoader,
+            filmQueueService: filmQueueService,
+            frcFactory: frcFactory,
+            foundationModelsClient: foundationModelsClient
+        )
         homeCoordinator.start()
         childCoordinators.append(homeCoordinator)
         
-        let exploreSplitViewCoordinator = ExploreSplitViewCoordinator(dependencies: dependencies,
-                                                                      imageLoader: imageLoader,
-                                                                      context: managedObjectContext,
-                                                                      filmQueueService: filmQueueService,
-                                                                      filmSyncService: filmSyncService,
-                                                                      frcFactory: frcFactory,
-                                                                      foundationModelsClient: foundationModelsClient)
+        let exploreSplitViewCoordinator = ExploreSplitViewCoordinator(
+            dependencies: dependencies,
+            imageLoader: imageLoader,
+            context: managedObjectContext,
+            filmQueueService: filmQueueService,
+            filmSyncService: filmSyncService,
+            frcFactory: frcFactory,
+            foundationModelsClient: foundationModelsClient
+        )
         exploreSplitViewCoordinator.start()
         childCoordinators.append(exploreSplitViewCoordinator)
         

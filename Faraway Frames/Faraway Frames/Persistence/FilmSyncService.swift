@@ -7,7 +7,7 @@
 
 import CoreData
 
-final class FilmSyncService {
+final class FilmSyncService: FilmSyncServicing {
     private let context: DatabaseContext
     
     init(context: DatabaseContext) {
