@@ -44,34 +44,26 @@ struct FilmsListViewModelUnitTests {
     
     @Test("ViewModel makes network call to fetch films", .tags(.networkRequest))
     func filmsListViewModel_getAllFilms_makesANetworkRequest() async {
-        let mockService = MockFilmsListService()
-        let mockImageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader, filmSyncService: filmSyncService)
+        let (sut, mockFilmsListService) = makeSUTAndMockFilmsListService()
         
         await sut.getAllFilms()
 
-        #expect(mockService.fetchWasCalled == true, "The service should be told to fetch films.")
+        #expect(mockFilmsListService.fetchWasCalled == true, "The service should be told to fetch films.")
     }
     
-    @Test("ViewModel has correct `currentState` during network request, and calls delgate", .tags(.networkRequest))
+    @Test("ViewModel has correct `currentState` during network request, and calls delegate", .tags(.networkRequest))
     func filmsListViewModel_getAllFilms_duringNetworkRequest_currentStateIsLoadingAllFilmsAndDelegateIsCalled() async {
-        let mockService = MockFilmsListService()
-        let mockImageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader, filmSyncService: filmSyncService)
+        let (sut, mockFilmsListService) = makeSUTAndMockFilmsListService()
         let delegateSpy = FilmsListViewModelDelegateSpy()
         sut.delegate = delegateSpy
-        mockService.shouldPauseForLoadingStateTest = true
+        mockFilmsListService.shouldPauseForLoadingStateTest = true
         
         let task = Task {
             await sut.getAllFilms()
         }
         await Task.yield()
         
-        #expect(sut.currentState == .loadingAllFilms)
+        #expect(sut.currentState == .loadingAllFilms, "Should be `.loadingAllFilms` during network request.")
         #expect(delegateSpy.didChangeStateCallCount == 1, "Should call delegate method once.")
         task.cancel()
     }
@@ -104,7 +96,7 @@ struct FilmsListViewModelUnitTests {
         
         await sut.getAllFilms()
         
-        #expect(sut.currentState == .error(.noInternetConnection))
+        #expect(sut.currentState == .error(.noInternetConnection), "Should be `.error(.noInternetConnection)`.")
     }
     
     @Test("Covers `handleFailure()`",.tags(.networkRequest))
@@ -113,7 +105,7 @@ struct FilmsListViewModelUnitTests {
         
         await sut.getAllFilms()
         
-        #expect(sut.currentState == .error(.networkTimeout))
+        #expect(sut.currentState == .error(.networkTimeout), "Should be `.error(.networkTimeout)`.")
     }
     
     @Test(.tags(.networkRequest))
@@ -122,7 +114,7 @@ struct FilmsListViewModelUnitTests {
         
         await sut.getAllFilms()
         
-        #expect(sut.currentState == .error(.unknown))
+        #expect(sut.currentState == .error(.unknown), "Should be `.error(.unknown)`.")
     }
     
     @Test(.tags(.networkRequest))
@@ -458,6 +450,21 @@ struct FilmsListViewModelUnitTests {
        }
     
     // MARK: - SUT Helper Methods
+    private func makeSUTAndMockFilmsListService() -> (
+        sut: FilmsListViewModel,
+        service: MockFilmsListService
+    ) {
+        let mockService = MockFilmsListService()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let sut = FilmsListViewModel(
+            filmsListService: mockService,
+            imageLoader: MockImageLoader(),
+            filmSyncService: filmSyncService
+        )
+        return (sut, mockService)
+    }
+    
     private func makeSUTForNetworkCallSuccess() -> FilmsListViewModel {
         let mockService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
         let mockImageLoader = MockImageLoader()
