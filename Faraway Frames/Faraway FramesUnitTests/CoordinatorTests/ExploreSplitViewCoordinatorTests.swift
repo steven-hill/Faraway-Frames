@@ -131,19 +131,24 @@ struct ExploreSplitViewCoordinatorTests {
     }
 
     // MARK: - SUT Helper Methods
-    private func makeSUT() -> (sut: ExploreSplitViewCoordinator, exploreSplitVCSpy: UISplitViewController) {
+    private func makeSUT() -> (
+        sut: ExploreSplitViewCoordinator,
+        exploreSplitVCSpy: UISplitViewController
+    ) {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
         let exploreSplitVCSpy = ExploreSplitVCSpy(style: .doubleColumn)
-        let sut = ExploreSplitViewCoordinator(dependencies: MockContainer(),
-                                              imageLoader: MockImageLoader(),
-                                              context: testPersistenceController.viewContext,
-                                              filmQueueService: filmQueueService,
-                                              filmSyncService: filmSyncService,
-                                              exploreSplitVC: exploreSplitVCSpy,
-                                              frcFactory: MockFRCFactory(),
-                                              foundationModelsClient: MockFoundationModelsClient())
+        let sut = ExploreSplitViewCoordinator(
+            dependencies: MockContainer(),
+            imageLoader: MockImageLoader(),
+            context: testPersistenceController.viewContext,
+            filmQueueService: filmQueueService,
+            filmSyncService: filmSyncService,
+            exploreSplitVC: exploreSplitVCSpy,
+            frcFactory: MockFRCFactory(),
+            foundationModelsClient: MockFoundationModelsClient()
+        )
         return (sut, exploreSplitVCSpy)
     }
     
@@ -151,23 +156,27 @@ struct ExploreSplitViewCoordinatorTests {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        return ExploreSplitViewCoordinator(dependencies: MockContainer(),
-                                           imageLoader: MockImageLoader(),
-                                           context: testPersistenceController.viewContext,
-                                           filmQueueService: filmQueueService,
-                                           filmSyncService: filmSyncService,
-                                           exploreSplitVC: spy,
-                                           frcFactory: MockFRCFactory(),
-                                           foundationModelsClient: MockFoundationModelsClient())
+        return ExploreSplitViewCoordinator(
+            dependencies: MockContainer(),
+            imageLoader: MockImageLoader(),
+            context: testPersistenceController.viewContext,
+            filmQueueService: filmQueueService,
+            filmSyncService: filmSyncService,
+            exploreSplitVC: spy,
+            frcFactory: MockFRCFactory(),
+            foundationModelsClient: MockFoundationModelsClient()
+        )
     }
     
     // MARK: - ExploreSplitVC Spies
     final class ExploreSplitVCSpy: UISplitViewController {
         var presentModalCallCount = 0
         
-        override func present(_ viewControllerToPresent: UIViewController,
-                              animated flag: Bool,
-                              completion: (() -> Void)? = nil) {
+        override func present(
+            _ viewControllerToPresent: UIViewController,
+            animated flag: Bool,
+            completion: (() -> Void)? = nil
+        ) {
             presentModalCallCount += 1
         }
     }
