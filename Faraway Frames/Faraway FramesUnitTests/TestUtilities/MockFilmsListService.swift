@@ -11,12 +11,12 @@ import Testing
 final class MockFilmsListService: FilmsListService {
     var isUsingFileManagerData: Bool = false
     var result: Result<[Film], Error>?
-    var fetchWasCalled = false
+    var fetchAllFilmsCallCount = 0
     private var continuation: CheckedContinuation<[Film], Error>?
     var shouldPauseForLoadingStateTest = false
     
     func fetchAllFilms() async throws -> [Film] {
-        fetchWasCalled = true
+        fetchAllFilmsCallCount += 1
         
         if shouldPauseForLoadingStateTest {
             return try await withCheckedThrowingContinuation { self.continuation = $0 }
