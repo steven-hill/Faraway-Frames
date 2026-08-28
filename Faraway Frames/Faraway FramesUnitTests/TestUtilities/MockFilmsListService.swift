@@ -44,3 +44,20 @@ final class MockFilmsListService: FilmsListService {
         }
     }
 }
+
+// MARK: - Factory Methods
+extension MockFilmsListService {
+    static func makeSuccess(
+        films: [Film] = try! JSONHelper.loadAndDecodeFilmsFromJSON()
+    ) -> MockFilmsListService {
+        let mockService = MockFilmsListService()
+        mockService.result = .success(films)
+        return mockService
+    }
+    
+    static func makeFailure(error: Error) -> MockFilmsListService {
+        let mockService = MockFilmsListService()
+        mockService.result = .failure(error)
+        return mockService
+    }
+}

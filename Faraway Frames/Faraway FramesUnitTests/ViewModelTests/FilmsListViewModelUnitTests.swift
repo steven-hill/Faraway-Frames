@@ -161,7 +161,7 @@ struct FilmsListViewModelUnitTests {
           (.tags(.networkRequest))
     )
     func filmsListViewModel_getAllFilms_callsMethodOnFilmSyncService() async {
-        let mockService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
+        let mockService = MockFilmsListService.makeSuccess()
         let filmSyncServiceSpy = FilmSyncServiceSpy()
         let sut = FilmsListViewModel(
             filmsListService: mockService,
@@ -469,7 +469,7 @@ struct FilmsListViewModelUnitTests {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
         let sut = FilmsListViewModel(
-            filmsListService: MockFilmsListServiceHelper.setupMockServiceForSuccessCase(),
+            filmsListService: MockFilmsListService.makeSuccess(),
             imageLoader: mockImageLoader,
             filmSyncService: filmSyncService
         )
@@ -480,7 +480,7 @@ struct FilmsListViewModelUnitTests {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
         return FilmsListViewModel(
-            filmsListService: MockFilmsListServiceHelper.setupMockServiceForSuccessCase(),
+            filmsListService: MockFilmsListService.makeSuccess(),
             imageLoader: MockImageLoader(),
             filmSyncService: filmSyncService
         )
@@ -490,7 +490,7 @@ struct FilmsListViewModelUnitTests {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
         return FilmsListViewModel(
-            filmsListService: MockFilmsListServiceHelper.setupMockServiceForFailureCase(error: error),
+            filmsListService: MockFilmsListService.makeFailure(error: error),
             imageLoader: MockImageLoader(),
             filmSyncService: filmSyncService
         )

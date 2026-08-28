@@ -589,7 +589,7 @@ struct ExploreListVCTests {
     @Test("`filmDetailViewController` delegate method correctly routes the updated film to FilmsListViewModel")
     func exploreListVC_filmDetailViewController_routesUpdatedFilmToFilmsListViewModel() async {
         let initialFilm = Film.sample[0]
-        let mockFilmsListService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
+        let mockFilmsListService = MockFilmsListService.makeSuccess()
         let imageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
@@ -712,7 +712,7 @@ struct ExploreListVCTests {
     }
     
     private func makeSUTForNetworkSuccess() -> ExploreListVC {
-        let mockFilmsListService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
+        let mockFilmsListService = MockFilmsListService.makeSuccess()
         let imageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
@@ -743,7 +743,7 @@ struct ExploreListVCTests {
     }
     
     private func makeSUTForVOTests(voiceOverIsOn: Bool) async -> (sut: ExploreListVC, mockAccessibilityService: MockAccessibilityService) {
-        let mockFilmsListService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
+        let mockFilmsListService = MockFilmsListService.makeSuccess()
         let imageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
@@ -766,7 +766,6 @@ struct ExploreListVCTests {
         var shouldDeselectAfterSelection = false
         var selectedFilm: Film?
         var didSelectFilmCalled = false
-        
         var onDidSelectFilmCalled: (@Sendable (Film) -> Void)?
         
         func didSelectFilm(_ film: Film) {
