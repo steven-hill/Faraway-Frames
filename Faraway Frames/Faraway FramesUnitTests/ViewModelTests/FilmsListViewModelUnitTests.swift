@@ -157,6 +157,21 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.currentState == .content(films: sut.films, isUsingArchivedData: false), "Should be set to false.")
     }
     
+    @Test("`getAllFilms` uses `filmSyncService` to sync films' data with local database", (.tags(.networkRequest)))
+    func filmsListViewModel_getAllFilms_callsMethodOnFilmSyncService() async {
+        let mockService = MockFilmsListService()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncServiceSpy = FilmSyncService(context: testPersistenceController.viewContext)
+        let sut = FilmsListViewModel(
+            filmsListService: mockService,
+            imageLoader: MockImageLoader(),
+            filmSyncService: filmSyncServiceSpy
+        )
+        await sut.getAllFilms()
+        
+        #expect(filmSyncServiceSpy.syncFilmsWithLocalStorageCallCount == 1, "The service should have been called once.")
+    }
+    
     @Test(.tags(.search))
     func filmsListViewModel_filteredFilmsArray_onInit_isEmpty() {
         let sut = makeSUTForNetworkCallSuccess()
