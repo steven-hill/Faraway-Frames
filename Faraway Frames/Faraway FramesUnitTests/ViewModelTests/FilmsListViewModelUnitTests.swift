@@ -357,11 +357,7 @@ struct FilmsListViewModelUnitTests {
     
     @Test(.tags(.networkRequest))
     func filmsListViewModel_retryLoadingAllFilms_makesAnotherNetworkCall() async {
-        let mockService = MockFilmsListService()
-        let mockImageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader, filmSyncService: filmSyncService)
+        let (sut, mockFilmsListService) = makeSUTAndMockFilmsListService()
         let delegateSpy = FilmsListViewModelDelegateSpy()
         sut.delegate = delegateSpy
         
@@ -373,16 +369,12 @@ struct FilmsListViewModelUnitTests {
         #expect(delegateSpy.didChangeStateCallCount == 1, "Should have called delegate method once.")
         
         await sut.refreshTask?.value
-        #expect(mockService.fetchWasCalled == true)
+        #expect(mockFilmsListService.fetchWasCalled == true)
     }
     
     @Test("Back-to-back network retries cancel the previous task")
     func filmsListViewModel_retryLoadingAllFilms_cancelsPreviousTask() async throws {
-        let mockService = MockFilmsListService()
-        let mockImageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader, filmSyncService: filmSyncService)
+        let (sut, _) = makeSUTAndMockFilmsListService()
         
         sut.retryLoadingAllFilms()
         let firstTask = try #require(sut.refreshTask, "Should have created first task.")
