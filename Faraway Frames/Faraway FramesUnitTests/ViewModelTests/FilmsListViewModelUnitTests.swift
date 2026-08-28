@@ -466,19 +466,23 @@ struct FilmsListViewModelUnitTests {
     }
     
     private func makeSUTForNetworkCallSuccess() -> FilmsListViewModel {
-        let mockService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
-        let mockImageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        return FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader, filmSyncService: filmSyncService)
+        return FilmsListViewModel(
+            filmsListService: MockFilmsListServiceHelper.setupMockServiceForSuccessCase(),
+            imageLoader: MockImageLoader(),
+            filmSyncService: filmSyncService
+        )
     }
     
     private func makeSUTForNetworkCallFailure(error: Error) -> FilmsListViewModel {
-        let mockService = MockFilmsListServiceHelper.setupMockServiceForFailureCase(error: error)
-        let mockImageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        return FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader, filmSyncService: filmSyncService)
+        return FilmsListViewModel(
+            filmsListService: MockFilmsListServiceHelper.setupMockServiceForFailureCase(error: error),
+            imageLoader: MockImageLoader(),
+            filmSyncService: filmSyncService
+        )
     }
     
     // MARK: - Films List View Model Delegate
