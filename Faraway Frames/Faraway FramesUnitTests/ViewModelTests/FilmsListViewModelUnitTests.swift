@@ -14,14 +14,14 @@ struct FilmsListViewModelUnitTests {
     
     @Test("ViewModel `currentState` is `.idle` on init")
     func filmsListViewModel_onInit_currentStateIsIdle() {
-        let sut = makeSUTForSuccessCase()
+        let sut = makeSUTForNetworkCallSuccess()
         
         #expect(sut.currentState == .idle, "Should be `.idle`.")
     }
     
     @Test("ViewModel fetches 22 films from successful network request", .tags(.networkRequest))
     func filmsListViewModel_getAllFilms_whenNetworkRequestIsSuccessful_gets22Films() async {
-        let sut = makeSUTForSuccessCase()
+        let sut = makeSUTForNetworkCallSuccess()
         
         await sut.getAllFilms()
         
@@ -33,7 +33,7 @@ struct FilmsListViewModelUnitTests {
     
     @Test("ViewModel requests voice over announcement after fetching films", .tags(.networkRequest))
     func filmsListViewModel_getAllFilms_whenNetworkRequestIsSuccessful_requestsVoiceOverAnnouncement() async {
-        let sut = makeSUTForSuccessCase()
+        let sut = makeSUTForNetworkCallSuccess()
         let delegateSpy = FilmsListViewModelDelegateSpy()
         sut.delegate = delegateSpy
         await sut.getAllFilms()
@@ -87,7 +87,7 @@ struct FilmsListViewModelUnitTests {
         APIError.unknown
     ])
     func filmsListViewModel_getAllFilms_handlesAPIError(expectedError: APIError) async {
-        let sut = makeSUTForFailureCase(error: expectedError)
+        let sut = makeSUTForNetworkCallFailure(error: expectedError)
         let delegateSpy = FilmsListViewModelDelegateSpy()
         sut.delegate = delegateSpy
         
@@ -100,7 +100,7 @@ struct FilmsListViewModelUnitTests {
     
     @Test("Covers `handleFailure()`",.tags(.networkRequest))
     func filmsListViewModel_getAllFilms_handlesNotConnectedToInternetURLError() async {
-        let sut = makeSUTForFailureCase(error: URLError(.notConnectedToInternet))
+        let sut = makeSUTForNetworkCallFailure(error: URLError(.notConnectedToInternet))
         
         await sut.getAllFilms()
         
@@ -109,7 +109,7 @@ struct FilmsListViewModelUnitTests {
     
     @Test("Covers `handleFailure()`",.tags(.networkRequest))
     func filmsListViewModel_getAllFilms_handlesNetworkTimeOutURLError() async {
-        let sut = makeSUTForFailureCase(error: URLError(.timedOut))
+        let sut = makeSUTForNetworkCallFailure(error: URLError(.timedOut))
         
         await sut.getAllFilms()
         
@@ -118,7 +118,7 @@ struct FilmsListViewModelUnitTests {
     
     @Test(.tags(.networkRequest))
     func filmsListViewModel_getAllFilms_handlesGenericError() async {
-        let sut = makeSUTForFailureCase(error: NSError(domain: "test", code: -1))
+        let sut = makeSUTForNetworkCallFailure(error: NSError(domain: "test", code: -1))
         
         await sut.getAllFilms()
         
@@ -127,7 +127,7 @@ struct FilmsListViewModelUnitTests {
     
     @Test(.tags(.networkRequest))
     func filmsListViewModel_getAllFilms_downloadsImageForFilm() async {
-        let sut = makeSUTForSuccessCase()
+        let sut = makeSUTForNetworkCallSuccess()
         
         await sut.getAllFilms()
         let filmImage = await sut.getImage(for: sut.films[0])
@@ -179,7 +179,7 @@ struct FilmsListViewModelUnitTests {
     
     @Test(.tags(.search))
     func filmsListViewModel_filteredFilmsArray_onInit_isEmpty() {
-        let sut = makeSUTForSuccessCase()
+        let sut = makeSUTForNetworkCallSuccess()
         
         #expect(sut.filteredFilms == [], "Should be empty at init.")
     }
@@ -197,7 +197,7 @@ struct FilmsListViewModelUnitTests {
         APIError.unknown
     ])
     func filmsListViewModel_filterFilms_whenThereAreNoFilmsToSearchThrough_doesNotUpdateFilteredFilmsArray(expectedError: APIError) async {
-        let sut = makeSUTForFailureCase(error: expectedError)
+        let sut = makeSUTForNetworkCallFailure(error: expectedError)
         let delegateSpy = FilmsListViewModelDelegateSpy()
         sut.delegate = delegateSpy
         
@@ -213,7 +213,7 @@ struct FilmsListViewModelUnitTests {
     @Test("ViewModel handles attempted search with empty search query by exiting early via guard",
           .tags(.search))
     func filmsListViewModel_filterFilms_withEmptyQuery_returnsAllFilmsAndAnEmptyFilteredFilmsArray() async {
-        let sut = makeSUTForSuccessCase()
+        let sut = makeSUTForNetworkCallSuccess()
         await sut.getAllFilms()
         let delegateSpy = FilmsListViewModelDelegateSpy()
         sut.delegate = delegateSpy
@@ -227,7 +227,7 @@ struct FilmsListViewModelUnitTests {
     
     @Test(.tags(.search))
     func filmsListViewModel_filterFilms_withPartialQueryMatch_returnsFilmsWithPartialMatches() async {
-        let sut = makeSUTForSuccessCase()
+        let sut = makeSUTForNetworkCallSuccess()
         await sut.getAllFilms()
         let delegateSpy = FilmsListViewModelDelegateSpy()
         sut.delegate = delegateSpy
@@ -240,7 +240,7 @@ struct FilmsListViewModelUnitTests {
     
     @Test(.tags(.search))
     func filmsListViewModel_filterFilms_isNotCaseSensitive() async {
-        let sut = makeSUTForSuccessCase()
+        let sut = makeSUTForNetworkCallSuccess()
         await sut.getAllFilms()
 
         sut.filterFilms(by: "cas")
@@ -250,7 +250,7 @@ struct FilmsListViewModelUnitTests {
     
     @Test(.tags(.search))
     func filmsListViewModel_filterFilms_whenThereAreNoMatches_returnsEmptyArray() async {
-        let sut = makeSUTForSuccessCase()
+        let sut = makeSUTForNetworkCallSuccess()
         await sut.getAllFilms()
         let delegateSpy = FilmsListViewModelDelegateSpy()
         sut.delegate = delegateSpy
@@ -264,7 +264,7 @@ struct FilmsListViewModelUnitTests {
     
     @Test(.tags(.search))
     func filmsListViewModel_filterFilms_removesLeadingAndTrailingWhiteSpaces() async {
-        let sut = makeSUTForSuccessCase()
+        let sut = makeSUTForNetworkCallSuccess()
         await sut.getAllFilms()
         
         sut.filterFilms(by: " Castle ")
@@ -274,7 +274,7 @@ struct FilmsListViewModelUnitTests {
     
     @Test(.tags(.search))
     func filmsListViewModel_filterFilms_removesMultipleSpacesInBetweenWords() async {
-        let sut = makeSUTForSuccessCase()
+        let sut = makeSUTForNetworkCallSuccess()
         await sut.getAllFilms()
         
         sut.filterFilms(by: "Castle  in the sky")
@@ -284,7 +284,7 @@ struct FilmsListViewModelUnitTests {
     
     @Test(.tags(.search))
     func filmsListViewModel_filterFilms_removesPunctuation() async {
-        let sut = makeSUTForSuccessCase()
+        let sut = makeSUTForNetworkCallSuccess()
         await sut.getAllFilms()
         
         sut.filterFilms(by: "Castle, in the sky.!")
@@ -294,7 +294,7 @@ struct FilmsListViewModelUnitTests {
     
     @Test(.tags(.search))
     func filmsListViewModel_filterFilms_handlesEmoji() async {
-        let sut = makeSUTForSuccessCase()
+        let sut = makeSUTForNetworkCallSuccess()
         await sut.getAllFilms()
         
         sut.filterFilms(by: "😎")
@@ -304,7 +304,7 @@ struct FilmsListViewModelUnitTests {
     
     @Test(.tags(.search))
     func filmsListViewModel_filterFilms_handlesTextAndEmoji() async {
-        let sut = makeSUTForSuccessCase()
+        let sut = makeSUTForNetworkCallSuccess()
         await sut.getAllFilms()
         
         sut.filterFilms(by: "Castle in the Sky😎")
@@ -316,7 +316,7 @@ struct FilmsListViewModelUnitTests {
     
     @Test(.tags(.search))
     func filmsListViewModel_filterFilms_whenThereAreSearchResults_requestsVoiceOverAnnouncement() async {
-        let sut = makeSUTForSuccessCase()
+        let sut = makeSUTForNetworkCallSuccess()
         let delegateSpy = FilmsListViewModelDelegateSpy()
         sut.delegate = delegateSpy
         await sut.getAllFilms()
@@ -329,7 +329,7 @@ struct FilmsListViewModelUnitTests {
     
     @Test(.tags(.search))
     func filmsListViewModel_filterFilms_whenSearchResultsAreEmpty_requestsVoiceOverAnnouncement() async {
-        let sut = makeSUTForSuccessCase()
+        let sut = makeSUTForNetworkCallSuccess()
         let delegateSpy = FilmsListViewModelDelegateSpy()
         sut.delegate = delegateSpy
         await sut.getAllFilms()
@@ -342,7 +342,7 @@ struct FilmsListViewModelUnitTests {
     
     @Test(.tags(.networkRequest))
     func filmsListViewModel_resetAllFilms_resetsFilmsArrayToAllFilms() async {
-        let sut = makeSUTForSuccessCase()
+        let sut = makeSUTForNetworkCallSuccess()
         await sut.getAllFilms()
         
         sut.resetAllFilms()
@@ -352,7 +352,7 @@ struct FilmsListViewModelUnitTests {
     }
     
     @Test func filmsListViewModel_resetAllFilms_emptiesFilteredFilms() async {
-        let sut = makeSUTForSuccessCase()
+        let sut = makeSUTForNetworkCallSuccess()
         await sut.getAllFilms()
         sut.filterFilms(by: "Cas")
         #expect(!sut.filteredFilms.isEmpty, "Should have some films.")
@@ -363,7 +363,7 @@ struct FilmsListViewModelUnitTests {
     }
     
     @Test func filmsListViewModel_resetAllFilms_requestsVoiceOverAnnouncement() async {
-        let sut = makeSUTForSuccessCase()
+        let sut = makeSUTForNetworkCallSuccess()
         let delegateSpy = FilmsListViewModelDelegateSpy()
         sut.delegate = delegateSpy
         await sut.getAllFilms()
@@ -417,7 +417,7 @@ struct FilmsListViewModelUnitTests {
     
     @Test("if a film exists in both `films` and `filteredFilms` arrays, `updateFilmInArrays` updates a film's properties in both arrays, updates state, and calls delegate correct number of times.")
     func filmsListViewModel_updateFilmInArrays_whenFilmExistsInBothArrays_updatesBothAndSetsStateAndCallsDelegateCorrectNumberOfTimes() async {
-        let sut = makeSUTForSuccessCase()
+        let sut = makeSUTForNetworkCallSuccess()
         let delegateSpy = FilmsListViewModelDelegateSpy()
         sut.delegate = delegateSpy
         await sut.getAllFilms()
@@ -439,7 +439,7 @@ struct FilmsListViewModelUnitTests {
     
     @Test("`updateFilmInArrays` gracefully does nothing if the film ID does not exist in the arrays")
        func filmsListViewModel_updateFilmInArrays_whenFilmDoesNotExist_leavesArraysUnchanged() async {
-           let sut = makeSUTForSuccessCase()
+           let sut = makeSUTForNetworkCallSuccess()
            let delegateSpy = FilmsListViewModelDelegateSpy()
            sut.delegate = delegateSpy
            await sut.getAllFilms()
@@ -458,7 +458,7 @@ struct FilmsListViewModelUnitTests {
        }
     
     // MARK: - SUT Helper Methods
-    private func makeSUTForSuccessCase() -> FilmsListViewModel {
+    private func makeSUTForNetworkCallSuccess() -> FilmsListViewModel {
         let mockService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
         let mockImageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
@@ -466,7 +466,7 @@ struct FilmsListViewModelUnitTests {
         return FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader, filmSyncService: filmSyncService)
     }
     
-    private func makeSUTForFailureCase(error: Error) -> FilmsListViewModel {
+    private func makeSUTForNetworkCallFailure(error: Error) -> FilmsListViewModel {
         let mockService = MockFilmsListServiceHelper.setupMockServiceForFailureCase(error: error)
         let mockImageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
