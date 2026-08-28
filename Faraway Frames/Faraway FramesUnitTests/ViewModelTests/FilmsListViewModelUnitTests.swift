@@ -129,12 +129,8 @@ struct FilmsListViewModelUnitTests {
     
     @Test(.tags(.networkRequest))
     func filmsListViewModel_getAllFilms_whenFailsToDownloadFilmImage_returnsNil() async {
-        let mockService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
-        let mockImageLoader = MockImageLoader()
+        let (sut, mockImageLoader) = makeSUTAndMockImageLoader()
         mockImageLoader.shouldSucceed = false
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader, filmSyncService: filmSyncService)
         
         await sut.getAllFilms()
         let filmImage = await sut.getImage(for: sut.films[0])
@@ -463,6 +459,21 @@ struct FilmsListViewModelUnitTests {
             filmSyncService: filmSyncService
         )
         return (sut, mockService)
+    }
+    
+    private func makeSUTAndMockImageLoader() -> (
+        sut: FilmsListViewModel,
+        imageLoader: MockImageLoader
+    ) {
+        let mockImageLoader = MockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let sut = FilmsListViewModel(
+            filmsListService: MockFilmsListServiceHelper.setupMockServiceForSuccessCase(),
+            imageLoader: mockImageLoader,
+            filmSyncService: filmSyncService
+        )
+        return (sut, mockImageLoader)
     }
     
     private func makeSUTForNetworkCallSuccess() -> FilmsListViewModel {
