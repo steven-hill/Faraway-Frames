@@ -140,12 +140,8 @@ struct FilmsListViewModelUnitTests {
     
     @Test(.tags(.networkRequest))
     func filmsListViewModel_getAllFilms_whenUsingFileManagerData_currentStateIsCorrect() async {
-        let mockService = MockFilmsListService()
-        let mockImageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader, filmSyncService: filmSyncService)
-        mockService.isUsingFileManagerData = true
+        let (sut, mockFilmsListService) = makeSUTAndMockFilmsListService()
+        mockFilmsListService.isUsingFileManagerData = true
         
         await sut.getAllFilms()
         
@@ -154,11 +150,7 @@ struct FilmsListViewModelUnitTests {
     
     @Test(.tags(.networkRequest))
     func filmsListViewModel_getAllFilms_whenNotUsingFileManagerToReturnFilms_currentStateIsCorrect() async {
-        let mockService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
-        let mockImageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let sut = FilmsListViewModel(filmsListService: mockService, imageLoader: mockImageLoader, filmSyncService: filmSyncService)
+        let sut = makeSUTForNetworkCallSuccess()
         
         await sut.getAllFilms()
         
