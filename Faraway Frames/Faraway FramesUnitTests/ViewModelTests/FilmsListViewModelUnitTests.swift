@@ -157,11 +157,12 @@ struct FilmsListViewModelUnitTests {
         #expect(sut.currentState == .content(films: sut.films, isUsingArchivedData: false), "Should be set to false.")
     }
     
-    @Test("`getAllFilms` uses `filmSyncService` to sync films' data with local database", (.tags(.networkRequest)))
+    @Test("`getAllFilms` uses `filmSyncService` to sync films' data with local database",
+          (.tags(.networkRequest))
+    )
     func filmsListViewModel_getAllFilms_callsMethodOnFilmSyncService() async {
-        let mockService = MockFilmsListService()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncServiceSpy = FilmSyncService(context: testPersistenceController.viewContext)
+        let mockService = MockFilmsListServiceHelper.setupMockServiceForSuccessCase()
+        let filmSyncServiceSpy = FilmSyncServiceSpy()
         let sut = FilmsListViewModel(
             filmsListService: mockService,
             imageLoader: MockImageLoader(),
@@ -517,6 +518,16 @@ struct FilmsListViewModelUnitTests {
             guard case let .voiceOverAnnouncement(message) = event else { return }
             capturedMessage = message
             didEmitEventCallCount += 1
+        }
+    }
+    
+    // MARK: - Film Sync Service Spy
+    final class FilmSyncServiceSpy: FilmSyncServicing {
+        var syncFilmsWithLocalStorageCallCount: Int = 0
+        
+        func syncFilmsWithLocalStorage(_ films: [Film]) async -> [Film] {
+            syncFilmsWithLocalStorageCallCount += 1
+            return []
         }
     }
 }
