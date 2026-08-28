@@ -130,6 +130,9 @@ struct ExploreListVCTests {
                                 cellConfigurator: mockCellConfigurator,
                                 accessibilityService: mockAccessibilityService)
         sut.loadViewIfNeeded()
+        await Task.yield()
+        
+        #expect(mockService.fetchAllFilmsCallCount == 1, "Should call `fetchAllFilms()` the first time.")
         
         sut.retryButtonTapped()
         sut.view.layoutIfNeeded()
@@ -139,7 +142,7 @@ struct ExploreListVCTests {
         #expect(sut.viewModel.refreshTask != nil, "Should start a new `refreshTask`.")
         
         await sut.viewModel.refreshTask?.value
-        #expect(mockService.fetchWasCalled == true, "Should call fetchAllFilms once.")
+        #expect(mockService.fetchAllFilmsCallCount == 2, "Should call `fetchAllFilms()` the second time.")
     }
     
     @Test(.tags(.networkRequest))
@@ -481,6 +484,9 @@ struct ExploreListVCTests {
                                 cellConfigurator: mockCellConfigurator,
                                 accessibilityService: mockAccessibilityService)
         sut.loadViewIfNeeded()
+        await Task.yield()
+        
+        #expect(mockService.fetchAllFilmsCallCount == 1, "Should call `fetchAllFilms()` the first time.")
 
         sut.collectionView.refreshControl?.sendActions(for: .valueChanged)
         sut.view.layoutIfNeeded()
@@ -490,7 +496,7 @@ struct ExploreListVCTests {
         
         await sut.viewModel.refreshTask?.value
         
-        #expect(mockService.fetchWasCalled == true, "Should call fetchAllFilms.")
+        #expect(mockService.fetchAllFilmsCallCount == 2, "Should call `fetchAllFilms()` the second time.")
     }
     
     @Test("Pull to refresh updates Content Unavailable Configuration")

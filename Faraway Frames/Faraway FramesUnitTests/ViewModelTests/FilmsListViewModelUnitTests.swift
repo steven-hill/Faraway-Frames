@@ -48,7 +48,7 @@ struct FilmsListViewModelUnitTests {
         
         await sut.getAllFilms()
 
-        #expect(mockFilmsListService.fetchWasCalled == true, "The service should be told to fetch films.")
+        #expect(mockFilmsListService.fetchAllFilmsCallCount == 1, "The service should be called to fetch films once.")
     }
     
     @Test("ViewModel has correct `currentState` during network request, and calls delegate", .tags(.networkRequest))
@@ -385,7 +385,7 @@ struct FilmsListViewModelUnitTests {
         #expect(delegateSpy.didChangeStateCallCount == 1, "Should have called delegate method once.")
         
         await sut.refreshTask?.value
-        #expect(mockFilmsListService.fetchWasCalled == true)
+        #expect(mockFilmsListService.fetchAllFilmsCallCount == 1, "Should have used the service to make one network call.")
     }
     
     @Test("Back-to-back network retries cancel the previous task")
