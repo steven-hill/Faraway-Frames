@@ -161,16 +161,11 @@ struct FilmsListViewModelUnitTests {
           (.tags(.networkRequest))
     )
     func filmsListViewModel_getAllFilms_callsMethodOnFilmSyncService() async {
-        let mockService = MockFilmsListService.makeSuccess()
-        let filmSyncServiceSpy = FilmSyncServiceSpy()
-        let sut = FilmsListViewModel(
-            filmsListService: mockService,
-            imageLoader: MockImageLoader(),
-            filmSyncService: filmSyncServiceSpy
-        )
+        let (sut, spy) = makeSUTAndFilmSyncServiceSpy()
+        
         await sut.getAllFilms()
         
-        #expect(filmSyncServiceSpy.syncFilmsWithLocalStorageCallCount == 1, "The service should have been called once.")
+        #expect(spy.syncFilmsWithLocalStorageCallCount == 1, "The film sync service method should have been called once.")
     }
     
     @Test(.tags(.search))
@@ -494,6 +489,20 @@ struct FilmsListViewModelUnitTests {
             imageLoader: MockImageLoader(),
             filmSyncService: filmSyncService
         )
+    }
+    
+    private func makeSUTAndFilmSyncServiceSpy() -> (
+        sut: FilmsListViewModel,
+        filmSyncServiceSpy: FilmSyncServiceSpy
+    ) {
+        let mockService = MockFilmsListService.makeSuccess()
+        let spy = FilmSyncServiceSpy()
+        let sut = FilmsListViewModel(
+            filmsListService: mockService,
+            imageLoader: MockImageLoader(),
+            filmSyncService: spy
+        )
+        return (sut, spy)
     }
     
     // MARK: - Films List View Model Delegate
