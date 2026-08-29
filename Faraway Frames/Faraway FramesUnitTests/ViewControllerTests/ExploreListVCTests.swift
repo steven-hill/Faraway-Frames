@@ -75,8 +75,8 @@ struct ExploreListVCTests {
         #expect(sut.searchController.searchBar.isEnabled == true, "Search bar should be enabled.")
     }
     
-    @Test("ExploreListVC shows alert for all API errors when no archived data exists",
-        .tags(.networkRequest),
+    @Test("ExploreListVC shows alert for all API errors when no archived data exists, and disables search bar",
+          .tags(.networkRequest, .search),
           arguments: [
         APIError.noInternetConnection,
         APIError.networkConnectionLost,
@@ -87,7 +87,7 @@ struct ExploreListVCTests {
         APIError.decodingError(""),
         APIError.unknown
     ])
-    func exploreListVC_showsAlertForAllErrors(expectedError: APIError) async throws {
+    func exploreListVC_whenNetworkCallResultsInError_showsAlertForNetworkErrorsAndDisablesSearchBar(expectedError: APIError) async {
         let sut = makeSUTForNetworkFailure(error: expectedError)
         let mockPresenter = MockAlertPresenter()
         sut.alertPresenter = mockPresenter
@@ -104,6 +104,7 @@ struct ExploreListVCTests {
         #expect(retryAction?.style == .default, "Should be `.default`.")
         #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
         #expect(sut.viewModel.currentState == .error(expectedError), "Should be set to .`error`.")
+        #expect(sut.searchController.searchBar.isEnabled == false, "Should be disabled.")
     }
     
     @Test("ExploreListVC can retry network call from the alert's retry button",
@@ -270,6 +271,7 @@ struct ExploreListVCTests {
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
         sut.searchController.searchBar.text = "Cas"
+        
         sut.updateSearchResults(for: sut.searchController)
         let itemCountAfterSearch = sut.collectionView.numberOfItems(inSection: 0)
         
@@ -282,12 +284,12 @@ struct ExploreListVCTests {
     }
     
     @Test(.tags(.search))
-    func exploreListVC_whenThereIsFilmsContentFromSearch_searchBarIsEnabled() async {
+    func exploreListVC_updateSearchResults_whenThereIsFilmsContentFromSearch_searchBarIsEnabled() async {
         let sut = makeSUTForNetworkSuccess()
-        
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
         sut.searchController.searchBar.text = "Cas"
+        
         sut.updateSearchResults(for: sut.searchController)
         let itemCount = sut.collectionView.numberOfItems(inSection: 0)
         
@@ -296,39 +298,16 @@ struct ExploreListVCTests {
     }
     
     @Test(.tags(.search))
-    func exploreListVC_whenThereAreNoSearchResults_searchBarIsEnabled() async {
+    func exploreListVC_updateSearchResults_whenThereAreNoSearchResults_searchBarIsEnabled() async {
         let sut = makeSUTForNetworkSuccess()
-        
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
         sut.searchController.searchBar.text = "No results found"
+        
         sut.updateSearchResults(for: sut.searchController)
         
         #expect(sut.viewModel.filteredFilms.count == 0, "Should have zero films in search results.")
         #expect(sut.searchController.searchBar.isEnabled == true, "Should be true.")
-    }
-    
-    @Test("ExploreListVC search bar is not enabled for all API errors",
-        .tags(.search),
-          arguments: [
-        APIError.noInternetConnection,
-        APIError.networkConnectionLost,
-        APIError.networkTimeout,
-        APIError.invalidURL,
-        APIError.invalidResponse,
-        APIError.serverError(statusCode: 500),
-        APIError.decodingError(""),
-        APIError.unknown
-    ])
-    func exploreListVC_searchBarIsNotEnabledForAllErrors(expectedError: APIError) async throws {
-        let sut = makeSUTForNetworkFailure(error: expectedError)
-        
-        sut.loadViewIfNeeded()
-        await sut.viewModel.getAllFilms()
-        
-        sut.view.layoutIfNeeded()
-        
-        #expect(sut.searchController.searchBar.isEnabled == false, "Should be false.")
     }
     
     @Test func exploreListVC_didSelectItemAt_notifiesDelegate_withCorrectFilm() async {
