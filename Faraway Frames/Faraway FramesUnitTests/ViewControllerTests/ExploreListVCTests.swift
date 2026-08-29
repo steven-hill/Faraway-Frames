@@ -320,25 +320,25 @@ struct ExploreListVCTests {
         let indexPath = IndexPath(item: 0, section: 0)
         sut.collectionView(sut.collectionView, didSelectItemAt: indexPath)
         
-        #expect(spy.didSelectFilmCalled, "Delegate should be called.")
+        #expect(spy.didSelectFilmCallCount == 1, "Delegate should be called once.")
         #expect(spy.selectedFilm?.id == sut.viewModel.films[0].id, "Both ids should match.")
         #expect(spy.selectedFilm?.title == "Castle in the Sky", "Should be `Castle in the Sky`.")
     }
     
-    @Test func exploreListVC_whenIndexPathIsInvalid_didSelectItemAt_doesNotNotifyDelegate() async {
+    @Test func exploreListVC_didSelectItemAt_whenIndexPathIsInvalid_doesNotNotifyDelegate() async {
         let sut = makeSUTForNetworkSuccess()
         let spy = ExploreNavigationSpy()
         sut.navigationDelegate = spy
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
-        
         let indexPath = IndexPath(item: 99, section: 0)
+
         sut.collectionView(sut.collectionView, didSelectItemAt: indexPath)
         
-        #expect(spy.didSelectFilmCalled == false, "Should be false.")
+        #expect(spy.didSelectFilmCallCount == 0, "Should not have called the delegate method.")
     }
     
-    @Test func exploreListVC_whenFilmIsMissingFromLookup_didSelectItemAt_doesNotNotifyDelegate() async {
+    @Test func exploreListVC_didSelectItemAt_whenFilmIsMissingFromLookup_doesNotNotifyDelegate() async {
         let sut = makeSUT()
         let spy = ExploreNavigationSpy()
         sut.navigationDelegate = spy
@@ -348,11 +348,11 @@ struct ExploreListVCTests {
         snapshot.appendSections([.main])
         snapshot.appendItems([testID], toSection: .main)
         await sut.dataSource.apply(snapshot, animatingDifferences: false)
-        
         let indexPath = IndexPath(item: 0, section: 0)
+
         sut.collectionView(sut.collectionView, didSelectItemAt: indexPath)
         
-        #expect(spy.didSelectFilmCalled == false, "Should be false.")
+        #expect(spy.didSelectFilmCallCount == 0, "Should not have called the delegate method.")
     }
     
     @Test("iPhone only: collection view cell deselects after selection", .disabled(if: IpadHelper.isPad))
@@ -363,8 +363,8 @@ struct ExploreListVCTests {
         sut.navigationDelegate = spy
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
-
         let indexPath = IndexPath(item: 0, section: 0)
+
         sut.collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
         sut.collectionView(sut.collectionView, didSelectItemAt: indexPath)
         
@@ -379,8 +379,8 @@ struct ExploreListVCTests {
         sut.navigationDelegate = spy
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
-        
         let indexPath = IndexPath(item: 0, section: 0)
+
         sut.collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
         sut.collectionView(sut.collectionView, didSelectItemAt: indexPath)
         
@@ -713,12 +713,12 @@ struct ExploreListVCTests {
     private final class ExploreNavigationSpy: ExploreNavigationDelegate {
         var shouldDeselectAfterSelection = false
         var selectedFilm: Film?
-        var didSelectFilmCalled = false
+        var didSelectFilmCallCount = 0
         var onDidSelectFilmCalled: (@Sendable (Film) -> Void)?
         
         func didSelectFilm(_ film: Film) {
             selectedFilm = film
-            didSelectFilmCalled = true
+            didSelectFilmCallCount += 1
             onDidSelectFilmCalled?(film)
         }
     }
