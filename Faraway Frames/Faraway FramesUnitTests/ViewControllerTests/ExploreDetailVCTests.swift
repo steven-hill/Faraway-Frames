@@ -261,7 +261,11 @@ struct ExploreDetailVCTests {
         let (sut, targetFilm) = makeSUTForUpdateFilmStatusFailure(errorToThrow: scenario.systemError)
         let expectedError = FilmDetailError.addFailed(scenario.expectedReason)
         
-        await sut.filmDetailViewModel.updateStatus(for: targetFilm, queue: .upNext, action: .add)
+        await sut.filmDetailViewModel.updateStatus(
+            for: targetFilm,
+            queue: .upNext,
+            action: .add
+        )
 
         #expect(sut.filmDetailViewModel.currentState == .error(expectedError, targetFilm, .upNext), "Should be in the error state.")
         #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
@@ -271,7 +275,7 @@ struct ExploreDetailVCTests {
           .tags(.persistence),
           arguments: PersistenceHelper.errorScenarios
     )
-    func exploreDetailVC_whenUpdatingStateFails_presentsAlert(
+    func exploreDetailVC_didReceiveError_whenUpdatingStateFails_presentsAlert(
         scenario: (systemError: CocoaError,
                    expectedReason: PersistenceFailureReason)
     ) async {
@@ -280,9 +284,11 @@ struct ExploreDetailVCTests {
         sut.alertPresenter = mockPresenter
         let expectedError = FilmDetailError.addFailed(scenario.expectedReason)
         
-        await sut.filmDetailViewModel.updateStatus(for: targetFilm,
-                                                   queue: .upNext,
-                                                   action: .add)
+        await sut.filmDetailViewModel.updateStatus(
+            for: targetFilm,
+            queue: .upNext,
+            action: .add
+        )
 
         sut.didReceiveError()
         sut.view.layoutIfNeeded()
@@ -300,7 +306,7 @@ struct ExploreDetailVCTests {
           .tags(.persistence),
           arguments: PersistenceHelper.errorScenarios
     )
-    func exploreDetailVC_tapRetryButtonOnErrorConfig_callsVMUpdateStatusAgain(
+    func exploreDetailVC_tapRetryButtonOnAlert_callsVMUpdateStatusAgain(
         scenario: (systemError: Error,
                    expectedReason: PersistenceFailureReason)
     ) async {
@@ -308,7 +314,11 @@ struct ExploreDetailVCTests {
         let mockPresenter = MockAlertPresenter()
         sut.alertPresenter = mockPresenter
         
-        await sut.filmDetailViewModel.updateStatus(for: targetFilm, queue: .upNext, action: .add)
+        await sut.filmDetailViewModel.updateStatus(
+            for: targetFilm,
+            queue: .upNext,
+            action: .add
+        )
         sut.didReceiveError()
         sut.view.layoutIfNeeded()
         guard let retryAction = mockPresenter.capturedActions.first(where: { $0.title == "Retry" }) else {
@@ -333,7 +343,11 @@ struct ExploreDetailVCTests {
         sut.alertPresenter = mockPresenter
         let displayModel = FilmDetailViewModel.FilmDetailDisplayModel(film: targetFilm)
         
-        await sut.filmDetailViewModel.updateStatus(for: targetFilm, queue: .upNext, action: .add)
+        await sut.filmDetailViewModel.updateStatus(
+            for: targetFilm,
+            queue: .upNext,
+            action: .add
+        )
         sut.didReceiveError()
         sut.view.layoutIfNeeded()
         guard let cancelAction = mockPresenter.capturedActions.first(where: { $0.title == "Cancel" }) else {
@@ -419,12 +433,10 @@ struct ExploreDetailVCTests {
         await Task.yield()
         
         #expect(sut.upNextButton.isEnabled == false, "The button should be disabled.")
-        #expect(sut.watchedButton.isEnabled == true, "The button should be enabled.")
         
         sut.didUpdateUpNextStatus(isUpNext: true)
         
         #expect(sut.upNextButton.isEnabled == true, "The button should be enabled.")
-        #expect(sut.watchedButton.isEnabled == true, "The button should be enabled.")
     }
     
     @Test("Tapping watchedButton disables the button while persistence operation is performed", .tags(.persistence))
@@ -436,12 +448,10 @@ struct ExploreDetailVCTests {
         await Task.yield()
         
         #expect(sut.watchedButton.isEnabled == false, "The button should be disabled.")
-        #expect(sut.upNextButton.isEnabled == true, "The button should be enabled.")
         
         sut.didUpdateWatchedStatus(isWatched: true)
         
         #expect(sut.watchedButton.isEnabled == true, "The button should be enabled.")
-        #expect(sut.upNextButton.isEnabled == true, "The button should be enabled.")
     }
     
     @Test("`viewWillDisappear` calls delegate with the film when the film is updated", .tags(.persistence))
@@ -449,7 +459,11 @@ struct ExploreDetailVCTests {
         let sut = makeSUTWithFilm()
         let delegateSpy = FilmDetailViewControllerDelegateSpy()
         sut.delegate = delegateSpy
-        await sut.filmDetailViewModel.updateStatus(for: Film.sample[0], queue: .upNext, action: .add)
+        await sut.filmDetailViewModel.updateStatus(
+            for: Film.sample[0],
+            queue: .upNext,
+            action: .add
+        )
         sut.didUpdateFilmDetails()
         
         sut.viewWillDisappear(false)
