@@ -183,16 +183,11 @@ struct ExploreDetailVCTests {
         // Simulates tapping the alert's 'Ok' button.
         sut.filmDetailViewModel.returnToFilmContent()
         
-        switch sut.filmDetailViewModel.currentState {
-        case .noFilmSelected:
-            Issue.record("Expected state to be `.content`, but it was `.noFilmSelected`.")
-        case .content(let displayModel, _):
+        if case .content(let displayModel, _) = sut.filmDetailViewModel.currentState {
             #expect(displayModel.title == film.title, "Should match.")
             #expect(displayModel.visualOriginalTitles == "\(film.originalTitle)\n\(film.originalTitleRomanised)", "Should match.")
-        case .fetchFailure:
-            Issue.record("Expected state to be `.content`, but it was `.fetchFailure`.")
-        case .error(_, _, _):
-            Issue.record("Expected state to be `.content`, but it was `.error`.")
+        } else {
+            Issue.record("Expected state to be `.content`, but got \(sut.filmDetailViewModel.currentState).")
         }
     }
     
