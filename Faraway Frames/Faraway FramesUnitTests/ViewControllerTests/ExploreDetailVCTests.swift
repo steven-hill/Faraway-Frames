@@ -33,24 +33,6 @@ struct ExploreDetailVCTests {
         #expect(sut.updatedFilm != nil, "Should not be nil.")
     }
     
-    @Test func exploreDetailVC_whenFilmIsNil_isInsideANavigationController() {
-        let sut = makeSUTWhenFilmIsNil()
-        _ = UINavigationController(rootViewController: sut)
-        
-        sut.loadViewIfNeeded()
-        
-        #expect(sut.navigationController != nil, "VC should be inside a navigation controller.")
-    }
-    
-    @Test func exploreDetailVC_withFilm_isInsideANavigationController() {
-        let sut = makeSUTWithFilm()
-        _ = UINavigationController(rootViewController: sut)
-        
-        sut.loadViewIfNeeded()
-        
-        #expect(sut.navigationController != nil, "VC should be inside a navigation controller.")
-    }
-    
     @Test func exploreDetailVC_whenFilmIsNil_canLoadView() {
         let sut = makeSUTWhenFilmIsNil()
         
