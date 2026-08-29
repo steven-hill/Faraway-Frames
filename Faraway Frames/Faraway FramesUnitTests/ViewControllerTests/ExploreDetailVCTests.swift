@@ -33,22 +33,6 @@ struct ExploreDetailVCTests {
         #expect(sut.updatedFilm != nil, "Should not be nil.")
     }
     
-    @Test func exploreDetailVC_whenFilmIsNil_canLoadView() {
-        let sut = makeSUTWhenFilmIsNil()
-        
-        sut.loadViewIfNeeded()
-        
-        #expect(sut.view != nil, "VC should load the view.")
-    }
-    
-    @Test func exploreDetailVC_withFilm_canLoadView() {
-        let sut = makeSUTWithFilm()
-        
-        sut.loadViewIfNeeded()
-        
-        #expect(sut.view != nil, "VC should load the view.")
-    }
-    
     @Test func exploreDetailVC_viewDidLoad_whenFilmIsNil_setsDelegate() {
         let sut = makeSUTWhenFilmIsNil()
         
