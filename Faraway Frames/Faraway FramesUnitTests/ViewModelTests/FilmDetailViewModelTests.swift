@@ -62,7 +62,7 @@ struct FilmDetailViewModelTests {
         let delegateSpy = FilmDetailViewModelSpy()
         sut.delegate = delegateSpy
         let targetFilm = Film.sample[0]
-        let filmMO = try saveFilmToDatabase(
+        let filmMO = try PersistenceHelper.saveFilmToDatabase(
             context: context,
             film: targetFilm,
             isUpNext: true,
@@ -396,7 +396,7 @@ struct FilmDetailViewModelTests {
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
         let targetFilm = Film.sample[0]
-        _ = try saveFilmToDatabase(
+        _ = try PersistenceHelper.saveFilmToDatabase(
             context: context,
             film: targetFilm,
             isUpNext: true,
@@ -442,7 +442,7 @@ struct FilmDetailViewModelTests {
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
         let targetFilm = Film.sample[0]
-        _ = try saveFilmToDatabase(
+        _ = try PersistenceHelper.saveFilmToDatabase(
             context: context,
             film: targetFilm,
             isUpNext: false,
@@ -462,7 +462,7 @@ struct FilmDetailViewModelTests {
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
         let targetFilm = Film.sample[0]
-        let filmMO = try saveFilmToDatabase(
+        let filmMO = try PersistenceHelper.saveFilmToDatabase(
             context: context,
             film: targetFilm,
             isUpNext: true,
@@ -503,7 +503,7 @@ struct FilmDetailViewModelTests {
         let spy = FilmDetailViewModelSpy()
         sut.delegate = spy
         let targetFilm = Film.sample[0]
-        let filmMO = try saveFilmToDatabase(
+        let filmMO = try PersistenceHelper.saveFilmToDatabase(
             context: context,
             film: targetFilm,
             isUpNext: true,
@@ -623,30 +623,7 @@ struct FilmDetailViewModelTests {
         )
         return (sut, context)
     }
-    
-    private func saveFilmToDatabase(
-        context: NSManagedObjectContext,
-        film: Film,
-        isUpNext: Bool,
-        isWatched: Bool
-    ) throws -> FilmMO {
-        let entity = try #require(
-            NSEntityDescription.entity(
-                forEntityName: Persistence.entityname,
-                in: context
-            ), "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
-        let filmMO = PersistenceHelper.makeFilmMO(
-            with: film,
-            entity: entity,
-            context: context,
-            isUpNext: isUpNext,
-            isWatched: isWatched
-        )
-        try? context.save()
-        return filmMO
-    }
-                                               
+                                          
     //MARK: - Film Detail View Model Spy
     final class FilmDetailViewModelSpy: FilmDetailViewModelDelegate {
         var updateFilmDetailsCallCount = 0
