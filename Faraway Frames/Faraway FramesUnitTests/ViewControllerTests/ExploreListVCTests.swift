@@ -139,7 +139,9 @@ struct ExploreListVCTests {
         #expect(sut.loadTask == nil, "Should be nil.")
     }
     
-    @Test("VC handles transition from empty search results view back to collection view")
+    @Test("VC handles transition from empty search results view back to collection view",
+          .tags(.search)
+    )
     func exploreListVC_whenSearchBarCancelButtonTapped_returnsToCollectionView() async {
         let sut = makeSUTForNetworkSuccess()
         sut.loadViewIfNeeded()
@@ -155,7 +157,7 @@ struct ExploreListVCTests {
         sut.view.layoutIfNeeded()
         
         #expect(sut.contentUnavailableConfiguration == nil, "Should be nil because the collection view is now on screen.")
-        #expect(sut.collectionView.isHidden == false, "Should be on screen.")
+        #expect(sut.collectionView.isHidden == false, "Should be visible.")
     }
     
     @Test func exploreListVC_dataSource_returnsACell() async {
@@ -202,22 +204,22 @@ struct ExploreListVCTests {
     }
     
     @Test(.tags(.search))
-    func exploreListVC_searchTextIsEmptyOnInit() {
+    func exploreListVC_onInit_searchTextIsEmpty() {
         let sut = makeSUT()
         
         sut.loadViewIfNeeded()
         sut.updateSearchResults(for: sut.searchController)
         
-        #expect(((sut.searchController.searchBar.text?.isEmpty) != nil), "Search bar text should be nil on init.")
+        #expect(sut.searchController.searchBar.text?.isEmpty == true, "Search bar text should be nil on init.")
     }
     
     @Test(.tags(.search))
-    func exploreListVC_whenSearchTextIsEmpty_searchIsNotAttempted() async {
+    func exploreListVC_updateSearchResults_whenSearchTextIsEmpty_searchIsNotAttempted() async {
         let sut = makeSUTForNetworkSuccess()
-        
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
         sut.searchController.searchBar.text = ""
+        
         sut.updateSearchResults(for: sut.searchController)
         let itemCount = sut.collectionView.numberOfItems(inSection: 0)
         
@@ -225,7 +227,7 @@ struct ExploreListVCTests {
     }
     
     @Test(.tags(.search))
-    func exploreListVC_whenVMFilmsArrayIsEmpty_searchIsNotAttempted() {
+    func exploreListVC_whenVMFilmsArraysAreEmpty_searchIsNotAttempted() {
         let sut = makeSUT()
         
         sut.updateSearchResults(for: sut.searchController)
@@ -235,12 +237,12 @@ struct ExploreListVCTests {
     }
     
     @Test(.tags(.search))
-    func exploreListVC_whenSearchWasSuccessful_showsFilteredResults() async {
+    func exploreListVC_updateSearchResults_whenSearchIsSuccessful_showsFilteredResults() async {
         let sut = makeSUTForNetworkSuccess()
-        
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
         sut.searchController.searchBar.text = "Cas"
+        
         sut.updateSearchResults(for: sut.searchController)
         let itemCount = sut.collectionView.numberOfItems(inSection: 0)
         
@@ -248,12 +250,12 @@ struct ExploreListVCTests {
     }
     
     @Test(.tags(.search))
-    func exploreListVC_whenThereAreNoSearchResults_showsEmptySearchResultsView() async {
+    func exploreListVC_updateSearchResults_whenThereAreNoSearchResults_showsEmptySearchResultsView() async {
         let sut = makeSUTForNetworkSuccess()
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
-
         sut.searchController.searchBar.text = "No results found"
+
         sut.updateSearchResults(for: sut.searchController)
         sut.view.layoutIfNeeded()
         
@@ -262,9 +264,8 @@ struct ExploreListVCTests {
     }
     
     @Test(.tags(.search))
-    func exploreListVC_searchBarCancelButtonTapped_showsAllFilmsAgain() async {
+    func exploreListVC_searchBarCancelButtonClicked_showsAllFilmsAgain() async {
         let sut = makeSUTForNetworkSuccess()
-        
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
         sut.searchController.searchBar.text = "Cas"
