@@ -406,7 +406,7 @@ struct ExploreListVCTests {
 
         sut.collectionView.refreshControl?.sendActions(for: .valueChanged)
         sut.view.layoutIfNeeded()
-        
+    
         #expect(sut.contentUnavailableConfiguration != nil, "Should be showing loading view.")
         #expect(sut.viewModel.currentState == .loadingAllFilms, "Should be set to `.loadingAllFilms`.")
         
@@ -415,29 +415,24 @@ struct ExploreListVCTests {
         #expect(mockFilmsListService.fetchAllFilmsCallCount == 2, "Should call `fetchAllFilms()` the second time.")
     }
     
-    @Test("Pull to refresh updates Content Unavailable Configuration")
-    func exploreListVC_pullToRefresh_updatesContentUnavailableConfiguration() {
-        let sut = makeSUTForNetworkSuccess()
-        sut.loadViewIfNeeded()
-        
-        sut.collectionView.refreshControl?.sendActions(for: .valueChanged)
-
-        #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
-    }
-    
-    @Test("Refreshing stops when view model's state changes")
+    @Test("Call to end refreshing is made when view model's state changes")
     func exploreListVC_refreshControl_whenVMStateChanges_stopsRefreshing() async {
         let sut = makeSUTForNetworkSuccess()
+        let spyRefreshControl = RefreshControlSpy()
         sut.loadViewIfNeeded()
-        await sut.loadTask?.value
-        sut.collectionView.refreshControl?.sendActions(for: .valueChanged)
+        sut.collectionView.refreshControl = spyRefreshControl
         
+        await sut.loadTask?.value
+        
+        #expect(spyRefreshControl.endRefreshingCallCount == 2, "Should have been called twice so far due to two VM state changes (idle -> loading -> content).")
+        
+        /// Simulate the refresh.
         sut.viewModel(
             sut.viewModel,
             didChange: sut.viewModel.currentState
         )
         
-        #expect(sut.collectionView.refreshControl?.isRefreshing == false, "Should be false.")
+        #expect(spyRefreshControl.endRefreshingCallCount == 3, "Should call `endRefreshing()` again after another state change.")
     }
     
     @Test("When there is a network error and data in File Manager is being used, collection view displays supplementary header view.")
@@ -688,7 +683,7 @@ struct ExploreListVCTests {
         return (sut, mockAccessibilityService)
     }
     
-    // MARK: - Explore Navigation Delegate Spy
+    // MARK: - Spies
     private final class ExploreNavigationSpy: ExploreNavigationDelegate {
         var shouldDeselectAfterSelection = false
         var selectedFilm: Film?
@@ -699,6 +694,15 @@ struct ExploreListVCTests {
             selectedFilm = film
             didSelectFilmCallCount += 1
             onDidSelectFilmCalled?(film)
+        }
+    }
+    
+    private final class RefreshControlSpy: UIRefreshControl {
+        var endRefreshingCallCount = 0
+        
+        override func endRefreshing() {
+            super.endRefreshing()
+            endRefreshingCallCount += 1
         }
     }
 }

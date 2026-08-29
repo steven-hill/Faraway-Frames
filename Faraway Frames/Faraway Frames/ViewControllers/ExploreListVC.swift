@@ -178,10 +178,8 @@ final class ExploreListVC: UIViewController {
             setNeedsUpdateContentUnavailableConfiguration()
             collectionViewIsHidden = false
             searchBarIsEnabled = true
-            //self.films = films
             let filmIds = films.map({ $0.id })
             filmLookup = Dictionary(uniqueKeysWithValues: films.map { ($0.id, $0) })
-            collectionView.refreshControl?.endRefreshing()
             
             var snapshot = NSDiffableDataSourceSnapshot<Section, Film.ID>()
             snapshot.appendSections([.main])
@@ -252,7 +250,11 @@ final class ExploreListVC: UIViewController {
 
 // MARK: - Collection View Delegate
 extension ExploreListVC: UICollectionViewDelegate {
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        didSelectItemAt
+        indexPath: IndexPath
+    ) {
         guard let filmId = dataSource.itemIdentifier(for: indexPath),
               let selectedFilm = filmLookup[filmId] else { return }
         navigationDelegate?.didSelectFilm(selectedFilm)
