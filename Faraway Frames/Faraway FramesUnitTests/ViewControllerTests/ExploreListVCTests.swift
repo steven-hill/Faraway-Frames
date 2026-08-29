@@ -9,6 +9,7 @@ import Testing
 import UIKit
 import SwiftUI
 @testable import Faraway_Frames
+import CoreData
 
 @MainActor
 struct ExploreListVCTests {
@@ -47,18 +48,9 @@ struct ExploreListVCTests {
         #expect(sut.collectionView.dataSource != nil, "Collection view data source should be set.")
     }
     
-    @Test(.tags(.networkRequest))
-    func exploreListVC_whenLoadingAllFilms_showsLoadingView() async {
-        let mockFilmsListService = MockFilmsListService()
-        let imageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
-        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
-        let mockAccessibilityService = MockAccessibilityService()
-        let sut = ExploreListVC(viewModel: filmsListViewModel,
-                                cellConfigurator: mockCellConfigurator,
-                                accessibilityService: mockAccessibilityService)
+    @Test(.tags(.networkRequest, .search))
+    func exploreListVC_whenLoadingAllFilms_showsLoadingViewAndSearchBarIsDisabled() async {
+        let (sut, mockFilmsListService) = makeSUTAndMockFilmsListService()
         mockFilmsListService.shouldPauseForLoadingStateTest = true
         
         sut.loadViewIfNeeded()
@@ -67,10 +59,11 @@ struct ExploreListVCTests {
         
         #expect(sut.contentUnavailableConfiguration != nil, "Should be showing loading view.")
         #expect(sut.viewModel.currentState == .loadingAllFilms, "State should be `.loadingAllFilms`.")
+        #expect(sut.searchController.searchBar.isEnabled == false, "Should be disabled.")
     }
     
-    @Test(.tags(.networkRequest))
-    func exploreListVC_afterSuccessfulNetworkCall_updatesUICorrectly() async {
+    @Test(.tags(.networkRequest, .search))
+    func exploreListVC_afterSuccessfulNetworkCall_updatesUICorrectlyAndSearchBarIsEnabled() async {
         let sut = makeSUTForNetworkSuccess()
         
         sut.loadViewIfNeeded()
@@ -79,12 +72,12 @@ struct ExploreListVCTests {
         
         #expect(itemCount == 22, "Should be 22 films in the collection view.")
         #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
-        #expect(sut.collectionView.isHidden == false)
-        #expect(sut.searchController.searchBar.isEnabled == true)
+        #expect(sut.collectionView.isHidden == false, "Collection view should be visible.")
+        #expect(sut.searchController.searchBar.isEnabled == true, "Search bar should be enabled.")
     }
     
-    @Test("ExploreListVC shows alert for all API errors when no archived data exists",
-        .tags(.networkRequest),
+    @Test("ExploreListVC shows alert for all API errors when no archived data exists, and disables search bar",
+          .tags(.networkRequest, .search),
           arguments: [
         APIError.noInternetConnection,
         APIError.networkConnectionLost,
@@ -95,7 +88,7 @@ struct ExploreListVCTests {
         APIError.decodingError(""),
         APIError.unknown
     ])
-    func exploreListVC_showsAlertForAllErrors(expectedError: APIError) async throws {
+    func exploreListVC_whenNetworkCallResultsInError_showsAlertForNetworkErrorsAndDisablesSearchBar(expectedError: APIError) async {
         let sut = makeSUTForNetworkFailure(error: expectedError)
         let mockPresenter = MockAlertPresenter()
         sut.alertPresenter = mockPresenter
@@ -112,27 +105,17 @@ struct ExploreListVCTests {
         #expect(retryAction?.style == .default, "Should be `.default`.")
         #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
         #expect(sut.viewModel.currentState == .error(expectedError), "Should be set to .`error`.")
+        #expect(sut.searchController.searchBar.isEnabled == false, "Should be disabled.")
     }
     
-    @Test("ExploreListVC can retry network call from alert",
+    @Test("ExploreListVC can retry network call from the alert's retry button",
           .tags(.networkRequest))
-    func exploreListVC_retry_callsFetchAllFilms() async {
-        let mockService = MockFilmsListService()
-        let imageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockService,
-                                                    imageLoader: imageLoader,
-                                                    filmSyncService: filmSyncService)
-        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
-        let mockAccessibilityService = MockAccessibilityService()
-        let sut = ExploreListVC(viewModel: filmsListViewModel,
-                                cellConfigurator: mockCellConfigurator,
-                                accessibilityService: mockAccessibilityService)
+    func exploreListVC_retryButtonTapped_callsFetchAllFilms() async {
+        let (sut, mockFilmsListService) = makeSUTAndMockFilmsListService()
         sut.loadViewIfNeeded()
         await Task.yield()
         
-        #expect(mockService.fetchAllFilmsCallCount == 1, "Should call `fetchAllFilms()` the first time.")
+        #expect(mockFilmsListService.fetchAllFilmsCallCount == 1, "Should call `fetchAllFilms()` the first time.")
         
         sut.retryButtonTapped()
         sut.view.layoutIfNeeded()
@@ -142,7 +125,7 @@ struct ExploreListVCTests {
         #expect(sut.viewModel.refreshTask != nil, "Should start a new `refreshTask`.")
         
         await sut.viewModel.refreshTask?.value
-        #expect(mockService.fetchAllFilmsCallCount == 2, "Should call `fetchAllFilms()` the second time.")
+        #expect(mockFilmsListService.fetchAllFilmsCallCount == 2, "Should call `fetchAllFilms()` the second time.")
     }
     
     @Test(.tags(.networkRequest))
@@ -159,7 +142,9 @@ struct ExploreListVCTests {
         #expect(sut.loadTask == nil, "Should be nil.")
     }
     
-    @Test("VC handles transition from empty search results view back to collection view")
+    @Test("VC handles transition from empty search results view back to collection view",
+          .tags(.search)
+    )
     func exploreListVC_whenSearchBarCancelButtonTapped_returnsToCollectionView() async {
         let sut = makeSUTForNetworkSuccess()
         sut.loadViewIfNeeded()
@@ -175,7 +160,7 @@ struct ExploreListVCTests {
         sut.view.layoutIfNeeded()
         
         #expect(sut.contentUnavailableConfiguration == nil, "Should be nil because the collection view is now on screen.")
-        #expect(sut.collectionView.isHidden == false, "Should be on screen.")
+        #expect(sut.collectionView.isHidden == false, "Should be visible.")
     }
     
     @Test func exploreListVC_dataSource_returnsACell() async {
@@ -222,22 +207,22 @@ struct ExploreListVCTests {
     }
     
     @Test(.tags(.search))
-    func exploreListVC_searchTextIsEmptyOnInit() {
+    func exploreListVC_onInit_searchTextIsEmpty() {
         let sut = makeSUT()
         
         sut.loadViewIfNeeded()
         sut.updateSearchResults(for: sut.searchController)
         
-        #expect(((sut.searchController.searchBar.text?.isEmpty) != nil), "Search bar text should be nil on init.")
+        #expect(sut.searchController.searchBar.text?.isEmpty == true, "Search bar text should be nil on init.")
     }
     
     @Test(.tags(.search))
-    func exploreListVC_whenSearchTextIsEmpty_searchIsNotAttempted() async {
+    func exploreListVC_updateSearchResults_whenSearchTextIsEmpty_searchIsNotAttempted() async {
         let sut = makeSUTForNetworkSuccess()
-        
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
         sut.searchController.searchBar.text = ""
+        
         sut.updateSearchResults(for: sut.searchController)
         let itemCount = sut.collectionView.numberOfItems(inSection: 0)
         
@@ -245,7 +230,7 @@ struct ExploreListVCTests {
     }
     
     @Test(.tags(.search))
-    func exploreListVC_whenVMFilmsArrayIsEmpty_searchIsNotAttempted() {
+    func exploreListVC_whenVMFilmsArraysAreEmpty_searchIsNotAttempted() {
         let sut = makeSUT()
         
         sut.updateSearchResults(for: sut.searchController)
@@ -255,12 +240,12 @@ struct ExploreListVCTests {
     }
     
     @Test(.tags(.search))
-    func exploreListVC_whenSearchWasSuccessful_showsFilteredResults() async {
+    func exploreListVC_updateSearchResults_whenSearchIsSuccessful_showsFilteredResults() async {
         let sut = makeSUTForNetworkSuccess()
-        
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
         sut.searchController.searchBar.text = "Cas"
+        
         sut.updateSearchResults(for: sut.searchController)
         let itemCount = sut.collectionView.numberOfItems(inSection: 0)
         
@@ -268,12 +253,12 @@ struct ExploreListVCTests {
     }
     
     @Test(.tags(.search))
-    func exploreListVC_whenThereAreNoSearchResults_showsEmptySearchResultsView() async {
+    func exploreListVC_updateSearchResults_whenThereAreNoSearchResults_showsEmptySearchResultsView() async {
         let sut = makeSUTForNetworkSuccess()
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
-
         sut.searchController.searchBar.text = "No results found"
+
         sut.updateSearchResults(for: sut.searchController)
         sut.view.layoutIfNeeded()
         
@@ -282,12 +267,12 @@ struct ExploreListVCTests {
     }
     
     @Test(.tags(.search))
-    func exploreListVC_searchBarCancelButtonTapped_showsAllFilmsAgain() async {
+    func exploreListVC_searchBarCancelButtonClicked_showsAllFilmsAgain() async {
         let sut = makeSUTForNetworkSuccess()
-        
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
         sut.searchController.searchBar.text = "Cas"
+        
         sut.updateSearchResults(for: sut.searchController)
         let itemCountAfterSearch = sut.collectionView.numberOfItems(inSection: 0)
         
@@ -300,46 +285,12 @@ struct ExploreListVCTests {
     }
     
     @Test(.tags(.search))
-    func exploreListVC_whenLoadingAllFilms_searchBarIsNotEnabled() async {
-        let mockFilmsListService = MockFilmsListService()
-        let imageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
-        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
-        let mockAccessibilityService = MockAccessibilityService()
-        let sut = ExploreListVC(viewModel: filmsListViewModel,
-                                cellConfigurator: mockCellConfigurator,
-                                accessibilityService: mockAccessibilityService)
-        mockFilmsListService.shouldPauseForLoadingStateTest = true
-        
-        sut.loadViewIfNeeded()
-        await Task.yield()
-        sut.view.layoutIfNeeded()
-        
-        #expect(sut.viewModel.currentState == .loadingAllFilms, "State should be `.loadingAllFilms`.")
-        #expect(sut.searchController.searchBar.isEnabled == false, "Should be false.")
-    }
-    
-    @Test(.tags(.search))
-    func exploreListVC_whenThereIsFilmsContentFromNetworkCall_searchBarIsEnabled() async {
+    func exploreListVC_updateSearchResults_whenThereIsFilmsContentFromSearch_searchBarIsEnabled() async {
         let sut = makeSUTForNetworkSuccess()
-        
-        sut.loadViewIfNeeded()
-        await sut.loadTask?.value
-        let itemCount = sut.collectionView.numberOfItems(inSection: 0)
-        
-        #expect(itemCount == 22, "All 22 films should still be in the collection view.")
-        #expect(sut.searchController.searchBar.isEnabled == true, "Should be true.")
-    }
-    
-    @Test(.tags(.search))
-    func exploreListVC_whenThereIsFilmsContentFromSearch_searchBarIsEnabled() async {
-        let sut = makeSUTForNetworkSuccess()
-        
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
         sut.searchController.searchBar.text = "Cas"
+        
         sut.updateSearchResults(for: sut.searchController)
         let itemCount = sut.collectionView.numberOfItems(inSection: 0)
         
@@ -348,39 +299,16 @@ struct ExploreListVCTests {
     }
     
     @Test(.tags(.search))
-    func exploreListVC_whenThereAreNoSearchResults_searchBarIsEnabled() async {
+    func exploreListVC_updateSearchResults_whenThereAreNoSearchResults_searchBarIsEnabled() async {
         let sut = makeSUTForNetworkSuccess()
-        
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
         sut.searchController.searchBar.text = "No results found"
+        
         sut.updateSearchResults(for: sut.searchController)
         
         #expect(sut.viewModel.filteredFilms.count == 0, "Should have zero films in search results.")
         #expect(sut.searchController.searchBar.isEnabled == true, "Should be true.")
-    }
-    
-    @Test("ExploreListVC search bar is not enabled for all API errors",
-        .tags(.search),
-          arguments: [
-        APIError.noInternetConnection,
-        APIError.networkConnectionLost,
-        APIError.networkTimeout,
-        APIError.invalidURL,
-        APIError.invalidResponse,
-        APIError.serverError(statusCode: 500),
-        APIError.decodingError(""),
-        APIError.unknown
-    ])
-    func exploreListVC_searchBarIsNotEnabledForAllErrors(expectedError: APIError) async throws {
-        let sut = makeSUTForNetworkFailure(error: expectedError)
-        
-        sut.loadViewIfNeeded()
-        await sut.viewModel.getAllFilms()
-        
-        sut.view.layoutIfNeeded()
-        
-        #expect(sut.searchController.searchBar.isEnabled == false, "Should be false.")
     }
     
     @Test func exploreListVC_didSelectItemAt_notifiesDelegate_withCorrectFilm() async {
@@ -393,25 +321,25 @@ struct ExploreListVCTests {
         let indexPath = IndexPath(item: 0, section: 0)
         sut.collectionView(sut.collectionView, didSelectItemAt: indexPath)
         
-        #expect(spy.didSelectFilmCalled, "Delegate should be called.")
+        #expect(spy.didSelectFilmCallCount == 1, "Delegate should be called once.")
         #expect(spy.selectedFilm?.id == sut.viewModel.films[0].id, "Both ids should match.")
         #expect(spy.selectedFilm?.title == "Castle in the Sky", "Should be `Castle in the Sky`.")
     }
     
-    @Test func exploreListVC_whenIndexPathIsInvalid_didSelectItemAt_doesNotNotifyDelegate() async {
+    @Test func exploreListVC_didSelectItemAt_whenIndexPathIsInvalid_doesNotNotifyDelegate() async {
         let sut = makeSUTForNetworkSuccess()
         let spy = ExploreNavigationSpy()
         sut.navigationDelegate = spy
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
-        
         let indexPath = IndexPath(item: 99, section: 0)
+
         sut.collectionView(sut.collectionView, didSelectItemAt: indexPath)
         
-        #expect(spy.didSelectFilmCalled == false, "Should be false.")
+        #expect(spy.didSelectFilmCallCount == 0, "Should not have called the delegate method.")
     }
     
-    @Test func exploreListVC_whenFilmIsMissingFromLookup_didSelectItemAt_doesNotNotifyDelegate() async {
+    @Test func exploreListVC_didSelectItemAt_whenFilmIsMissingFromLookup_doesNotNotifyDelegate() async {
         let sut = makeSUT()
         let spy = ExploreNavigationSpy()
         sut.navigationDelegate = spy
@@ -421,11 +349,11 @@ struct ExploreListVCTests {
         snapshot.appendSections([.main])
         snapshot.appendItems([testID], toSection: .main)
         await sut.dataSource.apply(snapshot, animatingDifferences: false)
-        
         let indexPath = IndexPath(item: 0, section: 0)
+
         sut.collectionView(sut.collectionView, didSelectItemAt: indexPath)
         
-        #expect(spy.didSelectFilmCalled == false, "Should be false.")
+        #expect(spy.didSelectFilmCallCount == 0, "Should not have called the delegate method.")
     }
     
     @Test("iPhone only: collection view cell deselects after selection", .disabled(if: IpadHelper.isPad))
@@ -436,8 +364,8 @@ struct ExploreListVCTests {
         sut.navigationDelegate = spy
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
-
         let indexPath = IndexPath(item: 0, section: 0)
+
         sut.collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
         sut.collectionView(sut.collectionView, didSelectItemAt: indexPath)
         
@@ -452,8 +380,8 @@ struct ExploreListVCTests {
         sut.navigationDelegate = spy
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
-        
         let indexPath = IndexPath(item: 0, section: 0)
+
         sut.collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
         sut.collectionView(sut.collectionView, didSelectItemAt: indexPath)
         
@@ -471,83 +399,48 @@ struct ExploreListVCTests {
     
     @Test("Pull to refresh retries loading all films")
     func exploreListVC_pullToRefresh_retriesLoadingAllFilms() async {
-        let mockService = MockFilmsListService()
-        let imageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockService,
-                                                    imageLoader: imageLoader,
-                                                    filmSyncService: filmSyncService)
-        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
-        let mockAccessibilityService = MockAccessibilityService()
-        let sut = ExploreListVC(viewModel: filmsListViewModel,
-                                cellConfigurator: mockCellConfigurator,
-                                accessibilityService: mockAccessibilityService)
+        let (sut, mockFilmsListService) = makeSUTAndMockFilmsListService()
         sut.loadViewIfNeeded()
         await Task.yield()
         
-        #expect(mockService.fetchAllFilmsCallCount == 1, "Should call `fetchAllFilms()` the first time.")
+        #expect(mockFilmsListService.fetchAllFilmsCallCount == 1, "Should call `fetchAllFilms()` the first time.")
 
         sut.collectionView.refreshControl?.sendActions(for: .valueChanged)
         sut.view.layoutIfNeeded()
-        
+    
         #expect(sut.contentUnavailableConfiguration != nil, "Should be showing loading view.")
         #expect(sut.viewModel.currentState == .loadingAllFilms, "Should be set to `.loadingAllFilms`.")
         
         await sut.viewModel.refreshTask?.value
         
-        #expect(mockService.fetchAllFilmsCallCount == 2, "Should call `fetchAllFilms()` the second time.")
+        #expect(mockFilmsListService.fetchAllFilmsCallCount == 2, "Should call `fetchAllFilms()` the second time.")
     }
     
-    @Test("Pull to refresh updates Content Unavailable Configuration")
-    func exploreListVC_pullToRefresh_updatesContentUnavailableConfiguration() {
+    @Test("Call to end refreshing is made when view model's state changes")
+    func exploreListVC_refreshControl_whenVMStateChanges_stopsRefreshing() async {
         let sut = makeSUTForNetworkSuccess()
+        let spyRefreshControl = RefreshControlSpy()
         sut.loadViewIfNeeded()
+        sut.collectionView.refreshControl = spyRefreshControl
         
-        sut.collectionView.refreshControl?.sendActions(for: .valueChanged)
-
-        #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
-    }
-
-    @Test("Refreshing stops when films have loaded")
-    func exploreListVC_didUpdateFilms_stopsRefreshing() {
-        let sut = makeSUTForNetworkSuccess()
-        sut.loadViewIfNeeded()
-        
-        sut.collectionView.refreshControl?.sendActions(for: .valueChanged)
-        
-        #expect(sut.collectionView.refreshControl?.isRefreshing == false, "Should be false.")
-    }
-    
-    @Test("Refreshing stops when view model's state changes")
-    func exploreListVC_whenVMChangesState_refreshControl_stopsRefreshing() async {
-        let sut = makeSUTForNetworkSuccess()
-        sut.loadViewIfNeeded()
         await sut.loadTask?.value
-        sut.collectionView.refreshControl?.sendActions(for: .valueChanged)
         
+        #expect(spyRefreshControl.endRefreshingCallCount == 2, "Should have been called twice so far due to two VM state changes (idle -> loading -> content).")
+        
+        /// Simulate the refresh.
         sut.viewModel(
             sut.viewModel,
             didChange: sut.viewModel.currentState
         )
         
-        #expect(sut.collectionView.refreshControl?.isRefreshing == false, "Should be false.")
+        #expect(spyRefreshControl.endRefreshingCallCount == 3, "Should call `endRefreshing()` again after another state change.")
     }
     
     @Test("When there is a network error and data in File Manager is being used, collection view displays supplementary header view.")
     func exploreListVC_whenShowingDataFromFileManager_setsHeaderModeToSupplementary() async {
-        let mockFilmsListService = MockFilmsListService()
+        let (sut, mockFilmsListService) = makeSUTAndMockFilmsListService()
         mockFilmsListService.isUsingFileManagerData = true
-        let imageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
-        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
-        let mockAccessibilityService = MockAccessibilityService()
-        let sut = ExploreListVC(viewModel: filmsListViewModel,
-                                cellConfigurator: mockCellConfigurator,
-                                accessibilityService: mockAccessibilityService)
-
+        
         sut.loadViewIfNeeded()
         await Task.yield()
         sut.collectionView.layoutIfNeeded()
@@ -561,24 +454,12 @@ struct ExploreListVCTests {
     
     @Test("When data in File Manager is not being used, collection view has no header view.")
     func exploreListVC_whenFileManagerDataIsNotUsed_doesNotShowCollectionViewHeader() async {
-        let mockFilmsListService = MockFilmsListService()
+        let (sut, mockFilmsListService) = makeSUTAndMockFilmsListService()
         mockFilmsListService.isUsingFileManagerData = false
-        let imageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService,
-                                                    imageLoader: imageLoader,
-                                                    filmSyncService: filmSyncService)
-        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
-        let mockAccessibilityService = MockAccessibilityService()
-        let sut = ExploreListVC(viewModel: filmsListViewModel,
-                                cellConfigurator: mockCellConfigurator,
-                                accessibilityService: mockAccessibilityService)
         
         sut.loadViewIfNeeded()
         await Task.yield()
         sut.collectionView.layoutIfNeeded()
-        
         let indexPath = IndexPath(item: 0, section: 0)
         let kind = UICollectionView.elementKindSectionHeader
         let header = sut.collectionView.supplementaryView(forElementKind: kind, at: indexPath)
@@ -586,36 +467,25 @@ struct ExploreListVCTests {
         #expect(header == nil, "Should be nil.")
     }
     
-    @Test("`filmDetailViewController` delegate method correctly routes the updated film to FilmsListViewModel")
+    @Test("`filmDetailViewController` delegate method correctly routes the updated film to `FilmsListViewModel`")
     func exploreListVC_filmDetailViewController_routesUpdatedFilmToFilmsListViewModel() async {
         let initialFilm = Film.sample[0]
-        let mockFilmsListService = MockFilmsListService.makeSuccess()
-        let imageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService,
-                                                    imageLoader: imageLoader,
-                                                    filmSyncService: filmSyncService)
-        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
-        let mockAccessibilityService = MockAccessibilityService()
-        let sut = ExploreListVC(viewModel: filmsListViewModel,
-                                cellConfigurator: mockCellConfigurator,
-                                accessibilityService: mockAccessibilityService)
+        let (sut, context, imageLoader) = makeSUTWithContextAndImageLoader()
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
-        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let mockDetailVM = FilmDetailViewModel(imageLoader: imageLoader,
-                                               managedObjectContext: testPersistenceController.viewContext,
-                                               frcFactory: MockFRCFactory(),
-                                               filmQueueService: filmQueueService
-                                               )
+        let mockDetailVM = FilmDetailViewModel(
+            imageLoader: imageLoader,
+            managedObjectContext: context,
+            frcFactory: MockFRCFactory(),
+            filmQueueService: FilmQueueService(context: context)
+        )
         let dummyDetailVC = ExploreDetailVC(filmDetailViewModel: mockDetailVM)
         
         var mutatedFilm = initialFilm
         mutatedFilm.isWatched = true
         sut.filmDetailViewController(dummyDetailVC, didUpdateFilm: mutatedFilm)
         
-        if let mutatedFilmInFilmsArray = filmsListViewModel.films.first(where: { $0.id == initialFilm.id }) {
+        if let mutatedFilmInFilmsArray = sut.viewModel.films.first(where: { $0.id == initialFilm.id }) {
             #expect(mutatedFilmInFilmsArray.isWatched == true, "The delegate function should successfully trigger viewModel.updateFilmInArrays(_:) to change the flag.")
         } else {
             Issue.record("The film with ID 'initialFilm.id' was missing entirely from the films array.")
@@ -623,8 +493,8 @@ struct ExploreListVCTests {
     }
     
     @Test("Does not post announcement when VoiceOver is disabled")
-    func exploreListVC_didRequestVoiceOverAnnouncement_whenVoiceOverIsDisabled_doesNotPost() async {
-        let (sut, mockAccessibilityService) = await makeSUTForVOTests(voiceOverIsOn: false)
+    func exploreListVC_didRequestVoiceOverAnnouncement_whenVoiceOverIsDisabled_doesNotPost() {
+        let (sut, mockAccessibilityService) = makeSUTForVOTests(voiceOverIsOn: false)
         
         sut.viewModel(
             sut.viewModel,
@@ -638,8 +508,8 @@ struct ExploreListVCTests {
     }
     
     @Test("Posts notification with message after the debounce delay completes")
-    func exploreListVC_didRequestVoiceOverAnnouncement_whenVoiceOverIsOn_postsMessageAfterDelay() async throws {
-        let (sut, mockAccessibilityService) = await makeSUTForVOTests(voiceOverIsOn: true)
+    func exploreListVC_didRequestVoiceOverAnnouncement_whenVoiceOverIsOn_postsMessageAfterDelay() async {
+        let (sut, mockAccessibilityService) = makeSUTForVOTests(voiceOverIsOn: true)
         
         sut.viewModel(
             sut.viewModel,
@@ -654,8 +524,8 @@ struct ExploreListVCTests {
     }
     
     @Test("Cancels previous announcement task when a new one is requested rapidly")
-    func exploreListVC_didRequestVoiceOverAnnouncement_multipleRequests_cancelsPreviousAndDebounces() async throws {
-        let (sut, mockAccessibilityService) = await makeSUTForVOTests(voiceOverIsOn: true)
+    func exploreListVC_didRequestVoiceOverAnnouncement_multipleRequests_cancelsPreviousAndDebounces() async  {
+        let (sut, mockAccessibilityService) = makeSUTForVOTests(voiceOverIsOn: true)
         
         sut.viewModel(
             sut.viewModel,
@@ -672,18 +542,18 @@ struct ExploreListVCTests {
         #expect(firstTask?.isCancelled == true, "Should have cancelled the first task.")
         #expect(mockAccessibilityService.postedArgument as? String == "Second Message", "Should match input of second call.")
         #expect(mockAccessibilityService.postedNotification == .announcement, "The notification should be for an announcement.")
-        #expect(mockAccessibilityService.postCallCount == 1, "Due to task cancellation, only one announcement was made.")
+        #expect(mockAccessibilityService.postCallCount == 1, "Due to task cancellation, only one announcement should be made.")
     }
     
     @Test("Clean up `voiceOverAnnouncementTask` in `viewWillDisappear`")
     func exploreListVC_viewWillDisappear_cancelsVoiceOverTaskAndSetsItToNil() async {
-        let (sut, mockAccessibilityService) = await makeSUTForVOTests(voiceOverIsOn: true)
-
+        let (sut, mockAccessibilityService) = makeSUTForVOTests(voiceOverIsOn: true)
+        sut.loadViewIfNeeded()
+        await sut.loadTask?.value
         sut.viewModel(
             sut.viewModel,
             didEmit: FilmsListViewModel.FilmsListEvent.voiceOverAnnouncement("Message")
         )
-        
         let capturedTask = sut.voiceOverAnnouncementTask
         #expect(capturedTask?.isCancelled == false, "Should not be cancelled.")
         #expect(sut.loadTask != nil, "Should not be nil.")
@@ -692,86 +562,132 @@ struct ExploreListVCTests {
         
         #expect(capturedTask?.isCancelled == true, "Should be marked for cancellation.")
         #expect(sut.voiceOverAnnouncementTask == nil, "Should be nil.")
-        #expect(mockAccessibilityService.postCallCount == 0, "Due to task cancellation, no announcement was made.")
+        #expect(mockAccessibilityService.postCallCount == 0, "Due to task cancellation, no announcement should be made.")
     }
     
     // MARK: - SUT Helper Methods
     private func makeSUT() -> ExploreListVC {
-        let mockFilmsListService = MockFilmsListService()
-        let imageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService,
-                                                    imageLoader: imageLoader,
-                                                    filmSyncService: filmSyncService)
-        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
-        let mockAccessibilityService = MockAccessibilityService()
-        return ExploreListVC(viewModel: filmsListViewModel,
-                             cellConfigurator: mockCellConfigurator,
-                             accessibilityService: mockAccessibilityService)
+        let filmsListViewModel = FilmsListViewModel(
+            filmsListService: MockFilmsListService(),
+            imageLoader: MockImageLoader(),
+            filmSyncService: FilmSyncService(context: testPersistenceController.viewContext)
+        )
+        return ExploreListVC(
+            viewModel: filmsListViewModel,
+            cellConfigurator: FilmRowCellConfigurator(viewModel: filmsListViewModel),
+            accessibilityService: MockAccessibilityService()
+        )
+    }
+    
+    private func makeSUTAndMockFilmsListService() -> (
+        sut: ExploreListVC,
+        mockFilmsListService: MockFilmsListService
+    ) {
+        let mockFilmsListService = MockFilmsListService()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmsListViewModel = FilmsListViewModel(
+            filmsListService: mockFilmsListService,
+            imageLoader: MockImageLoader(),
+            filmSyncService: FilmSyncService(context: testPersistenceController.viewContext)
+        )
+        let sut = ExploreListVC(
+            viewModel: filmsListViewModel,
+            cellConfigurator: FilmRowCellConfigurator(viewModel: filmsListViewModel),
+            accessibilityService: MockAccessibilityService()
+        )
+        return (sut, mockFilmsListService)
     }
     
     private func makeSUTForNetworkSuccess() -> ExploreListVC {
-        let mockFilmsListService = MockFilmsListService.makeSuccess()
-        let imageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService,
-                                                    imageLoader: imageLoader,
-                                                    filmSyncService: filmSyncService)
-        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
-        let mockAccessibilityService = MockAccessibilityService()
-        return ExploreListVC(viewModel: filmsListViewModel,
-                             cellConfigurator: mockCellConfigurator,
-                             accessibilityService: mockAccessibilityService)
+        let filmsListViewModel = FilmsListViewModel(
+            filmsListService: MockFilmsListService.makeSuccess(),
+            imageLoader: MockImageLoader(),
+            filmSyncService: FilmSyncService(context: testPersistenceController.viewContext)
+        )
+        return ExploreListVC(
+            viewModel: filmsListViewModel,
+            cellConfigurator: FilmRowCellConfigurator(viewModel: filmsListViewModel),
+            accessibilityService: MockAccessibilityService()
+        )
     }
     
     private func makeSUTForNetworkFailure(error: APIError) -> ExploreListVC {
-        let mockService = MockFilmsListService()
-        mockService.result = .failure(error)
-        let imageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockService,
-                                                    imageLoader: imageLoader,
-                                                    filmSyncService: filmSyncService)
-        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
-        let mockAccessibilityService = MockAccessibilityService()
-        return ExploreListVC(viewModel: filmsListViewModel,
-                             cellConfigurator: mockCellConfigurator,
-                             accessibilityService: mockAccessibilityService)
+        let filmsListViewModel = FilmsListViewModel(
+            filmsListService: MockFilmsListService.makeFailure(error: error),
+            imageLoader: MockImageLoader(),
+            filmSyncService: FilmSyncService(context: testPersistenceController.viewContext)
+        )
+        return ExploreListVC(
+            viewModel: filmsListViewModel,
+            cellConfigurator: FilmRowCellConfigurator(viewModel: filmsListViewModel),
+            accessibilityService: MockAccessibilityService()
+        )
     }
     
-    private func makeSUTForVOTests(voiceOverIsOn: Bool) async -> (sut: ExploreListVC, mockAccessibilityService: MockAccessibilityService) {
-        let mockFilmsListService = MockFilmsListService.makeSuccess()
+    private func makeSUTWithContextAndImageLoader() -> (
+        sut: ExploreListVC,
+        context: NSManagedObjectContext,
+        imageLoader: ImageLoader
+    ) {
         let imageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService,
-                                                    imageLoader: imageLoader,
-                                                    filmSyncService: filmSyncService)
-        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
+        let context = testPersistenceController.viewContext
+        let filmsListViewModel = FilmsListViewModel(
+            filmsListService: MockFilmsListService.makeSuccess(),
+            imageLoader: imageLoader,
+            filmSyncService: FilmSyncService(context: context)
+        )
+        let sut = ExploreListVC(
+            viewModel: filmsListViewModel,
+            cellConfigurator: FilmRowCellConfigurator(viewModel: filmsListViewModel),
+            accessibilityService: MockAccessibilityService()
+        )
+        return (sut, context, imageLoader)
+    }
+    
+    private func makeSUTForVOTests(voiceOverIsOn: Bool) -> (
+        sut: ExploreListVC,
+        mockAccessibilityService: MockAccessibilityService
+    ) {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmsListViewModel = FilmsListViewModel(
+            filmsListService: MockFilmsListService.makeSuccess(),
+            imageLoader: MockImageLoader(),
+            filmSyncService: FilmSyncService(context: testPersistenceController.viewContext)
+        )
         let mockAccessibilityService = MockAccessibilityService()
         mockAccessibilityService.isVoiceOverRunningStub = voiceOverIsOn
-        let sut = ExploreListVC(viewModel: filmsListViewModel,
-                                cellConfigurator: mockCellConfigurator,
-                                accessibilityService: mockAccessibilityService)
-        sut.loadViewIfNeeded()
-        await sut.loadTask?.value
+        let sut = ExploreListVC(
+            viewModel: filmsListViewModel,
+            cellConfigurator: FilmRowCellConfigurator(viewModel: filmsListViewModel),
+            accessibilityService: mockAccessibilityService
+        )
         return (sut, mockAccessibilityService)
     }
     
-    // MARK: - Explore Navigation Delegate Spy
+    // MARK: - Spies
     private final class ExploreNavigationSpy: ExploreNavigationDelegate {
         var shouldDeselectAfterSelection = false
         var selectedFilm: Film?
-        var didSelectFilmCalled = false
+        var didSelectFilmCallCount = 0
         var onDidSelectFilmCalled: (@Sendable (Film) -> Void)?
         
         func didSelectFilm(_ film: Film) {
             selectedFilm = film
-            didSelectFilmCalled = true
+            didSelectFilmCallCount += 1
             onDidSelectFilmCalled?(film)
+        }
+    }
+    
+    private final class RefreshControlSpy: UIRefreshControl {
+        var endRefreshingCallCount = 0
+        
+        override func endRefreshing() {
+            super.endRefreshing()
+            endRefreshingCallCount += 1
         }
     }
 }
