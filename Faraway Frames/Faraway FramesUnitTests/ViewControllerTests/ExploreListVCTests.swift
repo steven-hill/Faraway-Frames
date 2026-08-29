@@ -49,16 +49,7 @@ struct ExploreListVCTests {
     
     @Test(.tags(.networkRequest))
     func exploreListVC_whenLoadingAllFilms_showsLoadingView() async {
-        let mockFilmsListService = MockFilmsListService()
-        let imageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
-        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
-        let mockAccessibilityService = MockAccessibilityService()
-        let sut = ExploreListVC(viewModel: filmsListViewModel,
-                                cellConfigurator: mockCellConfigurator,
-                                accessibilityService: mockAccessibilityService)
+        let (sut, mockFilmsListService) = makeSUTAndMockFilmsListService()
         mockFilmsListService.shouldPauseForLoadingStateTest = true
         
         sut.loadViewIfNeeded()
@@ -79,8 +70,8 @@ struct ExploreListVCTests {
         
         #expect(itemCount == 22, "Should be 22 films in the collection view.")
         #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
-        #expect(sut.collectionView.isHidden == false)
-        #expect(sut.searchController.searchBar.isEnabled == true)
+        #expect(sut.collectionView.isHidden == false, "Collection view should be visible.")
+        #expect(sut.searchController.searchBar.isEnabled == true, "Search bar should be enabled.")
     }
     
     @Test("ExploreListVC shows alert for all API errors when no archived data exists",
@@ -114,25 +105,14 @@ struct ExploreListVCTests {
         #expect(sut.viewModel.currentState == .error(expectedError), "Should be set to .`error`.")
     }
     
-    @Test("ExploreListVC can retry network call from alert",
+    @Test("ExploreListVC can retry network call from the alert's retry button",
           .tags(.networkRequest))
-    func exploreListVC_retry_callsFetchAllFilms() async {
-        let mockService = MockFilmsListService()
-        let imageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockService,
-                                                    imageLoader: imageLoader,
-                                                    filmSyncService: filmSyncService)
-        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
-        let mockAccessibilityService = MockAccessibilityService()
-        let sut = ExploreListVC(viewModel: filmsListViewModel,
-                                cellConfigurator: mockCellConfigurator,
-                                accessibilityService: mockAccessibilityService)
+    func exploreListVC_retryButtonTapped_callsFetchAllFilms() async {
+        let (sut, mockFilmsListService) = makeSUTAndMockFilmsListService()
         sut.loadViewIfNeeded()
         await Task.yield()
         
-        #expect(mockService.fetchAllFilmsCallCount == 1, "Should call `fetchAllFilms()` the first time.")
+        #expect(mockFilmsListService.fetchAllFilmsCallCount == 1, "Should call `fetchAllFilms()` the first time.")
         
         sut.retryButtonTapped()
         sut.view.layoutIfNeeded()
@@ -142,7 +122,7 @@ struct ExploreListVCTests {
         #expect(sut.viewModel.refreshTask != nil, "Should start a new `refreshTask`.")
         
         await sut.viewModel.refreshTask?.value
-        #expect(mockService.fetchAllFilmsCallCount == 2, "Should call `fetchAllFilms()` the second time.")
+        #expect(mockFilmsListService.fetchAllFilmsCallCount == 2, "Should call `fetchAllFilms()` the second time.")
     }
     
     @Test(.tags(.networkRequest))
@@ -709,6 +689,27 @@ struct ExploreListVCTests {
         return ExploreListVC(viewModel: filmsListViewModel,
                              cellConfigurator: mockCellConfigurator,
                              accessibilityService: mockAccessibilityService)
+    }
+    
+    private func makeSUTAndMockFilmsListService() -> (
+        sut: ExploreListVC,
+        mockFilmsListService: MockFilmsListService
+    ) {
+        let mockFilmsListService = MockFilmsListService()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
+        let filmsListViewModel = FilmsListViewModel(
+            filmsListService: mockFilmsListService,
+            imageLoader: MockImageLoader(),
+            filmSyncService: filmSyncService
+        )
+        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
+        let sut = ExploreListVC(
+            viewModel: filmsListViewModel,
+            cellConfigurator: mockCellConfigurator,
+            accessibilityService: MockAccessibilityService()
+        )
+        return (sut, mockFilmsListService)
     }
     
     private func makeSUTForNetworkSuccess() -> ExploreListVC {
