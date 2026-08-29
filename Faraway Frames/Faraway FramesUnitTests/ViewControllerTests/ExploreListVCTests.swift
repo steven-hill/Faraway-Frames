@@ -398,22 +398,11 @@ struct ExploreListVCTests {
     
     @Test("Pull to refresh retries loading all films")
     func exploreListVC_pullToRefresh_retriesLoadingAllFilms() async {
-        let mockService = MockFilmsListService()
-        let imageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockService,
-                                                    imageLoader: imageLoader,
-                                                    filmSyncService: filmSyncService)
-        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
-        let mockAccessibilityService = MockAccessibilityService()
-        let sut = ExploreListVC(viewModel: filmsListViewModel,
-                                cellConfigurator: mockCellConfigurator,
-                                accessibilityService: mockAccessibilityService)
+        let (sut, mockFilmsListService) = makeSUTAndMockFilmsListService()
         sut.loadViewIfNeeded()
         await Task.yield()
         
-        #expect(mockService.fetchAllFilmsCallCount == 1, "Should call `fetchAllFilms()` the first time.")
+        #expect(mockFilmsListService.fetchAllFilmsCallCount == 1, "Should call `fetchAllFilms()` the first time.")
 
         sut.collectionView.refreshControl?.sendActions(for: .valueChanged)
         sut.view.layoutIfNeeded()
@@ -423,7 +412,7 @@ struct ExploreListVCTests {
         
         await sut.viewModel.refreshTask?.value
         
-        #expect(mockService.fetchAllFilmsCallCount == 2, "Should call `fetchAllFilms()` the second time.")
+        #expect(mockFilmsListService.fetchAllFilmsCallCount == 2, "Should call `fetchAllFilms()` the second time.")
     }
     
     @Test("Pull to refresh updates Content Unavailable Configuration")
@@ -435,19 +424,9 @@ struct ExploreListVCTests {
 
         #expect(sut.contentUnavailableConfiguration == nil, "Should be nil.")
     }
-
-    @Test("Refreshing stops when films have loaded")
-    func exploreListVC_didUpdateFilms_stopsRefreshing() {
-        let sut = makeSUTForNetworkSuccess()
-        sut.loadViewIfNeeded()
-        
-        sut.collectionView.refreshControl?.sendActions(for: .valueChanged)
-        
-        #expect(sut.collectionView.refreshControl?.isRefreshing == false, "Should be false.")
-    }
     
     @Test("Refreshing stops when view model's state changes")
-    func exploreListVC_whenVMChangesState_refreshControl_stopsRefreshing() async {
+    func exploreListVC_refreshControl_whenVMStateChanges_stopsRefreshing() async {
         let sut = makeSUTForNetworkSuccess()
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
