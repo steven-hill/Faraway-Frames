@@ -7,6 +7,7 @@
 
 import CoreData
 @testable import Faraway_Frames
+import Testing
 
 struct PersistenceHelper {
     @MainActor static func makeFilmMO(with film: Film, entity: NSEntityDescription, context: NSManagedObjectContext, isUpNext: Bool, isWatched: Bool) -> FilmMO {
@@ -39,5 +40,28 @@ struct PersistenceHelper {
             (CocoaError(.persistentStoreTypeMismatch), .databaseError),
             (CocoaError(.fileNoSuchFile), .databaseError)
         ]
+    }
+    
+    @MainActor static func saveFilmToDatabase(
+        context: NSManagedObjectContext,
+        film: Film,
+        isUpNext: Bool,
+        isWatched: Bool
+    ) throws -> FilmMO {
+        let entity = try #require(
+            NSEntityDescription.entity(
+                forEntityName: Persistence.entityname,
+                in: context
+            ), "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
+        let filmMO = makeFilmMO(
+            with: film,
+            entity: entity,
+            context: context,
+            isUpNext: isUpNext,
+            isWatched: isWatched
+        )
+        try? context.save()
+        return filmMO
     }
 }
