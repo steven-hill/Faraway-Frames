@@ -115,10 +115,10 @@ struct ExploreDetailVCTests {
           .tags(.persistence),
           arguments: PersistenceHelper.errorScenarios
     )
-    func exploreDetailVC_whenPerformFetchFailsOnViewModel_presentsAlert(
+    func exploreDetailVC_didReceiveError_whenPerformFetchFailsOnViewModel_presentsAlert(
         scenario: (systemError: CocoaError,
                    expectedReason: PersistenceFailureReason)
-    ) async throws {
+    ) throws {
         let sut = try makeSUTWithFetchFailureFRC(throwing: scenario.systemError)
         let mockPresenter = MockAlertPresenter()
         sut.alertPresenter = mockPresenter
@@ -140,7 +140,7 @@ struct ExploreDetailVCTests {
     }
     
     @Test("Fetch failure alert handles an unknown error gracefully by displaying its description", .tags(.persistence))
-    func exploreDetailVC_whenUnknownErrorOccursInFetchFailure_presentsAlert() async throws {
+    func exploreDetailVC_didReceiveError_whenUnknownErrorOccursInFetchFailure_presentsAlert() throws {
         let unknownError = UnknownError()
         let sut = try makeSUTWithFetchFailureFRC(throwing: unknownError)
         let mockPresenter = MockAlertPresenter()
