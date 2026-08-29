@@ -437,18 +437,9 @@ struct ExploreListVCTests {
     
     @Test("When there is a network error and data in File Manager is being used, collection view displays supplementary header view.")
     func exploreListVC_whenShowingDataFromFileManager_setsHeaderModeToSupplementary() async {
-        let mockFilmsListService = MockFilmsListService()
+        let (sut, mockFilmsListService) = makeSUTAndMockFilmsListService()
         mockFilmsListService.isUsingFileManagerData = true
-        let imageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
-        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
-        let mockAccessibilityService = MockAccessibilityService()
-        let sut = ExploreListVC(viewModel: filmsListViewModel,
-                                cellConfigurator: mockCellConfigurator,
-                                accessibilityService: mockAccessibilityService)
-
+        
         sut.loadViewIfNeeded()
         await Task.yield()
         sut.collectionView.layoutIfNeeded()
@@ -462,24 +453,12 @@ struct ExploreListVCTests {
     
     @Test("When data in File Manager is not being used, collection view has no header view.")
     func exploreListVC_whenFileManagerDataIsNotUsed_doesNotShowCollectionViewHeader() async {
-        let mockFilmsListService = MockFilmsListService()
+        let (sut, mockFilmsListService) = makeSUTAndMockFilmsListService()
         mockFilmsListService.isUsingFileManagerData = false
-        let imageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService,
-                                                    imageLoader: imageLoader,
-                                                    filmSyncService: filmSyncService)
-        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
-        let mockAccessibilityService = MockAccessibilityService()
-        let sut = ExploreListVC(viewModel: filmsListViewModel,
-                                cellConfigurator: mockCellConfigurator,
-                                accessibilityService: mockAccessibilityService)
         
         sut.loadViewIfNeeded()
         await Task.yield()
         sut.collectionView.layoutIfNeeded()
-        
         let indexPath = IndexPath(item: 0, section: 0)
         let kind = UICollectionView.elementKindSectionHeader
         let header = sut.collectionView.supplementaryView(forElementKind: kind, at: indexPath)
