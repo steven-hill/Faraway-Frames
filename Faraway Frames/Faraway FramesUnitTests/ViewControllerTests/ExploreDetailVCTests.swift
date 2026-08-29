@@ -15,7 +15,6 @@ struct ExploreDetailVCTests {
     
     @Test func exploreDetailVC_whenFilmIsNil_localStatePropertiesAreSetCorrectly() {
         let sut = makeSUTWhenFilmIsNil()
-        _ = UINavigationController(rootViewController: sut)
         
         sut.loadViewIfNeeded()
         
@@ -26,7 +25,6 @@ struct ExploreDetailVCTests {
     
     @Test func exploreDetailVC_withFilm_localStatePropertiesAreSetCorrectly() {
         let sut = makeSUTWithFilm()
-        _ = UINavigationController(rootViewController: sut)
         
         sut.loadViewIfNeeded()
         
