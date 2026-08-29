@@ -526,29 +526,28 @@ struct ExploreDetailVCTests {
     
     //MARK: - SUT Helper Methods
     private func makeSUTWhenFilmIsNil() -> ExploreDetailVC {
-        let mockImageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let filmDetailViewModel = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                                      managedObjectContext: testPersistenceController.viewContext,
-                                                      frcFactory: MockFRCFactory(),
-                                                      filmQueueService: filmQueueService,
-                                                      )
-        let sut = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
-        return sut
+        let context = testPersistenceController.viewContext
+        let filmDetailViewModel = FilmDetailViewModel(
+            imageLoader: MockImageLoader(),
+            managedObjectContext: context,
+            frcFactory: MockFRCFactory(),
+            filmQueueService: FilmQueueService(context: context),
+        )
+        return ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
     }
     
     private func makeSUTWithFilm() -> ExploreDetailVC {
-        let film = Film.sample[0]
-        let mockImageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let filmDetailViewModel = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                                      managedObjectContext: testPersistenceController.viewContext,
-                                                      frcFactory: MockFRCFactory(),
-                                                      filmQueueService: filmQueueService)
+        let context = testPersistenceController.viewContext
+        let filmDetailViewModel = FilmDetailViewModel(
+            imageLoader: MockImageLoader(),
+            managedObjectContext: context,
+            frcFactory: MockFRCFactory(),
+            filmQueueService: FilmQueueService(context: context)
+        )
         let sut = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
-        filmDetailViewModel.film = film
+        filmDetailViewModel.film = Film.sample[0]
         filmDetailViewModel.setFilm()
         return sut
     }
@@ -556,29 +555,32 @@ struct ExploreDetailVCTests {
     private func makeSUTWithFetchFailureFRC(throwing error: Error) throws -> ExploreDetailVC {
         let testPersistenceController = try PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
-        let filmQueueService = FilmQueueService(context: context)
         var mockFactory = MockFRCFactory()
         mockFactory.makeFilmDetailFRCStub = { _, context in
-            return ThrowingFetchedResultsController(context: context, errorToThrow: error)
+            return ThrowingFetchedResultsController(
+                context: context,
+                errorToThrow: error
+            )
         }
-        let mockImageLoader = MockImageLoader()
-        let vm = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                     managedObjectContext: context,
-                                     frcFactory: mockFactory,
-                                     filmQueueService: filmQueueService)
+        let vm = FilmDetailViewModel(
+            imageLoader: MockImageLoader(),
+            managedObjectContext: context,
+            frcFactory: mockFactory,
+            filmQueueService: FilmQueueService(context: context)
+        )
         return ExploreDetailVC(filmDetailViewModel: vm)
     }
     
     private func makeSUTForUpdateFilmStatusFailure(errorToThrow: Error) -> (vc: ExploreDetailVC, film: Film) {
-        let mockImageLoader = ExploreDetailMovieBannerMockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let saver = ThrowingSaver(errorToThrow: errorToThrow)
-        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext, saver: saver)
+        let vm = FilmDetailViewModel(
+            imageLoader: ExploreDetailMovieBannerMockImageLoader(),
+            managedObjectContext: testPersistenceController.viewContext,
+            frcFactory: MockFRCFactory(),
+            filmQueueService: FilmQueueService(context: testPersistenceController.viewContext, saver: saver)
+        )
         let targetFilm = Film.sample[0]
-        let vm = FilmDetailViewModel(imageLoader: mockImageLoader,
-                                     managedObjectContext: testPersistenceController.viewContext,
-                                     frcFactory: MockFRCFactory(),
-                                     filmQueueService: filmQueueService)
         let sut = ExploreDetailVC(filmDetailViewModel: vm)
         sut.filmDetailViewModel.film = targetFilm
         sut.filmDetailViewModel.setFilm()
@@ -588,10 +590,12 @@ struct ExploreDetailVCTests {
     private func makeSUTWithFilmAndFilmQueueServiceSpy() -> (vc: ExploreDetailVC, spyFQS: FilmQueueServiceSpy) {
         let spyFQS = FilmQueueServiceSpy()
         let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmDetailViewModel = FilmDetailViewModel(imageLoader: MockImageLoader(),
-                                                      managedObjectContext: testPersistenceController.viewContext,
-                                                      frcFactory: MockFRCFactory(),
-                                                      filmQueueService: spyFQS)
+        let filmDetailViewModel = FilmDetailViewModel(
+            imageLoader: ExploreDetailMovieBannerMockImageLoader(),
+            managedObjectContext: testPersistenceController.viewContext,
+            frcFactory: MockFRCFactory(),
+            filmQueueService: spyFQS
+        )
         let sut = ExploreDetailVC(filmDetailViewModel: filmDetailViewModel)
         filmDetailViewModel.film = Film.sample[0]
         filmDetailViewModel.setFilm()
