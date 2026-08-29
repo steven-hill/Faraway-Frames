@@ -9,6 +9,7 @@ import Testing
 import UIKit
 import SwiftUI
 @testable import Faraway_Frames
+import CoreData
 
 @MainActor
 struct ExploreListVCTests {
@@ -466,36 +467,25 @@ struct ExploreListVCTests {
         #expect(header == nil, "Should be nil.")
     }
     
-    @Test("`filmDetailViewController` delegate method correctly routes the updated film to FilmsListViewModel")
+    @Test("`filmDetailViewController` delegate method correctly routes the updated film to `FilmsListViewModel`")
     func exploreListVC_filmDetailViewController_routesUpdatedFilmToFilmsListViewModel() async {
         let initialFilm = Film.sample[0]
-        let mockFilmsListService = MockFilmsListService.makeSuccess()
-        let imageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService,
-                                                    imageLoader: imageLoader,
-                                                    filmSyncService: filmSyncService)
-        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
-        let mockAccessibilityService = MockAccessibilityService()
-        let sut = ExploreListVC(viewModel: filmsListViewModel,
-                                cellConfigurator: mockCellConfigurator,
-                                accessibilityService: mockAccessibilityService)
+        let (sut, context, imageLoader) = makeSUTWithContextAndImageLoader()
         sut.loadViewIfNeeded()
         await sut.loadTask?.value
-        let filmQueueService = FilmQueueService(context: testPersistenceController.viewContext)
-        let mockDetailVM = FilmDetailViewModel(imageLoader: imageLoader,
-                                               managedObjectContext: testPersistenceController.viewContext,
-                                               frcFactory: MockFRCFactory(),
-                                               filmQueueService: filmQueueService
-                                               )
+        let mockDetailVM = FilmDetailViewModel(
+            imageLoader: imageLoader,
+            managedObjectContext: context,
+            frcFactory: MockFRCFactory(),
+            filmQueueService: FilmQueueService(context: context)
+        )
         let dummyDetailVC = ExploreDetailVC(filmDetailViewModel: mockDetailVM)
         
         var mutatedFilm = initialFilm
         mutatedFilm.isWatched = true
         sut.filmDetailViewController(dummyDetailVC, didUpdateFilm: mutatedFilm)
         
-        if let mutatedFilmInFilmsArray = filmsListViewModel.films.first(where: { $0.id == initialFilm.id }) {
+        if let mutatedFilmInFilmsArray = sut.viewModel.films.first(where: { $0.id == initialFilm.id }) {
             #expect(mutatedFilmInFilmsArray.isWatched == true, "The delegate function should successfully trigger viewModel.updateFilmInArrays(_:) to change the flag.")
         } else {
             Issue.record("The film with ID 'initialFilm.id' was missing entirely from the films array.")
@@ -641,6 +631,28 @@ struct ExploreListVCTests {
         return ExploreListVC(viewModel: filmsListViewModel,
                              cellConfigurator: mockCellConfigurator,
                              accessibilityService: mockAccessibilityService)
+    }
+    
+    private func makeSUTWithContextAndImageLoader() -> (
+        sut: ExploreListVC,
+        context: NSManagedObjectContext,
+        imageLoader: ImageLoader
+    ) {
+        let mockFilmsListService = MockFilmsListService.makeSuccess()
+        let imageLoader = MockImageLoader()
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let filmsListViewModel = FilmsListViewModel(
+            filmsListService: mockFilmsListService,
+            imageLoader: imageLoader,
+            filmSyncService: FilmSyncService(context: context)
+        )
+        let sut = ExploreListVC(
+            viewModel: filmsListViewModel,
+            cellConfigurator: FilmRowCellConfigurator(viewModel: filmsListViewModel),
+            accessibilityService: MockAccessibilityService()
+        )
+        return (sut, context, imageLoader)
     }
     
     private func makeSUTForVOTests(voiceOverIsOn: Bool) async -> (sut: ExploreListVC, mockAccessibilityService: MockAccessibilityService) {
