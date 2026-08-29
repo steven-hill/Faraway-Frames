@@ -493,8 +493,8 @@ struct ExploreListVCTests {
     }
     
     @Test("Does not post announcement when VoiceOver is disabled")
-    func exploreListVC_didRequestVoiceOverAnnouncement_whenVoiceOverIsDisabled_doesNotPost() async {
-        let (sut, mockAccessibilityService) = await makeSUTForVOTests(voiceOverIsOn: false)
+    func exploreListVC_didRequestVoiceOverAnnouncement_whenVoiceOverIsDisabled_doesNotPost() {
+        let (sut, mockAccessibilityService) = makeSUTForVOTests(voiceOverIsOn: false)
         
         sut.viewModel(
             sut.viewModel,
@@ -508,8 +508,8 @@ struct ExploreListVCTests {
     }
     
     @Test("Posts notification with message after the debounce delay completes")
-    func exploreListVC_didRequestVoiceOverAnnouncement_whenVoiceOverIsOn_postsMessageAfterDelay() async throws {
-        let (sut, mockAccessibilityService) = await makeSUTForVOTests(voiceOverIsOn: true)
+    func exploreListVC_didRequestVoiceOverAnnouncement_whenVoiceOverIsOn_postsMessageAfterDelay() async {
+        let (sut, mockAccessibilityService) = makeSUTForVOTests(voiceOverIsOn: true)
         
         sut.viewModel(
             sut.viewModel,
@@ -524,8 +524,8 @@ struct ExploreListVCTests {
     }
     
     @Test("Cancels previous announcement task when a new one is requested rapidly")
-    func exploreListVC_didRequestVoiceOverAnnouncement_multipleRequests_cancelsPreviousAndDebounces() async throws {
-        let (sut, mockAccessibilityService) = await makeSUTForVOTests(voiceOverIsOn: true)
+    func exploreListVC_didRequestVoiceOverAnnouncement_multipleRequests_cancelsPreviousAndDebounces() async  {
+        let (sut, mockAccessibilityService) = makeSUTForVOTests(voiceOverIsOn: true)
         
         sut.viewModel(
             sut.viewModel,
@@ -542,18 +542,18 @@ struct ExploreListVCTests {
         #expect(firstTask?.isCancelled == true, "Should have cancelled the first task.")
         #expect(mockAccessibilityService.postedArgument as? String == "Second Message", "Should match input of second call.")
         #expect(mockAccessibilityService.postedNotification == .announcement, "The notification should be for an announcement.")
-        #expect(mockAccessibilityService.postCallCount == 1, "Due to task cancellation, only one announcement was made.")
+        #expect(mockAccessibilityService.postCallCount == 1, "Due to task cancellation, only one announcement should be made.")
     }
     
     @Test("Clean up `voiceOverAnnouncementTask` in `viewWillDisappear`")
     func exploreListVC_viewWillDisappear_cancelsVoiceOverTaskAndSetsItToNil() async {
-        let (sut, mockAccessibilityService) = await makeSUTForVOTests(voiceOverIsOn: true)
-
+        let (sut, mockAccessibilityService) = makeSUTForVOTests(voiceOverIsOn: true)
+        sut.loadViewIfNeeded()
+        await sut.loadTask?.value
         sut.viewModel(
             sut.viewModel,
             didEmit: FilmsListViewModel.FilmsListEvent.voiceOverAnnouncement("Message")
         )
-        
         let capturedTask = sut.voiceOverAnnouncementTask
         #expect(capturedTask?.isCancelled == false, "Should not be cancelled.")
         #expect(sut.loadTask != nil, "Should not be nil.")
@@ -562,7 +562,7 @@ struct ExploreListVCTests {
         
         #expect(capturedTask?.isCancelled == true, "Should be marked for cancellation.")
         #expect(sut.voiceOverAnnouncementTask == nil, "Should be nil.")
-        #expect(mockAccessibilityService.postCallCount == 0, "Due to task cancellation, no announcement was made.")
+        #expect(mockAccessibilityService.postCallCount == 0, "Due to task cancellation, no announcement should be made.")
     }
     
     // MARK: - SUT Helper Methods
@@ -655,7 +655,7 @@ struct ExploreListVCTests {
         return (sut, context, imageLoader)
     }
     
-    private func makeSUTForVOTests(voiceOverIsOn: Bool) async -> (sut: ExploreListVC, mockAccessibilityService: MockAccessibilityService) {
+    private func makeSUTForVOTests(voiceOverIsOn: Bool) -> (sut: ExploreListVC, mockAccessibilityService: MockAccessibilityService) {
         let mockFilmsListService = MockFilmsListService.makeSuccess()
         let imageLoader = MockImageLoader()
         let testPersistenceController = try! PersistenceController(inMemory: true)
@@ -669,8 +669,8 @@ struct ExploreListVCTests {
         let sut = ExploreListVC(viewModel: filmsListViewModel,
                                 cellConfigurator: mockCellConfigurator,
                                 accessibilityService: mockAccessibilityService)
-        sut.loadViewIfNeeded()
-        await sut.loadTask?.value
+//        sut.loadViewIfNeeded()
+//        await sut.loadTask?.value
         return (sut, mockAccessibilityService)
     }
     
