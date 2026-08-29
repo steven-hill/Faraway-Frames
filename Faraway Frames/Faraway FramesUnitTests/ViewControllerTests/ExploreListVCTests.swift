@@ -47,8 +47,8 @@ struct ExploreListVCTests {
         #expect(sut.collectionView.dataSource != nil, "Collection view data source should be set.")
     }
     
-    @Test(.tags(.networkRequest))
-    func exploreListVC_whenLoadingAllFilms_showsLoadingView() async {
+    @Test(.tags(.networkRequest, .search))
+    func exploreListVC_whenLoadingAllFilms_showsLoadingViewAndSearchBarIsDisabled() async {
         let (sut, mockFilmsListService) = makeSUTAndMockFilmsListService()
         mockFilmsListService.shouldPauseForLoadingStateTest = true
         
@@ -58,10 +58,11 @@ struct ExploreListVCTests {
         
         #expect(sut.contentUnavailableConfiguration != nil, "Should be showing loading view.")
         #expect(sut.viewModel.currentState == .loadingAllFilms, "State should be `.loadingAllFilms`.")
+        #expect(sut.searchController.searchBar.isEnabled == false, "Should be disabled.")
     }
     
-    @Test(.tags(.networkRequest))
-    func exploreListVC_afterSuccessfulNetworkCall_updatesUICorrectly() async {
+    @Test(.tags(.networkRequest, .search))
+    func exploreListVC_afterSuccessfulNetworkCall_updatesUICorrectlyAndSearchBarIsEnabled() async {
         let sut = makeSUTForNetworkSuccess()
         
         sut.loadViewIfNeeded()
@@ -278,40 +279,6 @@ struct ExploreListVCTests {
         let itemCountAfterCancel = sut.collectionView.numberOfItems(inSection: 0)
         
         #expect(itemCountAfterCancel == 22, "All 22 films should still be in the collection view.")
-    }
-    
-    @Test(.tags(.search))
-    func exploreListVC_whenLoadingAllFilms_searchBarIsNotEnabled() async {
-        let mockFilmsListService = MockFilmsListService()
-        let imageLoader = MockImageLoader()
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let filmSyncService = FilmSyncService(context: testPersistenceController.viewContext)
-        let filmsListViewModel = FilmsListViewModel(filmsListService: mockFilmsListService, imageLoader: imageLoader, filmSyncService: filmSyncService)
-        let mockCellConfigurator = FilmRowCellConfigurator(viewModel: filmsListViewModel)
-        let mockAccessibilityService = MockAccessibilityService()
-        let sut = ExploreListVC(viewModel: filmsListViewModel,
-                                cellConfigurator: mockCellConfigurator,
-                                accessibilityService: mockAccessibilityService)
-        mockFilmsListService.shouldPauseForLoadingStateTest = true
-        
-        sut.loadViewIfNeeded()
-        await Task.yield()
-        sut.view.layoutIfNeeded()
-        
-        #expect(sut.viewModel.currentState == .loadingAllFilms, "State should be `.loadingAllFilms`.")
-        #expect(sut.searchController.searchBar.isEnabled == false, "Should be false.")
-    }
-    
-    @Test(.tags(.search))
-    func exploreListVC_whenThereIsFilmsContentFromNetworkCall_searchBarIsEnabled() async {
-        let sut = makeSUTForNetworkSuccess()
-        
-        sut.loadViewIfNeeded()
-        await sut.loadTask?.value
-        let itemCount = sut.collectionView.numberOfItems(inSection: 0)
-        
-        #expect(itemCount == 22, "All 22 films should still be in the collection view.")
-        #expect(sut.searchController.searchBar.isEnabled == true, "Should be true.")
     }
     
     @Test(.tags(.search))
