@@ -73,8 +73,10 @@ struct HomeVCTests {
         await Task.yield()
         sut.collectionView.layoutIfNeeded()
         
-        selectSegment(at: 1,
-                      in: sut.segmentedControl)
+        selectSegment(
+            at: 1,
+            in: sut.segmentedControl
+        )
         
         #expect(sut.emptyStateView.isHidden == false, "Should display empty state view.")
         #expect(sut.films.isEmpty, "Should be empty.")
@@ -109,8 +111,10 @@ struct HomeVCTests {
         await Task.yield()
         sut.collectionView.layoutIfNeeded()
         
-        selectSegment(at: 1,
-                      in: sut.segmentedControl)
+        selectSegment(
+            at: 1,
+            in: sut.segmentedControl
+        )
         
         #expect(sut.emptyStateView.isHidden, "Empty state view should be hidden.")
         #expect(sut.films.count == 1, "Should be one film.")
@@ -148,8 +152,10 @@ struct HomeVCTests {
         #expect(sut.films[0].id == Film.sample[0].id, "Should be the first film that was added.")
         #expect(sut.films[1].id == Film.sample[1].id, "Should be the second film that was added.")
         
-        selectSegment(at: 1,
-                      in: sut.segmentedControl)
+        selectSegment(
+            at: 1,
+            in: sut.segmentedControl
+        )
         
         #expect(sut.emptyStateView.isHidden, "Empty state view should be hidden.")
         #expect(sut.films.count == 1, "Should have one film.")
@@ -177,8 +183,10 @@ struct HomeVCTests {
         #expect(sut.films[0].isUpNext == true, "Should be true.")
         #expect(sut.films[0].isWatched == true, "Should be true.")
         
-        selectSegment(at: 1,
-                      in: sut.segmentedControl)
+        selectSegment(
+            at: 1,
+            in: sut.segmentedControl
+        )
         
         #expect(config == nil, "Should be displaying Watched films, not `contentUnavailableConfiguration`.")
         #expect(sut.films.count == 1, "Should have one film.")
@@ -303,8 +311,10 @@ struct HomeVCTests {
         sut.loadViewIfNeeded()
         sut.collectionView.layoutIfNeeded()
         await Task.yield()
-        selectSegment(at: 1,
-                      in: sut.segmentedControl)
+        selectSegment(
+            at: 1,
+            in: sut.segmentedControl
+        )
     
         let targetIndexPath = IndexPath(item: 0, section: 0)
         sut.collectionView.delegate?.collectionView?(sut.collectionView, didSelectItemAt: targetIndexPath)
@@ -408,8 +418,10 @@ struct HomeVCTests {
     }
     
     //MARK: - Segmented Control Helper Method
-    private func selectSegment(at index: Int,
-                               in segmentedControl: UISegmentedControl) {
+    private func selectSegment(
+        at index: Int,
+        in segmentedControl: UISegmentedControl
+    ) {
         segmentedControl.selectedSegmentIndex = index
         segmentedControl.sendActions(for: .valueChanged)
     }
