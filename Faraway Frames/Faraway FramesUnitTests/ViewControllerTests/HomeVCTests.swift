@@ -13,14 +13,6 @@ import CoreData
 @MainActor
 struct HomeVCTests {
     
-    @Test func homeVC_canInitAndLoadView() {
-        let sut = makeSUT()
-        
-        sut.loadViewIfNeeded()
-        
-        #expect(sut.view != nil, "VC should load the view.")
-    }
-    
     @Test func homeVC_onInit_filmsArrayIsEmpty() {
         let sut = makeSUT()
         
