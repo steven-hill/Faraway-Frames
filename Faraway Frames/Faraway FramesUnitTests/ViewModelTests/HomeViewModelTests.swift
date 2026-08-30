@@ -425,22 +425,28 @@ struct HomeViewModelTests {
     }
     
     //MARK: - SUT Helper Methods
-    private func makeSUTWithContext() -> (sut: HomeViewModel, context: NSManagedObjectContext) {
+    private func makeSUTWithContext() -> (
+        sut: HomeViewModel,
+        context: NSManagedObjectContext
+    ) {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
         let mockFRCFactory = MockFRCFactory()
         let mockUpNextFRC = mockFRCFactory.makeHomeUpNextFRC(context: context)
         let mockWatchedFRC = mockFRCFactory.makeHomeWatchedFRC(context: context)
-        let filmQueueService = FilmQueueService(context: context)
         let sut = HomeViewModel(
             upNextFRC: mockUpNextFRC,
             watchedFRC: mockWatchedFRC,
             imageLoader: MockImageLoader(),
-            filmQueueService: filmQueueService)
+            filmQueueService: FilmQueueService(context: context)
+        )
         return (sut, context)
     }
     
-    private func makeSUTWithImageLoader(shouldDownloadSucceed: Bool) -> (sut: HomeViewModel, mockImageLoader: MockImageLoader)  {
+    private func makeSUTWithImageLoader(shouldDownloadSucceed: Bool) -> (
+        sut: HomeViewModel,
+        mockImageLoader: MockImageLoader
+    )  {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
         let mockFRCFactory = MockFRCFactory()
@@ -448,12 +454,12 @@ struct HomeViewModelTests {
         let mockWatchedFRC = mockFRCFactory.makeHomeWatchedFRC(context: context)
         let mockImageLoader = MockImageLoader()
         mockImageLoader.shouldSucceed = shouldDownloadSucceed
-        let filmQueueService = FilmQueueService(context: context)
         let sut = HomeViewModel(
             upNextFRC: mockUpNextFRC,
             watchedFRC: mockWatchedFRC,
             imageLoader: mockImageLoader,
-            filmQueueService: filmQueueService)
+            filmQueueService: FilmQueueService(context: context)
+        )
         return (sut, mockImageLoader)
     }
     
