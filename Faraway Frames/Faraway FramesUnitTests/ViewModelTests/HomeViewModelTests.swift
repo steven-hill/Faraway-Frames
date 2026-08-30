@@ -191,21 +191,12 @@ struct HomeViewModelTests {
           arguments: PersistenceHelper.errorScenarios
     )
     func homeViewModel_toggleFilmInQueue_onSaveError_whenAddingFilm_handlesError(
-        scenario: (systemError: Error,
-                   expectedReason: PersistenceFailureReason)
+        scenario: (
+            systemError: Error,
+            expectedReason: PersistenceFailureReason
+        )
     ) async {
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
-        let context = testPersistenceController.viewContext
-        let mockFRCFactory = MockFRCFactory()
-        let mockUpNextFRC = mockFRCFactory.makeHomeUpNextFRC(context: context)
-        let mockWatchedFRC = mockFRCFactory.makeHomeWatchedFRC(context: context)
-        let filmQueueService = FilmQueueService(context: context, saver: saver)
-        let sut = HomeViewModel(
-            upNextFRC: mockUpNextFRC,
-            watchedFRC: mockWatchedFRC,
-            imageLoader: MockImageLoader(),
-            filmQueueService: filmQueueService)
+        let (sut,_) = makeSUTAndContextWithThrowingSaver(error: scenario.systemError)
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         let expectedError = HomeError.addFailed(scenario.expectedReason)
@@ -221,28 +212,18 @@ struct HomeViewModelTests {
           arguments: PersistenceHelper.errorScenarios
     )
     func homeViewModel_toggleFilmInQueue_onSaveError_whenDeletingFilm_handlesError(
-        scenario: (systemError: Error,
-                   expectedReason: PersistenceFailureReason)
+        scenario: (
+            systemError: Error,
+            expectedReason: PersistenceFailureReason
+        )
     ) async throws {
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
-        let context = testPersistenceController.viewContext
+        let (sut, context) = makeSUTAndContextWithThrowingSaver(error: scenario.systemError)
         let sampleFilm = Film.sample[0]
         _ = try PersistenceHelper.saveFilmToDatabase(
             context: context,
             film: sampleFilm,
             isUpNext: true,
             isWatched: false
-        )
-        let mockFRCFactory = MockFRCFactory()
-        let mockUpNextFRC = mockFRCFactory.makeHomeUpNextFRC(context: context)
-        let mockWatchedFRC = mockFRCFactory.makeHomeWatchedFRC(context: context)
-        let filmQueueService = FilmQueueService(context: context, saver: saver)
-        let sut = HomeViewModel(
-            upNextFRC: mockUpNextFRC,
-            watchedFRC: mockWatchedFRC,
-            imageLoader: MockImageLoader(),
-            filmQueueService: filmQueueService
         )
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
@@ -448,6 +429,25 @@ struct HomeViewModelTests {
             imageLoader: MockImageLoader(),
             filmQueueService: FilmQueueService(context: context)
         )
+    }
+    
+    private func makeSUTAndContextWithThrowingSaver(error: Error) -> (
+        sut: HomeViewModel,
+        context: NSManagedObjectContext
+    ) {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let mockFRCFactory = MockFRCFactory()
+        let mockUpNextFRC = mockFRCFactory.makeHomeUpNextFRC(context: context)
+        let mockWatchedFRC = mockFRCFactory.makeHomeWatchedFRC(context: context)
+        let saver = ThrowingSaver(errorToThrow: error)
+        let sut = HomeViewModel(
+            upNextFRC: mockUpNextFRC,
+            watchedFRC: mockWatchedFRC,
+            imageLoader: MockImageLoader(),
+            filmQueueService: FilmQueueService(context: context, saver: saver)
+        )
+        return (sut, context)
     }
     
     private func makeSUTWithImageLoader(shouldDownloadSucceed: Bool) -> (
