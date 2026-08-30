@@ -328,24 +328,22 @@ struct HomeVCTests {
         return HomeVC(homeViewModel: homeViewModel)
     }
     
-    private func makeSUTAndContext() throws -> (sut: HomeVC,
-                                                          context: NSManagedObjectContext) {
+    private func makeSUTAndContext() -> (
+        sut: HomeVC,
+        context: NSManagedObjectContext
+    ) {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
         let mockFRCFactory = MockFRCFactory()
         let mockUpNextFRC = mockFRCFactory.makeHomeUpNextFRC(context: context)
         let mockWatchedFRC = mockFRCFactory.makeHomeWatchedFRC(context: context)
-        let filmQueueService = FilmQueueService(context: context)
         let homeVM = HomeViewModel(
             upNextFRC: mockUpNextFRC,
             watchedFRC: mockWatchedFRC,
             imageLoader: MockImageLoader(),
-            filmQueueService: filmQueueService)
-        let sut = HomeVC(homeViewModel: homeVM)
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+            filmQueueService: FilmQueueService(context: context)
         )
+        let sut = HomeVC(homeViewModel: homeVM)
         return (sut, context)
     }
     
