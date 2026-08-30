@@ -273,13 +273,12 @@ struct HomeVCTests {
     func homeVC_didSelectItemAt_filmInUpNext_flowsThroughViewModelToCoordinatorDelegate() async throws {
         let upNextFilm = Film.sample[0]
         let (sut, context, spyDelegate, entity) = try makeSUTForCellTap()
-        _ = PersistenceHelper.makeFilmMO(with: upNextFilm,
-                                         entity: entity,
-                                         context: context,
-                                         isUpNext: true,
-                                         isWatched: false
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: Film.sample[0],
+            isUpNext: true,
+            isWatched: false
         )
-        try context.save()
         sut.loadViewIfNeeded()
         sut.collectionView.layoutIfNeeded()
         await Task.yield()
@@ -293,22 +292,14 @@ struct HomeVCTests {
     
     @Test("Tapping a cell in `Watched` flows through the view model and fires the coordinator delegate")
     func homeVC_didSelectItemAt_filmInWatched_flowsThroughViewModelToCoordinatorDelegate() async throws {
-        let upNextFilm = Film.sample[0]
         let watchedFilm = Film.sample[1]
         let (sut, context, spyDelegate, entity) = try makeSUTForCellTap()
-        _ = PersistenceHelper.makeFilmMO(with: upNextFilm,
-                                         entity: entity,
-                                         context: context,
-                                         isUpNext: true,
-                                         isWatched: false
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: watchedFilm,
+            isUpNext: false,
+            isWatched: true
         )
-        _ = PersistenceHelper.makeFilmMO(with: watchedFilm,
-                                         entity: entity,
-                                         context: context,
-                                         isUpNext: false,
-                                         isWatched: true
-        )
-        try context.save()
         sut.loadViewIfNeeded()
         sut.collectionView.layoutIfNeeded()
         await Task.yield()
