@@ -239,7 +239,7 @@ struct HomeVCTests {
         await Task.yield()
         let targetIndexPath = IndexPath(item: 0, section: 0)
         guard let cell = sut.collectionView.cellForItem(at: targetIndexPath) as? FilmGridCell else {
-            Issue.record("Expected visible `FilmGridCell` to be present after reconfiguration")
+            Issue.record("Expected visible `FilmGridCell` to be present after reconfiguration.")
             return
         }
         
@@ -248,10 +248,13 @@ struct HomeVCTests {
     
     @Test("`FilmGridCell` is not reconfigured with film image when image does not exist in cache.")
     func homeVC_whenImageIsNotInCache_cellIsNotReconfiguredWithFilmImage() async throws {
-        let targetFilm = Film.sample[0]
-        let (sut, context, entity) = try makeSUTWithEmptyMockImageLoaderCache()
-        _ = PersistenceHelper.makeFilmMO(with: targetFilm, entity: entity, context: context, isUpNext: true, isWatched: false)
-        try context.save()
+        let (sut, context) = try makeSUTWithEmptyMockImageLoaderCache()
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: Film.sample[0],
+            isUpNext: true,
+            isWatched: false
+        )
         sut.loadViewIfNeeded()
         
         sut.collectionView.layoutIfNeeded()
@@ -372,8 +375,7 @@ struct HomeVCTests {
     }
     
     private func makeSUTWithEmptyMockImageLoaderCache() throws -> (sut: HomeVC,
-                                                                   context: NSManagedObjectContext,
-                                                                   entity: NSEntityDescription) {
+                                                                   context: NSManagedObjectContext) {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
         let mockFRCFactory = MockFRCFactory()
@@ -392,7 +394,7 @@ struct HomeVCTests {
             NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
             "The Core Data model schema must contain an entity definition named 'FilmMO'."
         )
-        return (sut, context, entity)
+        return (sut, context)
     }
     
     private func makeSUTForCellTap() throws -> (sut: HomeVC,
