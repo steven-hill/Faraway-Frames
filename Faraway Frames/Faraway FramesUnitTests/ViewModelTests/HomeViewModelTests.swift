@@ -60,7 +60,7 @@ struct HomeViewModelTests {
     }
     
     @Test("`HomeViewModel` upNextFilms and watchedFilms are empty if `performFetches` returns no results, and calls delegate", (.tags(.persistence)))
-    func homeViewModel_performFetches_whenFetchesReturnNoResults_arraysAreEmpty() throws {
+    func homeViewModel_performFetches_whenFetchesReturnNoResults_arraysAreEmpty() {
         let (sut, _) = makeSUTWithContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
@@ -89,19 +89,12 @@ struct HomeViewModelTests {
           arguments: PersistenceHelper.errorScenarios
     )
     func homeViewModel_performFetches_whenThereIsAnError_setsCorrectFailureState(
-        for scenario: (systemError: Error,
-                       expectedReason: PersistenceFailureReason)
-    ) throws {
-        let testPersistenceController = try PersistenceController(inMemory: true)
-        let context = testPersistenceController.viewContext
-        let filmQueueService = FilmQueueService(context: context)
-        let throwingController = ThrowingFetchedResultsController(context: context, errorToThrow: scenario.systemError)
-        let sut = HomeViewModel(
-            upNextFRC: throwingController,
-            watchedFRC: throwingController,
-            imageLoader: MockImageLoader(),
-            filmQueueService: filmQueueService
+        for scenario: (
+            systemError: Error,
+            expectedReason: PersistenceFailureReason
         )
+    ) throws {
+        let sut = try makeSUTWithThrowingFRC(error: scenario.systemError)
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         let expectedError = HomeError.fetchFailed(scenario.expectedReason)
@@ -167,7 +160,7 @@ struct HomeViewModelTests {
     }
     
     @Test("Adding a film to upNext should add it to `upNextFilms`, and call delegate method", (.tags(.persistence)))
-    func homeViewModel_toggleFilmInQueue_addsFilmToUpNext() async throws {
+    func homeViewModel_toggleFilmInQueue_addsFilmToUpNext() async {
         let (sut, _) = makeSUTWithContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
@@ -181,13 +174,12 @@ struct HomeViewModelTests {
     }
     
     @Test("Adding a film to watched should add it to `watchedFilms`, and call delegate method", (.tags(.persistence)))
-    func homeViewModel_toggleFilmInQueue_addsFilmToWatched() async throws {
+    func homeViewModel_toggleFilmInQueue_addsFilmToWatched() async {
         let (sut, _) = makeSUTWithContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
-        let targetFilm = Film.sample[0]
         
-        await sut.toggleFilmInQueue(film: targetFilm, queue: .watched, action: .add)
+        await sut.toggleFilmInQueue(film: Film.sample[0], queue: .watched, action: .add)
         sut.performFetches()
         
         #expect(delegateSpy.didUpdateCallCount == 1, "Should call the delegate once.")
@@ -441,6 +433,21 @@ struct HomeViewModelTests {
             filmQueueService: FilmQueueService(context: context)
         )
         return (sut, context)
+    }
+    
+    private func makeSUTWithThrowingFRC(error: Error) throws -> HomeViewModel {
+        let testPersistenceController = try PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let throwingController = ThrowingFetchedResultsController(
+            context: context,
+            errorToThrow: error
+        )
+        return HomeViewModel(
+            upNextFRC: throwingController,
+            watchedFRC: throwingController,
+            imageLoader: MockImageLoader(),
+            filmQueueService: FilmQueueService(context: context)
+        )
     }
     
     private func makeSUTWithImageLoader(shouldDownloadSucceed: Bool) -> (
