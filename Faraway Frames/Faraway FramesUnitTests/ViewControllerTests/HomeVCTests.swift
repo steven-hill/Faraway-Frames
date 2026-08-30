@@ -317,14 +317,15 @@ struct HomeVCTests {
     private func makeSUT() -> HomeVC {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
-        let filmQueueService = FilmQueueService(context: context)
         let mockFRCFactory = MockFRCFactory()
         let mockUpNextFRC = mockFRCFactory.makeHomeUpNextFRC(context: context)
         let mockWatchedFRC = mockFRCFactory.makeHomeWatchedFRC(context: context)
-        let homeViewModel = HomeViewModel(upNextFRC: mockUpNextFRC,
-                                          watchedFRC: mockWatchedFRC,
-                                          imageLoader: MockImageLoader(),
-                                          filmQueueService: filmQueueService)
+        let homeViewModel = HomeViewModel(
+            upNextFRC: mockUpNextFRC,
+            watchedFRC: mockWatchedFRC,
+            imageLoader: MockImageLoader(),
+            filmQueueService: FilmQueueService(context: context)
+        )
         return HomeVC(homeViewModel: homeViewModel)
     }
     
