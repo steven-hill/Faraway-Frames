@@ -211,16 +211,16 @@ struct HomeVCTests {
     @Test("`LayoutMetrics` calculates number of columns for different size classes correctly")
     func homeVC_layoutMetricsColumnCount_returnsCorrectNumberOfColumns() {
         let iPhonePortraitNumberOfColumns = HomeVC.LayoutMetrics.columnCount(horizontal: .compact, vertical: .regular)
-        #expect(iPhonePortraitNumberOfColumns == 2)
+        #expect(iPhonePortraitNumberOfColumns == 2, "Should have 2 columns.")
             
         let iPhoneLandscapeNumberOfColumns = HomeVC.LayoutMetrics.columnCount(horizontal: .compact, vertical: .compact)
-        #expect(iPhoneLandscapeNumberOfColumns == 4)
+        #expect(iPhoneLandscapeNumberOfColumns == 4, "Should have 4 columns.")
 
         let iPadFullScreenNumberOfColumns = HomeVC.LayoutMetrics.columnCount(horizontal: .regular, vertical: .regular)
-        #expect(iPadFullScreenNumberOfColumns == 4)
+        #expect(iPadFullScreenNumberOfColumns == 4, "Should have 4 columns.")
         
         let iPadSplitViewNumberOfColumns = HomeVC.LayoutMetrics.columnCount(horizontal: .compact, vertical: .regular)
-        #expect(iPadSplitViewNumberOfColumns == 2)
+        #expect(iPadSplitViewNumberOfColumns == 2, "Should have 2 columns.")
     }
     
     @Test("`FilmGridCell` is reconfigured with film image when image exists in cache.")
