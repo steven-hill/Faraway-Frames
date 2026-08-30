@@ -13,14 +13,6 @@ import CoreData
 @MainActor
 struct HomeVCTests {
     
-    @Test func homeVC_canInitAndLoadView() {
-        let sut = makeSUT()
-        
-        sut.loadViewIfNeeded()
-        
-        #expect(sut.view != nil, "VC should load the view.")
-    }
-    
     @Test func homeVC_onInit_filmsArrayIsEmpty() {
         let sut = makeSUT()
         
@@ -47,9 +39,13 @@ struct HomeVCTests {
     
     @Test("Datasource returns a `FilmGridCell`")
     func homeVC_dataSource_returnsACell() throws {
-        let (sut, context, entity) = try makeSUTWithContextAndEntity()
-        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
-        try context.save()
+        let (sut, context) = makeSUTAndContext()
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: Film.sample[0],
+            isUpNext: true,
+            isWatched: false
+        )
         sut.loadViewIfNeeded()
         
         let indexPath = IndexPath(item: 0, section: 0)
@@ -77,8 +73,10 @@ struct HomeVCTests {
         await Task.yield()
         sut.collectionView.layoutIfNeeded()
         
-        selectSegment(at: 1,
-                      in: sut.segmentedControl)
+        selectSegment(
+            at: 1,
+            in: sut.segmentedControl
+        )
         
         #expect(sut.emptyStateView.isHidden == false, "Should display empty state view.")
         #expect(sut.films.isEmpty, "Should be empty.")
@@ -86,9 +84,13 @@ struct HomeVCTests {
     
     @Test("Film added to `Up Next` appears in `Up Next` segment")
     func homeVC_whenFilmWasAddedToUpNext_onInit_displaysInUpNext() throws {
-        let (sut, context, entity) = try makeSUTWithContextAndEntity()
-        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
-        try context.save()
+        let (sut, context) = makeSUTAndContext()
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: Film.sample[0],
+            isUpNext: true,
+            isWatched: false
+        )
         sut.loadViewIfNeeded()
         
         #expect(sut.emptyStateView.isHidden, "Empty state view should be hidden.")
@@ -98,15 +100,21 @@ struct HomeVCTests {
     
     @Test("Film added to `Watched` appears in `Watched` segment")
     func homeVC_whenFilmWasAddedToWatched_onInit_displaysInWatched() async throws {
-        let (sut, context, entity) = try makeSUTWithContextAndEntity()
-        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: false, isWatched: true)
-        try context.save()
+        let (sut, context) = makeSUTAndContext()
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: Film.sample[0],
+            isUpNext: false,
+            isWatched: true
+        )
         sut.loadViewIfNeeded()
         await Task.yield()
         sut.collectionView.layoutIfNeeded()
         
-        selectSegment(at: 1,
-                      in: sut.segmentedControl)
+        selectSegment(
+            at: 1,
+            in: sut.segmentedControl
+        )
         
         #expect(sut.emptyStateView.isHidden, "Empty state view should be hidden.")
         #expect(sut.films.count == 1, "Should be one film.")
@@ -115,27 +123,25 @@ struct HomeVCTests {
     
     @Test("When segment changes, snapshot swaps sections to show correct films in their respective segments")
     func homeVC_whenUpNextAndWatchedHaveFilms_onInit_displaysFilmsInCorrectSegments() async throws {
-        let (sut, context, entity) = try makeSUTWithContextAndEntity()
-        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0],
-                                         entity: entity,
-                                         context: context,
-                                         isUpNext: true,
-                                         isWatched: false)
-        try context.save()
-        
-        _ = PersistenceHelper.makeFilmMO(with: Film.sample[1],
-                                         entity: entity,
-                                         context: context,
-                                         isUpNext: true,
-                                         isWatched: false)
-        try context.save()
-        
-        _ = PersistenceHelper.makeFilmMO(with: Film.sample[2],
-                                         entity: entity,
-                                         context: context,
-                                         isUpNext: false,
-                                         isWatched: true)
-        try context.save()
+        let (sut, context) = makeSUTAndContext()
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: Film.sample[0],
+            isUpNext: true,
+            isWatched: false
+        )
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: Film.sample[1],
+            isUpNext: true,
+            isWatched: false
+        )
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: Film.sample[2],
+            isUpNext: false,
+            isWatched: true
+        )
         
         sut.loadViewIfNeeded()
         await Task.yield()
@@ -146,8 +152,10 @@ struct HomeVCTests {
         #expect(sut.films[0].id == Film.sample[0].id, "Should be the first film that was added.")
         #expect(sut.films[1].id == Film.sample[1].id, "Should be the second film that was added.")
         
-        selectSegment(at: 1,
-                      in: sut.segmentedControl)
+        selectSegment(
+            at: 1,
+            in: sut.segmentedControl
+        )
         
         #expect(sut.emptyStateView.isHidden, "Empty state view should be hidden.")
         #expect(sut.films.count == 1, "Should have one film.")
@@ -156,9 +164,13 @@ struct HomeVCTests {
     
     @Test("When the same film was added to both queues, and segment selection changes, snapshot shows film in both segments")
     func homeVC_whenSameFilmExistsInBothSegments_eachSegmentDisplaysCorrectData() async throws {
-        let (sut, context, entity) = try makeSUTWithContextAndEntity()
-        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: true)
-        try context.save()
+        let (sut, context) = makeSUTAndContext()
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: Film.sample[0],
+            isUpNext: true,
+            isWatched: true
+        )
         
         sut.loadViewIfNeeded()
         await Task.yield()
@@ -171,8 +183,10 @@ struct HomeVCTests {
         #expect(sut.films[0].isUpNext == true, "Should be true.")
         #expect(sut.films[0].isWatched == true, "Should be true.")
         
-        selectSegment(at: 1,
-                      in: sut.segmentedControl)
+        selectSegment(
+            at: 1,
+            in: sut.segmentedControl
+        )
         
         #expect(config == nil, "Should be displaying Watched films, not `contentUnavailableConfiguration`.")
         #expect(sut.films.count == 1, "Should have one film.")
@@ -188,17 +202,7 @@ struct HomeVCTests {
     func homeVC_whenfetchRequestFails_showsAlert(for scenario: (systemError: CocoaError,
                                                                              expectedReason: PersistenceFailureReason)
     ) throws {
-        let testPersistenceController = try PersistenceController(inMemory: true)
-        let context = testPersistenceController.viewContext
-        let filmQueueService = FilmQueueService(context: context)
-        let throwingController = ThrowingFetchedResultsController(context: context, errorToThrow: scenario.systemError)
-        let vm = HomeViewModel(
-            upNextFRC: throwingController,
-            watchedFRC: throwingController,
-            imageLoader: MockImageLoader(),
-            filmQueueService: filmQueueService
-        )
-        let sut = HomeVC(homeViewModel: vm)
+        let sut = makeSUTWithThrowingFRC(error: scenario.systemError)
         let mockPresenter = MockAlertPresenter()
         sut.alertPresenter = mockPresenter
         sut.loadViewIfNeeded()
@@ -215,24 +219,27 @@ struct HomeVCTests {
     @Test("`LayoutMetrics` calculates number of columns for different size classes correctly")
     func homeVC_layoutMetricsColumnCount_returnsCorrectNumberOfColumns() {
         let iPhonePortraitNumberOfColumns = HomeVC.LayoutMetrics.columnCount(horizontal: .compact, vertical: .regular)
-        #expect(iPhonePortraitNumberOfColumns == 2)
+        #expect(iPhonePortraitNumberOfColumns == 2, "Should have 2 columns.")
             
         let iPhoneLandscapeNumberOfColumns = HomeVC.LayoutMetrics.columnCount(horizontal: .compact, vertical: .compact)
-        #expect(iPhoneLandscapeNumberOfColumns == 4)
+        #expect(iPhoneLandscapeNumberOfColumns == 4, "Should have 4 columns.")
 
         let iPadFullScreenNumberOfColumns = HomeVC.LayoutMetrics.columnCount(horizontal: .regular, vertical: .regular)
-        #expect(iPadFullScreenNumberOfColumns == 4)
+        #expect(iPadFullScreenNumberOfColumns == 4, "Should have 4 columns.")
         
         let iPadSplitViewNumberOfColumns = HomeVC.LayoutMetrics.columnCount(horizontal: .compact, vertical: .regular)
-        #expect(iPadSplitViewNumberOfColumns == 2)
+        #expect(iPadSplitViewNumberOfColumns == 2, "Should have 2 columns.")
     }
     
     @Test("`FilmGridCell` is reconfigured with film image when image exists in cache.")
     func homeVC_whenImageExistsInCache_reconfiguresCellWithFilmImage() async throws {
-        let targetFilm = Film.sample[0]
-        let (sut, context, entity) = try makeSUTWithContextAndEntity()
-        _ = PersistenceHelper.makeFilmMO(with: targetFilm, entity: entity, context: context, isUpNext: true, isWatched: false)
-        try context.save()
+        let (sut, context) = makeSUTAndContext()
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: Film.sample[0],
+            isUpNext: true,
+            isWatched: false
+        )
         sut.loadViewIfNeeded()
 
         sut.collectionView.layoutIfNeeded()
@@ -240,7 +247,7 @@ struct HomeVCTests {
         await Task.yield()
         let targetIndexPath = IndexPath(item: 0, section: 0)
         guard let cell = sut.collectionView.cellForItem(at: targetIndexPath) as? FilmGridCell else {
-            Issue.record("Expected visible `FilmGridCell` to be present after reconfiguration")
+            Issue.record("Expected visible `FilmGridCell` to be present after reconfiguration.")
             return
         }
         
@@ -249,10 +256,13 @@ struct HomeVCTests {
     
     @Test("`FilmGridCell` is not reconfigured with film image when image does not exist in cache.")
     func homeVC_whenImageIsNotInCache_cellIsNotReconfiguredWithFilmImage() async throws {
-        let targetFilm = Film.sample[0]
-        let (sut, context, entity) = try makeSUTWithEmptyMockImageLoaderCache()
-        _ = PersistenceHelper.makeFilmMO(with: targetFilm, entity: entity, context: context, isUpNext: true, isWatched: false)
-        try context.save()
+        let (sut, context) = makeSUTWithEmptyMockImageLoaderCache()
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: Film.sample[0],
+            isUpNext: true,
+            isWatched: false
+        )
         sut.loadViewIfNeeded()
         
         sut.collectionView.layoutIfNeeded()
@@ -270,14 +280,13 @@ struct HomeVCTests {
     @Test("Tapping a cell in `Up Next` flows through the view model and fires the coordinator delegate")
     func homeVC_didSelectItemAt_filmInUpNext_flowsThroughViewModelToCoordinatorDelegate() async throws {
         let upNextFilm = Film.sample[0]
-        let (sut, context, spyDelegate, entity) = try makeSUTForCellTap()
-        _ = PersistenceHelper.makeFilmMO(with: upNextFilm,
-                                         entity: entity,
-                                         context: context,
-                                         isUpNext: true,
-                                         isWatched: false
+        let (sut, context, spyDelegate) = makeSUTForCellTap()
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: Film.sample[0],
+            isUpNext: true,
+            isWatched: false
         )
-        try context.save()
         sut.loadViewIfNeeded()
         sut.collectionView.layoutIfNeeded()
         await Task.yield()
@@ -291,27 +300,21 @@ struct HomeVCTests {
     
     @Test("Tapping a cell in `Watched` flows through the view model and fires the coordinator delegate")
     func homeVC_didSelectItemAt_filmInWatched_flowsThroughViewModelToCoordinatorDelegate() async throws {
-        let upNextFilm = Film.sample[0]
         let watchedFilm = Film.sample[1]
-        let (sut, context, spyDelegate, entity) = try makeSUTForCellTap()
-        _ = PersistenceHelper.makeFilmMO(with: upNextFilm,
-                                         entity: entity,
-                                         context: context,
-                                         isUpNext: true,
-                                         isWatched: false
+        let (sut, context, spyDelegate) = makeSUTForCellTap()
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: watchedFilm,
+            isUpNext: false,
+            isWatched: true
         )
-        _ = PersistenceHelper.makeFilmMO(with: watchedFilm,
-                                         entity: entity,
-                                         context: context,
-                                         isUpNext: false,
-                                         isWatched: true
-        )
-        try context.save()
         sut.loadViewIfNeeded()
         sut.collectionView.layoutIfNeeded()
         await Task.yield()
-        selectSegment(at: 1,
-                      in: sut.segmentedControl)
+        selectSegment(
+            at: 1,
+            in: sut.segmentedControl
+        )
     
         let targetIndexPath = IndexPath(item: 0, section: 0)
         sut.collectionView.delegate?.collectionView?(sut.collectionView, didSelectItemAt: targetIndexPath)
@@ -324,42 +327,57 @@ struct HomeVCTests {
     private func makeSUT() -> HomeVC {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
-        let filmQueueService = FilmQueueService(context: context)
         let mockFRCFactory = MockFRCFactory()
         let mockUpNextFRC = mockFRCFactory.makeHomeUpNextFRC(context: context)
         let mockWatchedFRC = mockFRCFactory.makeHomeWatchedFRC(context: context)
-        let homeViewModel = HomeViewModel(upNextFRC: mockUpNextFRC,
-                                          watchedFRC: mockWatchedFRC,
-                                          imageLoader: MockImageLoader(),
-                                          filmQueueService: filmQueueService)
+        let homeViewModel = HomeViewModel(
+            upNextFRC: mockUpNextFRC,
+            watchedFRC: mockWatchedFRC,
+            imageLoader: MockImageLoader(),
+            filmQueueService: FilmQueueService(context: context)
+        )
         return HomeVC(homeViewModel: homeViewModel)
     }
     
-    private func makeSUTWithContextAndEntity() throws -> (sut: HomeVC,
-                                                          context: NSManagedObjectContext,
-                                                          entity: NSEntityDescription) {
+    private func makeSUTAndContext() -> (
+        sut: HomeVC,
+        context: NSManagedObjectContext
+    ) {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
         let mockFRCFactory = MockFRCFactory()
         let mockUpNextFRC = mockFRCFactory.makeHomeUpNextFRC(context: context)
         let mockWatchedFRC = mockFRCFactory.makeHomeWatchedFRC(context: context)
-        let filmQueueService = FilmQueueService(context: context)
         let homeVM = HomeViewModel(
             upNextFRC: mockUpNextFRC,
             watchedFRC: mockWatchedFRC,
             imageLoader: MockImageLoader(),
-            filmQueueService: filmQueueService)
-        let sut = HomeVC(homeViewModel: homeVM)
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+            filmQueueService: FilmQueueService(context: context)
         )
-        return (sut, context, entity)
+        let sut = HomeVC(homeViewModel: homeVM)
+        return (sut, context)
     }
     
-    private func makeSUTWithEmptyMockImageLoaderCache() throws -> (sut: HomeVC,
-                                                                   context: NSManagedObjectContext,
-                                                                   entity: NSEntityDescription) {
+    private func makeSUTWithThrowingFRC(error: Error) -> HomeVC {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let throwingController = ThrowingFetchedResultsController(
+            context: context,
+            errorToThrow: error
+        )
+        let vm = HomeViewModel(
+            upNextFRC: throwingController,
+            watchedFRC: throwingController,
+            imageLoader: MockImageLoader(),
+            filmQueueService: FilmQueueService(context: context)
+        )
+        return HomeVC(homeViewModel: vm)
+    }
+    
+    private func makeSUTWithEmptyMockImageLoaderCache() -> (
+        sut: HomeVC,
+        context: NSManagedObjectContext
+    ) {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
         let mockFRCFactory = MockFRCFactory()
@@ -367,48 +385,43 @@ struct HomeVCTests {
         let mockWatchedFRC = mockFRCFactory.makeHomeWatchedFRC(context: context)
         let mockImageLoader = MockImageLoader()
         mockImageLoader.shouldSucceed = false
-        let filmQueueService = FilmQueueService(context: context)
         let homeVM = HomeViewModel(
             upNextFRC: mockUpNextFRC,
             watchedFRC: mockWatchedFRC,
             imageLoader: mockImageLoader,
-            filmQueueService: filmQueueService)
-        let sut = HomeVC(homeViewModel: homeVM)
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+            filmQueueService: FilmQueueService(context: context)
         )
-        return (sut, context, entity)
+        let sut = HomeVC(homeViewModel: homeVM)
+        return (sut, context)
     }
     
-    private func makeSUTForCellTap() throws -> (sut: HomeVC,
-                                                context: NSManagedObjectContext,
-                                                spyDelegate: SpyCoordinatorDelegate,
-                                                entity: NSEntityDescription) {
+    private func makeSUTForCellTap() -> (
+        sut: HomeVC,
+        context: NSManagedObjectContext,
+        spyDelegate: SpyCoordinatorDelegate
+    ) {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
         let mockFRCFactory = MockFRCFactory()
         let mockUpNextFRC = mockFRCFactory.makeHomeUpNextFRC(context: context)
         let mockWatchedFRC = mockFRCFactory.makeHomeWatchedFRC(context: context)
-        let filmQueueService = FilmQueueService(context: context)
         let homeVM = HomeViewModel(
             upNextFRC: mockUpNextFRC,
             watchedFRC: mockWatchedFRC,
             imageLoader: MockImageLoader(),
-            filmQueueService: filmQueueService
+            filmQueueService: FilmQueueService(context: context)
         )
         let spyDelegate = SpyCoordinatorDelegate()
         homeVM.coordinatorDelegate = spyDelegate
         let sut = HomeVC(homeViewModel: homeVM)
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'.")
-        return (sut, context, spyDelegate, entity)
+        return (sut, context, spyDelegate)
     }
     
     //MARK: - Segmented Control Helper Method
-    private func selectSegment(at index: Int,
-                               in segmentedControl: UISegmentedControl) {
+    private func selectSegment(
+        at index: Int,
+        in segmentedControl: UISegmentedControl
+    ) {
         segmentedControl.selectedSegmentIndex = index
         segmentedControl.sendActions(for: .valueChanged)
     }
