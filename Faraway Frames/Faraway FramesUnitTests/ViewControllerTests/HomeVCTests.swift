@@ -194,17 +194,7 @@ struct HomeVCTests {
     func homeVC_whenfetchRequestFails_showsAlert(for scenario: (systemError: CocoaError,
                                                                              expectedReason: PersistenceFailureReason)
     ) throws {
-        let testPersistenceController = try PersistenceController(inMemory: true)
-        let context = testPersistenceController.viewContext
-        let filmQueueService = FilmQueueService(context: context)
-        let throwingController = ThrowingFetchedResultsController(context: context, errorToThrow: scenario.systemError)
-        let vm = HomeViewModel(
-            upNextFRC: throwingController,
-            watchedFRC: throwingController,
-            imageLoader: MockImageLoader(),
-            filmQueueService: filmQueueService
-        )
-        let sut = HomeVC(homeViewModel: vm)
+        let sut = try makeSUTWithThrowingFRC(error: scenario.systemError)
         let mockPresenter = MockAlertPresenter()
         sut.alertPresenter = mockPresenter
         sut.loadViewIfNeeded()
@@ -363,6 +353,22 @@ struct HomeVCTests {
             "The Core Data model schema must contain an entity definition named 'FilmMO'."
         )
         return (sut, context)
+    }
+    
+    private func makeSUTWithThrowingFRC(error: Error) throws -> HomeVC {
+        let testPersistenceController = try PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let throwingController = ThrowingFetchedResultsController(
+            context: context,
+            errorToThrow: error
+        )
+        let vm = HomeViewModel(
+            upNextFRC: throwingController,
+            watchedFRC: throwingController,
+            imageLoader: MockImageLoader(),
+            filmQueueService: FilmQueueService(context: context)
+        )
+        return HomeVC(homeViewModel: vm)
     }
     
     private func makeSUTWithEmptyMockImageLoaderCache() throws -> (sut: HomeVC,
