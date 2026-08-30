@@ -323,17 +323,7 @@ struct HomeViewModelTests {
     
     @Test("`toggleFilmInQueue` doesn't throw error or call delegate, but exits silently via guard when film does not exist in database", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_whenFilmDoesNotExistInDatabase_doesNotThrowAndExitsCleanly() async {
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let context = testPersistenceController.viewContext
-        let mockFRCFactory = MockFRCFactory()
-        let mockUpNextFRC = mockFRCFactory.makeHomeUpNextFRC(context: context)
-        let mockWatchedFRC = mockFRCFactory.makeHomeWatchedFRC(context: context)
-        let filmQueueService = FilmQueueService(context: context)
-        let sut = HomeViewModel(
-            upNextFRC: mockUpNextFRC,
-            watchedFRC: mockWatchedFRC,
-            imageLoader: MockImageLoader(),
-            filmQueueService: filmQueueService)
+        let (sut,_) = makeSUTAndContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         
