@@ -10,8 +10,49 @@ import CoreData
 import Testing
 
 struct PersistenceHelper {
+    /// Maps a `Film` to a `FilmMO`, tries to save it in the context, and returns it.
+    @MainActor static func saveFilmToDatabase(
+        context: NSManagedObjectContext,
+        film: Film,
+        isUpNext: Bool,
+        isWatched: Bool
+    ) throws -> FilmMO {
+        let entity = try #require(
+            NSEntityDescription.entity(
+                forEntityName: Persistence.entityname,
+                in: context
+            ), "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        )
+        let filmMO = makeFilmMO(
+            with: film,
+            entity: entity,
+            context: context,
+            isUpNext: isUpNext,
+            isWatched: isWatched
+        )
+        try? context.save()
+        return filmMO
+    }
+
+    /// Used in tests involving CoreData operations error handling.
+    nonisolated static var errorScenarios: [(
+        systemError: CocoaError,
+        expectedReason: PersistenceFailureReason
+    )]
+    {
+        [
+            (CocoaError(.fileWriteOutOfSpace), .diskFull),
+            (CocoaError(.persistentStoreOpen), .databaseError),
+            (CocoaError(.managedObjectReferentialIntegrity), .databaseError),
+            (CocoaError(.persistentStoreTypeMismatch), .databaseError),
+            (CocoaError(.fileNoSuchFile), .databaseError)
+        ]
+    }
+}
+
+extension PersistenceHelper {
     /// Maps a `Film` to a `FilmMO` CoreData entity, and returns it.
-    @MainActor static func makeFilmMO(
+    @MainActor private static func makeFilmMO(
         with film: Film,
         entity: NSEntityDescription,
         context: NSManagedObjectContext,
@@ -35,44 +76,5 @@ struct PersistenceHelper {
         filmToBeSaved.isUpNext = isUpNext
         filmToBeSaved.isWatched = isWatched
         return filmToBeSaved
-    }
-    
-    /// Used in tests involving CoreData operations error handling.
-    nonisolated static var errorScenarios: [(
-        systemError: CocoaError,
-        expectedReason: PersistenceFailureReason
-    )]
-    {
-        [
-            (CocoaError(.fileWriteOutOfSpace), .diskFull),
-            (CocoaError(.persistentStoreOpen), .databaseError),
-            (CocoaError(.managedObjectReferentialIntegrity), .databaseError),
-            (CocoaError(.persistentStoreTypeMismatch), .databaseError),
-            (CocoaError(.fileNoSuchFile), .databaseError)
-        ]
-    }
-    
-    /// Maps a `Film` to a `FilmMO`, tries to save it in the context, and returns it.
-    @MainActor static func saveFilmToDatabase(
-        context: NSManagedObjectContext,
-        film: Film,
-        isUpNext: Bool,
-        isWatched: Bool
-    ) throws -> FilmMO {
-        let entity = try #require(
-            NSEntityDescription.entity(
-                forEntityName: Persistence.entityname,
-                in: context
-            ), "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
-        let filmMO = makeFilmMO(
-            with: film,
-            entity: entity,
-            context: context,
-            isUpNext: isUpNext,
-            isWatched: isWatched
-        )
-        try? context.save()
-        return filmMO
     }
 }
