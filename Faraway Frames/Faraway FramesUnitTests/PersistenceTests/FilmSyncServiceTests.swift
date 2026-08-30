@@ -37,8 +37,12 @@ struct FilmSyncServiceTests {
     @Test("If database is not empty but records don't match the input, should return the input films with their default flags unchanged", (.tags(.persistence)))
     func filmSyncService_syncFilmsWithLocalStorage_ifDatabaseRecordsDontMatchInput_returnsInputWithStatusUnchanged() async throws {
         let (sut, context, entity) = try makeSUTViewContextAndEntity()
-        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: true)
-        try? context.save()
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: Film.sample[0],
+            isUpNext: true,
+            isWatched: true
+        )
         let input = [Film.sample[1]]
         
         let result = await sut.syncFilmsWithLocalStorage(input)
@@ -51,9 +55,18 @@ struct FilmSyncServiceTests {
     @Test("If database records match all the input, should update input films with the database state", (.tags(.persistence)))
     func filmSyncService_syncFilmsWithLocalStorage_ifDatabaseRecordsAndInputMatchPerfectly_returnsInputWithStatusUpdated() async throws {
         let (sut, context, entity) = try makeSUTViewContextAndEntity()
-        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: true)
-        _ = PersistenceHelper.makeFilmMO(with: Film.sample[1], entity: entity, context: context, isUpNext: true, isWatched: true)
-        try? context.save()
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: Film.sample[0],
+            isUpNext: true,
+            isWatched: true
+        )
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: Film.sample[1],
+            isUpNext: true,
+            isWatched: true
+        )
         let films = [Film.sample[0], Film.sample[1]]
         
         let result = await sut.syncFilmsWithLocalStorage(films)
