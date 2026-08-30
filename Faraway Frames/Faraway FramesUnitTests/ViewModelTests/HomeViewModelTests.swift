@@ -14,14 +14,14 @@ struct HomeViewModelTests {
     
     @Test("`currentState` is correct on init")
     func homeViewModel_currentState_onInit_isIdle() {
-        let (sut,_) = makeSUTWithContext()
+        let (sut,_) = makeSUTAndContext()
         
         #expect(sut.currentState == .idle, "Should be `.idle`.")
     }
     
     @Test("`currentState` is correct after fetching Up Next films and Watched films")
     func homeViewModel_currentState_afterFetchingSuccessfully_isFetchedObjects() {
-        let (sut,_) = makeSUTWithContext()
+        let (sut,_) = makeSUTAndContext()
         
         sut.performFetches()
         
@@ -30,17 +30,21 @@ struct HomeViewModelTests {
     
     @Test("`HomeViewModel` can fetch up next films and watched films, and calls delegate", (.tags(.persistence)))
     func homeViewModel_performFetches_whenFilmsExistInDatabase_fetchesCorrectly() throws {
-        let (sut, context) = makeSUTWithContext()
+        let (sut, context) = makeSUTAndContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: Film.sample[0],
+            isUpNext: true,
+            isWatched: false
         )
-        
-        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
-        _ = PersistenceHelper.makeFilmMO(with: Film.sample[1], entity: entity, context: context, isUpNext: false, isWatched: true)
-        try context.save()
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: Film.sample[1],
+            isUpNext: false,
+            isWatched: true
+        )
         
         sut.performFetches()
         
@@ -56,8 +60,8 @@ struct HomeViewModelTests {
     }
     
     @Test("`HomeViewModel` upNextFilms and watchedFilms are empty if `performFetches` returns no results, and calls delegate", (.tags(.persistence)))
-    func homeViewModel_performFetches_whenFetchesReturnNoResults_arraysAreEmpty() throws {
-        let (sut, _) = makeSUTWithContext()
+    func homeViewModel_performFetches_whenFetchesReturnNoResults_arraysAreEmpty() {
+        let (sut, _) = makeSUTAndContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         
@@ -70,7 +74,7 @@ struct HomeViewModelTests {
     
     @Test("When `controllerDidChangeContent` is called, it should call the delegate")
     func homeViewModel_controllerDidChangeContent_triggersDelegate() {
-        let (sut, _) = makeSUTWithContext()
+        let (sut, _) = makeSUTAndContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         let dummyController = NSFetchedResultsController<NSFetchRequestResult>()
@@ -85,19 +89,12 @@ struct HomeViewModelTests {
           arguments: PersistenceHelper.errorScenarios
     )
     func homeViewModel_performFetches_whenThereIsAnError_setsCorrectFailureState(
-        for scenario: (systemError: Error,
-                       expectedReason: PersistenceFailureReason)
-    ) throws {
-        let testPersistenceController = try PersistenceController(inMemory: true)
-        let context = testPersistenceController.viewContext
-        let filmQueueService = FilmQueueService(context: context)
-        let throwingController = ThrowingFetchedResultsController(context: context, errorToThrow: scenario.systemError)
-        let sut = HomeViewModel(
-            upNextFRC: throwingController,
-            watchedFRC: throwingController,
-            imageLoader: MockImageLoader(),
-            filmQueueService: filmQueueService
+        for scenario: (
+            systemError: Error,
+            expectedReason: PersistenceFailureReason
         )
+    ) throws {
+        let sut = try makeSUTWithThrowingFRC(error: scenario.systemError)
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         let expectedError = HomeError.fetchFailed(scenario.expectedReason)
@@ -111,7 +108,7 @@ struct HomeViewModelTests {
     
     @Test("Image loading request returns fallback image when URL is invalid")
     func homeViewModel_getImage_whenURLIsInvalid_returnsFallback() async {
-        let (sut, _) = makeSUTWithImageLoader(shouldDownloadSucceed: false)
+        let (sut, _) = makeSUTAndImageLoader(shouldDownloadSucceed: false)
         let targetFilm = Film.sample[0]
         
         let returnedImage = await sut.getImage(for: targetFilm)
@@ -121,7 +118,7 @@ struct HomeViewModelTests {
     
     @Test("Image loading request returns the downloaded image when network request succeeds")
     func homeViewModel_getImage_whenRequestSucceeds_returnsDownloadedImage() async {
-        let (sut, _) = makeSUTWithContext()
+        let (sut, _) = makeSUTAndContext()
         let targetFilm = Film.sample[0]
         
         let returnedImage = await sut.getImage(for: targetFilm)
@@ -131,7 +128,7 @@ struct HomeViewModelTests {
     
     @Test("Image loading request returns the fallback image when network request fails")
     func homeViewModel_getImage_whenRequestFails_returnsFallbackImage() async {
-        let (sut, _) = makeSUTWithImageLoader(shouldDownloadSucceed: false)
+        let (sut, _) = makeSUTAndImageLoader(shouldDownloadSucceed: false)
         let targetFilm = Film.sample[0]
         
         let returnedImage = await sut.getImage(for: targetFilm)
@@ -141,7 +138,7 @@ struct HomeViewModelTests {
     
     @Test("Image loading request catches cancellation and returns fallback image")
     func homeViewModel_getImage_whenTaskIsCancelledMidFlight_returnsFallback() async {
-        let (sut, _) = makeSUTWithImageLoader(shouldDownloadSucceed: false)
+        let (sut, _) = makeSUTAndImageLoader(shouldDownloadSucceed: false)
         let targetFilm = Film.sample[0]
         let task = Task {
             await sut.getImage(for: targetFilm)
@@ -155,7 +152,7 @@ struct HomeViewModelTests {
     
     @Test("`checkCachesForFilmPoster` calls method on `imageLoader`")
     func homeViewModel_checkCachesForFilmPoster_callsCorrectMethodOnImageLoaderOnce() {
-        let (sut, mockImageLoader) = makeSUTWithImageLoader(shouldDownloadSucceed: false)
+        let (sut, mockImageLoader) = makeSUTAndImageLoader(shouldDownloadSucceed: false)
         
         _ = sut.checkCachesForFilmPoster(for: Film.sample[0])
         
@@ -163,8 +160,8 @@ struct HomeViewModelTests {
     }
     
     @Test("Adding a film to upNext should add it to `upNextFilms`, and call delegate method", (.tags(.persistence)))
-    func homeViewModel_toggleFilmInQueue_addsFilmToUpNext() async throws {
-        let (sut, _) = makeSUTWithContext()
+    func homeViewModel_toggleFilmInQueue_addsFilmToUpNext() async {
+        let (sut, _) = makeSUTAndContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         let targetFilm = Film.sample[0]
@@ -177,13 +174,12 @@ struct HomeViewModelTests {
     }
     
     @Test("Adding a film to watched should add it to `watchedFilms`, and call delegate method", (.tags(.persistence)))
-    func homeViewModel_toggleFilmInQueue_addsFilmToWatched() async throws {
-        let (sut, _) = makeSUTWithContext()
+    func homeViewModel_toggleFilmInQueue_addsFilmToWatched() async {
+        let (sut, _) = makeSUTAndContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
-        let targetFilm = Film.sample[0]
         
-        await sut.toggleFilmInQueue(film: targetFilm, queue: .watched, action: .add)
+        await sut.toggleFilmInQueue(film: Film.sample[0], queue: .watched, action: .add)
         sut.performFetches()
         
         #expect(delegateSpy.didUpdateCallCount == 1, "Should call the delegate once.")
@@ -195,21 +191,12 @@ struct HomeViewModelTests {
           arguments: PersistenceHelper.errorScenarios
     )
     func homeViewModel_toggleFilmInQueue_onSaveError_whenAddingFilm_handlesError(
-        scenario: (systemError: Error,
-                   expectedReason: PersistenceFailureReason)
+        scenario: (
+            systemError: Error,
+            expectedReason: PersistenceFailureReason
+        )
     ) async {
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
-        let context = testPersistenceController.viewContext
-        let mockFRCFactory = MockFRCFactory()
-        let mockUpNextFRC = mockFRCFactory.makeHomeUpNextFRC(context: context)
-        let mockWatchedFRC = mockFRCFactory.makeHomeWatchedFRC(context: context)
-        let filmQueueService = FilmQueueService(context: context, saver: saver)
-        let sut = HomeViewModel(
-            upNextFRC: mockUpNextFRC,
-            watchedFRC: mockWatchedFRC,
-            imageLoader: MockImageLoader(),
-            filmQueueService: filmQueueService)
+        let (sut,_) = makeSUTAndContextWithThrowingSaver(error: scenario.systemError)
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         let expectedError = HomeError.addFailed(scenario.expectedReason)
@@ -225,28 +212,18 @@ struct HomeViewModelTests {
           arguments: PersistenceHelper.errorScenarios
     )
     func homeViewModel_toggleFilmInQueue_onSaveError_whenDeletingFilm_handlesError(
-        scenario: (systemError: Error,
-                   expectedReason: PersistenceFailureReason)
-    ) async throws {
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let saver = ThrowingSaver(errorToThrow: scenario.systemError)
-        let context = testPersistenceController.viewContext
-        let sampleFilm = Film.sample[0]
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        scenario: (
+            systemError: Error,
+            expectedReason: PersistenceFailureReason
         )
-        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
-        try? context.save()
-        let mockFRCFactory = MockFRCFactory()
-        let mockUpNextFRC = mockFRCFactory.makeHomeUpNextFRC(context: context)
-        let mockWatchedFRC = mockFRCFactory.makeHomeWatchedFRC(context: context)
-        let filmQueueService = FilmQueueService(context: context, saver: saver)
-        let sut = HomeViewModel(
-            upNextFRC: mockUpNextFRC,
-            watchedFRC: mockWatchedFRC,
-            imageLoader: MockImageLoader(),
-            filmQueueService: filmQueueService
+    ) async throws {
+        let (sut, context) = makeSUTAndContextWithThrowingSaver(error: scenario.systemError)
+        let sampleFilm = Film.sample[0]
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: sampleFilm,
+            isUpNext: true,
+            isWatched: false
         )
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
@@ -260,16 +237,16 @@ struct HomeViewModelTests {
 
     @Test("Removing film from upNext when it's not in watched should remove it from database entirely, and call delegate", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_whenFilmInUpNextButNotInWatchedIsRemoved_deletesItFromDatabase() async throws {
-        let (sut, context) = makeSUTWithContext()
+        let (sut, context) = makeSUTAndContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
         let targetFilm = Film.sample[0]
-        _ = PersistenceHelper.makeFilmMO(with: targetFilm, entity: entity, context: context, isUpNext: true, isWatched: false)
-        try context.save()
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: targetFilm,
+            isUpNext: true,
+            isWatched: false
+        )
         
         await sut.toggleFilmInQueue(film: targetFilm, queue: .upNext, action: .remove)
         
@@ -282,16 +259,16 @@ struct HomeViewModelTests {
     
     @Test("Removing film from upNext when it's in watched should only flip upNext flag, and call delegate", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_whenFilmIsInUpNextAndInWatched_shouldFlipFlag() async throws {
-        let (sut, context) = makeSUTWithContext()
+        let (sut, context) = makeSUTAndContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
         let targetFilm = Film.sample[0]
-        _ = PersistenceHelper.makeFilmMO(with: targetFilm, entity: entity, context: context, isUpNext: true, isWatched: true)
-        try context.save()
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: targetFilm,
+            isUpNext: true,
+            isWatched: true
+        )
         
         await sut.toggleFilmInQueue(film: targetFilm, queue: .upNext, action: .remove)
         
@@ -304,19 +281,18 @@ struct HomeViewModelTests {
     
     @Test("Removing film from watched when it's not in upNext removes film from database entirely, and calls delegate", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_whenFilmInWatchedAndNotInUpNext_deletesFilmFromDatabase() async throws {
-        let (sut, context) = makeSUTWithContext()
+        let (sut, context) = makeSUTAndContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
         let targetFilm = Film.sample[0]
-        _ = PersistenceHelper.makeFilmMO(with: targetFilm, entity: entity, context: context, isUpNext: false, isWatched: true)
-        try context.save()
-        
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: targetFilm,
+            isUpNext: false,
+            isWatched: true
+        )
+
         await sut.toggleFilmInQueue(film: targetFilm, queue: .watched, action: .remove)
-        
         sut.performFetches()
         
         #expect(sut.upNextFilms.isEmpty, "Should be empty.")
@@ -326,19 +302,18 @@ struct HomeViewModelTests {
     
     @Test("Removing film from watched when it is in upNext removes film from watched only, and calls delegate", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_whenFilmInBothWatchedAndInUpNext_deletesFilmFromWatched() async throws {
-        let (sut, context) = makeSUTWithContext()
+        let (sut, context) = makeSUTAndContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
         let targetFilm = Film.sample[0]
-        _ = PersistenceHelper.makeFilmMO(with: targetFilm, entity: entity, context: context, isUpNext: true, isWatched: true)
-        try context.save()
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: targetFilm,
+            isUpNext: true,
+            isWatched: true
+        )
         
         await sut.toggleFilmInQueue(film: targetFilm, queue: .watched, action: .remove)
-        
         sut.performFetches()
         
         #expect(sut.upNextFilms.count == 1, "Should still have one in upNext.")
@@ -348,17 +323,7 @@ struct HomeViewModelTests {
     
     @Test("`toggleFilmInQueue` doesn't throw error or call delegate, but exits silently via guard when film does not exist in database", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_whenFilmDoesNotExistInDatabase_doesNotThrowAndExitsCleanly() async {
-        let testPersistenceController = try! PersistenceController(inMemory: true)
-        let context = testPersistenceController.viewContext
-        let mockFRCFactory = MockFRCFactory()
-        let mockUpNextFRC = mockFRCFactory.makeHomeUpNextFRC(context: context)
-        let mockWatchedFRC = mockFRCFactory.makeHomeWatchedFRC(context: context)
-        let filmQueueService = FilmQueueService(context: context)
-        let sut = HomeViewModel(
-            upNextFRC: mockUpNextFRC,
-            watchedFRC: mockWatchedFRC,
-            imageLoader: MockImageLoader(),
-            filmQueueService: filmQueueService)
+        let (sut,_) = makeSUTAndContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         
@@ -369,53 +334,51 @@ struct HomeViewModelTests {
     
     @Test("Up Next film lookup returns film when it exists in array")
     func homeViewModel_lookupUpNextFilm_whenFilmExistsInArray_returnsFilm() throws {
-        let (sut, context) = makeSUTWithContext()
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        let (sut, context) = makeSUTAndContext()
+        let targetFilm = Film.sample[0]
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: targetFilm,
+            isUpNext: true,
+            isWatched: false
         )
-        
-        let targetFilm = Film.sample[0].id
-        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
-        try context.save()
         sut.performFetches()
         
-        let result = sut.lookupUpNextFilm(for: targetFilm)
+        let result = sut.lookupUpNextFilm(for: targetFilm.id)
         
         #expect(result != nil, "Result should return a film.")
     }
     
     @Test("Up Next film lookup returns nil when film does not exist in array")
     func homeViewModel_lookupUpNextFilm_whenFilmIsNotInArray_returnsNil() throws {
-        let (sut, _) = makeSUTWithContext()
-        let targetFilm = Film.sample[0].id
+        let (sut, _) = makeSUTAndContext()
         sut.performFetches()
         
-        let result = sut.lookupUpNextFilm(for: targetFilm)
+        let result = sut.lookupUpNextFilm(for: Film.sample[0].id)
         
         #expect(result == nil, "Result should return nil.")
     }
     
     @Test("Watched film lookup returns film when it exists in array")
     func homeViewModel_lookupWatchedFilm_whenFilmExistsInArray_returnsFilm() throws {
-        let (sut, context) = makeSUTWithContext()
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        let (sut, context) = makeSUTAndContext()
+        let targetFilm = Film.sample[0]
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: targetFilm,
+            isUpNext: false,
+            isWatched: true
         )
-        let targetFilm = Film.sample[0].id
-        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: false, isWatched: true)
-        try context.save()
         sut.performFetches()
         
-        let result = sut.lookupWatchedFilm(for: targetFilm)
+        let result = sut.lookupWatchedFilm(for: targetFilm.id)
         
         #expect(result != nil, "Result should return a film.")
     }
     
     @Test("Watched film lookup returns nil when film does not exist in array")
     func homeViewModel_lookupUpWatchedFilm_whenFilmIsNotInArray_returnsNil() throws {
-        let (sut, _) = makeSUTWithContext()
+        let (sut, _) = makeSUTAndContext()
         let targetFilm = Film.sample[0].id
         sut.performFetches()
         
@@ -425,22 +388,62 @@ struct HomeViewModelTests {
     }
     
     //MARK: - SUT Helper Methods
-    private func makeSUTWithContext() -> (sut: HomeViewModel, context: NSManagedObjectContext) {
+    private func makeSUTAndContext() -> (
+        sut: HomeViewModel,
+        context: NSManagedObjectContext
+    ) {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
         let mockFRCFactory = MockFRCFactory()
         let mockUpNextFRC = mockFRCFactory.makeHomeUpNextFRC(context: context)
         let mockWatchedFRC = mockFRCFactory.makeHomeWatchedFRC(context: context)
-        let filmQueueService = FilmQueueService(context: context)
         let sut = HomeViewModel(
             upNextFRC: mockUpNextFRC,
             watchedFRC: mockWatchedFRC,
             imageLoader: MockImageLoader(),
-            filmQueueService: filmQueueService)
+            filmQueueService: FilmQueueService(context: context)
+        )
         return (sut, context)
     }
     
-    private func makeSUTWithImageLoader(shouldDownloadSucceed: Bool) -> (sut: HomeViewModel, mockImageLoader: MockImageLoader)  {
+    private func makeSUTWithThrowingFRC(error: Error) throws -> HomeViewModel {
+        let testPersistenceController = try PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let throwingController = ThrowingFetchedResultsController(
+            context: context,
+            errorToThrow: error
+        )
+        return HomeViewModel(
+            upNextFRC: throwingController,
+            watchedFRC: throwingController,
+            imageLoader: MockImageLoader(),
+            filmQueueService: FilmQueueService(context: context)
+        )
+    }
+    
+    private func makeSUTAndContextWithThrowingSaver(error: Error) -> (
+        sut: HomeViewModel,
+        context: NSManagedObjectContext
+    ) {
+        let testPersistenceController = try! PersistenceController(inMemory: true)
+        let context = testPersistenceController.viewContext
+        let mockFRCFactory = MockFRCFactory()
+        let mockUpNextFRC = mockFRCFactory.makeHomeUpNextFRC(context: context)
+        let mockWatchedFRC = mockFRCFactory.makeHomeWatchedFRC(context: context)
+        let saver = ThrowingSaver(errorToThrow: error)
+        let sut = HomeViewModel(
+            upNextFRC: mockUpNextFRC,
+            watchedFRC: mockWatchedFRC,
+            imageLoader: MockImageLoader(),
+            filmQueueService: FilmQueueService(context: context, saver: saver)
+        )
+        return (sut, context)
+    }
+    
+    private func makeSUTAndImageLoader(shouldDownloadSucceed: Bool) -> (
+        sut: HomeViewModel,
+        mockImageLoader: MockImageLoader
+    )  {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
         let mockFRCFactory = MockFRCFactory()
@@ -448,12 +451,12 @@ struct HomeViewModelTests {
         let mockWatchedFRC = mockFRCFactory.makeHomeWatchedFRC(context: context)
         let mockImageLoader = MockImageLoader()
         mockImageLoader.shouldSucceed = shouldDownloadSucceed
-        let filmQueueService = FilmQueueService(context: context)
         let sut = HomeViewModel(
             upNextFRC: mockUpNextFRC,
             watchedFRC: mockWatchedFRC,
             imageLoader: mockImageLoader,
-            filmQueueService: filmQueueService)
+            filmQueueService: FilmQueueService(context: context)
+        )
         return (sut, mockImageLoader)
     }
     
