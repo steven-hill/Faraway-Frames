@@ -14,14 +14,14 @@ struct HomeViewModelTests {
     
     @Test("`currentState` is correct on init")
     func homeViewModel_currentState_onInit_isIdle() {
-        let (sut,_) = makeSUTWithContext()
+        let (sut,_) = makeSUTAndContext()
         
         #expect(sut.currentState == .idle, "Should be `.idle`.")
     }
     
     @Test("`currentState` is correct after fetching Up Next films and Watched films")
     func homeViewModel_currentState_afterFetchingSuccessfully_isFetchedObjects() {
-        let (sut,_) = makeSUTWithContext()
+        let (sut,_) = makeSUTAndContext()
         
         sut.performFetches()
         
@@ -30,7 +30,7 @@ struct HomeViewModelTests {
     
     @Test("`HomeViewModel` can fetch up next films and watched films, and calls delegate", (.tags(.persistence)))
     func homeViewModel_performFetches_whenFilmsExistInDatabase_fetchesCorrectly() throws {
-        let (sut, context) = makeSUTWithContext()
+        let (sut, context) = makeSUTAndContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         _ = try PersistenceHelper.saveFilmToDatabase(
@@ -61,7 +61,7 @@ struct HomeViewModelTests {
     
     @Test("`HomeViewModel` upNextFilms and watchedFilms are empty if `performFetches` returns no results, and calls delegate", (.tags(.persistence)))
     func homeViewModel_performFetches_whenFetchesReturnNoResults_arraysAreEmpty() {
-        let (sut, _) = makeSUTWithContext()
+        let (sut, _) = makeSUTAndContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         
@@ -74,7 +74,7 @@ struct HomeViewModelTests {
     
     @Test("When `controllerDidChangeContent` is called, it should call the delegate")
     func homeViewModel_controllerDidChangeContent_triggersDelegate() {
-        let (sut, _) = makeSUTWithContext()
+        let (sut, _) = makeSUTAndContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         let dummyController = NSFetchedResultsController<NSFetchRequestResult>()
@@ -108,7 +108,7 @@ struct HomeViewModelTests {
     
     @Test("Image loading request returns fallback image when URL is invalid")
     func homeViewModel_getImage_whenURLIsInvalid_returnsFallback() async {
-        let (sut, _) = makeSUTWithImageLoader(shouldDownloadSucceed: false)
+        let (sut, _) = makeSUTAndImageLoader(shouldDownloadSucceed: false)
         let targetFilm = Film.sample[0]
         
         let returnedImage = await sut.getImage(for: targetFilm)
@@ -118,7 +118,7 @@ struct HomeViewModelTests {
     
     @Test("Image loading request returns the downloaded image when network request succeeds")
     func homeViewModel_getImage_whenRequestSucceeds_returnsDownloadedImage() async {
-        let (sut, _) = makeSUTWithContext()
+        let (sut, _) = makeSUTAndContext()
         let targetFilm = Film.sample[0]
         
         let returnedImage = await sut.getImage(for: targetFilm)
@@ -128,7 +128,7 @@ struct HomeViewModelTests {
     
     @Test("Image loading request returns the fallback image when network request fails")
     func homeViewModel_getImage_whenRequestFails_returnsFallbackImage() async {
-        let (sut, _) = makeSUTWithImageLoader(shouldDownloadSucceed: false)
+        let (sut, _) = makeSUTAndImageLoader(shouldDownloadSucceed: false)
         let targetFilm = Film.sample[0]
         
         let returnedImage = await sut.getImage(for: targetFilm)
@@ -138,7 +138,7 @@ struct HomeViewModelTests {
     
     @Test("Image loading request catches cancellation and returns fallback image")
     func homeViewModel_getImage_whenTaskIsCancelledMidFlight_returnsFallback() async {
-        let (sut, _) = makeSUTWithImageLoader(shouldDownloadSucceed: false)
+        let (sut, _) = makeSUTAndImageLoader(shouldDownloadSucceed: false)
         let targetFilm = Film.sample[0]
         let task = Task {
             await sut.getImage(for: targetFilm)
@@ -152,7 +152,7 @@ struct HomeViewModelTests {
     
     @Test("`checkCachesForFilmPoster` calls method on `imageLoader`")
     func homeViewModel_checkCachesForFilmPoster_callsCorrectMethodOnImageLoaderOnce() {
-        let (sut, mockImageLoader) = makeSUTWithImageLoader(shouldDownloadSucceed: false)
+        let (sut, mockImageLoader) = makeSUTAndImageLoader(shouldDownloadSucceed: false)
         
         _ = sut.checkCachesForFilmPoster(for: Film.sample[0])
         
@@ -161,7 +161,7 @@ struct HomeViewModelTests {
     
     @Test("Adding a film to upNext should add it to `upNextFilms`, and call delegate method", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_addsFilmToUpNext() async {
-        let (sut, _) = makeSUTWithContext()
+        let (sut, _) = makeSUTAndContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         let targetFilm = Film.sample[0]
@@ -175,7 +175,7 @@ struct HomeViewModelTests {
     
     @Test("Adding a film to watched should add it to `watchedFilms`, and call delegate method", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_addsFilmToWatched() async {
-        let (sut, _) = makeSUTWithContext()
+        let (sut, _) = makeSUTAndContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         
@@ -237,7 +237,7 @@ struct HomeViewModelTests {
 
     @Test("Removing film from upNext when it's not in watched should remove it from database entirely, and call delegate", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_whenFilmInUpNextButNotInWatchedIsRemoved_deletesItFromDatabase() async throws {
-        let (sut, context) = makeSUTWithContext()
+        let (sut, context) = makeSUTAndContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         let targetFilm = Film.sample[0]
@@ -259,7 +259,7 @@ struct HomeViewModelTests {
     
     @Test("Removing film from upNext when it's in watched should only flip upNext flag, and call delegate", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_whenFilmIsInUpNextAndInWatched_shouldFlipFlag() async throws {
-        let (sut, context) = makeSUTWithContext()
+        let (sut, context) = makeSUTAndContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         let targetFilm = Film.sample[0]
@@ -281,7 +281,7 @@ struct HomeViewModelTests {
     
     @Test("Removing film from watched when it's not in upNext removes film from database entirely, and calls delegate", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_whenFilmInWatchedAndNotInUpNext_deletesFilmFromDatabase() async throws {
-        let (sut, context) = makeSUTWithContext()
+        let (sut, context) = makeSUTAndContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         let targetFilm = Film.sample[0]
@@ -302,7 +302,7 @@ struct HomeViewModelTests {
     
     @Test("Removing film from watched when it is in upNext removes film from watched only, and calls delegate", (.tags(.persistence)))
     func homeViewModel_toggleFilmInQueue_whenFilmInBothWatchedAndInUpNext_deletesFilmFromWatched() async throws {
-        let (sut, context) = makeSUTWithContext()
+        let (sut, context) = makeSUTAndContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
         let targetFilm = Film.sample[0]
@@ -344,7 +344,7 @@ struct HomeViewModelTests {
     
     @Test("Up Next film lookup returns film when it exists in array")
     func homeViewModel_lookupUpNextFilm_whenFilmExistsInArray_returnsFilm() throws {
-        let (sut, context) = makeSUTWithContext()
+        let (sut, context) = makeSUTAndContext()
         let targetFilm = Film.sample[0]
         _ = try PersistenceHelper.saveFilmToDatabase(
             context: context,
@@ -361,7 +361,7 @@ struct HomeViewModelTests {
     
     @Test("Up Next film lookup returns nil when film does not exist in array")
     func homeViewModel_lookupUpNextFilm_whenFilmIsNotInArray_returnsNil() throws {
-        let (sut, _) = makeSUTWithContext()
+        let (sut, _) = makeSUTAndContext()
         sut.performFetches()
         
         let result = sut.lookupUpNextFilm(for: Film.sample[0].id)
@@ -371,7 +371,7 @@ struct HomeViewModelTests {
     
     @Test("Watched film lookup returns film when it exists in array")
     func homeViewModel_lookupWatchedFilm_whenFilmExistsInArray_returnsFilm() throws {
-        let (sut, context) = makeSUTWithContext()
+        let (sut, context) = makeSUTAndContext()
         let targetFilm = Film.sample[0]
         _ = try PersistenceHelper.saveFilmToDatabase(
             context: context,
@@ -388,7 +388,7 @@ struct HomeViewModelTests {
     
     @Test("Watched film lookup returns nil when film does not exist in array")
     func homeViewModel_lookupUpWatchedFilm_whenFilmIsNotInArray_returnsNil() throws {
-        let (sut, _) = makeSUTWithContext()
+        let (sut, _) = makeSUTAndContext()
         let targetFilm = Film.sample[0].id
         sut.performFetches()
         
@@ -398,7 +398,7 @@ struct HomeViewModelTests {
     }
     
     //MARK: - SUT Helper Methods
-    private func makeSUTWithContext() -> (
+    private func makeSUTAndContext() -> (
         sut: HomeViewModel,
         context: NSManagedObjectContext
     ) {
@@ -450,7 +450,7 @@ struct HomeViewModelTests {
         return (sut, context)
     }
     
-    private func makeSUTWithImageLoader(shouldDownloadSucceed: Bool) -> (
+    private func makeSUTAndImageLoader(shouldDownloadSucceed: Bool) -> (
         sut: HomeViewModel,
         mockImageLoader: MockImageLoader
     )  {
