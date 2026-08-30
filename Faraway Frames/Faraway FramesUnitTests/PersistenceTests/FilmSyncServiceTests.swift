@@ -13,8 +13,8 @@ import CoreData
 struct FilmSyncServiceTests {
     
     @Test("Should exit immediately if input films array is empty", (.tags(.persistence)))
-    func filmSyncService_syncFilmsWithLocalStorage_ifFilmsArrayIsEmpty_exitsImmediately() async throws {
-        let (sut, _, _) = try makeSUTViewContextAndEntity()
+    func filmSyncService_syncFilmsWithLocalStorage_ifFilmsArrayIsEmpty_exitsImmediately() async {
+        let (sut, _) = makeSUTandViewContext()
         let films: [Film] = []
         
         let result = await sut.syncFilmsWithLocalStorage(films)
@@ -23,8 +23,8 @@ struct FilmSyncServiceTests {
     }
     
     @Test("If database is empty, should return the input films with their default flags unchanged", (.tags(.persistence)))
-    func filmSyncService_syncFilmsWithLocalStorage_ifDatabaseIsEmpty_returnsFilmsWithStatusUnchanged() async throws {
-        let (sut, _, _) = try makeSUTViewContextAndEntity()
+    func filmSyncService_syncFilmsWithLocalStorage_ifDatabaseIsEmpty_returnsFilmsWithStatusUnchanged() async {
+        let (sut, _) = makeSUTandViewContext()
         let films = [Film.sample[0]]
         
         let result = await sut.syncFilmsWithLocalStorage(films)
@@ -36,7 +36,7 @@ struct FilmSyncServiceTests {
     
     @Test("If database is not empty but records don't match the input, should return the input films with their default flags unchanged", (.tags(.persistence)))
     func filmSyncService_syncFilmsWithLocalStorage_ifDatabaseRecordsDontMatchInput_returnsInputWithStatusUnchanged() async throws {
-        let (sut, context, entity) = try makeSUTViewContextAndEntity()
+        let (sut, context) = makeSUTandViewContext()
         _ = try PersistenceHelper.saveFilmToDatabase(
             context: context,
             film: Film.sample[0],
@@ -54,7 +54,7 @@ struct FilmSyncServiceTests {
     
     @Test("If database records match all the input, should update input films with the database state", (.tags(.persistence)))
     func filmSyncService_syncFilmsWithLocalStorage_ifDatabaseRecordsAndInputMatchPerfectly_returnsInputWithStatusUpdated() async throws {
-        let (sut, context, entity) = try makeSUTViewContextAndEntity()
+        let (sut, context) = makeSUTandViewContext()
         _ = try PersistenceHelper.saveFilmToDatabase(
             context: context,
             film: Film.sample[0],
@@ -80,9 +80,13 @@ struct FilmSyncServiceTests {
     
     @Test("If database records match some of the input, should only update the matching input films with the database state", (.tags(.persistence)))
     func filmSyncService_syncFilmsWithLocalStorage_ifDatabaseRecordsPartiallyMatchInput_updateOnlyThoseMatchingFilms() async throws {
-        let (sut, context, entity) = try makeSUTViewContextAndEntity()
-        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: true)
-        try? context.save()
+        let (sut, context) = makeSUTandViewContext()
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: Film.sample[0],
+            isUpNext: true,
+            isWatched: true
+        )
         let films = [Film.sample[0], Film.sample[1]]
         
         let result = await sut.syncFilmsWithLocalStorage(films)
@@ -95,7 +99,7 @@ struct FilmSyncServiceTests {
     }
     
     @Test("Return input films when database fetch fails", (.tags(.persistence)))
-    func filmSyncService_syncFilmsWithLocalStorage_whenDatabaseFetchFails_returnsInputFilms() async throws {
+    func filmSyncService_syncFilmsWithLocalStorage_whenDatabaseFetchFails_returnsInputFilms() async {
         let mockContext = MockFailingDatabaseContext()
         let sut = FilmSyncService(context: mockContext)
         let films = [Film.sample[0], Film.sample[1]]
@@ -112,17 +116,14 @@ struct FilmSyncServiceTests {
     }
     
     // MARK: - SUT Helper Method
-    private func makeSUTViewContextAndEntity() throws -> (sut: FilmSyncService,
-                                                          viewContext: NSManagedObjectContext,
-                                                          entity: NSEntityDescription) {
+    private func makeSUTandViewContext() -> (
+        sut: FilmSyncService,
+        viewContext: NSManagedObjectContext
+    ) {
         let testPersistenceController = try! PersistenceController(inMemory: true)
         let context = testPersistenceController.viewContext
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
         let sut = FilmSyncService(context: context)
-        return (sut, context, entity)
+        return (sut, context)
     }
     
     // MARK: - Mock Failing Database Context
