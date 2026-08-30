@@ -10,7 +10,14 @@ import CoreData
 import Testing
 
 struct PersistenceHelper {
-    @MainActor static func makeFilmMO(with film: Film, entity: NSEntityDescription, context: NSManagedObjectContext, isUpNext: Bool, isWatched: Bool) -> FilmMO {
+    /// Maps a `Film` to a `FilmMO` CoreData entity, and returns it.
+    @MainActor static func makeFilmMO(
+        with film: Film,
+        entity: NSEntityDescription,
+        context: NSManagedObjectContext,
+        isUpNext: Bool,
+        isWatched: Bool
+    ) -> FilmMO {
         let filmToBeSaved = FilmMO(entity: entity, insertInto: context)
         filmToBeSaved.id = film.id
         filmToBeSaved.title = film.title
@@ -30,9 +37,12 @@ struct PersistenceHelper {
         return filmToBeSaved
     }
     
-    /// Used in tests involving Core Data operations error handling.
-    nonisolated static var errorScenarios: [(systemError: CocoaError,
-                                             expectedReason: PersistenceFailureReason)] {
+    /// Used in tests involving CoreData operations error handling.
+    nonisolated static var errorScenarios: [(
+        systemError: CocoaError,
+        expectedReason: PersistenceFailureReason
+    )]
+    {
         [
             (CocoaError(.fileWriteOutOfSpace), .diskFull),
             (CocoaError(.persistentStoreOpen), .databaseError),
@@ -42,6 +52,7 @@ struct PersistenceHelper {
         ]
     }
     
+    /// Maps a `Film` to a `FilmMO`, tries to save it in the context, and returns it.
     @MainActor static func saveFilmToDatabase(
         context: NSManagedObjectContext,
         film: Film,
