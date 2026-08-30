@@ -33,14 +33,18 @@ struct HomeViewModelTests {
         let (sut, context) = makeSUTWithContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: Film.sample[0],
+            isUpNext: true,
+            isWatched: false
         )
-        
-        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
-        _ = PersistenceHelper.makeFilmMO(with: Film.sample[1], entity: entity, context: context, isUpNext: false, isWatched: true)
-        try context.save()
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: Film.sample[1],
+            isUpNext: false,
+            isWatched: true
+        )
         
         sut.performFetches()
         
@@ -232,12 +236,12 @@ struct HomeViewModelTests {
         let saver = ThrowingSaver(errorToThrow: scenario.systemError)
         let context = testPersistenceController.viewContext
         let sampleFilm = Film.sample[0]
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: sampleFilm,
+            isUpNext: true,
+            isWatched: false
         )
-        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
-        try? context.save()
         let mockFRCFactory = MockFRCFactory()
         let mockUpNextFRC = mockFRCFactory.makeHomeUpNextFRC(context: context)
         let mockWatchedFRC = mockFRCFactory.makeHomeWatchedFRC(context: context)
@@ -263,13 +267,13 @@ struct HomeViewModelTests {
         let (sut, context) = makeSUTWithContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
         let targetFilm = Film.sample[0]
-        _ = PersistenceHelper.makeFilmMO(with: targetFilm, entity: entity, context: context, isUpNext: true, isWatched: false)
-        try context.save()
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: targetFilm,
+            isUpNext: true,
+            isWatched: false
+        )
         
         await sut.toggleFilmInQueue(film: targetFilm, queue: .upNext, action: .remove)
         
@@ -285,13 +289,13 @@ struct HomeViewModelTests {
         let (sut, context) = makeSUTWithContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
         let targetFilm = Film.sample[0]
-        _ = PersistenceHelper.makeFilmMO(with: targetFilm, entity: entity, context: context, isUpNext: true, isWatched: true)
-        try context.save()
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: targetFilm,
+            isUpNext: true,
+            isWatched: true
+        )
         
         await sut.toggleFilmInQueue(film: targetFilm, queue: .upNext, action: .remove)
         
@@ -307,16 +311,15 @@ struct HomeViewModelTests {
         let (sut, context) = makeSUTWithContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
         let targetFilm = Film.sample[0]
-        _ = PersistenceHelper.makeFilmMO(with: targetFilm, entity: entity, context: context, isUpNext: false, isWatched: true)
-        try context.save()
-        
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: targetFilm,
+            isUpNext: false,
+            isWatched: true
+        )
+
         await sut.toggleFilmInQueue(film: targetFilm, queue: .watched, action: .remove)
-        
         sut.performFetches()
         
         #expect(sut.upNextFilms.isEmpty, "Should be empty.")
@@ -329,16 +332,15 @@ struct HomeViewModelTests {
         let (sut, context) = makeSUTWithContext()
         let delegateSpy = HomeViewModelDelegateSpy()
         sut.delegate = delegateSpy
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
-        )
         let targetFilm = Film.sample[0]
-        _ = PersistenceHelper.makeFilmMO(with: targetFilm, entity: entity, context: context, isUpNext: true, isWatched: true)
-        try context.save()
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: targetFilm,
+            isUpNext: true,
+            isWatched: true
+        )
         
         await sut.toggleFilmInQueue(film: targetFilm, queue: .watched, action: .remove)
-        
         sut.performFetches()
         
         #expect(sut.upNextFilms.count == 1, "Should still have one in upNext.")
@@ -370,17 +372,16 @@ struct HomeViewModelTests {
     @Test("Up Next film lookup returns film when it exists in array")
     func homeViewModel_lookupUpNextFilm_whenFilmExistsInArray_returnsFilm() throws {
         let (sut, context) = makeSUTWithContext()
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        let targetFilm = Film.sample[0]
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: targetFilm,
+            isUpNext: true,
+            isWatched: false
         )
-        
-        let targetFilm = Film.sample[0].id
-        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: true, isWatched: false)
-        try context.save()
         sut.performFetches()
         
-        let result = sut.lookupUpNextFilm(for: targetFilm)
+        let result = sut.lookupUpNextFilm(for: targetFilm.id)
         
         #expect(result != nil, "Result should return a film.")
     }
@@ -388,10 +389,9 @@ struct HomeViewModelTests {
     @Test("Up Next film lookup returns nil when film does not exist in array")
     func homeViewModel_lookupUpNextFilm_whenFilmIsNotInArray_returnsNil() throws {
         let (sut, _) = makeSUTWithContext()
-        let targetFilm = Film.sample[0].id
         sut.performFetches()
         
-        let result = sut.lookupUpNextFilm(for: targetFilm)
+        let result = sut.lookupUpNextFilm(for: Film.sample[0].id)
         
         #expect(result == nil, "Result should return nil.")
     }
@@ -399,16 +399,16 @@ struct HomeViewModelTests {
     @Test("Watched film lookup returns film when it exists in array")
     func homeViewModel_lookupWatchedFilm_whenFilmExistsInArray_returnsFilm() throws {
         let (sut, context) = makeSUTWithContext()
-        let entity = try #require(
-            NSEntityDescription.entity(forEntityName: Persistence.entityname, in: context),
-            "The Core Data model schema must contain an entity definition named 'FilmMO'."
+        let targetFilm = Film.sample[0]
+        _ = try PersistenceHelper.saveFilmToDatabase(
+            context: context,
+            film: targetFilm,
+            isUpNext: false,
+            isWatched: true
         )
-        let targetFilm = Film.sample[0].id
-        _ = PersistenceHelper.makeFilmMO(with: Film.sample[0], entity: entity, context: context, isUpNext: false, isWatched: true)
-        try context.save()
         sut.performFetches()
         
-        let result = sut.lookupWatchedFilm(for: targetFilm)
+        let result = sut.lookupWatchedFilm(for: targetFilm.id)
         
         #expect(result != nil, "Result should return a film.")
     }
