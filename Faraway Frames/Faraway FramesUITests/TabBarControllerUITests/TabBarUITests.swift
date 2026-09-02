@@ -24,7 +24,7 @@ final class TabBarUITests: XCTestCase {
     }
     
     func test_tabBar_whenLoaded_existsAndIsHittable() throws {
-        guard CurrentDevice.isIPhone else {
+        guard UIDevice.current.userInterfaceIdiom == .phone else {
             throw XCTSkip("iPhone-only test")
         }
         
@@ -33,7 +33,7 @@ final class TabBarUITests: XCTestCase {
     }
     
     func test_tabBarButtons_whenLoaded_existAndAreHittable() throws {
-        guard CurrentDevice.isIPad else {
+        guard UIDevice.current.userInterfaceIdiom == .pad else {
             throw XCTSkip("iPad-only test")
         }
         
@@ -51,7 +51,7 @@ final class TabBarUITests: XCTestCase {
     }
     
     func test_tabBar_hasCorrectNumberOfTabs() throws {
-        guard CurrentDevice.isIPhone else {
+        guard UIDevice.current.userInterfaceIdiom == .phone else {
             throw XCTSkip("iPhone-only test")
         }
         let numberOfTabs = app.tabBars.firstMatch.buttons.count
@@ -66,7 +66,7 @@ final class TabBarUITests: XCTestCase {
     }
     
     func test_tabBar_canNavigatefromHomeToExploreAndBackToHome() throws {
-        guard CurrentDevice.isIPhone else {
+        guard UIDevice.current.userInterfaceIdiom == .phone else {
             throw XCTSkip("iPhone-only test")
         }
         app.tabBars.buttons["Explore"].firstMatch.tap()

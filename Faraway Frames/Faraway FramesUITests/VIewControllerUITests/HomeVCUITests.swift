@@ -22,7 +22,7 @@ final class HomeVCUITests: XCTestCase {
     
     func test_homeVC_hasTitle() throws {
         launchApp()
-        guard CurrentDevice.isIPhone else {
+        guard UIDevice.current.userInterfaceIdiom == .phone else {
             throw XCTSkip("iPhone-only test")
         }
         
