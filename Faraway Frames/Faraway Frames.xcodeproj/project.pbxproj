@@ -33,7 +33,6 @@
 		5B3CF7B82F90E1E200BA59CA /* Exceptions for "Faraway Frames" folder in "Faraway FramesTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Constants/CurrentDevice.swift,
 				Constants/Persistence.swift,
 				Constants/SFSymbols.swift,
 				Resources/ghibliFilms.json,
@@ -43,7 +42,6 @@
 		5B3CF7BB2F90E20300BA59CA /* Exceptions for "Faraway Frames" folder in "Faraway FramesUITests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Constants/CurrentDevice.swift,
 				Constants/SFSymbols.swift,
 				Resources/ghibliFilms.json,
 			);
