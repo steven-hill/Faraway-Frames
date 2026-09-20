@@ -35,8 +35,8 @@ struct FilmsListAPIClientTests {
             .appending(path: "GhibliFilms")
             .appending(path: "AllGhibliFilms.json")
         
-        #expect(mockFM.didCreateDirectory, "File Manager should have created the directory.")
-        #expect(mockFM.writeWasCalled, "Should be true.")
+        #expect(mockFM.createDirectoryCallCount == 1, "File Manager should have created the directory once.")
+        #expect(mockFM.writeCallCount == 1, "Should have been called once.")
         #expect(mockFM.mockStorage[expectedURL] == mockData, "Data in File Manager should match the data that was saved.")
     }
     
@@ -55,7 +55,7 @@ struct FilmsListAPIClientTests {
         
         let retrievedData = sut.loadFilmsDataFromFileManager()
         
-        #expect(mockFM.readWasCalled, "Should have asked File Manager to read the data.")
+        #expect(mockFM.readCallCount == 1, "Should have asked File Manager to read the data once.")
         #expect(mockData == retrievedData, "Data retrieved from File Manager should match the data that was saved.")
     }
     
@@ -73,7 +73,7 @@ struct FilmsListAPIClientTests {
         
         let retrievedData = sut.loadFilmsDataFromFileManager()
         
-        #expect(mockFM.readWasCalled == false, "Should have not have been called.")
+        #expect(mockFM.readCallCount == 0, "Should not have been called.")
         #expect(retrievedData == nil, "Should be nil.")
     }
     
