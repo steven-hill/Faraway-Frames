@@ -9,6 +9,7 @@ import Testing
 @testable import Faraway_Frames
 import CoreData
 
+@MainActor
 struct FilmMOQueryTests {
     
     @Test("UpNext fetch request returns the correct filtering configurations", (.tags(.persistence)))
