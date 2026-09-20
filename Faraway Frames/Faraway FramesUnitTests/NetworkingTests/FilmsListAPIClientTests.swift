@@ -13,8 +13,10 @@ import Foundation
 struct FilmsListAPIClientTests {
     
     @Test func filmsListAPIClient_onInit_isUsingFileManagerData_isFalse() {
-        let mockFM = MockFileManager()
-        let sut = FilmsListAPIClient(session: nil, fileManager: mockFM)
+        let sut = FilmsListAPIClient(
+            session: nil,
+            fileManager: MockFileManager()
+        )
         #expect(!sut.isUsingFileManagerData, "Should be false.")
     }
     
@@ -27,8 +29,14 @@ struct FilmsListAPIClientTests {
             headerFields: nil
         )!
         let mockFM = MockFileManager()
-        let session = StubNetworkSession(data: mockData, response: mockResponse)
-        let sut = FilmsListAPIClient(session: session, fileManager: mockFM)
+        let session = StubNetworkSession(
+            data: mockData,
+            response: mockResponse
+        )
+        let sut = FilmsListAPIClient(
+            session: session,
+            fileManager: mockFM
+        )
         
         sut.saveFilmsDataToFileManager(data: mockData)
         let expectedURL = mockFM.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
@@ -49,8 +57,14 @@ struct FilmsListAPIClientTests {
             headerFields: nil
         )!
         let mockFM = MockFileManager()
-        let session = StubNetworkSession(data: mockData, response: mockResponse)
-        let sut = FilmsListAPIClient(session: session, fileManager: mockFM)
+        let session = StubNetworkSession(
+            data: mockData,
+            response: mockResponse
+        )
+        let sut = FilmsListAPIClient(
+            session: session,
+            fileManager: mockFM
+        )
         sut.saveFilmsDataToFileManager(data: mockData)
         
         let retrievedData = sut.loadFilmsDataFromFileManager()
@@ -68,8 +82,14 @@ struct FilmsListAPIClientTests {
             headerFields: nil
         )!
         let mockFM = MockFileManager()
-        let session = StubNetworkSession(data: mockData, response: mockResponse)
-        let sut = FilmsListAPIClient(session: session, fileManager: mockFM)
+        let session = StubNetworkSession(
+            data: mockData,
+            response: mockResponse
+        )
+        let sut = FilmsListAPIClient(
+            session: session,
+            fileManager: mockFM
+        )
         
         let retrievedData = sut.loadFilmsDataFromFileManager()
         
@@ -79,14 +99,16 @@ struct FilmsListAPIClientTests {
     
     @Test(.tags(.networkRequest, .decoding))
     func filmsListAPIClient_fetchAllFilms_withCorrectURL_decodesDataOn200Response() async throws {
-        let mockData = makeValidMockFilmsData()
         let mockResponse = HTTPURLResponse(
             url: URL(string: makeFilmsURLString())!,
             statusCode: 200,
             httpVersion: nil,
             headerFields: nil
         )!
-        let sut = makeSUT(data: mockData, response: mockResponse)
+        let sut = makeSUT(
+            data: makeValidMockFilmsData(),
+            response: mockResponse
+        )
         
         let result = try await sut.fetchAllFilms()
         
@@ -97,14 +119,16 @@ struct FilmsListAPIClientTests {
     
     @Test(.tags(.networkRequest))
     func filmsListAPIClient_fetchAllFilms_throwsOnInvalidResponse() async {
-        let mockData = Data()
         let invalidResponse = URLResponse(
             url: URL(string: makeFilmsURLString())!,
             mimeType: nil,
             expectedContentLength: 0,
             textEncodingName: nil
         )
-        let sut = makeSUT(data: mockData, response: invalidResponse)
+        let sut = makeSUT(
+            data: Data(),
+            response: invalidResponse
+        )
         
         await #expect(throws: APIError.invalidResponse, "The error should be .invalidResponse.") {
             try await sut.fetchAllFilms()
@@ -113,7 +137,6 @@ struct FilmsListAPIClientTests {
     
     @Test(.tags(.networkRequest))
     func filmsListAPIClient_fetchAllFilms_throwsOnNon200To299Response() async {
-        let mockFilmsData = Data()
         let statusCode = 500
         let mockResponse = HTTPURLResponse(
             url: URL(string: makeFilmsURLString())!,
@@ -121,7 +144,10 @@ struct FilmsListAPIClientTests {
             httpVersion: nil,
             headerFields: nil
         )!
-        let sut = makeSUT(data: mockFilmsData, response: mockResponse)
+        let sut = makeSUT(
+            data: Data(),
+            response: mockResponse
+        )
         
         await #expect(throws: APIError.serverError(statusCode: statusCode), "The error should be .serverError(statusCode: \(statusCode).") {
             try await sut.fetchAllFilms()
@@ -137,7 +163,10 @@ struct FilmsListAPIClientTests {
             httpVersion: nil,
             headerFields: nil
         )!
-        let sut = makeSUT(data: mockInvalidData, response: mockResponse)
+        let sut = makeSUT(
+            data: mockInvalidData,
+            response: mockResponse
+        )
         
         do {
             _ = try await sut.fetchAllFilms()
@@ -162,13 +191,19 @@ struct FilmsListAPIClientTests {
     ])
     func filmsListAPIClient_fetchAllFilms_ifThereIsAnError_checksForDataInFileManager(expectedError: APIError) async throws {
         let mockFM = MockFileManager()
-        let mockData = makeValidMockFilmsData()
         let expectedURL = mockFM.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
             .appending(path: "GhibliFilms")
             .appending(path: "AllGhibliFilms.json")
-        try mockFM.write(data: mockData, to: expectedURL, options: .atomic)
+        try mockFM.write(
+            data: makeValidMockFilmsData(),
+            to: expectedURL,
+            options: .atomic
+        )
         let session = StubNetworkSession(error: expectedError)
-        let sut = FilmsListAPIClient(session: session, fileManager: mockFM)
+        let sut = FilmsListAPIClient(
+            session: session,
+            fileManager: mockFM
+        )
 
         let films = try await sut.fetchAllFilms()
 
@@ -183,9 +218,14 @@ struct FilmsListAPIClientTests {
     }
     
     private func makeSUT(data: Data, response: URLResponse) -> FilmsListAPIClient {
-        let mockFM = MockFileManager()
-        let session = StubNetworkSession(data: data, response: response)
-        return FilmsListAPIClient(session: session, fileManager: mockFM)
+        let session = StubNetworkSession(
+            data: data,
+            response: response
+        )
+        return FilmsListAPIClient(
+            session: session,
+            fileManager: MockFileManager()
+        )
     }
     
     private func makeValidMockFilmsData() -> Data {
