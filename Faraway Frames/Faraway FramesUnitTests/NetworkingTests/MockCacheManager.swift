@@ -11,16 +11,16 @@ import UIKit
 
 final class MockCacheManager: CacheManagerProtocol {
     var cachedData: [NSString: UIImage] = [:]
-    var setDataCalled = false
-    var getDataCalled = false
+    private(set) var setDataCallCount = 0
+    private(set) var getDataCallCount = 0
     
     func setData(_ data: UIImage, forKey key: NSString) {
-        setDataCalled = true
+        setDataCallCount += 1
         cachedData[key] = data
     }
     
     func getData(forKey key: NSString) -> UIImage? {
-        getDataCalled = true
+        getDataCallCount += 1
         return cachedData[key]
     }
 }
